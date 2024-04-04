@@ -1,0 +1,15 @@
+body{
+    width: 100%;
+    overflow-x: hidden;
+    min-height: 100vh;
+    margin: 0px;
+}
+
+#root {
+    display: flex;
+    flex-direction: row;
+}
+
+#middle {
+    flex-grow: 1;
+}
