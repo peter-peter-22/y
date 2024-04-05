@@ -5,6 +5,8 @@ import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
+import '@fontsource/roboto/900.css';
+import 'material-icons/iconfont/material-icons.css';
 
 //pages
 import Home from "./pages/home";
@@ -16,25 +18,29 @@ import Header from "./components/header";
 
 //styles
 import './styles/css/App.css';
+import MyTheme from '/src/styles/mui/my_theme.jsx';
 
-import MyTheme from './styles/mui/my_theme.jsx';
+//components
+import { Container } from '@mui/system';
 
 
 function App() {
   return (
     <Router>
       <MyTheme>
-        <Header />
-        <div id="middle">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/test" element={<Test />} />
-            <Route path="*" element={<Error />} />
-          </Routes>
-        </div>
-        <footer>
-          <p>footer</p>
-        </footer>
+        <Container maxWidth="xl" style={{display:"flex",flexDirection:"row"}}>
+          <Header />
+          <div id="middle">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/test" element={<Test />} />
+              <Route path="*" element={<Error />} />
+            </Routes>
+          </div>
+          <footer>
+            <p>footer</p>
+          </footer>
+        </Container>
       </MyTheme>
     </Router>
   )

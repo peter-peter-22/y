@@ -1,28 +1,40 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
-import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
-import Box from '@mui/material/Box';
 import Fab from '@mui/material/Fab';
 import Stack from '@mui/material/Stack';
+import { TabButton, PostButton, SvgIcon } from "./buttons.jsx";
+import SideMenu from "./side_menus.jsx";
+import {  NavLink } from "react-router-dom";
+import { theme } from '/src/styles/mui/my_theme.jsx';
+
 
 function Header() {
     return (
-            <Stack direction="column" spacing={1}  sx={{    height: '100%', borderRight: 1 }}>
 
-                <Link color="secondary" to="/">
-                    <Fab variant="extended" color="primary" className="hide-background">
-                        <HomeOutlinedIcon sx={{ mr: 1 }} />
-                        Extended
-                    </Fab>
-                </Link>
+        <SideMenu border="borderRight">
+            <Stack direction="column" spacing={1} >
 
-                <Link to="/test">
-                    <Fab variant="extended" color="secondary">
-                        <HomeOutlinedIcon sx={{ mr: 1 }} />
-                        Extenaaaaaaaaaaaaaaaaaded
+                <NavLink to="/">
+                    <Fab size="medium" color="secondary" sx={{
+                        backgroundColor: 'transparent',
+                        fontSize: theme.typography.h6.fontSize
+                    }}>
+                        <SvgIcon src="/src/svg/y.svg" />
                     </Fab>
-                </Link>
+                </NavLink>
+
+                <TabButton to="/" text="home" icon="home_outlined" />
+                <TabButton to="/" text="explore" icon="home_outlined" />
+                <TabButton to="/" text="notifications" icon="home_outlined" />
+                <TabButton to="/" text="messages" icon="home_outlined" />
+                <TabButton to="/" text="lists" icon="home_outlined" />
+                <TabButton to="/" text="bookmarks" icon="home_outlined" />
+                <TabButton to="/" text="communities" icon="home_outlined" />
+                <TabButton to="/" text="premium" icon="home_outlined" />
+                <TabButton to="/" text="profile" icon="home_outlined" />
+                <TabButton to="/" text="more" icon="home_outlined" />
+
             </Stack>
+        </SideMenu>
     );
 }
 
