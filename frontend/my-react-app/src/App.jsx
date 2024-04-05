@@ -15,6 +15,7 @@ import Error from "./pages/error";
 
 //components
 import Header from "./components/header";
+import Footer from "./components/footer";
 
 //styles
 import './styles/css/App.css';
@@ -37,9 +38,7 @@ function App() {
               <Route path="*" element={<Error />} />
             </Routes>
           </div>
-          <footer>
-            <p>footer</p>
-          </footer>
+          <Footer/>
         </Container>
       </MyTheme>
     </Router>

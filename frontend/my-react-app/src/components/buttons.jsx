@@ -1,5 +1,5 @@
 import React from "react";
-import {  NavLink } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import Fab from '@mui/material/Fab';
 import { Icon } from '@mui/material';
 import { theme } from '/src/styles/mui/my_theme.jsx';
@@ -12,13 +12,15 @@ function TabButton(props) {
                 <Fab variant="extended" color="secondary" sx={{
                     backgroundColor: 'transparent',
                     fontSize: theme.typography.h6.fontSize,
-                    paddingLeft:"8px",
-                    paddingRight:"25px"
+                    paddingLeft: "8px",
+                    paddingRight: "25px"
                 }}>
-                    <SelectableIcon icon={props.icon} selected={isActive} />
-                   <span style={{
-                    fontWeight: isActive ? "800" : "inherit", 
-                    marginLeft: "5px" 
+                    {props.children && (props.children.length !== undefined ?
+                        props.children[(props.children.length > 1 && isActive) ? 1 : 0] :
+                        props.children)}
+                    <span style={{
+                        fontWeight: isActive ? "800" : "inherit",
+                        marginLeft: "5px"
                     }} >{props.text}</span>
                 </Fab>
             )}
@@ -26,10 +28,10 @@ function TabButton(props) {
     );
 }
 
-function SelectableIcon(props) {
+function ButtonIcon(props) {
     return (
         <Icon
-            baseClassName={props.selected ? "material-icons" : "material-icons-outlined"}
+            baseClassName={props.filled ? "material-icons" : "material-icons-outlined"}
             sx={{ fontSize: "150%" }}
         >
             {props.icon}
@@ -37,7 +39,7 @@ function SelectableIcon(props) {
     );
 }
 
-function SvgIcon(props) {
+function ButtonSvg(props) {
     return (
         <Icon sx={{ fontSize: "150%" }}>
             <img src={props.src} style={{ height: "100%" }} />
@@ -47,12 +49,16 @@ function SvgIcon(props) {
 
 
 
-
-
-function PostButton(props) {
+function PostButton() {
     return (
-        <p>coming soon</p>
+        <Fab variant="extended" color="primary" sx={{
+            padding: "0px 100px",
+            fontWeight:"800",
+            fontSize: theme.typography.h6.fontSize,
+        }}>
+            post
+        </Fab>
     );
 }
 
-export { TabButton, PostButton, SvgIcon, SelectableIcon };
+export { TabButton, PostButton, ButtonSvg, ButtonIcon };

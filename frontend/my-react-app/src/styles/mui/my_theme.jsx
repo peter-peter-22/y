@@ -4,9 +4,9 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 const text = '#0F1419';
 
 const primary = {
-    main: '#1976d2',
-    light: '#42a5f5',
-    dark: '#1565c0',
+    main: '#1D9BF0',
+    light: '#4AADEF',
+    dark: '#1A8CD8',
     contrastText: '#fff',
 };
 
@@ -46,9 +46,6 @@ let theme = createTheme({
         button: {
             textTransform: 'capitalize'
         },
-        large: {
-            fontSize: "5rem"
-        }
     },
 });
 
