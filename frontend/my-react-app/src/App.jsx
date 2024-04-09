@@ -7,6 +7,7 @@ import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 import '@fontsource/roboto/900.css';
 import 'material-icons/iconfont/material-icons.css';
+import { AboveBreakpoint } from '/src/components/utilities';
 
 //pages
 import Home from "./pages/home";
@@ -26,20 +27,23 @@ import { Container } from '@mui/system';
 
 
 function App() {
+  let isBig = AboveBreakpoint("sm");
   return (
     <Router>
       <MyTheme>
-        <Container maxWidth="xl" style={{display:"flex",flexDirection:"row"}}>
-          <Header />
-          <div id="middle">
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/test" element={<Test />} />
-              <Route path="*" element={<Error />} />
-            </Routes>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: isBig ? "center" : "stretch", overflowY:"hidden"}}>
+          <div style={{ display: "flex", flexDirection: "row", padding: isBig ? "revert-layer" : 0 }}>
+            <Header />
+            <div style={isBig ? { width: "500px" } : { flexGrow: 1 }}>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/test" element={<Test />} />
+                <Route path="*" element={<Error />} />
+              </Routes>
+            </div>
+            <Footer />
           </div>
-          <Footer/>
-        </Container>
+        </div>
       </MyTheme>
     </Router>
   )

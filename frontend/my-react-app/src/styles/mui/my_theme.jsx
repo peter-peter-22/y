@@ -11,11 +11,14 @@ const primary = {
 };
 
 const secondary = {
-    main: '#E7E7E8',
+    main: '#C1C1C1',
     light: '#E7E7E8',
     dark: '#E7E7E8',
     contrastText: text,
 };
+
+const secondaryNoBackground = { ...secondary };
+secondaryNoBackground.main = "transparent";
 
 const secondary_blue = {
     main: '#F7F9F9',
@@ -23,11 +26,23 @@ const secondary_blue = {
     dark: '#EFF3F4',
     contrastText: text,
 };
+const black = {
+    main: '#000000',
+    light: '#000000',
+    dark: '#000000',
+    contrastText: "#fff",
+};
 
-let theme = createTheme({
+const small_text = "14px";
+const big_text = "20px";
+
+const theme = createTheme({
     palette: {
         primary: primary,
         secondary: secondary,
+        secondary_blue: secondary_blue,
+        black:black,
+        secondary_noBg:secondaryNoBackground
     },
     shadows: ["none"],
     components: {
@@ -44,10 +59,50 @@ let theme = createTheme({
             "sans-serif"
         ].join(','),
         button: {
-            textTransform: 'capitalize'
+            textTransform: 'capitalize',
+            fontWeight: "bold",
+        },
+        small_title: {
+            fontSize: small_text,
+            fontWeight: "bold"
+        },
+        small_body: {
+            fontSize: small_text,
+            fontWeight: "normal"
+        },
+        small_fade: {
+            fontSize: small_text,
+            color: secondary.main,
+            fontWeight: "normal"
+        },
+        big_title: {
+            fontSize: big_text,
+            fontWeight: "bold"
+        },
+        big_body: {
+            fontSize: big_text,
+            fontWeight: "normal"
+        },
+        big_fade: {
+            fontSize: big_text,
+            color: secondary.main,
+            fontWeight: "normal"
+        }
+    },
+    breakpoints: {
+        values: {
+            xs: 0,
+            sm: 600,
+            md: 900,
+            lg: 1200,
+            xl: 1536,
+            leftMenu: 900
         },
     },
 });
+
+
+
 
 
 export default function MyTheme(props) {
@@ -58,4 +113,4 @@ export default function MyTheme(props) {
     );
 }
 
-export {theme};
+export { theme };
