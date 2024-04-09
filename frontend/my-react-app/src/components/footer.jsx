@@ -9,45 +9,125 @@ import Fab from '@mui/material/Fab';
 import { Icon } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ChooseChildBool, ProfileText } from '/src/components/utilities';
-
+import { ResponsiveSelector, ChooseChildBool, ProfileText,FadeLink } from '/src/components/utilities';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
+import { BoxList, BoxListOutlined, BlueTextButton } from '/src/components/containers';
+import IconButton from '@mui/material/IconButton';
+import Link from '@mui/material/Link';
 
 function Footer() {
     return (
         <SideMenu border="borderLeft">
-            <Box sx={{ pl: 4,width:"270px" }}>
+            <Box sx={{ pl: 4, width: "300px" }}>
                 <TopMenu>
                     <SearchField />
                 </TopMenu>
                 <Stack direction="column" spacing={2} sx={{ my: 2 }} >
-                    <Box sx={{ borderRadius: 2, overflow: "hidden", bgcolor: 'secondary_blue.main' }}>
-                        <List sx={{ p: 0 }}>
 
-                            <ListItem>
+                    <BoxList>
+
+                        <ListItem>
+                            <Typography variant="big_bold">
+                                Subscribe to Premium
+                            </Typography>
+                        </ListItem>
+
+                        <ListItem>
+                            <Typography variant="small">
+                                Subscribe to unlock new features and if eligible, receive a share of ads revenue.
+                            </Typography>
+                        </ListItem>
+
+                        <ListItem >
+                            <Fab variant="extended" size="small" color="black">Subscribe</Fab>
+                        </ListItem>
+
+                    </BoxList>
+
+                    <BoxList>
+
+                        <ListItem>
+                            <ListItemText>
+                                <Typography variant="big_bold">
+                                    Who to follow
+                                </Typography>
+                            </ListItemText>
+                        </ListItem>
+
+                        <ListItem disablePadding>
+                            <ListItemButton>
+                                <Stack direction="row" spacing={1} sx={{ alignItems: "center", width: "100%" }}>
+                                    <Avatar src="/src/images/example profile.jpg" />
+                                    <ProfileText />
+                                    <Fab variant="extended" size="small" color="black" sx={{ flexShrink: 0 }}>Follow</Fab>
+                                </Stack>
+                            </ListItemButton>
+                        </ListItem>
+
+                        <BlueTextButton>
+                            Show more
+                        </BlueTextButton>
+
+                    </BoxList>
+
+                    <BoxList>
+
+                        <ListItem>
+                            <ListItemText>
+                                <Typography variant="big_bold">
+                                    Hungary trends
+                                </Typography>
+                            </ListItemText>
+                        </ListItem>
+
+                        <ListItem disablePadding>
+                            <ListItemButton>
                                 <ListItemText>
-                                    <Typography variant="big_title">
-                                        Who to follow
+                                    <Typography variant="small_fade">
+                                        <div>
+                                            <span>1</span><span style={{ margin: "0px 4px" }}>·</span><span>Trending</span>
+                                        </div>
                                     </Typography>
+                                    <Typography variant="small_bold">
+                                        <div>
+                                            #Hungary
+                                        </div>
+                                    </Typography>
+                                    <Typography variant="small_fade">
+                                        <div>
+                                            999K posts
+                                        </div>
+                                    </Typography>
+
+                                    <IconButton size="small" style={{ position: "absolute", right: "10px", top: "10px" }}>
+                                        <Icon fontSize="small">more_horiz</Icon>
+                                    </IconButton>
                                 </ListItemText>
-                            </ListItem>
+                            </ListItemButton>
+                        </ListItem>
 
-                            <ListItem disablePadding>
-                                <ListItemButton>
-                                    <Stack direction="row" spacing={1} sx={{alignItems:"center",width:"100%"}}>
-                                        <Avatar src="/src/images/example profile.jpg" />
-                                        <ProfileText />
-                                        <Fab variant="extended" size="small" color="black" sx={{flexShrink:0}}>Follow</Fab>
-                                    </Stack>
-                                </ListItemButton>
-                            </ListItem>
+                        <BlueTextButton>
+                            Show more
+                        </BlueTextButton>
 
-                        </List>
-                    </Box>
+                    </BoxList>
+
+                    <ListItem>
+                        <div style={{display:"flex", flexWrap:"wrap", gap:"0px 10px"}}>
+                        <FadeLink>Terms of Service</FadeLink>
+                        <FadeLink>Privacy Policy</FadeLink>
+                        <FadeLink>Cookie Policy</FadeLink>
+                        <FadeLink>Accessibility</FadeLink>
+                        <FadeLink>Ads Info</FadeLink>
+                        <FadeLink>More···</FadeLink>
+                        <Typography variant="small_fade">© 2024 Y Corp.</Typography>
+                        </div>
+                    </ListItem>
+
                 </Stack>
             </Box>
         </SideMenu>

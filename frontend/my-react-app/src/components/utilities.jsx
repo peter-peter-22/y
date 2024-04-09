@@ -1,13 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import { theme } from '/src/styles/mui/my_theme.jsx';
+import Stack from '@mui/material/Stack';
+import SideMenu, { Inside } from "/src/components/side_menus.jsx";
+import { SearchField } from "/src/components/inputs.jsx";
+import { Box } from '@mui/material';
 import { Typography } from '@mui/material';
+import Fab from '@mui/material/Fab';
+import { Icon } from '@mui/material';
+import Avatar from '@mui/material/Avatar';
+import { ThemeProvider } from '@mui/material';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import { BoxList, BoxListOutlined, BlueTextButton } from '/src/components/containers';
+import IconButton from '@mui/material/IconButton';
+import Link from '@mui/material/Link';
+import { ResponsiveButton, ButtonIcon, ButtonSvg, TabButton, PostButton, ProfileButton, TopMenuButton } from "/src/components/buttons.jsx";
 
 const noOverflow = {
     whiteSpace: 'nowrap',
     overflow: "hidden",
     textOverflow: 'ellipsis',
-    display: "block",
-    textAlign: "start"
+    display: "block"
 };
 
 function ResponsiveSelector(props) {
@@ -47,7 +63,7 @@ function ChooseChild(props) {
 
 function TopMenu(props) {
     return (
-        <div style={{ height: "40px" }}>
+        <div style={{ height: "40px", position: "static" }}>
             {props.children}
         </div>);
 }
@@ -59,14 +75,58 @@ function ChooseChildBool(props) {
 function ProfileText() {
     return (
         <div style={{ flexGrow: 1, overflow: "hidden" }}>
-            <Typography variant="small_title" style={noOverflow}>
+            <Typography variant="small_bold" align="left" style={noOverflow}>
                 Firstname Lastname abc efd efd afsfas sd fsfd
             </Typography>
-            <Typography variant="small_fade" style={noOverflow} >
+            <Typography variant="small_fade" align="left" fontWeight="normal" style={noOverflow} >
                 @user_id_5378543678345
             </Typography>
         </div>
     );
 }
 
-export { AboveBreakpoint, ResponsiveSelector, ChooseChild, ChooseChildBool, TopMenu,ProfileText }
+function FadeLink(props) {
+    return (
+        <Link href="#" color="secondary" underline="hover">
+            <Typography variant="small">
+                {props.children}
+            </Typography>
+        </Link>
+    );
+}
+
+function TabSwitcher(props) {
+    const [getTab, setTab] = React.useState(props.tabs[0].tabName);
+
+    function SelectTab(tabName) {
+        console.log(tabName);
+        setTab(tabName);
+    }
+
+    const selectedTab=props.tabs.find((tab)=>{return tab.tabName===getTab});
+
+    return (
+        <>
+            <TopMenu>
+                <Box sx={{ borderBottom: 1, borderColor: 'divider', height: "100%", width: "100%", display: "flex", alignItems:"center", flexDirection: "row" }}>
+                    {props.tabs.map((tab, index) => {
+                        return (
+                            <TopMenuButton
+                                tabIndex={tab.tabName}
+                                selected={getTab === tab.tabName ? true : false}
+                                onClick={() => {
+                                    SelectTab(tab.tabName)
+                                }}
+                                key={index}>
+                                {tab.text}
+                            </TopMenuButton>);
+                    })}
+                    {props.children}
+                </Box>
+            </TopMenu>
+            {selectedTab.contents}
+        </>
+    );
+}
+
+export { AboveBreakpoint, ResponsiveSelector, ChooseChild, ChooseChildBool, TopMenu, ProfileText, FadeLink, TabSwitcher }

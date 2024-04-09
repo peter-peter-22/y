@@ -7,7 +7,9 @@ import Stack from '@mui/material/Stack';
 import { Typography } from '@mui/material';
 import { ThemeProvider } from '@mui/material';
 import { ResponsiveSelector, ChooseChildBool, ProfileText } from '/src/components/utilities';
-
+import Button from '@mui/material/Button';
+import ListItemButton from '@mui/material/ListItemButton';
+import Box from '@mui/material/Box';
 
 const smallerButtons = "leftMenu";
 const iconSize = "30px";
@@ -34,9 +36,30 @@ function SelectableButton(props) {
             <span style={{
                 marginLeft: "10px"
             }} >
-                <Typography variant={props.selected ? "big_title" : "big_body"}>{props.text}</Typography>
+                <Typography variant="big" fontWeight={props.selected ? "bold" : "normal"}>{props.text}</Typography>
             </span>
         </Fab>
+    );
+}
+
+function TopMenuButton(props) {
+    return (
+        <ListItemButton onClick={props.onClick} sx={{ p: 0, height: "100%" }}>
+            <Box sx={{
+                height: "100%",
+                boxSizing: "border-box",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: 'center',
+                borderBottom: props.selected?4:0,
+                borderColor: 'primary.main',
+                m:"auto"
+            }}>
+                <Typography fontWeight={props.selected ? "bold" : "normal"} sx={{ p: 0 }}>
+                    {props.children}
+                </Typography>
+            </Box>
+        </ListItemButton >
     );
 }
 
@@ -84,7 +107,7 @@ function PostButton() {
             <Fab variant="extended" color="primary" sx={{
                 width: "100%"
             }}>
-                <Typography variant="big_title">Post</Typography>
+                <Typography variant="big_bold">Post</Typography>
             </Fab>
             <Fab size="medium" color="primary">
                 <ButtonIcon icon="create" filled="true" />
@@ -109,7 +132,7 @@ function ProfileButton() {
                 </Stack>
             </Fab>
 
-            <Fab color="secondary" sx={{ height: size, width: size, borderRadius: "100%", p: 0 }}>
+            <Fab color="secondary_noBg" sx={{ height: size, width: size, borderRadius: "100%", p: 0 }}>
                 <Avatar src="/src/images/example profile.jpg" />
             </Fab>
 
@@ -117,4 +140,4 @@ function ProfileButton() {
     );
 }
 
-export { TabButton, PostButton, ButtonSvg, ButtonIcon, ProfileButton, ResponsiveButton, SelectableButton, SelectableIcon };
+export { TabButton, PostButton, ButtonSvg, ButtonIcon, ProfileButton, ResponsiveButton, SelectableButton, SelectableIcon, TopMenuButton };

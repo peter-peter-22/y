@@ -1,8 +1,7 @@
 import * as React from 'react';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 
-const text = '#0F1419';
-
+//colors
 const primary = {
     main: '#1D9BF0',
     light: '#4AADEF',
@@ -14,7 +13,7 @@ const secondary = {
     main: '#C1C1C1',
     light: '#E7E7E8',
     dark: '#E7E7E8',
-    contrastText: text,
+    contrastText: '0F1419',
 };
 
 const secondaryNoBackground = { ...secondary };
@@ -24,7 +23,7 @@ const secondary_blue = {
     main: '#F7F9F9',
     light: '#F7F7F7',
     dark: '#EFF3F4',
-    contrastText: text,
+    contrastText: secondary.contrastText,
 };
 const black = {
     main: '#000000',
@@ -33,16 +32,56 @@ const black = {
     contrastText: "#fff",
 };
 
-const small_text = "14px";
-const big_text = "20px";
+//fonts
+
+const medium = {
+    fontSize: "1rem",
+    fontFamily: "Roboto",
+}
+const medium_bold = {
+    ...medium,
+    fontWeight: "bold",
+}
+const medium_fade = {
+    ...medium,
+    color: secondary.main,
+}
+
+const small = {
+    fontSize: "0.8rem",
+    fontFamily: "Roboto"
+}
+const small_bold = {
+    ...small,
+    fontWeight: "bold",
+}
+const small_fade = {
+    ...small,
+    color: secondary.main,
+}
+
+const big = {
+    fontSize: "1.20rem",
+    fontFamily: "Roboto"
+}
+const big_bold = {
+    ...big,
+    fontWeight: "bold",
+}
+const big_fade = {
+    ...big,
+    color: secondary.main,
+}
+
+//theme
 
 const theme = createTheme({
     palette: {
         primary: primary,
         secondary: secondary,
         secondary_blue: secondary_blue,
-        black:black,
-        secondary_noBg:secondaryNoBackground
+        black: black,
+        secondary_noBg: secondaryNoBackground
     },
     shadows: ["none"],
     components: {
@@ -62,32 +101,18 @@ const theme = createTheme({
             textTransform: 'capitalize',
             fontWeight: "bold",
         },
-        small_title: {
-            fontSize: small_text,
-            fontWeight: "bold"
-        },
-        small_body: {
-            fontSize: small_text,
-            fontWeight: "normal"
-        },
-        small_fade: {
-            fontSize: small_text,
-            color: secondary.main,
-            fontWeight: "normal"
-        },
-        big_title: {
-            fontSize: big_text,
-            fontWeight: "bold"
-        },
-        big_body: {
-            fontSize: big_text,
-            fontWeight: "normal"
-        },
-        big_fade: {
-            fontSize: big_text,
-            color: secondary.main,
-            fontWeight: "normal"
-        }
+
+        small: small,
+        small_bold: small_bold,
+        small_fade: small_fade,
+
+        medium: medium,
+        medium_bold: medium_bold,
+        medium_fade: medium_fade,
+
+        big: big,
+        big_bold: big_bold,
+        big_fade: big_fade,
     },
     breakpoints: {
         values: {

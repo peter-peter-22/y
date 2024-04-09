@@ -48,7 +48,7 @@ function SearchField() {
             ),
             endAdornment: (
                 isFocused && getText.length > 0 && <InputAdornment position="end">
-                    <Icon color="primary">
+                    <Icon color="primary" >
                         cancel
                     </Icon>
                 </InputAdornment>
