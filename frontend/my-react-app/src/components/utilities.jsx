@@ -72,15 +72,17 @@ function ChooseChildBool(props) {
     return (<ChooseChild index={props.first ? 0 : 1}>{props.children}</ChooseChild>);
 }
 
-function ProfileText() {
+function ProfileText(props) {
     return (
         <div style={{ flexGrow: 1, overflow: "hidden" }}>
-            <Typography variant="small_bold" align="left" style={noOverflow}>
-                Firstname Lastname abc efd efd afsfas sd fsfd
-            </Typography>
-            <Typography variant="small_fade" align="left" fontWeight="normal" style={noOverflow} >
-                @user_id_5378543678345
-            </Typography>
+            <Stack direction={props.row ? "row" : "column"} spacing={props.row?0.5:0}>
+                <Typography variant="small_bold" align="left" style={noOverflow}>
+                    Firstname Lastname abc efd efd afsfas sd fsfd
+                </Typography>
+                <Typography variant="small_fade" align="left" fontWeight="normal" style={noOverflow} >
+                    @user_id_5378543678345
+                </Typography>
+            </Stack>
         </div>
     );
 }
@@ -103,12 +105,12 @@ function TabSwitcher(props) {
         setTab(tabName);
     }
 
-    const selectedTab=props.tabs.find((tab)=>{return tab.tabName===getTab});
+    const selectedTab = props.tabs.find((tab) => { return tab.tabName === getTab });
 
     return (
         <>
             <TopMenu>
-                <Box sx={{ borderBottom: 1, borderColor: 'divider', height: "100%", width: "100%", display: "flex", alignItems:"center", flexDirection: "row" }}>
+                <Box sx={{ borderBottom: 1, borderColor: 'divider', height: "100%", width: "100%", display: "flex", alignItems: "center", flexDirection: "row" }}>
                     {props.tabs.map((tab, index) => {
                         return (
                             <TopMenuButton

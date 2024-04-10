@@ -18,6 +18,7 @@ import ListItemText from '@mui/material/ListItemText';
 import { BoxList, BoxListOutlined, BlueTextButton } from '/src/components/containers';
 import IconButton from '@mui/material/IconButton';
 import Link from '@mui/material/Link';
+import { ResponsiveButton, ButtonIcon, ButtonSvg, TabButton, PostButton, ProfileButton, TopMenuButton,CornerButton } from "/src/components/buttons.jsx";
 
 function Footer() {
     return (
@@ -103,9 +104,7 @@ function Footer() {
                                         </div>
                                     </Typography>
 
-                                    <IconButton size="small" style={{ position: "absolute", right: "10px", top: "10px" }}>
-                                        <Icon fontSize="small">more_horiz</Icon>
-                                    </IconButton>
+                                    <CornerButton>more_horiz</CornerButton>
                                 </ListItemText>
                             </ListItemButton>
                         </ListItem>

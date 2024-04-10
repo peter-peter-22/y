@@ -10,6 +10,7 @@ import { ResponsiveSelector, ChooseChildBool, ProfileText } from '/src/component
 import Button from '@mui/material/Button';
 import ListItemButton from '@mui/material/ListItemButton';
 import Box from '@mui/material/Box';
+import IconButton from '@mui/material/IconButton';
 
 const smallerButtons = "leftMenu";
 const iconSize = "30px";
@@ -51,9 +52,9 @@ function TopMenuButton(props) {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: 'center',
-                borderBottom: props.selected?4:0,
+                borderBottom: props.selected ? 4 : 0,
                 borderColor: 'primary.main',
-                m:"auto"
+                m: "auto"
             }}>
                 <Typography fontWeight={props.selected ? "bold" : "normal"} sx={{ p: 0 }}>
                     {props.children}
@@ -140,4 +141,10 @@ function ProfileButton() {
     );
 }
 
-export { TabButton, PostButton, ButtonSvg, ButtonIcon, ProfileButton, ResponsiveButton, SelectableButton, SelectableIcon, TopMenuButton };
+function CornerButton(props) {
+    return (<IconButton size="small" style={{ position: "absolute", right: "10px", top: "10px" }}>
+        <Icon fontSize="small">{props.children}</Icon>
+    </IconButton>);
+}
+
+export { TabButton, PostButton, ButtonSvg, ButtonIcon, ProfileButton, ResponsiveButton, SelectableButton, SelectableIcon, TopMenuButton,CornerButton };
