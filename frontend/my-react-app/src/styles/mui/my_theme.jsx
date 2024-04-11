@@ -4,13 +4,13 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 //colors
 const primary = {
     main: '#1D9BF0',
-    light: '#4AADEF',
+    light: '#E8F5FD',
     dark: '#1A8CD8',
     contrastText: '#fff',
 };
 
 const secondary = {
-    main: '#C1C1C1',
+    main: '#7F7F7F',
     light: '#E7E7E8',
     dark: '#E7E7E8',
     contrastText: '0F1419',
@@ -37,6 +37,7 @@ const black = {
 const medium = {
     fontSize: "1rem",
     fontFamily: "Roboto",
+    color:"rgb(15, 20, 25)"
 }
 const medium_bold = {
     ...medium,
@@ -48,8 +49,8 @@ const medium_fade = {
 }
 
 const small = {
+    ...medium,
     fontSize: "0.8rem",
-    fontFamily: "Roboto"
 }
 const small_bold = {
     ...small,
@@ -61,8 +62,8 @@ const small_fade = {
 }
 
 const big = {
+    ...medium,
     fontSize: "1.20rem",
-    fontFamily: "Roboto"
 }
 const big_bold = {
     ...big,
@@ -81,8 +82,9 @@ const theme = createTheme({
         secondary: secondary,
         secondary_blue: secondary_blue,
         black: black,
-        secondary_noBg: secondaryNoBackground
+        secondary_noBg: secondaryNoBackground,
     },
+
     shadows: ["none"],
     components: {
         MuiButtonBase: {
@@ -90,6 +92,16 @@ const theme = createTheme({
                 disableRipple: true,
             },
         },
+        MuiFab: {
+            styleOverrides: {
+                root: ({ ownerState }) => ({
+                    ...(ownerState.variant === 'extended' && {
+                        paddingLeft: "15px",
+                        paddingRight: "15px"
+                    }),
+                }),
+            },
+        }
     },
     typography: {
         fontFamily: [
@@ -97,6 +109,7 @@ const theme = createTheme({
             'Trebuchet MS',
             "sans-serif"
         ].join(','),
+
         button: {
             textTransform: 'capitalize',
             fontWeight: "bold",

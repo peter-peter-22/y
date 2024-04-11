@@ -75,15 +75,27 @@ function ChooseChildBool(props) {
 function ProfileText(props) {
     return (
         <div style={{ flexGrow: 1, overflow: "hidden" }}>
-            <Stack direction={props.row ? "row" : "column"} spacing={props.row?0.5:0}>
-                <Typography variant="small_bold" align="left" style={noOverflow}>
-                    Firstname Lastname abc efd efd afsfas sd fsfd
-                </Typography>
-                <Typography variant="small_fade" align="left" fontWeight="normal" style={noOverflow} >
-                    @user_id_5378543678345
-                </Typography>
+            <Stack direction={props.row ? "row" : "column"} spacing={props.row ? 0.5 : 0}>
+                <UserName />
+                <UserKey />
             </Stack>
         </div>
+    );
+}
+
+function UserName(props) {
+    return (
+        <Typography variant="small_bold" align="left" style={noOverflow}>
+            Firstname Lastname abc efd efd afsfas sd fsfd gfg fddhfjhf ghj dgfjhdgfhjjhgd jhfhjb dgfhfjhhdfhjdfg hjdgfjhd hgjfjhgfjh
+        </Typography>
+    );
+}
+
+function UserKey(props) {
+    return (
+        <Typography variant="small_fade" align="left" fontWeight="normal" style={noOverflow} >
+            @user_id_5378543678345
+        </Typography>
     );
 }
 
@@ -131,4 +143,5 @@ function TabSwitcher(props) {
     );
 }
 
-export { AboveBreakpoint, ResponsiveSelector, ChooseChild, ChooseChildBool, TopMenu, ProfileText, FadeLink, TabSwitcher }
+
+export { AboveBreakpoint, ResponsiveSelector, ChooseChild, ChooseChildBool, TopMenu, ProfileText, FadeLink, TabSwitcher, UserName, UserKey, noOverflow,  }

@@ -22,14 +22,7 @@ import { ResponsiveButton, ButtonIcon, ButtonSvg, TabButton, PostButton, Profile
 import { ForYou } from "/src/components/home_pages";
 
 function Page() {
-  const [getTab, setTab] = React.useState();
-
-  function SelectTab(index) {
-    setTab(index);
-  }
-
   return (
-    <>
       <TabSwitcher tabs={[
         {
           tabName: "for you",
@@ -48,7 +41,6 @@ function Page() {
           </Icon>
         </IconButton>
       </TabSwitcher >
-    </>
   )
 }
 

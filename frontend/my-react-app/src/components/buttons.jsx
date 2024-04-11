@@ -108,7 +108,7 @@ function PostButton() {
             <Fab variant="extended" color="primary" sx={{
                 width: "100%"
             }}>
-                <Typography variant="big_bold">Post</Typography>
+                <Typography variant="big_bold" color="primary.contrastText">Post</Typography>
             </Fab>
             <Fab size="medium" color="primary">
                 <ButtonIcon icon="create" filled="true" />
@@ -127,7 +127,7 @@ function ProfileButton() {
                 <Stack direction="row" spacing={1} sx={{ width: "100%", height: "100%", alignItems: "center" }}>
                     <Avatar src="/src/images/example profile.jpg" />
                     <ProfileText />
-                    <Icon>
+                    <Icon fontSize="small">
                         more_horiz
                     </Icon>
                 </Stack>

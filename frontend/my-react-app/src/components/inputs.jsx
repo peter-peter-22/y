@@ -6,7 +6,7 @@ import React from "react";
 
 function SearchField() {
     const [isFocused, setIsFocused] = React.useState(false);
-    const [getText, setText] = React.useState(false);
+    const [getText, setText] = React.useState("");
 
     const handleFocus = () => {
         setIsFocused(true);
@@ -56,4 +56,20 @@ function SearchField() {
         }} />);
 }
 
-export {SearchField};
+function PlainTextField(props) {
+    return (
+        <TextField
+            {...props}
+            sx={{
+                "& .MuiInputBase-root": {
+                    p: 0,
+                },
+                '& fieldset': {
+                    border: 'none',
+                },
+            }}
+        />
+    );
+}
+
+export { SearchField,PlainTextField };
