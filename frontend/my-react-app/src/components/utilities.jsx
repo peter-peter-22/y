@@ -18,6 +18,7 @@ import { BoxList, BoxListOutlined, BlueTextButton } from '/src/components/contai
 import IconButton from '@mui/material/IconButton';
 import Link from '@mui/material/Link';
 import { ResponsiveButton, ButtonIcon, ButtonSvg, TabButton, PostButton, ProfileButton, TopMenuButton } from "/src/components/buttons.jsx";
+import Moment from "moment";
 
 const noOverflow = {
     whiteSpace: 'nowrap',
@@ -76,7 +77,7 @@ function ProfileText(props) {
     return (
         <div style={{ flexGrow: 1, overflow: "hidden" }}>
             <Stack direction={props.row ? "row" : "column"} spacing={props.row ? 0.5 : 0}>
-                <UserName />
+                {props.link ? <UserLink /> : <UserName />}
                 <UserKey />
             </Stack>
         </div>
@@ -86,38 +87,72 @@ function ProfileText(props) {
 function UserName(props) {
     return (
         <Typography variant="small_bold" align="left" style={noOverflow}>
-            Firstname Lastname abc efd efd afsfas sd fsfd gfg fddhfjhf ghj dgfjhdgfhjjhgd jhfhjb dgfhfjhhdfhjdfg hjdgfjhd hgjfjhgfjh
+            <GetUserName />
         </Typography>
     );
+}
+
+function UserLink(props) {
+    return (
+        <Link typography="small_bold" href="#" align="left" underline="hover" style={noOverflow} {...props}>
+            <GetUserName />
+        </Link>
+    );
+}
+
+function UserKeyLink(props) {
+    return (
+        <Link typography="small" href="#" align="left" underline="hover" style={noOverflow} {...props}>
+            <GetUserKey />
+        </Link>
+    );
+}
+
+function GetUserName(props) {
+    return ("Firstname Lastname abc efd efd afsfas sd fsfd gfg fddhfjhf ghj dgfjhdgfhjjhgd jhfhjb dgfhfjhhdfhjdfg hjdgfjhd hgjfjhgfjh");
+}
+function GetUserKey(props) {
+    return ("@user23543453435768453687548674358765648786734867345687687345876345687345678345786");
 }
 
 function UserKey(props) {
     return (
         <Typography variant="small_fade" align="left" fontWeight="normal" style={noOverflow} >
-            @user_id_5378543678345
+            <GetUserKey />
         </Typography>
     );
 }
 
-function FadeLink(props) {
+function AnyLink(props) {
     return (
-        <Link href="#" color="secondary" underline="hover">
-            <Typography variant="small">
+        <Link href="#" underline="hover" {...props}>
+            <Typography variant={props.typography}>
                 {props.children}
             </Typography>
         </Link>
     );
 }
 
+function FadeLink(props) {
+    return (
+        <AnyLink typography="small_fade" {...props}>{props.children}</AnyLink>
+    );
+}
+
+function BoldLink(props) {
+    return (
+        <AnyLink typography="small_bold" {...props}>{props.children}</AnyLink>
+    );
+}
+
 function TabSwitcher(props) {
-    const [getTab, setTab] = React.useState(props.tabs[0].tabName);
+    const [getTab, setTab] = React.useState(props.tabs[0].text);
 
     function SelectTab(tabName) {
-        console.log(tabName);
         setTab(tabName);
     }
 
-    const selectedTab = props.tabs.find((tab) => { return tab.tabName === getTab });
+    const selectedTab = props.tabs.find((tab) => { return tab.text === getTab });
 
     return (
         <>
@@ -126,10 +161,9 @@ function TabSwitcher(props) {
                     {props.tabs.map((tab, index) => {
                         return (
                             <TopMenuButton
-                                tabIndex={tab.tabName}
-                                selected={getTab === tab.tabName ? true : false}
+                                selected={getTab === tab.text ? true : false}
                                 onClick={() => {
-                                    SelectTab(tab.tabName)
+                                    SelectTab(tab.text)
                                 }}
                                 key={index}>
                                 {tab.text}
@@ -143,5 +177,55 @@ function TabSwitcher(props) {
     );
 }
 
+function DateLink(props) {
+    const moment = Moment(new Date());
+    const hover = moment.format('h:mm a [·] MM DD YYYY');
+    let display;
+    if (props.short) {
+        display = moment.format('MMM DD');
+    }
+    else if (props.passed) {
+        const passed = Moment.duration(moment.diff("2015-06-02"));
+        if (passed.asSeconds() < 60)
+            display = Math.round(passed.asSeconds()) + "s";
+        else if (passed.asMinutes() < 60)
+            display = Math.round(passed.asMinutes()) + "m";
+        else if (passed.asHours() < 24)
+            display = Math.round(passed.asHours()) + "h";
+        else if (passed.asDays() < 7)
+            display = Math.round(passed.asDays()) + "d";
+        else if (passed.asMonths() < 12)
+            display = Math.round(passed.asMonths()) + "M";
+        else
+            display = Math.round(passed.asYears()) + "y";
+    }
+    else
+        display = hover;
 
-export { AboveBreakpoint, ResponsiveSelector, ChooseChild, ChooseChildBool, TopMenu, ProfileText, FadeLink, TabSwitcher, UserName, UserKey, noOverflow,  }
+
+    return (
+        <FadeLink style={{ flexShrink: 0, ...noOverflow }}>
+            {display}
+        </FadeLink>
+    );
+}
+
+function TextRow(props) {
+    return (
+        <Stack direction="row" spacing={0.5} style={{ overflow: "hidden" }}>
+            {props.children}
+        </Stack>
+    );
+}
+
+function ReplyingTo(props) {
+    return (
+        <TextRow >
+            <Typography variant="small_fade" style={{ flexShrink: 0, ...noOverflow }}>Replying to</Typography>
+            <UserKeyLink color="primary.main" />
+        </TextRow>
+    );
+}
+
+
+export { AboveBreakpoint, ResponsiveSelector, ChooseChild, ChooseChildBool, TopMenu, ProfileText, FadeLink, TabSwitcher, UserName, UserKey, noOverflow, BoldLink, UserLink, DateLink, TextRow, UserKeyLink, ReplyingTo, GetUserName, GetUserKey }

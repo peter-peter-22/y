@@ -9,7 +9,7 @@ import Fab from '@mui/material/Fab';
 import { Icon } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink, UserName, UserKey, noOverflow } from '/src/components/utilities';
+import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey } from '/src/components/utilities';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -46,65 +46,33 @@ function RowWithPrefix(props) {
 
 function Post(props) {
     return (
-        <ListItem disablePadding sx={{ borderBottom: 1, borderColor: "divider" }}>
-            <ListItemButton>
-                <Stack direction="column" style={{ overflow: "hidden" }}>
-                    <Reposted />
-                    <RowWithPrefix
-                        prefix={<Avatar src="/src/images/example profile.jpg" />}
-                        contents={
-                            <Stack direction="column" style={{ overflow: "hidden" }}>
-                                <Stack direction="row" spacing={0.25} style={{ alignItems: "center" }}>
-                                    <UserName />
-                                    <UserKey />
-                                    <ManagePost />
-                                </Stack>
-                                <PostText />
-                                <PostMedia />
-                            </Stack>
-                        } />
-                    <RowWithPrefix contents={
-                        <Stack direction="column" style={{ overflow: "hidden" }}>
-                            <FromUser />
-                            <Stack direction="row" justifyContent="space-between" style={{ flexGrow: 1 }}>
-
-                                <PostBottomIcon icon="more_horiz" text="999k" >
-                                    chat_bubble_outline
-                                </PostBottomIcon>
-
-                                <PostBottomIcon icon="more_horiz" text="999k" >
-                                    loop
-                                </PostBottomIcon>
-
-                                <PostBottomIcon icon="more_horiz" text="999k" >
-                                    favorite_border
-                                </PostBottomIcon>
-
-                                <PostBottomIcon icon="more_horiz" text="999k" >
-                                    align_vertical_bottom
-                                </PostBottomIcon>
-
-                                <Stack direction="row">
-                                    <IconButton size="small">
-                                        <Icon fontSize="small">
-                                            bookmark_border
-                                        </Icon>
-                                    </IconButton>
-
-                                    <IconButton size="small">
-                                        <Icon fontSize="small">
-                                            upload
-                                        </Icon>
-                                    </IconButton>
-                                </Stack>
-                            </Stack>
+        <ListBlockButton>
+            <Reposted />
+            <RowWithPrefix
+                prefix={<Avatar src="/src/images/example profile.jpg" />}
+                contents={
+                    <Stack direction="column" style={{ overflow: "hidden" }}>
+                        <Stack direction="row" spacing={0.25} style={{ alignItems: "center" }}>
+                            <UserName />
+                            <UserKey />
+                            ·
+                            <DateLink passed />
+                            <ManagePost />
                         </Stack>
-                    } />
+                        <PostText />
+                        <PostMedia />
+                    </Stack>
+                } />
+            <RowWithPrefix contents={
+                <Stack direction="column" style={{ overflow: "hidden" }}>
+                    <FromUser />
+                    <PostButtonRow />
                 </Stack>
-            </ListItemButton>
-        </ListItem>
+            } />
+        </ListBlockButton>
     );
 }
+
 
 function PostFocused(props) {
     const [isFocused, setIsFocused] = React.useState(false);
@@ -122,123 +90,158 @@ function PostFocused(props) {
     }
 
     return (
-        <ListItem sx={{ borderBottom: 1, borderColor: "divider" }}>
-            <Stack direction="column" style={{ overflow: "hidden" }}>
-                <Reposted />
-                <RowWithPrefix
-                    prefix={<Avatar src="/src/images/example profile.jpg" />}
-                    contents={
-                        <Stack direction="column" style={{ overflow: "hidden" }}>
-                            <Stack direction="row" spacing={0.25} style={{ alignItems: "center" }}>
-                                <ProfileText />
-                                <Fab variant="extended" size="small" color="black" style={{ flexShrink: 0 }}>Subscribe</Fab>
-                                <ManagePost />
-                            </Stack>
+        <ListBlock>
+            <Reposted />
+            <RowWithPrefix
+                prefix={<Avatar src="/src/images/example profile.jpg" />}
+                contents={
+                    <Stack direction="column" style={{ overflow: "hidden" }}>
+                        <Stack direction="row" spacing={0.25} style={{ alignItems: "center" }}>
+                            <ProfileText />
+                            <Fab variant="extended" size="small" color="black" style={{ flexShrink: 0 }}>Subscribe</Fab>
+                            <ManagePost />
                         </Stack>
-                    } />
-
-                <Stack direction="column" sx={{ overflow: "hidden", mt: 1 }}>
-                    <PostText />
-                    <PostMedia />
-                    <FromUser />
-                    <Stack direction="row" spacing={0.5} sx={{ alignItems: "baseline", my: 1 }}>
-                        <FadeLink>99:99 AM Apr 99, 2024</FadeLink>
-                        <Typography variant="small_fade">·</Typography>
-                        <Typography variant="small_bold">999M</Typography>
-                        <Typography variant="small_fade">Views</Typography>
                     </Stack>
+                } />
+
+            <Stack direction="column" sx={{ overflow: "hidden", mt: 1 }}>
+                <PostText />
+                <PostMedia />
+                <FromUser />
+                <Stack direction="row" spacing={0.5} sx={{ alignItems: "baseline", my: 1 }}>
+                    <DateLink />
+                    <Typography variant="small_fade">·</Typography>
+                    <Typography variant="small_bold">999M</Typography>
+                    <Typography variant="small_fade">Views</Typography>
                 </Stack>
-
-                <Divider />
-
-                <Stack direction="row" justifyContent="space-between" sx={{ flexGrow: 1, py: 0.5 }}>
-
-                    <PostBottomIcon text="999k" >
-                        chat_bubble_outline
-                    </PostBottomIcon>
-
-                    <PostBottomIcon text="999k" >
-                        loop
-                    </PostBottomIcon>
-
-                    <PostBottomIcon text="999k" >
-                        favorite_border
-                    </PostBottomIcon>
-
-                    <PostBottomIcon text="999k" >
-                        bookmark_border
-                    </PostBottomIcon>
-
-                    <IconButton size="small">
-                        <Icon fontSize="small">
-                            upload
-                        </Icon>
-                    </IconButton>
-                </Stack>
-
-                <Divider />
-
-                {isFocused &&
-                    <Box sx={{ my: 1 }} >
-                        <RowWithPrefix contents={
-                            <Typography variant="small_fade" style={noOverflow}>Replying to <Typography variant="small_fade" color="primary">Firstname Lastname abc efd efd afsfas sd fsfd gfg fddhfjhf ghj dgfjhdgfhjjhgd jhfhjb dgfhfjhhdfhjdfg hjdgfjhd hgjfjhgfjh</Typography></Typography>
-                        } />
-                    </Box>
-                }
-                <RowWithPrefix
-                    prefix={
-                        <Avatar sx={{ py: 1 }} src="/src/images/example profile.jpg" />
-                    }
-                    contents={
-                        <Stack direction={isFocused ? "column" : "row"} style={{ flexGrow: 1 }}>
-                            <Box sx={{ py: 1, display: "inline-flex", flexGrow: 1, position: "relative" }}>
-
-                                <Typography variant="body1"
-                                    style={{
-                                        position: "absolute",
-                                        height: "100%",
-                                        width: "100%",
-                                        overflow: "hidden",
-                                        whiteSpace: "pre",
-                                        lineHeight: "1.4375em",
-                                        overflowWrap: "break-word",
-                                        textWrap: "wrap",
-                                        color:"transparent"
-                                    }}
-                                >
-                                    {keep}
-                                    <mark style={{background:"#FF000044"}}>{overflow}</mark>
-                                </Typography>
-
-                                <PlainTextField
-                                    placeholder="Post your reply"
-                                    multiline
-                                    fullWidth
-                                    onFocus={handleFocus}
-                                    onChange={handleChange}
-                                />
-
-                            </Box>
-
-                            <Stack direction="row" alignItems="center" >
-                                {isFocused &&
-                                    <Stack direction="row" alignItems="center" justifyContent={"space-between"} style={{ flexGrow: 1 }}>
-                                        <Stack direction="row" spacing={0.5}>
-                                            <CommentButton>insert_photo</CommentButton>
-                                            <CommentButton>gif_box</CommentButton>
-                                            <CommentButton>sentiment_satisfied_alt</CommentButton>
-                                            <CommentButton>location_on</CommentButton>
-                                        </Stack>
-
-                                        <LetterCounter maxvalue={maxLetters} letters={getText.length} />
-                                    </Stack>
-                                }
-                                <Fab disabled={getText.length === 0 || getText.length > maxLetters} variant="extended" size="small" color="primary">Reply</Fab>
-                            </Stack>
-                        </Stack>
-                    } />
             </Stack>
-        </ListItem>
+
+            <Divider />
+
+            <Stack direction="row" justifyContent="space-between" sx={{ flexGrow: 1, py: 0.5 }}>
+
+                <PostBottomIcon text="999k" >
+                    chat_bubble_outline
+                </PostBottomIcon>
+
+                <PostBottomIcon text="999k" >
+                    loop
+                </PostBottomIcon>
+
+                <PostBottomIcon text="999k" >
+                    favorite_border
+                </PostBottomIcon>
+
+                <PostBottomIcon text="999k" >
+                    bookmark_border
+                </PostBottomIcon>
+
+                <IconButton size="small">
+                    <Icon fontSize="small">
+                        upload
+                    </Icon>
+                </IconButton>
+            </Stack>
+
+            <Divider />
+
+            {isFocused &&
+                <Box sx={{ my: 1 }} >
+                    <RowWithPrefix contents={
+                        <ReplyingTo />
+                    } />
+                </Box>
+            }
+            <RowWithPrefix
+                prefix={
+                    <Avatar sx={{ py: 1 }} src="/src/images/example profile.jpg" />
+                }
+                contents={
+                    <Stack direction={isFocused ? "column" : "row"} style={{ flexGrow: 1 }}>
+                        <Box sx={{ pb: 1, pt: 2, display: "inline-flex", flexGrow: 1, position: "relative" }}>
+
+                            <Typography variant="body1"
+                                style={{
+                                    position: "absolute",
+                                    height: "100%",
+                                    width: "100%",
+                                    overflow: "hidden",
+                                    whiteSpace: "pre",
+                                    lineHeight: "1.4375em",
+                                    overflowWrap: "break-word",
+                                    textWrap: "wrap",
+                                    color: "transparent"
+                                }}
+                            >
+                                {keep}
+                                <mark style={{ background: "#FF000044" }}>{overflow}</mark>
+                            </Typography>
+
+                            <PlainTextField
+                                placeholder="Post your reply"
+                                multiline
+                                fullWidth
+                                onFocus={handleFocus}
+                                onChange={handleChange}
+                            />
+
+                        </Box>
+
+                        <Stack direction="row" alignItems="center" >
+                            {isFocused &&
+                                <Stack direction="row" alignItems="center" justifyContent={"space-between"} style={{ flexGrow: 1 }}>
+                                    <Stack direction="row" spacing={0.5}>
+                                        <CommentButton>insert_photo</CommentButton>
+                                        <CommentButton>gif_box</CommentButton>
+                                        <CommentButton>sentiment_satisfied_alt</CommentButton>
+                                        <CommentButton>location_on</CommentButton>
+                                    </Stack>
+
+                                    <LetterCounter maxvalue={maxLetters} letters={getText.length} />
+                                </Stack>
+                            }
+                            <Fab disabled={getText.length === 0 || getText.length > maxLetters} variant="extended" size="small" color="primary">Reply</Fab>
+                        </Stack>
+                    </Stack>
+                } />
+        </ListBlock>
+    );
+}
+
+function PostButtonRow() {
+    return (
+        <Stack direction="row" justifyContent="space-between" style={{ flexGrow: 1 }}>
+
+            <PostBottomIcon icon="more_horiz" text="999k" >
+                chat_bubble_outline
+            </PostBottomIcon>
+
+            <PostBottomIcon icon="more_horiz" text="999k" >
+                loop
+            </PostBottomIcon>
+
+            <PostBottomIcon icon="more_horiz" text="999k" >
+                favorite_border
+            </PostBottomIcon>
+
+            <PostBottomIcon icon="more_horiz" text="999k" >
+                align_vertical_bottom
+            </PostBottomIcon>
+
+            <Stack direction="row">
+                <IconButton size="small">
+                    <Icon fontSize="small">
+                        bookmark_border
+                    </Icon>
+                </IconButton>
+
+                <IconButton size="small">
+                    <Icon fontSize="small">
+                        upload
+                    </Icon>
+                </IconButton>
+            </Stack>
+        </Stack>
     );
 }
 
@@ -342,7 +345,7 @@ function PostBottomIcon(props) {
             <Icon fontSize="small">
                 {props.children}
             </Icon>
-            <Typography variant="small" style={{ position: "absolute", left: "90%" }}>{props.text}</Typography>
+            <Typography variant="small" color="secondary" style={{ position: "absolute", left: "90%" }}>{props.text}</Typography>
         </IconButton>);
 }
 
@@ -383,12 +386,12 @@ function ManagePost(props) {
 
 function FromUser(props) {
     return (
-        <Stack direction="row" spacing={0.5}>
+        <TextRow>
             <Typography variant="small_fade">
                 From
             </Typography>
             <UserName />
-        </Stack>
+        </TextRow>
     );
 }
 
@@ -396,8 +399,31 @@ function Reposted(props) {
     return (
         <RowWithPrefix
             prefix={<Icon color="secondary" style={{ fontSize: "15px", alignSelf: "end" }}>loop</Icon>}
-            contents={<FadeLink>adsgsgdsdggsd reposted</FadeLink>} />
+            contents={<FadeLink style={{ fontWeight: "bold", overflow: "hidden" }}><TextRow><span color="secondary.main" style={noOverflow}><GetUserName /></span>reposted</TextRow></FadeLink>} />
     );
 }
 
-export { Post, PostList, PostFocused };
+function ListBlock(props) {
+    return (
+        <ListItem sx={{ borderBottom: 1, borderColor: "divider" }}>
+            <Stack direction="column" style={{ overflow: "hidden" }}>
+                {props.children}
+            </Stack>
+        </ListItem>
+    );
+}
+
+function ListBlockButton(props) {
+    return (
+        <ListItem disablePadding sx={{ borderBottom: 1, borderColor: "divider" }}>
+            <ListItemButton>
+                <Stack direction="column" style={{ overflow: "hidden" }}>
+                    {props.children}
+                </Stack>
+            </ListItemButton>
+        </ListItem>
+    );
+}
+
+
+export { Post, PostList, PostFocused, ListBlockButton, ListBlock, RowWithPrefix,PostButtonRow };

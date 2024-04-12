@@ -12,6 +12,7 @@ import { AboveBreakpoint } from '/src/components/utilities';
 //pages
 import Home from "./pages/home";
 import Test from "./pages/test";
+import Notifications from "./pages/notifications";
 import Error from "./pages/error";
 
 //components
@@ -38,6 +39,7 @@ function App() {
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/test" element={<Test />} />
+                <Route path="/notifications" element={<Notifications />} />
                 <Route path="*" element={<Error />} />
               </Routes>
             </div>
