@@ -35,7 +35,7 @@ function Like(props) {
         <ListBlockButton>
             <Stack direction="column" spacing={spacing}>
                 <RowWithPrefix
-                    prefix={<Icon style={{ color: "#F91880", fontSize: "25px", alignSelf: "center" }}>favorite</Icon>}
+                    prefix={<SmallIcon color="#F91880" icon="favorite" />}
                     contents={
                         <Stack direction="row" spacing={1}>
                             <SmallAvatar />
@@ -46,10 +46,10 @@ function Like(props) {
                 <RowWithPrefix
                     contents={
                         <Stack direction="column" spacing={spacing} style={{ overflow: "hidden" }}>
-                            <Stack direction="row" >
+                            <TextRow >
                                 <UserLink />
                                 <Typography variant="small" style={{ flexShrink: 0, ...noOverflow }}>liked your reply</Typography>
-                            </Stack>
+                            </TextRow>
                             <Typography variant="small_fade">
                                 poist test gdfjdfgfg jgd njjdgf jkdgfjgfd jkngdfjnkdjgfkndjgf knj kdgfnjdkngfjnkdgfjnkdgfjkndjkndjknd gfjkndgfjknd gfjknjdgfjkndgfjkndjkgnf
                             </Typography>
@@ -58,6 +58,65 @@ function Like(props) {
                 />
             </Stack>
         </ListBlockButton>
+    );
+}
+
+function Follow(props) {
+    return (
+        <ListBlockButton>
+            <Stack direction="column" spacing={spacing}>
+                <RowWithPrefix
+                    prefix={<SmallIcon color={theme.palette.primary.main} icon="person" />}
+                    contents={
+                        <SmallAvatar />
+                    }
+                />
+                <RowWithPrefix
+                    contents={
+                        <Stack direction="column" spacing={spacing} style={{ overflow: "hidden" }}>
+                            <TextRow>
+                                <UserLink />
+                                <Typography variant="small" style={{ flexShrink: 0, ...noOverflow }}>followed you</Typography>
+                            </TextRow>
+                        </Stack>
+                    }
+                />
+            </Stack>
+        </ListBlockButton>
+    );
+}
+
+function ShareReply(props) {
+    return (
+        <ListBlockButton>
+            <Stack direction="column" spacing={spacing}>
+                <RowWithPrefix
+                    prefix={<SmallIcon color="#00BA7C" icon="loop" />}
+                    contents={
+                        <SmallAvatar />
+                    }
+                />
+                <RowWithPrefix
+                    contents={
+                        <Stack direction="column" spacing={spacing} style={{ overflow: "hidden" }}>
+                            <TextRow>
+                                <UserLink />
+                                <Typography variant="small" style={{ flexShrink: 0, ...noOverflow }}>reposted your reply</Typography>
+                            </TextRow>
+                            <Typography variant="small_fade">
+                                poist test gdfjdfgfg jgd njjdgf jkdgfjgfd jkngdfjnkdjgfkndjgf knj kdgfnjdkngfjnkdgfjnkdgfjkndjkndjknd gfjkndgfjknd gfjknjdgfjkndgfjkndjkgnf
+                            </Typography>
+                        </Stack>
+                    }
+                />
+            </Stack>
+        </ListBlockButton>
+    );
+}
+
+function SmallIcon(props) {
+    return (
+        <Icon style={{ color: props.color, fontSize: "25px", alignSelf: "center" }}>{props.icon}</Icon>
     );
 }
 
@@ -98,8 +157,10 @@ function SmallAvatar(props) {
 function NotificationList(props) {
     return (
         <List sx={{ p: 0 }}>
-            <Like/>
+            <Like />
             <Comment />
+            <Follow />
+            <ShareReply />
         </List>
     );
 }
