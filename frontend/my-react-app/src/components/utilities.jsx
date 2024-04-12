@@ -27,6 +27,10 @@ const noOverflow = {
     display: "block"
 };
 
+const logo="/src/svg/y.svg";
+
+const creation = "© 2024 Y Corp.";
+
 function ResponsiveSelector(props) {
     let isBig = props.override === undefined ? AboveBreakpoint(props.breakpoint) : props.override;
     return (<ChooseChildBool first={isBig}>{props.children}</ChooseChildBool>);
@@ -94,7 +98,7 @@ function UserName(props) {
 
 function UserLink(props) {
     return (
-        <Link typography="small_bold" href="#" align="left" underline="hover" style={noOverflow} {...props}>
+        <Link typography="small_bold" href="#" align="left"  style={noOverflow} {...props}>
             <GetUserName />
         </Link>
     );
@@ -102,7 +106,7 @@ function UserLink(props) {
 
 function UserKeyLink(props) {
     return (
-        <Link typography="small" href="#" align="left" underline="hover" style={noOverflow} {...props}>
+        <Link typography="small" href="#" align="left"  style={noOverflow} {...props}>
             <GetUserKey />
         </Link>
     );
@@ -123,25 +127,16 @@ function UserKey(props) {
     );
 }
 
-function AnyLink(props) {
-    return (
-        <Link href="#" underline="hover" {...props}>
-            <Typography variant={props.typography}>
-                {props.children}
-            </Typography>
-        </Link>
-    );
-}
 
 function FadeLink(props) {
     return (
-        <AnyLink typography="small_fade" {...props}>{props.children}</AnyLink>
+        <Link typography="small_fade" {...props}>{props.children}</Link>
     );
 }
 
 function BoldLink(props) {
     return (
-        <AnyLink typography="small_bold" {...props}>{props.children}</AnyLink>
+        <Link typography="small_bold" {...props}>{props.children}</Link>
     );
 }
 
@@ -222,10 +217,10 @@ function ReplyingTo(props) {
     return (
         <TextRow >
             <Typography variant="small_fade" style={{ flexShrink: 0, ...noOverflow }}>Replying to</Typography>
-            <UserKeyLink color="primary.main" />
+            <UserKeyLink />
         </TextRow>
     );
 }
 
 
-export { AboveBreakpoint, ResponsiveSelector, ChooseChild, ChooseChildBool, TopMenu, ProfileText, FadeLink, TabSwitcher, UserName, UserKey, noOverflow, BoldLink, UserLink, DateLink, TextRow, UserKeyLink, ReplyingTo, GetUserName, GetUserKey }
+export { AboveBreakpoint, ResponsiveSelector, ChooseChild, ChooseChildBool, TopMenu, ProfileText, FadeLink, TabSwitcher, UserName, UserKey, noOverflow, BoldLink, UserLink, DateLink, TextRow, UserKeyLink, ReplyingTo, GetUserName, GetUserKey,logo,creation }

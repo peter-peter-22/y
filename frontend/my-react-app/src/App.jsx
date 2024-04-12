@@ -8,6 +8,8 @@ import '@fontsource/roboto/700.css';
 import '@fontsource/roboto/900.css';
 import 'material-icons/iconfont/material-icons.css';
 import { AboveBreakpoint } from '/src/components/utilities';
+import Axios from "axios";
+import { Endpoint } from "/src/server.js";
 
 //pages
 import Home from "./pages/home";
@@ -18,37 +20,42 @@ import Error from "./pages/error";
 //components
 import Header from "./components/header";
 import Footer from "./components/footer";
-
-//styles
-import './styles/css/App.css';
-import MyTheme from '/src/styles/mui/my_theme.jsx';
-
-//components
-import { Container } from '@mui/system';
-
+import Main from "./components/logged_in.jsx";
+import NoUser from "./components/no_user.jsx";
+import Loading from "./components/loading.jsx";
 
 function App() {
-  let isBig = AboveBreakpoint("sm");
-  return (
-    <Router>
-      <MyTheme>
-        <div style={{ display: "flex", flexDirection: "column", alignItems: isBig ? "center" : "stretch", overflowY:"hidden"}}>
-          <div style={{ display: "flex", flexDirection: "row", padding: isBig ? "revert-layer" : 0 }}>
-            <Header />
-            <div style={isBig ? { width: "500px" } : { flexGrow: 1 }}>
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/test" element={<Test />} />
-                <Route path="/notifications" element={<Notifications />} />
-                <Route path="*" element={<Error />} />
-              </Routes>
-            </div>
-            <Footer />
-          </div>
-        </div>
-      </MyTheme>
-    </Router>
-  )
+  const [getData, setData] = React.useState();
+
+  React.useEffect(() => {
+    Axios.get(Endpoint("/")).then((response) => {
+      setData(response.data);
+      console.log(response.data);
+    }).catch((err) => {
+      if (err.response.status === 404)
+        console.log("no connection");
+      else
+        console.log(err);
+    });
+
+  }, []);
+
+  if (getData === undefined) {
+    return (
+      <Loading />
+    );
+  }
+
+  if (getData.user === 1) {
+    return (
+      <Main />
+    )
+  }
+  else {
+    return (
+      <NoUser />
+    );
+  }
 }
 
 export default App

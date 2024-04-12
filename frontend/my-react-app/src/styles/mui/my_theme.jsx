@@ -74,6 +74,19 @@ const big_fade = {
     color: secondary.main,
 }
 
+const verysmall = {
+    ...medium,
+    fontSize: "0.6rem",
+}
+const verysmall_bold = {
+    ...verysmall,
+    fontWeight: "bold",
+}
+const verysmall_fade = {
+    ...verysmall,
+    color: secondary.main,
+}
+
 //theme
 
 const theme = createTheme({
@@ -101,6 +114,11 @@ const theme = createTheme({
                     }),
                 }),
             },
+        },
+        MuiLink:{
+            defaultProps:{
+                underline:"hover"
+            }
         }
     },
     typography: {
@@ -126,6 +144,10 @@ const theme = createTheme({
         big: big,
         big_bold: big_bold,
         big_fade: big_fade,
+
+        verysmall:verysmall,
+        verysmall_bold:verysmall_bold,
+        verysmall_fade:verysmall_fade,
     },
     breakpoints: {
         values: {

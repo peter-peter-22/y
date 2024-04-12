@@ -4,7 +4,7 @@ import Stack from '@mui/material/Stack';
 import { ResponsiveButton, ButtonIcon, ButtonSvg, TabButton, PostButton, ProfileButton } from "./buttons.jsx";
 import SideMenu,{Inside} from "./side_menus.jsx";
 import { ThemeProvider } from '@mui/material';
-import { AboveBreakpoint } from './utilities';
+import { AboveBreakpoint,logo } from './utilities';
 
 function Header() {
     let isBig = AboveBreakpoint("leftMenu");
@@ -16,7 +16,7 @@ function Header() {
                     <Stack direction="column" spacing={1} sx={{ mr: isBig ? 4 : 0 }}>
 
                             <TabButton link="/" override={false}>
-                                <ButtonSvg src="/src/svg/y.svg" />
+                                <ButtonSvg src={logo} />
                             </TabButton>
 
                             <TabButton to="/" text="home"  >
@@ -55,8 +55,8 @@ function Header() {
                             </TabButton>
 
                             <TabButton to="/premium" text="premium">
-                                <ButtonSvg src="/src/svg/y.svg" />
-                                <ButtonSvg src="/src/svg/y.svg" useWeight={true} />
+                                <ButtonSvg src={logo}/>
+                                <ButtonSvg src={logo} useWeight={true} />
                             </TabButton>
 
                             <TabButton to="/profile" text="profile" icon="home_outlined" >

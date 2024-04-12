@@ -9,7 +9,7 @@ import Fab from '@mui/material/Fab';
 import { Icon } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ChooseChildBool, ProfileText,FadeLink } from '/src/components/utilities';
+import { ResponsiveSelector, ChooseChildBool, ProfileText,FadeLink,creation } from '/src/components/utilities';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -123,7 +123,7 @@ function Footer() {
                         <FadeLink>Accessibility</FadeLink>
                         <FadeLink>Ads Info</FadeLink>
                         <FadeLink>More···</FadeLink>
-                        <Typography variant="small_fade">© 2024 Y Corp.</Typography>
+                        <Typography variant="small_fade">{creation}</Typography>
                         </div>
                     </ListItem>
 
