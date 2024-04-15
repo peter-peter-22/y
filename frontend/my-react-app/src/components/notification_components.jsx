@@ -35,7 +35,7 @@ function Like(props) {
         <ListBlockButton>
             <Stack direction="column" spacing={spacing}>
                 <RowWithPrefix
-                    prefix={<SmallIcon color="#F91880" icon="favorite" />}
+                    prefix={<SmallIcon color={theme.palette.colors.like} icon="favorite" />}
                     contents={
                         <Stack direction="row" spacing={1}>
                             <SmallAvatar />
@@ -91,7 +91,7 @@ function ShareReply(props) {
         <ListBlockButton>
             <Stack direction="column" spacing={spacing}>
                 <RowWithPrefix
-                    prefix={<SmallIcon color="#00BA7C" icon="loop" />}
+                    prefix={<SmallIcon color={theme.palette.colors.share} icon="loop" />}
                     contents={
                         <SmallAvatar />
                     }
@@ -125,7 +125,7 @@ function Comment(props) {
         <ListBlockButton>
             <Stack direction="column" spacing={spacing} style={{ overflow: "hidden" }}>
                 <RowWithPrefix
-                    prefix={<Avatar src="/src/images/example profile.jpg" />}
+                    prefix={<Avatar src="/images/example profile.jpg" />}
                     contents={
                         <Stack direction="column" style={{ overflow: "hidden" }}>
                             <TextRow>
@@ -150,7 +150,7 @@ function Comment(props) {
 
 function SmallAvatar(props) {
     return (
-        <Avatar sx={{ width: "30px", height: "30px" }} src="/src/images/example profile.jpg" />
+        <Avatar sx={{ width: "30px", height: "30px" }} src="/images/example profile.jpg" />
     );
 }
 

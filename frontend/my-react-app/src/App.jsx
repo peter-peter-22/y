@@ -9,17 +9,9 @@ import '@fontsource/roboto/900.css';
 import 'material-icons/iconfont/material-icons.css';
 import { AboveBreakpoint } from '/src/components/utilities';
 import Axios from "axios";
-import { Endpoint } from "/src/server.js";
-
-//pages
-import Home from "./pages/home";
-import Test from "./pages/test";
-import Notifications from "./pages/notifications";
-import Error from "./pages/error";
+import { Endpoint } from "/src/communication.js";
 
 //components
-import Header from "./components/header";
-import Footer from "./components/footer";
 import Main from "./components/logged_in.jsx";
 import NoUser from "./components/no_user.jsx";
 import Loading from "./components/loading.jsx";

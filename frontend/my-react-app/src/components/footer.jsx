@@ -62,7 +62,7 @@ function Footer() {
                         <ListItem disablePadding>
                             <ListItemButton>
                                 <Stack direction="row" spacing={1} sx={{ alignItems: "center", width: "100%" }}>
-                                    <Avatar src="/src/images/example profile.jpg" />
+                                    <Avatar src="/images/example profile.jpg" />
                                     <ProfileText />
                                     <Fab variant="extended" size="small" color="black" sx={{ flexShrink: 0 }}>Follow</Fab>
                                 </Stack>

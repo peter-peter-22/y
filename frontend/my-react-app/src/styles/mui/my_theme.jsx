@@ -2,6 +2,9 @@ import * as React from 'react';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 
 //colors
+
+const transparentBlack = { main: "#00000077" };
+
 const primary = {
     main: '#1D9BF0',
     light: '#E8F5FD',
@@ -32,12 +35,17 @@ const black = {
     contrastText: "#fff",
 };
 
+const colors = {
+    like: "#F91880",
+    share: "#00BA7C"
+}
+
 //fonts
 
 const medium = {
     fontSize: "1rem",
     fontFamily: "Roboto",
-    color:"rgb(15, 20, 25)"
+    color: "rgb(15, 20, 25)"
 }
 const medium_bold = {
     ...medium,
@@ -87,6 +95,19 @@ const verysmall_fade = {
     color: secondary.main,
 }
 
+const verybig = {
+    ...medium,
+    fontSize: "1.75rem",
+}
+const verybig_bold = {
+    ...verybig,
+    fontWeight: "bold",
+}
+const verybig_fade = {
+    ...verybig,
+    color: secondary.main,
+}
+
 //theme
 
 const theme = createTheme({
@@ -96,9 +117,11 @@ const theme = createTheme({
         secondary_blue: secondary_blue,
         black: black,
         secondary_noBg: secondaryNoBackground,
+        transparentBlack: transparentBlack,
+        colors
     },
 
-    shadows: ["none"],
+    //shadows: ["none"],
     components: {
         MuiButtonBase: {
             defaultProps: {
@@ -110,14 +133,17 @@ const theme = createTheme({
                 root: ({ ownerState }) => ({
                     ...(ownerState.variant === 'extended' && {
                         paddingLeft: "15px",
-                        paddingRight: "15px"
+                        paddingRight: "15px",
                     }),
+                    '&:hover,&': {
+                        boxShadow: 'none',
+                    }
                 }),
             },
         },
-        MuiLink:{
-            defaultProps:{
-                underline:"hover"
+        MuiLink: {
+            defaultProps: {
+                underline: "hover"
             }
         }
     },
@@ -145,9 +171,13 @@ const theme = createTheme({
         big_bold: big_bold,
         big_fade: big_fade,
 
-        verysmall:verysmall,
-        verysmall_bold:verysmall_bold,
-        verysmall_fade:verysmall_fade,
+        verysmall: verysmall,
+        verysmall_bold: verysmall_bold,
+        verysmall_fade: verysmall_fade,
+
+        verybig: verybig,
+        verybig_bold: verybig_bold,
+        verybig_fade: verybig_fade,
     },
     breakpoints: {
         values: {

@@ -49,7 +49,7 @@ function Post(props) {
         <ListBlockButton>
             <Reposted />
             <RowWithPrefix
-                prefix={<Avatar src="/src/images/example profile.jpg" />}
+                prefix={<Avatar src="/images/example profile.jpg" />}
                 contents={
                     <Stack direction="column" style={{ overflow: "hidden" }}>
                         <Stack direction="row" spacing={0.25} style={{ alignItems: "center" }}>
@@ -93,7 +93,7 @@ function PostFocused(props) {
         <ListBlock>
             <Reposted />
             <RowWithPrefix
-                prefix={<Avatar src="/src/images/example profile.jpg" />}
+                prefix={<Avatar src="/images/example profile.jpg" />}
                 contents={
                     <Stack direction="column" style={{ overflow: "hidden" }}>
                         <Stack direction="row" spacing={0.25} style={{ alignItems: "center" }}>
@@ -154,7 +154,7 @@ function PostFocused(props) {
             }
             <RowWithPrefix
                 prefix={
-                    <Avatar sx={{ py: 1 }} src="/src/images/example profile.jpg" />
+                    <Avatar sx={{ py: 1 }} src="/images/example profile.jpg" />
                 }
                 contents={
                     <Stack direction={isFocused ? "column" : "row"} style={{ flexGrow: 1 }}>
@@ -330,7 +330,7 @@ function BlockImage(props) {
             aspectRatio: "1 / 1",
             overflow: "hidden"
         }}>
-            <img src={"/src/images/example profile copy.jpg"} style={{
+            <img src={"/images/example profile copy.jpg"} style={{
                 width: "100%",
                 height: "100%",
                 objectFit: "cover",

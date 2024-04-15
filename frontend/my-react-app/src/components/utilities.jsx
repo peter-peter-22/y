@@ -27,7 +27,7 @@ const noOverflow = {
     display: "block"
 };
 
-const logo="/src/svg/y.svg";
+const logo = "/svg/y.svg";
 
 const creation = "© 2024 Y Corp.";
 
@@ -98,7 +98,7 @@ function UserName(props) {
 
 function UserLink(props) {
     return (
-        <Link typography="small_bold" href="#" align="left"  style={noOverflow} {...props}>
+        <Link typography="small_bold" href="#" align="left" style={noOverflow} {...props}>
             <GetUserName />
         </Link>
     );
@@ -106,7 +106,7 @@ function UserLink(props) {
 
 function UserKeyLink(props) {
     return (
-        <Link typography="small" href="#" align="left"  style={noOverflow} {...props}>
+        <Link typography="small" href="#" align="left" style={noOverflow} {...props}>
             <GetUserKey />
         </Link>
     );
@@ -222,5 +222,21 @@ function ReplyingTo(props) {
     );
 }
 
+function ToCorner(props) {
+    const offset = "10px";
+    const style = { position: "absolute" };
+    if (props.left)
+        style.right = offset;
+    else
+        style.left = offset;
+    if (props.down)
+        style.down = offset;
+    else
+        style.top = offset;
+    return (<div size="small" style={style}>
+        {props.children}
+    </div>);
+}
 
-export { AboveBreakpoint, ResponsiveSelector, ChooseChild, ChooseChildBool, TopMenu, ProfileText, FadeLink, TabSwitcher, UserName, UserKey, noOverflow, BoldLink, UserLink, DateLink, TextRow, UserKeyLink, ReplyingTo, GetUserName, GetUserKey,logo,creation }
+
+export { AboveBreakpoint, ResponsiveSelector, ChooseChild, ChooseChildBool, TopMenu, ProfileText, FadeLink, TabSwitcher, UserName, UserKey, noOverflow, BoldLink, UserLink, DateLink, TextRow, UserKeyLink, ReplyingTo, GetUserName, GetUserKey, logo, creation,ToCorner }

@@ -6,7 +6,7 @@ import Avatar from '@mui/material/Avatar';
 import Stack from '@mui/material/Stack';
 import { Typography } from '@mui/material';
 import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ChooseChildBool, ProfileText } from '/src/components/utilities';
+import { ResponsiveSelector, ChooseChildBool, ProfileText, ToCorner } from '/src/components/utilities';
 import Button from '@mui/material/Button';
 import ListItemButton from '@mui/material/ListItemButton';
 import Box from '@mui/material/Box';
@@ -105,11 +105,9 @@ function ButtonSvg(props) {
 function PostButton() {
     return (
         <ResponsiveSelector breakpoint={smallerButtons}>
-            <Fab variant="extended" color="primary" sx={{
-                width: "100%"
-            }}>
+            <WideButton color="primary">
                 <Typography variant="big_bold" color="primary.contrastText">Post</Typography>
-            </Fab>
+            </WideButton>
             <Fab size="medium" color="primary">
                 <ButtonIcon icon="create" filled="true" />
             </Fab>
@@ -125,7 +123,7 @@ function ProfileButton() {
 
             <Fab variant="extended" color="secondary_noBg" sx={{ height: size, borderRadius: size, width: "100%", p: 1 }}>
                 <Stack direction="row" spacing={1} sx={{ width: "100%", height: "100%", alignItems: "center" }}>
-                    <Avatar src="/src/images/example profile.jpg" />
+                    <Avatar src="/images/example profile.jpg" />
                     <ProfileText />
                     <Icon fontSize="small">
                         more_horiz
@@ -134,7 +132,7 @@ function ProfileButton() {
             </Fab>
 
             <Fab color="secondary_noBg" sx={{ height: size, width: size, borderRadius: "100%", p: 0 }}>
-                <Avatar src="/src/images/example profile.jpg" />
+                <Avatar src="/images/example profile.jpg" />
             </Fab>
 
         </ResponsiveSelector>
@@ -142,9 +140,28 @@ function ProfileButton() {
 }
 
 function CornerButton(props) {
-    return (<IconButton size="small" style={{ position: "absolute", right: "10px", top: "10px" }}>
-        <Icon fontSize="small">{props.children}</Icon>
-    </IconButton>);
+    return (
+        <ToCorner {...props}>
+            <IconButton size="small" onClick={props.onClick}>
+                <Icon fontSize="small">{props.children}</Icon>
+            </IconButton>
+        </ToCorner>);
 }
 
-export { TabButton, PostButton, ButtonSvg, ButtonIcon, ProfileButton, ResponsiveButton, SelectableButton, SelectableIcon, TopMenuButton,CornerButton };
+function OutlinedButton(props) {
+    return (
+        <WideButton color="secondary_noBg" {...props} sx={{ border: 1, borderColor: "divider" }}>
+            {props.children}
+        </WideButton>
+    );
+}
+
+function WideButton(props) {
+    return (
+        <Fab variant="extended" {...props} style={{ width: "100%" }}>
+            {props.children}
+        </Fab>
+    );
+}
+
+export { TabButton, PostButton, ButtonSvg, ButtonIcon, ProfileButton, ResponsiveButton, SelectableButton, SelectableIcon, TopMenuButton, CornerButton, OutlinedButton, WideButton };

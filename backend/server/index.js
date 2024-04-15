@@ -30,7 +30,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const server_url = process.env.SERVER_URL;
 
 //this folder stores the uploaded images of the products, it's must be in synchron with the sql
-const uploaded_images_folder = __dirname + '/public/images/uploaded/';
+const uploaded_images_folder = __dirname + '/images/uploaded/';
 
 //cookie expiration when remember me is enabled
 const cookie_remember = 1000 * 60 * 60 * 24 * 30//1 month
