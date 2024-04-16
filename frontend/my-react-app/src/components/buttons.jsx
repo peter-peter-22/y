@@ -150,7 +150,7 @@ function CornerButton(props) {
 
 function OutlinedButton(props) {
     return (
-        <WideButton color="secondary_noBg" {...props} sx={{ border: 1, borderColor: "divider" }}>
+        <WideButton color="secondary_noBg" {...props} sx={{ border: 1, borderColor: "divider",...props.sx }}>
             {props.children}
         </WideButton>
     );

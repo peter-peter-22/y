@@ -238,5 +238,11 @@ function ToCorner(props) {
     </div>);
 }
 
+function CenterLogo() {
+    return (
+        <img src={logo} style={{ height: "30px", marginTop: "10px" }} />
+    );
+}
 
-export { AboveBreakpoint, ResponsiveSelector, ChooseChild, ChooseChildBool, TopMenu, ProfileText, FadeLink, TabSwitcher, UserName, UserKey, noOverflow, BoldLink, UserLink, DateLink, TextRow, UserKeyLink, ReplyingTo, GetUserName, GetUserKey, logo, creation,ToCorner }
+
+export { AboveBreakpoint, ResponsiveSelector, ChooseChild, ChooseChildBool, TopMenu, ProfileText, FadeLink, TabSwitcher, UserName, UserKey, noOverflow, BoldLink, UserLink, DateLink, TextRow, UserKeyLink, ReplyingTo, GetUserName, GetUserKey, logo, creation,ToCorner,CenterLogo }

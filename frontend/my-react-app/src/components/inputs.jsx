@@ -1,8 +1,8 @@
 import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
 import { Icon } from '@mui/material';
-import React from "react";
-
+import React, {useState} from "react";
+import {  IconButton } from '@mui/material';
 
 function SearchField() {
     const [isFocused, setIsFocused] = React.useState(false);
@@ -72,4 +72,41 @@ function PlainTextField(props) {
     );
 }
 
-export { SearchField,PlainTextField };
+function PasswordFieldWithToggle(props) {
+    const [showPassword, setShowPassword] = useState(false);
+    const [password, setPassword] = useState('');
+  
+    const handleTogglePasswordVisibility = () => {
+      setShowPassword((prevShowPassword) => !prevShowPassword);
+    };
+  
+    const handlePasswordChange = (event) => {
+        const value = event.target.value;
+      setPassword(value);
+      props.handlechange(value);
+    };
+
+    const propsWithoutHandleChange={...props};
+    propsWithoutHandleChange.handlechange=undefined;
+  
+    return (
+        <TextField
+          type={showPassword ? 'text' : 'password'}
+          value={password}
+          onChange={handlePasswordChange}
+          {...propsWithoutHandleChange}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton onClick={handleTogglePasswordVisibility}>
+                  {showPassword ? <Icon>visibility_off</Icon> : <Icon>visibility</Icon>}
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
+        />
+    );
+  }
+  
+
+export { SearchField,PlainTextField,PasswordFieldWithToggle };

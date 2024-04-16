@@ -3,7 +3,10 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 
 //colors
 
-const transparentBlack = { main: "#00000077" };
+const transparentBlack = { 
+    main: "#00000077",
+    dark: '#00000077',
+ };
 
 const primary = {
     main: '#1D9BF0',

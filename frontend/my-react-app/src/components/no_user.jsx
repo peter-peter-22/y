@@ -9,7 +9,7 @@ import Fab from '@mui/material/Fab';
 import { Icon } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, logo, creation } from '/src/components/utilities';
+import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, logo, creation,CenterLogo } from '/src/components/utilities';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -25,7 +25,7 @@ import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import { theme } from "/src/styles/mui/my_theme";
-import { PlainTextField } from "/src/components/inputs";
+import { PlainTextField,PasswordFieldWithToggle } from "/src/components/inputs";
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
@@ -35,6 +35,9 @@ import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormControl from '@mui/material/FormControl';
 import FormLabel from '@mui/material/FormLabel';
+import ReCAPTCHA from 'react-google-recaptcha';
+import axios from 'axios';
+import { Endpoint } from "/src/communication.js";
 
 export default () => {
     const [createAccount, setCreateAccount] = useState(false);
@@ -43,8 +46,7 @@ export default () => {
         setCreateAccount(false);
     }
 
-    function showCreator()
-    {
+    function showCreator() {
         setCreateAccount(true);
     }
 
@@ -73,7 +75,7 @@ export default () => {
                             <LoginButton color="primary" onClick={showCreator}>
                                 Create account
                             </LoginButton>
-                            <Typography variant="verysmall_fade">By registering you accept our <Link href="#">End-user agreement</Link> and <Link href="#">Cookie policy</Link> including <Link href="#">Privacy policy</Link></Typography>
+<ByRegistering variant="verysmall_fade"/>
                             <Typography variant="medium_bold" sx={{ pt: 5 }}>Do you already have an account?</Typography>
                             <OutlinedButton size="medium">
                                 <Typography variant="medium_bold" color="primary">Sign-in</Typography>
@@ -174,8 +176,71 @@ function CreateAccount(props) {
         setdateError(!date.isValid() || date.isAfter() || date.year() < 1900);
     }
 
-    //steps
-    const [step, setStep] = useState(0);
+    //checkboxes
+    const [checkboxes, setCheckboxes] = useState();
+
+    function handleCheckboxes(e) {
+        console.log(e);
+    }
+
+    //rechapta
+    const [captchaValue, setCaptchaValue] = useState('');
+
+    function handleCaptchaChange(value) {
+        setCaptchaValue(value);
+    };
+
+    //submit rechapta
+    async function handleSubmit() {
+        try {
+            await axios.post(Endpoint('/register'),
+                {
+                    email: email,
+                    name: name,
+                    birthdate: date,
+                    recaptchaToken: captchaValue, // Send the reCAPTCHA token to the backend
+                },
+                { withCredentials: true }
+            );
+            //rechapta ok, next page
+            handleNext();
+        } catch (error) {
+            console.error('Error submitting rechapta:', error);
+        }
+    };
+
+    //verification code
+    const [code, setCode] = useState("");
+
+    function handleCode(e) {
+        setCode(e.target.value);
+    }
+
+    //submit verification code
+    async function submitCode() {
+        try {
+            await axios.post(Endpoint('/verify_code'),
+                {
+                    code: code
+                },
+                { withCredentials: true }
+            );
+            //code ok, next page
+            handleNext();
+        } catch (error) {
+            console.error('Error submitting verification code:', error);
+        }
+    };
+
+    //password
+    const [password, setPassword] = useState('');
+
+    function handlePassword(value) {
+        setPassword(value);
+    };
+
+    //step handler
+    const [step, setStep] = useState(5);
 
     function handleNext() {
         setStep((previousValue) => { return previousValue + 1 });
@@ -188,21 +253,26 @@ function CreateAccount(props) {
             setStep((previousValue) => { return previousValue - 1 });
     }
 
+    //step conditions
     const step0ok = !nameError && name && !emailError && email && !dateError;
+    const step3ok = code.length > 0;
+    const step4ok = password.length>=8;
 
+    //step renderer
     let currentPage;
     switch (step) {
-        case 0:
+
+        case 0://enter email, ect.
             currentPage = (
                 <Stack direction="column" sx={{ mx: margin, height: "100%" }}>
                     <CenterLogo />
                     <Typography variant="verybig_bold" sx={{ my: 4 }}>Create account</Typography>
-                    <TextField autoComplete="name" variant="outlined" type="text" label="Name" inputProps={{ maxLength: "50" }} required sx={{ mb: 3 }}
+                    <TextField autoComplete="name" variant="outlined" type="text" label="Name" inputProps={{ maxLength: "50" }} sx={{ mb: 3 }}
                         onChange={handleName}
                         error={Boolean(nameError)}
                         helperText={nameError}
                         value={name} />
-                    <TextField autoComplete="email" variant="outlined" type="email" label="Email" required sx={{ mb: 4 }}
+                    <TextField autoComplete="email" variant="outlined" type="email" label="Email" sx={{ mb: 4 }}
                         onChange={handleEmail}
                         error={Boolean(emailError)}
                         helperText={emailError}
@@ -210,7 +280,7 @@ function CreateAccount(props) {
                     <Typography variant="medium_bold" sx={{ mb: 2 }}>Date of birth</Typography>
                     <Typography variant="medium_fade" sx={{ mb: 2 }}>This will not be publicly visible. Verify your own age, even if it's a business account, a pet account, or something else.</Typography>
                     <LocalizationProvider dateAdapter={AdapterMoment}>
-                        <DatePicker required label="Date of birth" disableFuture onChange={handleDate} value={date} />
+                        <DatePicker label="Date of birth" disableFuture onChange={handleDate} value={date} />
                     </LocalizationProvider>
                     <WideButton color="black" disabled={!step0ok} sx={{ mt: "auto", mb: 3 }}
                         onClick={handleNext}>Next</WideButton>
@@ -218,7 +288,7 @@ function CreateAccount(props) {
             );
             break;
 
-        case 1:
+        case 1://checkboxes
             currentPage = (
                 <Stack direction="column" sx={{ height: "100%" }}>
                     <Stack direction="column" sx={{ mx: margin, flexGrow: 1 }}>
@@ -228,7 +298,7 @@ function CreateAccount(props) {
                             <Stack direction="column">
                                 <Typography variant="big_bold" sx={{ mb: 1 }}>Get more out of Y</Typography>
                                 <FormControlLabel
-                                    control={<Checkbox />}
+                                    control={<Checkbox onChange={handleCheckboxes} />}
                                     label="Recieve the notifications in email."
                                     labelPlacement="start"
                                     sx={{ mx: 0, justifyContent: "space-between" }}
@@ -245,8 +315,82 @@ function CreateAccount(props) {
                 </Stack>
             );
             break;
+
+        case 2://rechapta
+            currentPage = (
+                <Stack direction="column" spacing={2} sx={{ height: "100%" }}>
+                    <CenterLogo />
+                    <Stack style={{ alignItems: "center", flexGrow: 1 }}>
+                        <ReCAPTCHA
+                            sitekey="6Ld-x7wpAAAAAI72weXOfrlCY4hmIZ_b1F9FWFik"
+                            onChange={handleCaptchaChange}
+                        />
+                    </Stack>
+                    <Box borderTop={1} borderColor="divider">
+                        <Box sx={{ mx: margin }}>
+                            <WideButton color="black" sx={{ my: 3, boxSizing: "border-box" }}
+                                onClick={handleSubmit}>Submit</WideButton>
+                        </Box>
+                    </Box>
+                </Stack>
+            );
+            break;
+
+        case 3://enter verification code
+            currentPage = (
+                <Stack direction="column" sx={{ mx: margin, height: "100%" }}>
+                    <CenterLogo />
+                    <Typography variant="verybig_bold" sx={{ mt: 4 }}>We sent you a verification code</Typography>
+                    <Typography variant="small_fade" sx={{ mt: 3 }}>Enter it to the field below to verify {email}</Typography>
+                    <TextField variant="outlined" type="text" label="Verification code" sx={{ my: 3 }}
+                        onChange={handleCode}
+                        value={code} />
+                    <WideButton color="black" sx={{ mb: 3, mt: "auto", boxSizing: "border-box" }}
+                        onClick={submitCode} disabled={!step3ok}>Submit</WideButton>
+                </Stack>
+            );
+            break;
+
+        case 4://enter password
+            currentPage = (
+                <Stack direction="column" sx={{ mx: margin, height: "100%" }}>
+                    <CenterLogo />
+                    <Typography variant="verybig_bold" sx={{ mt: 4 }}>You need a password</Typography>
+                    <Typography variant="small_fade" sx={{ mt: 3 }}>At least 8 characters {email}</Typography>
+                    <PasswordFieldWithToggle variant="outlined" label="Password" sx={{ my: 3 }}
+                        handlechange={handlePassword} />
+                        <ByRegistering variant="small_fade" sx={{  mt: "auto"}}/>
+                        <Typography variant="small_fade">Y can use your contact informations, including your email address and phone number according to the privacy policy. <Link href="#">See more</Link></Typography>
+                    <WideButton color="black" sx={{ my: 3, boxSizing: "border-box" }}
+                        onClick={handleNext} disabled={!step4ok}>Next</WideButton>
+                </Stack>
+            );
+            break;
+
+            case 5://upload profile picture
+            currentPage = (
+                <Stack direction="column" sx={{ mx: margin, height: "100%" }}>
+                    <CenterLogo />
+                    <Typography variant="verybig_bold" sx={{ mt: 4 }}>Select profile picture!</Typography>
+                    <Typography variant="small_fade" sx={{ mt: 3 }}>Do you have a favourite selfie? Upload now! {email}</Typography>
+                    <div style={{flexGrow:1,display:"flex",justifyContent:"center",alignItems:"center"}}>
+                        <Avatar sx={{height:"200px",width:"200px"}}>
+                            <img src="/images/example profile.jpg" style={{height:"100%",width:"100%",objectFit:"cover"}}/>
+                            <Fab size="small" color="transparentBlack" sx={{border:1,borderColor:"divider", position:"absolute",top:"50%",left:"50%",transform:"translate(-50%, -50%)"}}>
+                                <Icon baseClassName="material-icons-outlined">
+                                    add_a_photo
+                                </Icon>
+                            </Fab>
+                        </Avatar>
+                    </div>
+                    <OutlinedButton sx={{ my: 3, boxSizing: "border-box" }}
+                        onClick={handleNext}>Skip</OutlinedButton>
+                </Stack>
+            );
+            break;
     }
 
+    //final
     return (
         <div style={{ backgroundColor: theme.palette.transparentBlack.main, height: "100%", width: "100%", position: "absolute", zIndex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
             <Box style={{ backgroundColor: theme.palette.background.default, borderRadius: "10px", width: "600px", height: 650, position: "relative" }}>
@@ -257,8 +401,9 @@ function CreateAccount(props) {
     );
 }
 
-function CenterLogo() {
-    return (
-        <img src={logo} style={{ height: "30px", marginTop: "10px" }} />
+function ByRegistering(props)
+{
+    return(
+        <Typography {...props}>By registering you accept our <Link href="#">End-user agreement</Link> and <Link href="#">Cookie policy</Link> including <Link href="#">Privacy policy</Link></Typography>
     );
 }
