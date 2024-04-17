@@ -6,6 +6,7 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 const transparentBlack = { 
     main: "#00000077",
     dark: '#00000077',
+    contrastText: '#fff',
  };
 
 const primary = {

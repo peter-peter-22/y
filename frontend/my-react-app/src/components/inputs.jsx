@@ -74,7 +74,6 @@ function PlainTextField(props) {
 
 function PasswordFieldWithToggle(props) {
     const [showPassword, setShowPassword] = useState(false);
-    const [password, setPassword] = useState('');
   
     const handleTogglePasswordVisibility = () => {
       setShowPassword((prevShowPassword) => !prevShowPassword);
@@ -82,7 +81,6 @@ function PasswordFieldWithToggle(props) {
   
     const handlePasswordChange = (event) => {
         const value = event.target.value;
-      setPassword(value);
       props.handlechange(value);
     };
 
@@ -92,7 +90,7 @@ function PasswordFieldWithToggle(props) {
     return (
         <TextField
           type={showPassword ? 'text' : 'password'}
-          value={password}
+          value={props.value}
           onChange={handlePasswordChange}
           {...propsWithoutHandleChange}
           InputProps={{

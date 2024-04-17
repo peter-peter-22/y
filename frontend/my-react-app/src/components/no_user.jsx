@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Stack from '@mui/material/Stack';
 import SideMenu, { Inside } from "./side_menus.jsx";
 import { TopMenu } from '/src/components/utilities';
@@ -9,7 +9,7 @@ import Fab from '@mui/material/Fab';
 import { Icon } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, logo, creation,CenterLogo } from '/src/components/utilities';
+import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, logo, creation, CenterLogo, default_profile, FollowDialog } from '/src/components/utilities';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -25,7 +25,7 @@ import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import { theme } from "/src/styles/mui/my_theme";
-import { PlainTextField,PasswordFieldWithToggle } from "/src/components/inputs";
+import { PlainTextField, PasswordFieldWithToggle } from "/src/components/inputs";
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
@@ -38,6 +38,8 @@ import FormLabel from '@mui/material/FormLabel';
 import ReCAPTCHA from 'react-google-recaptcha';
 import axios from 'axios';
 import { Endpoint } from "/src/communication.js";
+import { styled } from '@mui/material/styles';
+import InputAdornment from '@mui/material/InputAdornment';
 
 export default () => {
     const [createAccount, setCreateAccount] = useState(false);
@@ -75,7 +77,7 @@ export default () => {
                             <LoginButton color="primary" onClick={showCreator}>
                                 Create account
                             </LoginButton>
-<ByRegistering variant="verysmall_fade"/>
+                            <ByRegistering variant="verysmall_fade" />
                             <Typography variant="medium_bold" sx={{ pt: 5 }}>Do you already have an account?</Typography>
                             <OutlinedButton size="medium">
                                 <Typography variant="medium_bold" color="primary">Sign-in</Typography>
@@ -99,6 +101,21 @@ export default () => {
         </div>
     );
 }
+
+//constants
+
+const VisuallyHiddenInput = styled('input')({
+    height: "100%",
+    overflow: 'hidden',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    whiteSpace: 'nowrap',
+    width: "100%",
+    opacity: 0
+});
+
+const margin = 10;
 
 function AlternativeLogin(props) {
     return (
@@ -126,8 +143,9 @@ function GrowingLine() {
 }
 
 function CreateAccount(props) {
-    //constants
-    const margin = 10;
+    //the timers are stored here
+    const timerRef = useRef(null);
+    const waitBeforeSending = 500;//the value of the server verified inputs have to stay still fore a short while before getting verified by the server
 
     //email
     const [email, setEmail] = useState('');
@@ -176,11 +194,20 @@ function CreateAccount(props) {
         setdateError(!date.isValid() || date.isAfter() || date.year() < 1900);
     }
 
-    //checkboxes
-    const [checkboxes, setCheckboxes] = useState();
+    const step0ok = !nameError && name && !emailError && email && !dateError;
 
+    //checkboxes
+    const [checkboxes, setCheckboxes] = useState([]);
+
+    console.log(checkboxes);
     function handleCheckboxes(e) {
-        console.log(e);
+        setCheckboxes((previous) => {
+            const toggle = e.target.name;
+            if (previous.includes(toggle))
+                return (previous.filter(el => el !== toggle));
+            else
+                return ([...previous, toggle]);
+        });
     }
 
     //rechapta
@@ -191,14 +218,15 @@ function CreateAccount(props) {
     };
 
     //submit rechapta
-    async function handleSubmit() {
+    async function submitChapta() {
         try {
-            await axios.post(Endpoint('/register'),
+            await axios.post(Endpoint('/register_start'),
                 {
                     email: email,
                     name: name,
                     birthdate: date,
-                    recaptchaToken: captchaValue, // Send the reCAPTCHA token to the backend
+                    recaptchaToken: captchaValue,
+                    checkboxes: checkboxes
                 },
                 { withCredentials: true }
             );
@@ -215,6 +243,8 @@ function CreateAccount(props) {
     function handleCode(e) {
         setCode(e.target.value);
     }
+
+    const codeOk = code.length > 0;
 
     //submit verification code
     async function submitCode() {
@@ -239,8 +269,48 @@ function CreateAccount(props) {
         setPassword(value);
     };
 
+    const passwordOk = password.length >= 8;
+
+    async function submitPassword() {
+        try {
+            await axios.post(Endpoint('/submit_password'),
+                {
+                    code: code
+                },
+                { withCredentials: true }
+            );
+            //code ok, next page
+            handleNext();
+        } catch (error) {
+            console.error('Error submitting verification code:', error);
+        }
+        handleNext();
+    }
+
+    //file
+    const [file, setFile] = useState();
+
+    function handleFile(e) {
+        setFile(URL.createObjectURL(e.target.files[0]));
+    }
+
+    //username
+    const [username, setUserName] = useState("");
+    const [usernameOk, setUserNameOk] = useState(false);
+
+    function handleUsername(e) {
+        clearTimeout(timerRef.username);
+        const value = e.target.value;
+        setUserName(value);
+        setUserNameOk(false);
+        if (value.length > 0)
+            timerRef.username = setTimeout(() => {
+                setUserNameOk(true);
+            }, waitBeforeSending);
+    }
+
     //step handler
-    const [step, setStep] = useState(5);
+    const [step, setStep] = useState(0);
 
     function handleNext() {
         setStep((previousValue) => { return previousValue + 1 });
@@ -252,11 +322,6 @@ function CreateAccount(props) {
         else
             setStep((previousValue) => { return previousValue - 1 });
     }
-
-    //step conditions
-    const step0ok = !nameError && name && !emailError && email && !dateError;
-    const step3ok = code.length > 0;
-    const step4ok = password.length>=8;
 
     //step renderer
     let currentPage;
@@ -298,7 +363,7 @@ function CreateAccount(props) {
                             <Stack direction="column">
                                 <Typography variant="big_bold" sx={{ mb: 1 }}>Get more out of Y</Typography>
                                 <FormControlLabel
-                                    control={<Checkbox onChange={handleCheckboxes} />}
+                                    control={<Checkbox name="emails" onChange={handleCheckboxes} />}
                                     label="Recieve the notifications in email."
                                     labelPlacement="start"
                                     sx={{ mx: 0, justifyContent: "space-between" }}
@@ -306,12 +371,7 @@ function CreateAccount(props) {
                             </Stack>
                         </div>
                     </Stack>
-                    <Box borderTop={1} borderColor="divider">
-                        <Box sx={{ mx: margin }}>
-                            <WideButton color="black" sx={{ my: 3, boxSizing: "border-box" }}
-                                onClick={handleNext}>Next</WideButton>
-                        </Box>
-                    </Box>
+                    <BottomButtonWithBorder onClick={handleNext} text={"Next"} />
                 </Stack>
             );
             break;
@@ -326,12 +386,7 @@ function CreateAccount(props) {
                             onChange={handleCaptchaChange}
                         />
                     </Stack>
-                    <Box borderTop={1} borderColor="divider">
-                        <Box sx={{ mx: margin }}>
-                            <WideButton color="black" sx={{ my: 3, boxSizing: "border-box" }}
-                                onClick={handleSubmit}>Submit</WideButton>
-                        </Box>
-                    </Box>
+                    <BottomButtonWithBorder onClick={submitChapta} text="Submit" />
                 </Stack>
             );
             break;
@@ -345,8 +400,8 @@ function CreateAccount(props) {
                     <TextField variant="outlined" type="text" label="Verification code" sx={{ my: 3 }}
                         onChange={handleCode}
                         value={code} />
-                    <WideButton color="black" sx={{ mb: 3, mt: "auto", boxSizing: "border-box" }}
-                        onClick={submitCode} disabled={!step3ok}>Submit</WideButton>
+                    <WideButton color="black" sx={{ mb: 3, mt: "auto" }}
+                        onClick={submitCode} disabled={!codeOk}>Submit</WideButton>
                 </Stack>
             );
             break;
@@ -358,33 +413,99 @@ function CreateAccount(props) {
                     <Typography variant="verybig_bold" sx={{ mt: 4 }}>You need a password</Typography>
                     <Typography variant="small_fade" sx={{ mt: 3 }}>At least 8 characters {email}</Typography>
                     <PasswordFieldWithToggle variant="outlined" label="Password" sx={{ my: 3 }}
-                        handlechange={handlePassword} />
-                        <ByRegistering variant="small_fade" sx={{  mt: "auto"}}/>
-                        <Typography variant="small_fade">Y can use your contact informations, including your email address and phone number according to the privacy policy. <Link href="#">See more</Link></Typography>
-                    <WideButton color="black" sx={{ my: 3, boxSizing: "border-box" }}
-                        onClick={handleNext} disabled={!step4ok}>Next</WideButton>
+                        handlechange={handlePassword} value={password} />
+                    <ByRegistering variant="small_fade" sx={{ mt: "auto" }} />
+                    <Typography variant="small_fade">Y can use your contact informations, including your email address and phone number according to the privacy policy. <Link href="#">See more</Link></Typography>
+                    <WideButton color="black" sx={{ my: 3 }}
+                        onClick={submitPassword} disabled={!passwordOk}>Next</WideButton>
                 </Stack>
             );
             break;
 
-            case 5://upload profile picture
+        case 5://upload profile picture
             currentPage = (
                 <Stack direction="column" sx={{ mx: margin, height: "100%" }}>
                     <CenterLogo />
                     <Typography variant="verybig_bold" sx={{ mt: 4 }}>Select profile picture!</Typography>
                     <Typography variant="small_fade" sx={{ mt: 3 }}>Do you have a favourite selfie? Upload now! {email}</Typography>
-                    <div style={{flexGrow:1,display:"flex",justifyContent:"center",alignItems:"center"}}>
-                        <Avatar sx={{height:"200px",width:"200px"}}>
-                            <img src="/images/example profile.jpg" style={{height:"100%",width:"100%",objectFit:"cover"}}/>
-                            <Fab size="small" color="transparentBlack" sx={{border:1,borderColor:"divider", position:"absolute",top:"50%",left:"50%",transform:"translate(-50%, -50%)"}}>
+                    <div style={{ flexGrow: 1, display: "flex", justifyContent: "center", alignItems: "center" }}>
+                        <Avatar sx={{ height: "200px", width: "200px" }}>
+                            <img src={file ? file : default_profile} style={{ height: "100%", width: "100%", objectFit: "cover" }} />
+                            <Fab size="small" color="transparentBlack" sx={{ border: 1, borderColor: "divider", position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}>
+                                <VisuallyHiddenInput type="file" onChange={handleFile} />
                                 <Icon baseClassName="material-icons-outlined">
                                     add_a_photo
                                 </Icon>
                             </Fab>
                         </Avatar>
                     </div>
-                    <OutlinedButton sx={{ my: 3, boxSizing: "border-box" }}
-                        onClick={handleNext}>Skip</OutlinedButton>
+                    <Box sx={{ my: 3, boxSizing: "border-box" }}>
+                        {file ?
+                            <WideButton color="black" onClick={handleNext}>
+                                Submit
+                            </WideButton>
+                            :
+                            <OutlinedButton onClick={handleNext}>
+                                Skip
+                            </OutlinedButton>
+                        }
+                    </Box>
+                </Stack>
+            );
+            break;
+
+        case 6://enter username
+            currentPage = (
+                <Stack direction="column" sx={{ mx: margin, height: "100%" }}>
+                    <CenterLogo />
+                    <Typography variant="verybig_bold" sx={{ mt: 4 }}>How should we call you?</Typography>
+                    <Typography variant="small_fade" sx={{ mt: 3 }}>The @username is unique. You can modify it anytime.</Typography>
+                    <TextField variant="outlined" type="text" label="Username" sx={{ my: 3 }}
+                        onChange={handleUsername}
+                        value={username}
+                        InputProps={{
+                            maxLength: "50",
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    {usernameOk ? <Icon color="success">check_circle</Icon> : <Icon color="error">cancel</Icon>}
+                                </InputAdornment>
+                            ),
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    @
+                                </InputAdornment>
+                            ),
+                        }}
+                    />
+                    <WideButton color="black" sx={{ my: 3 }}
+                        onClick={handleNext} disabled={!usernameOk}>Next</WideButton>
+                </Stack>
+            );
+            break;
+
+        case 7://notifications
+            currentPage = (
+                <Stack direction="column" sx={{ mx: margin, height: "100%", justifyContent: "center" }}>
+                    <Typography variant="verybig_bold">Enable notifications?</Typography>
+                    <Typography variant="small_fade" sx={{ mt: 1, mb: 3 }}>Bring out the most of Y and stay up-to-date about the events.</Typography>
+                    <WideButton color="black" sx={{ mb: 2, boxSizing: "border-box" }} onClick={handleNext}>Enable</WideButton>
+                    <OutlinedButton onClick={handleNext}>Not now</OutlinedButton>
+                </Stack>
+            );
+            break;
+
+        case 8://follow
+            currentPage = (
+                <Stack direction="column" sx={{ height: "100%" }}>
+                    <Stack direction="column" sx={{ flexGrow: 1 }}>
+                        <CenterLogo />
+                        <div style={{ flexGrow: 1, maxHeight: "100%", overflowY: "scroll" }}>
+                            <List sx={{ p: 0, mx: margin }}>
+                                <FollowDialog />
+                            </List>
+                        </div>
+                    </Stack>
+                    <BottomButtonWithBorder onClick={handleNext} text={"Next"} />
                 </Stack>
             );
             break;
@@ -401,9 +522,19 @@ function CreateAccount(props) {
     );
 }
 
-function ByRegistering(props)
-{
-    return(
+function ByRegistering(props) {
+    return (
         <Typography {...props}>By registering you accept our <Link href="#">End-user agreement</Link> and <Link href="#">Cookie policy</Link> including <Link href="#">Privacy policy</Link></Typography>
+    );
+}
+
+function BottomButtonWithBorder(props) {
+    return (
+        <Box borderTop={1} borderColor="divider">
+            <Box sx={{ mx: margin }}>
+                <WideButton color="black" sx={{ my: 3, boxSizing: "border-box" }}
+                    onClick={props.onClick}>{props.text}</WideButton>
+            </Box>
+        </Box>
     );
 }

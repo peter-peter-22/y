@@ -244,5 +244,21 @@ function CenterLogo() {
     );
 }
 
+const default_profile = "/images/default_profile.jpg";
 
-export { AboveBreakpoint, ResponsiveSelector, ChooseChild, ChooseChildBool, TopMenu, ProfileText, FadeLink, TabSwitcher, UserName, UserKey, noOverflow, BoldLink, UserLink, DateLink, TextRow, UserKeyLink, ReplyingTo, GetUserName, GetUserKey, logo, creation,ToCorner,CenterLogo }
+function FollowDialog(props) {
+    return (
+        <ListItem disablePadding>
+            <ListItemButton>
+                <Stack direction="row" spacing={1} sx={{ alignItems: "center", width: "100%" }}>
+                    <Avatar src="/images/example profile.jpg" />
+                    <ProfileText />
+                    <Fab variant="extended" size="small" color="black" sx={{ flexShrink: 0 }}>Follow</Fab>
+                </Stack>
+            </ListItemButton>
+        </ListItem>
+    );
+}
+
+
+export { AboveBreakpoint, ResponsiveSelector, ChooseChild, ChooseChildBool, TopMenu, ProfileText, FadeLink, TabSwitcher, UserName, UserKey, noOverflow, BoldLink, UserLink, DateLink, TextRow, UserKeyLink, ReplyingTo, GetUserName, GetUserKey, logo, creation, ToCorner, CenterLogo, default_profile,FollowDialog }

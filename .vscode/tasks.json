@@ -7,7 +7,7 @@
 			"path": "frontend/my-react-app",
 			"problemMatcher": [],
 			"label": "npm: dev - frontend/my-react-app",
-			"detail": "vite",
+			"detail": "vite"
 		},
 		{
 			"type": "npm",
@@ -19,7 +19,11 @@
 		},
 		{
 			"label": "Start All",
-			"dependsOn":["npm: start - backend/server","npm: dev - frontend/my-react-app"]
-		},
+			"dependsOn": [
+				"npm: start - backend/server",
+				"npm: dev - frontend/my-react-app"
+			],
+			"problemMatcher": []
+		}
 	]
 }

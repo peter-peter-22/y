@@ -9,7 +9,7 @@ import Fab from '@mui/material/Fab';
 import { Icon } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ChooseChildBool, ProfileText,FadeLink,creation } from '/src/components/utilities';
+import { ResponsiveSelector, ChooseChildBool, ProfileText,FadeLink,creation,FollowDialog } from '/src/components/utilities';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -59,15 +59,7 @@ function Footer() {
                             </ListItemText>
                         </ListItem>
 
-                        <ListItem disablePadding>
-                            <ListItemButton>
-                                <Stack direction="row" spacing={1} sx={{ alignItems: "center", width: "100%" }}>
-                                    <Avatar src="/images/example profile.jpg" />
-                                    <ProfileText />
-                                    <Fab variant="extended" size="small" color="black" sx={{ flexShrink: 0 }}>Follow</Fab>
-                                </Stack>
-                            </ListItemButton>
-                        </ListItem>
+                       <FollowDialog/>
 
                         <BlueTextButton>
                             Show more

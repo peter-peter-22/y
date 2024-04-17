@@ -35,7 +35,8 @@ const google_rechapta_secret_key = process.env.GOOGLE_RECHAPTA_SECRET;
 const uploaded_images_folder = __dirname + '/images/uploaded/';
 
 //cookie expiration when remember me is enabled
-const cookie_remember = 1000 * 60 * 60 * 24 * 30//1 month
+const cookie_remember = 1000 * 60 * 60 * 24 * 30//1 month. the user most log in at least once within a month to prevent logout
+const cookie_registering = 1000 * 60 * 60 * 2;//2 hours. the email, name, ect. the user sends at the start of the registration must be finalized within 2 hour
 
 const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -45,22 +46,22 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-//const db = new pg.Client({
-//    user: process.env.PG_USER,
-//    host: process.env.PG_HOST,
-//    database: process.env.PG_DATABASE,
-//    password: process.env.PG_PASSWORD,
-//    port: process.env.PG_PORT,
-//});
-//await db.connect();
+const db = new pg.Client({
+    user: process.env.PG_USER,
+    host: process.env.PG_HOST,
+    database: process.env.PG_DATABASE,
+    password: process.env.PG_PASSWORD,
+    port: process.env.PG_PORT,
+});
+await db.connect();
 
-//const pgPool = new pg.Pool({
-//  user: process.env.PG_USER,
-//  host: process.env.PG_HOST,
-//  database: process.env.PG_DATABASE,
-//  password: process.env.PG_PASSWORD,
-//  port: process.env.PG_PORT,
-//});
+const pgPool = new pg.Pool({
+    user: process.env.PG_USER,
+    host: process.env.PG_HOST,
+    database: process.env.PG_DATABASE,
+    password: process.env.PG_PASSWORD,
+    port: process.env.PG_PORT,
+});
 
 //global constants end-------------------------------------------------------------------------------------------------------------------------
 
@@ -92,10 +93,10 @@ app.use(
 );
 
 //update session expiration 
-//app.use((req, res, next) => {
-//    req.session.lastVisit = new Date();
-//    next();
-//});
+app.use((req, res, next) => {
+    req.session.lastVisit = new Date();
+    next();
+});
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(
@@ -124,7 +125,7 @@ app.get("/", async (req, res) => {
     res.json({ user: 0 });
 });
 
-app.post('/register', async (req, res) => {
+app.post('/register_start', async (req, res) => {
     const { recaptchaToken, name, email, birthdate } = req.body;
 
     try {
@@ -134,13 +135,16 @@ app.post('/register', async (req, res) => {
         if (success) {
             //send verificationcode in email
             const code = generateVerificationCode();
-            req.session.verification_code = code;
             req.session.registered_data = {
                 name: name,
                 email: email,
                 birthdate: birthdate,
-                verified: false
+                verified: false,
+                verification_code: code
             }
+
+            remember_session(req, cookie_registering);
+
             res.send('reCAPTCHA validation successful');
 
             const mailOptions = {
@@ -167,7 +171,7 @@ app.post('/register', async (req, res) => {
 
 app.post('/verify_code', async (req, res) => {
     const { code } = req.body;
-    if (code === req.session.verification_code && code !== undefined) {
+    if (code === req.session.registered_data.verification_code && code !== undefined) {
         try {
             req.session.registered_data.verified = true;
             res.status(200).send("chapta successful");
@@ -180,6 +184,88 @@ app.post('/verify_code', async (req, res) => {
         res.status(400).send("failed rechapta");
     }
 });
+
+app.post("submit_password", async (req, res) => {
+    const { password } = req.body;
+    if (password === undefined || password.length < 8)
+        return (res.status(400).send("invalid password"));
+
+    if (req.session.registered_data === undefined)
+        return (res.status(400).send("no registered data"));
+
+    const data = req.session.registered_data;
+    if (data.verified === false)
+        return (res.status(400).send("not verified"));
+
+    try {
+
+        bcrypt.hash(password, saltRounds, async (err, hash) => {
+            if (err) {
+                console.error("Error hashing password:", err);
+            } else {
+                try {
+                    const result = await db.query(
+                        named("INSERT INTO users (username,name,email,password_hash) VALUES (:username, :name,:email,:password_hash) RETURNING *",)({
+                            username: "test",
+                            name: data.name,
+                            email: data.email,
+                            password_hash: hash
+                        })
+                    );
+
+                    const user = result.rows[0];
+                    req.login(user, (err) => {
+                        remember_session(req, cookie_remember);
+
+                        console.login("a");
+                        res.send("registered successfully");
+                        //res.redirect("/profile");
+                    });
+                } catch (e) {
+                    // if (e.constraint == "users_email_key")
+                    //     floating_error_message(req, "This email is already registered");
+                    // else if (e.constraint == "users_username_key")
+                    //     floating_error_message(req, "This username is already registered");
+                    // else
+                    // {
+                    //     floating_error_message(req, e.message);
+                    // }
+
+                    // res.redirect(req.headers.referer);
+
+                    res.status(400).send("error");
+                }
+            }
+        });
+    } catch (err) {
+        console.log(err);
+    }
+});
+
+app.post(
+    "/login",
+    (req, res, next) => {
+        passport.authenticate('local', function (err, user, info, status) {
+            if (err) {
+                floating_error_message(req, err);
+                return res.redirect("/login");
+            }
+            if (!user) {
+                floating_error_message(req, "Something went wrong");//this should never happen because err is always returned when user is false
+                return res.redirect('/login')
+            }
+
+            req.logIn(user, function (err) {
+                if (err) { return next(err); }
+
+                remember_login(req, req.body.remember_me);
+
+                return res.redirect("/profile");
+            });
+
+        })(req, res, next);
+    }
+);
 
 
 app.listen(port, () => {
@@ -200,7 +286,7 @@ function generateVerificationCode(length) {
     return result;
 }
 
-function auth(req, res, type = 0)//checking if the user is admin
+function auth(req, res)//checking if the user is admin
 {
     //if (req.isAuthenticated()) {
     //    return true;
@@ -209,3 +295,14 @@ function auth(req, res, type = 0)//checking if the user is admin
     //    return false;
     //}
 }
+
+function remember_session(req, time) {
+    req.session.cookie.maxAge = time;
+}
+
+passport.serializeUser((user, cb) => {
+    cb(null, user);
+});
+passport.deserializeUser((user, cb) => {
+    cb(null, user);
+});
