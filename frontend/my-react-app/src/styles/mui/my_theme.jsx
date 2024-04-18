@@ -3,11 +3,11 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 
 //colors
 
-const transparentBlack = { 
+const transparentBlack = {
     main: "#00000077",
     dark: '#00000077',
     contrastText: '#fff',
- };
+};
 
 const primary = {
     main: '#1D9BF0',
@@ -113,7 +113,6 @@ const verybig_fade = {
 }
 
 //theme
-
 const theme = createTheme({
     palette: {
         primary: primary,
@@ -125,7 +124,6 @@ const theme = createTheme({
         colors
     },
 
-    //shadows: ["none"],
     components: {
         MuiButtonBase: {
             defaultProps: {
@@ -149,7 +147,14 @@ const theme = createTheme({
             defaultProps: {
                 underline: "hover"
             }
-        }
+        },
+        MuiDialog: {
+            styleOverrides: {
+                paper: {
+                    borderRadius: 15, // Adjust the value as needed
+                },
+            }
+        },
     },
     typography: {
         fontFamily: [

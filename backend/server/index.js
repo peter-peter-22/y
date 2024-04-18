@@ -126,7 +126,7 @@ app.get("/", async (req, res) => {
 });
 
 app.post('/register_start', async (req, res) => {
-    const { recaptchaToken, name, email, birthdate } = req.body;
+    const { recaptchaToken, name, email, birthdate, checkboxes } = req.body;
 
     try {
         const response = await axios.post(`https://www.google.com/recaptcha/api/siteverify?secret=${google_rechapta_secret_key}&response=${recaptchaToken}`);
@@ -140,7 +140,8 @@ app.post('/register_start', async (req, res) => {
                 email: email,
                 birthdate: birthdate,
                 verified: false,
-                verification_code: code
+                verification_code: code,
+                checkboxes: checkboxes
             }
 
             remember_session(req, cookie_registering);
@@ -185,7 +186,15 @@ app.post('/verify_code', async (req, res) => {
     }
 });
 
-app.post("submit_password", async (req, res) => {
+app.post("/submit_password", async (req, res) => {
+    req.session.registered_data = {
+        name: "Peter",
+        email: "szaladospeti1@gmail.com",
+        birthdate: "",
+        verified: true,
+        verification_code: 123456,
+    }
+
     const { password } = req.body;
     if (password === undefined || password.length < 8)
         return (res.status(400).send("invalid password"));
@@ -195,7 +204,7 @@ app.post("submit_password", async (req, res) => {
 
     const data = req.session.registered_data;
     if (data.verified === false)
-        return (res.status(400).send("not verified"));
+        return (res.status(400).send("this email is not verified"));
 
     try {
 
@@ -217,7 +226,6 @@ app.post("submit_password", async (req, res) => {
                     req.login(user, (err) => {
                         remember_session(req, cookie_remember);
 
-                        console.login("a");
                         res.send("registered successfully");
                         //res.redirect("/profile");
                     });
@@ -247,25 +255,73 @@ app.post(
     (req, res, next) => {
         passport.authenticate('local', function (err, user, info, status) {
             if (err) {
-                floating_error_message(req, err);
-                return res.redirect("/login");
+               return res.status(400).send(err);
             }
-            if (!user) {
-                floating_error_message(req, "Something went wrong");//this should never happen because err is always returned when user is false
-                return res.redirect('/login')
+            if(!user)
+            {
+              return res.status(400).send("missing crendentials");
             }
 
             req.logIn(user, function (err) {
                 if (err) { return next(err); }
 
-                remember_login(req, req.body.remember_me);
+                remember_session(req, cookie_remember);
 
-                return res.redirect("/profile");
+                res.sendStatus(200);
             });
 
         })(req, res, next);
     }
 );
+
+passport.use(
+    "local",
+    new Strategy(
+        { // or whatever you want to use
+            usernameField: 'email',    // define the parameter in req.body that passport can use as username and password
+            passwordField: 'password'
+          },
+        async function verify(email, password, cb) {
+        try {
+            const result = await db.query("SELECT * FROM users WHERE email = $1 ", [
+                email
+            ]);
+            if (result.rows.length > 0) {
+                const user = result.rows[0];
+                const storedHashedPassword = user.password_hash;
+                bcrypt.compare(password, storedHashedPassword, (err, valid) => {
+                    if (err) {
+                        //Error with password check
+                        console.error("Error comparing passwords:", err);
+                        return cb(err);
+                    } else {
+                        if (valid) {
+                            //Passed password check
+                            return cb(null, user);
+                        } else {
+                            //Did not pass password check
+                            return cb("Wrong password", false);
+                        }
+                    }
+                });
+            } else {
+                //user not found
+                return cb("Wrong email", false);
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    })
+);
+
+app.post('/user_exists', async (req, res) => {
+    const { email } = req.body;
+    const result = await db.query(named("SELECT count(*) FROM users WHERE email=:email")({ email: email }));
+    if (result.rows[0].count > 0)
+        return res.sendStatus(200);
+    else
+        return (res.status(400).send("No Y user belong to this email"));
+});
 
 
 app.listen(port, () => {

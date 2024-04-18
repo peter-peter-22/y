@@ -40,6 +40,9 @@ import axios from 'axios';
 import { Endpoint } from "/src/communication.js";
 import { styled } from '@mui/material/styles';
 import InputAdornment from '@mui/material/InputAdornment';
+import Dialog from '@mui/material/Dialog';
+import { Modal } from "/src/App.jsx";
+import { Error } from "/src/components/modals";
 
 export default () => {
     const [createAccount, setCreateAccount] = useState(false);
@@ -52,9 +55,21 @@ export default () => {
         setCreateAccount(true);
     }
 
+
+    const [login, setLogin] = useState(false);
+
+    function closeLogin() {
+        setLogin(false);
+    }
+
+    function showLogin() {
+        setLogin(true);
+    }
+
     return (
         <div style={{ height: "100vh" }}>
             {createAccount && <CreateAccount close={closeCreator} />}
+            {login && <Login close={closeLogin} />}
 
             <Stack direction="column" style={{ height: "100%", position: "relative", zIndex: 0 }}>
                 <Stack direction="row" style={{ justifyContent: "space-evenly", alignItems: "center", flexGrow: 1 }}>
@@ -74,13 +89,13 @@ export default () => {
                                 <Typography variant="small_fade" sx={{ mx: 1 }}>or</Typography>
                                 <GrowingLine />
                             </Stack>
-                            <LoginButton color="primary" onClick={showCreator}>
+                            <WideButton size="medium" color="primary" onClick={showCreator}>
                                 Create account
-                            </LoginButton>
+                            </WideButton>
                             <ByRegistering variant="verysmall_fade" />
                             <Typography variant="medium_bold" sx={{ pt: 5 }}>Do you already have an account?</Typography>
-                            <OutlinedButton size="medium">
-                                <Typography variant="medium_bold" color="primary">Sign-in</Typography>
+                            <OutlinedButton size="medium" onClick={showLogin}>
+                                <Typography variant="medium_bold" color="primary" >Sign-in</Typography>
                             </OutlinedButton>
                         </Stack>
                     </Stack>
@@ -116,23 +131,16 @@ const VisuallyHiddenInput = styled('input')({
 });
 
 const margin = 10;
+const bigmargin = 15;
 
 function AlternativeLogin(props) {
     return (
-        <OutlinedButton size="medium">
+        <OutlinedButton size={props.size ? props.size : "medium"}>
             <TextRow>
                 <img src={props.src} style={{ height: "1.5em" }} />
                 <span>{props.text}</span>
             </TextRow>
         </OutlinedButton >
-    );
-}
-
-function LoginButton(props) {
-    return (
-        <WideButton size="medium" {...props}>
-            {props.children}
-        </WideButton>
     );
 }
 
@@ -199,7 +207,6 @@ function CreateAccount(props) {
     //checkboxes
     const [checkboxes, setCheckboxes] = useState([]);
 
-    console.log(checkboxes);
     function handleCheckboxes(e) {
         setCheckboxes((previous) => {
             const toggle = e.target.name;
@@ -228,7 +235,6 @@ function CreateAccount(props) {
                     recaptchaToken: captchaValue,
                     checkboxes: checkboxes
                 },
-                { withCredentials: true }
             );
             //rechapta ok, next page
             handleNext();
@@ -253,7 +259,6 @@ function CreateAccount(props) {
                 {
                     code: code
                 },
-                { withCredentials: true }
             );
             //code ok, next page
             handleNext();
@@ -275,16 +280,14 @@ function CreateAccount(props) {
         try {
             await axios.post(Endpoint('/submit_password'),
                 {
-                    code: code
+                    password: password
                 },
-                { withCredentials: true }
             );
             //code ok, next page
             handleNext();
         } catch (error) {
             console.error('Error submitting verification code:', error);
         }
-        handleNext();
     }
 
     //file
@@ -310,7 +313,7 @@ function CreateAccount(props) {
     }
 
     //step handler
-    const [step, setStep] = useState(0);
+    const [step, setStep] = useState(4);
 
     function handleNext() {
         setStep((previousValue) => { return previousValue + 1 });
@@ -513,12 +516,139 @@ function CreateAccount(props) {
 
     //final
     return (
-        <div style={{ backgroundColor: theme.palette.transparentBlack.main, height: "100%", width: "100%", position: "absolute", zIndex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <Box style={{ backgroundColor: theme.palette.background.default, borderRadius: "10px", width: "600px", height: 650, position: "relative" }}>
-                <CornerButton onClick={handleBack}>{step > 0 ? "arrow_back" : "close"}</CornerButton>
-                {currentPage}
+        <BigModal close={props.close} open={true}>
+            <CornerButton onClick={handleBack}>{step > 0 ? "arrow_back" : "close"}</CornerButton>
+            {currentPage}
+        </BigModal>
+    );
+}
+
+function BigModal(props) {
+    return (
+        <Dialog onClose={props.close} open={props.open}>
+            <Box style={{ width: 600, height: 650 }}>
+                {props.children}
             </Box>
-        </div>
+        </Dialog>
+    );
+}
+
+function Login(props) {
+    //pages
+    const pages = {
+        choose: 0,
+        password: 1
+    }
+    const [page, setPage] = useState(pages.choose);
+
+    function handleBack() {
+        if (page === pages.choose)
+            props.close();
+        else
+            setPage(pages.choose);
+    }
+
+    //email
+    const [email, setEmail] = useState("");
+    const [emailError, setemailError] = useState("");
+
+    function handleEmail(e) {
+        setEmail(e.target.value);
+    }
+    async function submitEmail() {
+        try {
+            await axios.post(Endpoint('/user_exists'),
+                {
+                    email: email
+                },
+            );
+            setPage(pages.password);
+        } catch (error) {
+            Modal.Show(<Error text={error.response.data} />);
+        }
+    }
+
+    //password
+    const [password, setPassword] = useState("");
+    function handlePassword(value) {
+        setPassword(value);
+    }
+    async function submitPassword() {
+        try {
+            await axios.post(Endpoint('/login'),
+                {
+                    email: email,
+                    password:password
+                },
+            );
+            console.log("success");
+        } catch (error) {
+            Modal.Show(<Error text={error.response.data} />);
+        }
+    }
+
+    //forgot
+    function handleForgot() {
+        console.log(email);
+    }
+
+    let currentPage;
+    switch (page) {
+        case pages.choose:
+            currentPage = (
+                <Stack direction="column" sx={{ mx: bigmargin, height: "100%" }}>
+                    <CenterLogo />
+                    <Typography variant="verybig_bold" sx={{ my: 4 }}>Sign-in to Y!</Typography>
+
+                    <Stack direction="column" spacing={2}>
+                        <AlternativeLogin size="small" src="/svg/google.svg" text="Sign-up with Google" />
+                        <AlternativeLogin size="small" src="/svg/google.svg" text="Sign-up with Google" />
+                        <Stack direction="row" sx={{ my: 0.5, alignItems: "center" }}>
+                            <GrowingLine />
+                            <Typography variant="small_fade" sx={{ mx: 1 }}>or</Typography>
+                            <GrowingLine />
+                        </Stack>
+                        <TextField autoComplete="email" variant="outlined" type="text" label="Email" onChange={handleEmail} value={email} />
+                        <WideButton onClick={submitEmail} size="small" color="black">Next</WideButton>
+                        <OutlinedButton onClick={handleForgot} size="small">Forgot password?</OutlinedButton>
+                        <Box sx={{ mt: 3 }}>
+                            <NoAccount close={props.close} />
+                        </Box>
+                    </Stack>
+
+                </Stack>
+            );
+            break;
+
+        case pages.password:
+            currentPage = (
+                <Stack direction="column" sx={{ mx: bigmargin, height: "100%" }}>
+                    <CenterLogo />
+                    <Typography variant="verybig_bold" sx={{ my: 4 }}>Enter your password!</Typography>
+                    <TextField variant="outlined" type="text" label="Email" value={email} disabled sx={{ mb: 3 }} />
+                    <PasswordFieldWithToggle variant="outlined" label="Password" sx={{ mb: 3 }}
+                        handlechange={handlePassword} value={password} />
+                    <Link>Forgot password?</Link>
+                    <WideButton onClick={submitPassword} size="medium" color="black" sx={{ mt: "auto", mb:3 }}>Sign-in</WideButton>
+                    <Box sx={{ mb: 3 }}>
+                        <NoAccount close={props.close} />
+                    </Box>
+                </Stack>
+            );
+            break;
+    }
+
+    return (
+        <BigModal close={props.close} open={true}>
+            <CornerButton onClick={handleBack}>{page === pages.choose ? "close" : "arrow_back"}</CornerButton>
+            {currentPage}
+        </BigModal>
+    );
+}
+
+function NoAccount(props) {
+    return (
+        <Typography variant="small_fade">You have no account? <Link onClick={props.close}>Register</Link></Typography>
     );
 }
 

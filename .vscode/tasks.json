@@ -18,12 +18,20 @@
 			"detail": "nodemon index.js"
 		},
 		{
-			"label": "Start All",
+			"label": "Debug All",
 			"dependsOn": [
-				"npm: start - backend/server",
+				"npm: debug - backend/server",
 				"npm: dev - frontend/my-react-app"
 			],
 			"problemMatcher": []
+		},
+		{
+			"type": "npm",
+			"script": "debug",
+			"path": "backend/server",
+			"problemMatcher": [],
+			"label": "npm: debug - backend/server",
+			"detail": "nodemon --inspect index.js"
 		}
 	]
 }
