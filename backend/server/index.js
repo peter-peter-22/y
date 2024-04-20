@@ -29,10 +29,9 @@ const port = 3000;
 const saltRounds = 10;
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const server_url = process.env.SERVER_URL;
+const client_url = process.env.CLIENT_URL;
 const google_rechapta_secret_key = process.env.GOOGLE_RECHAPTA_SECRET;
-
-//this folder stores the uploaded images of the products, it's must be in synchron with the sql
-const uploaded_images_folder = __dirname + '/images/uploaded/';
+const google_login_redirect = "/login/google";
 
 //cookie expiration when remember me is enabled
 const cookie_remember = 1000 * 60 * 60 * 24 * 30//1 month. the user most log in at least once within a month to prevent logout
@@ -121,8 +120,28 @@ app.use(passport.session());
 //app.use end
 
 
-app.get("/", async (req, res) => {
-    res.json({ user: 0 });
+app.get("/get_user", async (req, res) => {
+    res.json({
+        user: req.user,
+        showStartMessage: req.session.showStartMessage
+    });
+});
+
+app.get("/close_starting_message", async (req, res) => {
+    if (auth(req, res)) {
+        req.session.showStartMessage = false;
+        console.log("ok");
+        res.sendStatus(200);
+    }
+});
+
+app.get("/logout", (req, res) => {
+    req.logout(function (err) {
+        if (err) {
+            console.log(err);
+        }
+        res.sendStatus(200);
+    });
 });
 
 app.post('/register_start', async (req, res) => {
@@ -225,7 +244,7 @@ app.post("/submit_password", async (req, res) => {
                     const user = result.rows[0];
                     req.login(user, (err) => {
                         remember_session(req, cookie_remember);
-
+                        req.session.showStartMessage = true;//this bool will show the dialog the asks for the @username, profile pic...
                         res.send("registered successfully");
                         //res.redirect("/profile");
                     });
@@ -255,18 +274,16 @@ app.post(
     (req, res, next) => {
         passport.authenticate('local', function (err, user, info, status) {
             if (err) {
-               return res.status(400).send(err);
+                return res.status(400).send(err);
             }
-            if(!user)
-            {
-              return res.status(400).send("missing crendentials");
+            if (!user) {
+                return res.status(400).send("missing crendentials");
             }
 
             req.logIn(user, function (err) {
                 if (err) { return next(err); }
 
                 remember_session(req, cookie_remember);
-
                 res.sendStatus(200);
             });
 
@@ -280,38 +297,38 @@ passport.use(
         { // or whatever you want to use
             usernameField: 'email',    // define the parameter in req.body that passport can use as username and password
             passwordField: 'password'
-          },
+        },
         async function verify(email, password, cb) {
-        try {
-            const result = await db.query("SELECT * FROM users WHERE email = $1 ", [
-                email
-            ]);
-            if (result.rows.length > 0) {
-                const user = result.rows[0];
-                const storedHashedPassword = user.password_hash;
-                bcrypt.compare(password, storedHashedPassword, (err, valid) => {
-                    if (err) {
-                        //Error with password check
-                        console.error("Error comparing passwords:", err);
-                        return cb(err);
-                    } else {
-                        if (valid) {
-                            //Passed password check
-                            return cb(null, user);
+            try {
+                const result = await db.query("SELECT * FROM users WHERE email = $1 ", [
+                    email
+                ]);
+                if (result.rows.length > 0) {
+                    const user = result.rows[0];
+                    const storedHashedPassword = user.password_hash;
+                    bcrypt.compare(password, storedHashedPassword, (err, valid) => {
+                        if (err) {
+                            //Error with password check
+                            console.error("Error comparing passwords:", err);
+                            return cb(err);
                         } else {
-                            //Did not pass password check
-                            return cb("Wrong password", false);
+                            if (valid) {
+                                //Passed password check
+                                return cb(null, user);
+                            } else {
+                                //Did not pass password check
+                                return cb("Wrong password", false);
+                            }
                         }
-                    }
-                });
-            } else {
-                //user not found
-                return cb("Wrong email", false);
+                    });
+                } else {
+                    //user not found
+                    return cb("Wrong email", false);
+                }
+            } catch (err) {
+                console.error(err);
             }
-        } catch (err) {
-            console.error(err);
-        }
-    })
+        })
 );
 
 app.post('/user_exists', async (req, res) => {
@@ -322,6 +339,70 @@ app.post('/user_exists', async (req, res) => {
     else
         return (res.status(400).send("No Y user belong to this email"));
 });
+
+//the sign in/up with google button was pressed
+app.get("/auth/google",
+    passport.authenticate("google", {
+        scope: ["profile", "email"]
+    })
+);
+
+passport.use(
+    "google",
+    new GoogleStrategy(
+        {
+            clientID: process.env.GOOGLE_CLIENT_ID,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+            callbackURL: server_url + google_login_redirect,
+        },
+        async (accessToken, refreshToken, profile, cb) => {
+            try {
+                const query_result = await db.query("SELECT * FROM users WHERE email=$1", [profile.email])
+                if (query_result.rowCount === 0) {
+                    const result = await db.query(
+                        named("INSERT INTO users (username,name,email,password_hash) VALUES (:username, :name,:email,:password_hash) RETURNING *",)({
+                            username: "test",
+                            name: profile.displayName,
+                            email: profile.email,
+                            password_hash: "google"
+                        })
+                    );
+                    cb(null, result.rows[0], { new: true });
+                }
+                else {
+                    cb(null, query_result.rows[0]);
+                }
+            }
+            catch (err) {
+                console.log(err);
+                cb(err);
+            }
+        }
+    )
+);
+
+//redirect after login
+app.get(google_login_redirect, function (req, res, next) {
+    passport.authenticate('google', function (err, user, info, status) {
+        if (err) { return next(err) }
+        if (!user) { return res.redirect(client_url); }
+
+        req.logIn(user, function (err) {
+            if (err) { return next(err); }
+
+            if (info.new)
+                req.session.showStartMessage = true;
+
+            remember_session(req, cookie_remember);
+            return res.redirect(client_url);
+        });
+    })(req, res, next);
+});
+
+app.get("/failure_redirect", (req, res) => {
+    res.send("failed to login");
+});
+
 
 
 app.listen(port, () => {
@@ -344,12 +425,13 @@ function generateVerificationCode(length) {
 
 function auth(req, res)//checking if the user is admin
 {
-    //if (req.isAuthenticated()) {
-    //    return true;
-    //}
-    //else {
-    //    return false;
-    //}
+    if (req.isAuthenticated()) {
+        return true;
+    }
+    else {
+        res.sendStatus(401);
+        return false;
+    }
 }
 
 function remember_session(req, time) {

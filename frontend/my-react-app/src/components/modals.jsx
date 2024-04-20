@@ -44,20 +44,61 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
+import Dialog from '@mui/material/Dialog';
 
 function Error(props) {
     return (
         <>
             <DialogTitle color="error">
-                {props.title?props.title:"Error"}
+                {props.title ? props.title : "Error"}
             </DialogTitle>
             <DialogContent>
                 <DialogContentText>
-                   {props.text}
+                    {props.text}
                 </DialogContentText>
             </DialogContent>
         </>
     );
 }
 
-export {Error};
+//creating modal data
+let Modals = [];
+
+function CreateModal(props) {
+    const [modal, setModal] = React.useState();
+    const [onClose, setonClose] = React.useState();
+
+    function Show(content, onClose_) {
+        setonClose(() => onClose_);
+        setModal(content);
+    }
+
+    function Close() {
+        if(onClose)
+        onClose();
+        setModal(undefined);
+    }
+
+    Modals[props.id] = {
+        Close: Close,
+        Show: Show
+    }
+
+    return (
+        <Dialog open={Boolean(modal)} onClose={Close} >
+            {modal}
+        </Dialog>
+    )
+}
+
+//creating modal elements
+function CreateModals(props) {
+    return (
+        <>
+            <CreateModal id={0} />
+            <CreateModal id={1} />
+        </>
+    );
+}
+
+export { Error, Modals, CreateModals };

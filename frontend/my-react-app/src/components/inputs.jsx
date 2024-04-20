@@ -3,6 +3,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 import { Icon } from '@mui/material';
 import React, {useState} from "react";
 import {  IconButton } from '@mui/material';
+import { styled } from '@mui/material/styles';
 
 function SearchField() {
     const [isFocused, setIsFocused] = React.useState(false);
@@ -105,6 +106,18 @@ function PasswordFieldWithToggle(props) {
         />
     );
   }
+
+  const VisuallyHiddenInput = styled('input')({
+    height: "100%",
+    overflow: 'hidden',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    whiteSpace: 'nowrap',
+    width: "100%",
+    opacity: 0
+});
+
   
 
-export { SearchField,PlainTextField,PasswordFieldWithToggle };
+export { SearchField,PlainTextField,PasswordFieldWithToggle,VisuallyHiddenInput };

@@ -1,0 +1,16 @@
+{
+    "web": {
+        "client_id": "775135100728-be2hobc2jjnsqik0mu7ggoqts25fbe4f.apps.googleusercontent.com",
+        "project_id": "y-twitter-clone",
+        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+        "token_uri": "https://oauth2.googleapis.com/token",
+        "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+        "client_secret": "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",
+        "redirect_uris": [
+            "http://localhost:3000/login/google"
+        ],
+        "javascript_origins": [
+            "http://localhost:3000"
+        ]
+    }
+}

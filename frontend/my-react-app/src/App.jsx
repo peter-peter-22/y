@@ -9,41 +9,61 @@ import '@fontsource/roboto/900.css';
 import 'material-icons/iconfont/material-icons.css';
 import { AboveBreakpoint } from '/src/components/utilities';
 import axios from "axios";
+axios.defaults.withCredentials = true
 import { Endpoint } from "/src/communication.js";
 import Dialog from '@mui/material/Dialog';
+import CreateAccount from "/src/components/create_account.jsx";
+import { Modals, CreateModals } from "/src/components/modals";
 
 //components
 import Main from "./components/logged_in.jsx";
 import NoUser from "./components/no_user.jsx";
 import Loading from "./components/loading.jsx";
 
-//functions of the modal, filled by app
-let Modal={}; 
+//globally accessable
+let UserData = {};
 
 function App() {
   //get user data
   const [getData, setData] = React.useState();
+  UserData.getData = getData;
+  UserData.setData = setData;
+  UserData.update = Update;
 
   React.useEffect(() => {
-    axios.defaults.withCredentials = true
-    axios.get(Endpoint("/")).then((response) => {
-      setData(response.data);
-    }).catch((err) => {
-      if (err.response.status === 404)
-        console.log("no connection");
-      else
-        console.log(err);
-    });
-
+    Update();//update is not awaited to show the loading page
   }, []);
+
+  async function Update() {
+    try {
+      const response = await axios.get(Endpoint("/get_user"));
+      setData(response.data);
+
+      //process user data
+      if (response.data.showStartMessage) {
+        Modals[0].Show(<CreateAccount page={5} />, CloseStartMessage);
+      }
+
+      async function CloseStartMessage() {
+        try {
+          await axios.get(Endpoint("/close_starting_message"));
+          UserData.update();
+        }
+        catch (err) { console.log(err); }
+      }
+    }
+    catch (err) {
+      console.log(err);
+    }
+  }
 
   //choose page
   let page;
   if (getData === undefined) {
-    page=(<Loading />)
+    page = (<Loading />)
   }
   else {
-    if (getData.user === 1) {
+    if (getData.user) {
       page = (<Main />);
     }
     else {
@@ -51,23 +71,13 @@ function App() {
     }
   }
 
-//modal
-  const [modal, setModal] = React.useState();
-  Modal.Show=setModal;
-  function closeModal() {
-    setModal(undefined);
-  }
-
   return (
     <>
+      <CreateModals />
       {page}
-
-      <Dialog open={Boolean(modal)} onClose={closeModal}>
-        {modal}
-      </Dialog>
     </>
-  )
+  );
 }
 
 export default App
-export {Modal}
+export { UserData }

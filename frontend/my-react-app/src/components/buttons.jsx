@@ -6,11 +6,19 @@ import Avatar from '@mui/material/Avatar';
 import Stack from '@mui/material/Stack';
 import { Typography } from '@mui/material';
 import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ChooseChildBool, ProfileText, ToCorner } from '/src/components/utilities';
+import { ResponsiveSelector, ChooseChildBool, ProfileText, ToCorner,GetUserKey,noOverflow } from '/src/components/utilities';
 import Button from '@mui/material/Button';
-import ListItemButton from '@mui/material/ListItemButton';
 import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
+import Popover from '@mui/material/Popover';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import axios from "axios";
+import { Endpoint } from "/src/communication.js";
+import { UserData } from '/src/App';
 
 const smallerButtons = "leftMenu";
 const iconSize = "30px";
@@ -118,24 +126,64 @@ function PostButton() {
 
 function ProfileButton() {
     const size = "60px";
+
+    const [anchorEl, setAnchorEl] = React.useState(null);
+
+    const handleClick = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
+
+    async function handleLogout(){
+        await axios.get(Endpoint("/logout"));
+        UserData.update();
+    }
+
     return (
-        <ResponsiveSelector breakpoint={smallerButtons}>
+        <>
+            <ResponsiveSelector breakpoint={smallerButtons}>
+                <Fab onClick={handleClick} variant="extended" color="secondary_noBg" sx={{ height: size, borderRadius: size, width: "100%", p: 1 }}>
+                    <Stack direction="row" spacing={1} sx={{ width: "100%", height: "100%", alignItems: "center" }}>
+                        <Avatar src="/images/example profile.jpg" />
+                        <ProfileText />
+                        <Icon fontSize="small">
+                            more_horiz
+                        </Icon>
+                    </Stack>
+                </Fab>
 
-            <Fab variant="extended" color="secondary_noBg" sx={{ height: size, borderRadius: size, width: "100%", p: 1 }}>
-                <Stack direction="row" spacing={1} sx={{ width: "100%", height: "100%", alignItems: "center" }}>
+                <Fab onClick={handleClick} color="secondary_noBg" sx={{ height: size, width: size, borderRadius: "100%", p: 0 }}>
                     <Avatar src="/images/example profile.jpg" />
-                    <ProfileText />
-                    <Icon fontSize="small">
-                        more_horiz
-                    </Icon>
-                </Stack>
-            </Fab>
+                </Fab>
+            </ResponsiveSelector>
 
-            <Fab color="secondary_noBg" sx={{ height: size, width: size, borderRadius: "100%", p: 0 }}>
-                <Avatar src="/images/example profile.jpg" />
-            </Fab>
-
-        </ResponsiveSelector>
+            <Popover
+                open={Boolean(anchorEl)}
+                anchorEl={anchorEl}
+                onClose={handleClose}
+                anchorOrigin={{
+                    vertical: 'top',
+                    horizontal: 'left',
+                }}
+                transformOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left',
+                }}
+            >
+                <List>
+                    <ListItem disablePadding>
+                        <ListItemButton onClick={handleLogout}>
+                            <Typography variant="medium_bold" sx={{maxWidth:"70vw"}} style={noOverflow}>
+                                Logout <GetUserKey/>
+                            </Typography>
+                        </ListItemButton>
+                    </ListItem>
+                </List>
+            </Popover>
+        </>
     );
 }
 
@@ -150,7 +198,7 @@ function CornerButton(props) {
 
 function OutlinedButton(props) {
     return (
-        <WideButton color="secondary_noBg" {...props} sx={{ border: 1, borderColor: "divider",...props.sx }}>
+        <WideButton color="secondary_noBg" {...props} sx={{ border: 1, borderColor: "divider", ...props.sx }}>
             {props.children}
         </WideButton>
     );
