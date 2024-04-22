@@ -37,7 +37,7 @@ import FormControl from '@mui/material/FormControl';
 import FormLabel from '@mui/material/FormLabel';
 import ReCAPTCHA from 'react-google-recaptcha';
 import axios from 'axios';
-import { Endpoint } from "/src/communication.js";
+import { Endpoint, FormatAxiosError } from "/src/communication.js";
 import { styled } from '@mui/material/styles';
 import InputAdornment from '@mui/material/InputAdornment';
 import Dialog from '@mui/material/Dialog';
@@ -69,14 +69,20 @@ function Login(props) {
     }
     async function submitEmail() {
         try {
-            await axios.post(Endpoint('/user_exists'),
+            await axios.post(Endpoint('/user/exists/email'),
                 {
                     email: email
                 },
             );
             setPage(pages.password);
         } catch (error) {
-            Modals[1].Show(<Error text={error.response.data} />);
+            let text;
+            if (error.response&&error.response.status === 400)
+                text = "No Y user belongs to this email";
+            else
+                text = FormatAxiosError(error);
+            Modals[1].Show(<Error text={text} />);
+            console.log(error);
         }
     }
 
@@ -96,13 +102,7 @@ function Login(props) {
             UserData.update();
             Modals[0].Close();
         } catch (error) {
-            let text;
-            try {
-                text = error.response.data;
-            } catch {
-                text = error.message;
-            }
-            Modals[1].Show(<Error text={text} />);
+            Modals[1].Show(<Error text={FormatAxiosError(error)} />);
         }
     }
 

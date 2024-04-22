@@ -20,29 +20,24 @@ import cors from "cors";
 import axios from "axios";
 import nodemailer from "nodemailer";
 import { Validator } from "node-input-validator";
-import * as g from "./global.js";
+import * as g from "../global.js";
+import * as pp from "../components/passport.js";
 
-import initialize_app from "./components/app_use.js";
-initialize_app();
-import initialize_passport,{router as passport_routes}  from "./components/passport.js";
-initialize_passport();
+const router = express.Router();
 
-//routes
-import general from "./routes/general.js";
-g.app.use('/', general);
-
-import register from "./routes/register.js";
-g.app.use('/', register);
-
-import user from "./routes/user.js";
-g.app.use("/user", user);
-
-import member from "./routes/logged_in.js";
-g.app.use("/member", member);
-
-g.app.use("/",passport_routes);
-
-const port = g.config.port;
-g.app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
+router.post('/exists/email', async (req, res) => {
+    try {
+        const { email } = req.body;
+        const result = await g.db.query(named("SELECT count(*) FROM users WHERE email=:email")({ email: email }));
+        if (result.rows[0].count > 0)
+            return res.sendStatus(200);
+        else
+            return res.sendStatus(400);
+    }
+    catch (err) {
+        res.sendStatus(500);
+        console.log(err);
+    }
 });
+
+export default router;

@@ -2,36 +2,36 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"type": "npm",
-			"script": "dev",
-			"path": "frontend/my-react-app",
-			"problemMatcher": [],
-			"label": "npm: dev - frontend/my-react-app",
-			"detail": "vite"
-		},
-		{
-			"type": "npm",
-			"script": "start",
-			"path": "backend/server",
-			"problemMatcher": [],
-			"label": "npm: start - backend/server",
-			"detail": "nodemon index.js"
-		},
-		{
-			"label": "Debug All",
+			"label": "open terminals",
 			"dependsOn": [
-				"npm: debug - backend/server",
-				"npm: dev - frontend/my-react-app"
+				"open backend",
+				"open frontend"
 			],
-			"problemMatcher": []
+			// Try start the task on folder open
+			"runOptions": {
+				"runOn": "folderOpen"
+			},
 		},
 		{
-			"type": "npm",
-			"script": "debug",
-			"path": "backend/server",
+			"label": "open frontend",
+			"type": "shell",
+			"command": "bash",
+			"args": [
+				"-c",
+				"cd frontend/my-react-app && exec bash"
+			],
 			"problemMatcher": [],
-			"label": "npm: debug - backend/server",
-			"detail": "nodemon --inspect index.js"
-		}
-	]
+		},
+		{
+			"label": "open backend",
+			"type": "shell",
+			"command": "bash",
+			"args": [
+				"-c",
+				"cd backend/server && exec bash"
+			],
+			"isBackground": true,
+			"problemMatcher": [],
+		},
+		]
 }

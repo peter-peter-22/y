@@ -46,7 +46,7 @@ function App() {
 
       async function CloseStartMessage() {
         try {
-          await axios.get(Endpoint("/close_starting_message"));
+          await axios.get(Endpoint("/member/close_starting_message"));
           UserData.update();
         }
         catch (err) { console.log(err); }

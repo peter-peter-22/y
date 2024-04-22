@@ -37,7 +37,7 @@ import FormControl from '@mui/material/FormControl';
 import FormLabel from '@mui/material/FormLabel';
 import ReCAPTCHA from 'react-google-recaptcha';
 import axios from 'axios';
-import { Endpoint } from "/src/communication.js";
+import { Endpoint, FormatAxiosError } from "/src/communication.js";
 import { styled } from '@mui/material/styles';
 import InputAdornment from '@mui/material/InputAdornment';
 import Dialog from '@mui/material/Dialog';
@@ -182,15 +182,49 @@ function CreateAccount(props) {
             handleNext();
             UserData.update();
         } catch (error) {
-            console.error('Error submitting verification code:', error);
+            Modals[1].Show(<Error text={FormatAxiosError(error)} />);
         }
     }
 
-    //file
+    //profile pic
     const [file, setFile] = useState();
+    const imageUrlRef = useRef();
+    const fileUrl = imageUrlRef.url;
 
     function handleFile(e) {
-        setFile(URL.createObjectURL(e.target.files[0]));
+        const selected = e.target.files[0];
+        setFile(selected);
+        if (selected === undefined)
+            imageUrlRef.url = undefined;
+        else {
+            const selectedUrl = URL.createObjectURL(selected);
+            imageUrlRef.url = selectedUrl;
+        }
+    }
+
+    async function submitImage() {
+        if (file !== undefined) {
+            const formData = new FormData();
+            formData.append('image', file);
+            try {
+                await axios.post(
+                    Endpoint('/member/update_profile_picture'),
+                    formData,
+                    {
+                        headers: {
+                            'Content-Type': 'multipart/form-data'
+                        }
+                    }
+                );
+                handleNext();
+            }
+            catch (err) {
+                console.log(err);
+                Modals[1].Show(<Error text={FormatAxiosError(err)} />);
+            }
+        }
+        else
+            handleNext();
     }
 
     //username
@@ -209,7 +243,7 @@ function CreateAccount(props) {
     }
 
     //step handler
-    const [step, setStep] = useState(props.page ? props.page : 4);
+    const [step, setStep] = useState(props.page ? props.page : 0);
     const allowBack = step > 0 && step != 5;
 
     function handleNext() {
@@ -331,9 +365,9 @@ function CreateAccount(props) {
                     <Typography variant="small_fade" sx={{ mt: 3 }}>Do you have a favourite selfie? Upload now! {email}</Typography>
                     <div style={{ flexGrow: 1, display: "flex", justifyContent: "center", alignItems: "center" }}>
                         <Avatar sx={{ height: "200px", width: "200px" }}>
-                            <img src={file ? file : default_profile} style={{ height: "100%", width: "100%", objectFit: "cover" }} />
+                            <img src={fileUrl ? fileUrl : default_profile} style={{ height: "100%", width: "100%", objectFit: "cover" }} />
                             <Fab size="small" color="transparentBlack" sx={{ border: 1, borderColor: "divider", position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}>
-                                <VisuallyHiddenInput type="file" onChange={handleFile} />
+                                <VisuallyHiddenInput type="file" accept="image/*" onChange={handleFile} />
                                 <Icon baseClassName="material-icons-outlined">
                                     add_a_photo
                                 </Icon>
@@ -342,7 +376,7 @@ function CreateAccount(props) {
                     </div>
                     <Box sx={{ my: 3, boxSizing: "border-box" }}>
                         {file ?
-                            <WideButton color="black" onClick={handleNext}>
+                            <WideButton color="black" onClick={submitImage}>
                                 Submit
                             </WideButton>
                             :
