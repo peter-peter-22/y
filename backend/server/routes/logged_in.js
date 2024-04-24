@@ -19,50 +19,80 @@ const named = yesql.pg;
 import cors from "cors";
 import axios from "axios";
 import nodemailer from "nodemailer";
-import { Validator } from "node-input-validator";
 import * as g from "../global.js";
 import * as pp from "../components/passport.js";
+import { username_exists, selectable_username } from "./user.js";
+import { Validator } from "node-input-validator";
+import { CheckV, CheckErr } from "../components/validations.js";
 
 const router = express.Router();
 
+router.use((req, res, next) => {
+    if (pp.auth(req, res))
+        next();
+});
+
 router.post("/update_profile_picture", async (req, res) => {
-    if (pp.auth(req,res)) {
-        try {
-            const file = req.files.image;
+    const file = req.files.image;
 
-            const imagesType = ['image/png', 'image/jpeg', 'image/jpg'];
-            if (!imagesType.includes(file.mimetype))
-            res.status(400).send("invalid image");
+    const imagesType = ['image/png', 'image/jpeg', 'image/jpg'];
+    if (!imagesType.includes(file.mimetype))
+        res.status(400).send("invalid image");
 
-            file.mv(g.config.__dirname + "/public/images/profiles/"+req.user.id+".jpg");
-            res.sendStatus(200);
-        }
-        catch (err) {
-            console.log(err);
-            res.status(500).send(err.message);
-        }
-    }
+    file.mv(config.__dirname + "/public/images/profiles/" + req.user.id + ".jpg");
+    res.sendStatus(200);
 });
 
 router.get("/close_starting_message", async (req, res) => {
-        if (pp.auth(req, res)) {
-            req.session.showStartMessage = false;
-            res.sendStatus(200);
-        }
+    req.session.showStartMessage = false;
+    res.sendStatus(200);
 });
 
-router.post("/update_username", async (req, res) => {
-    if (pp.auth(req,res)) {
-        try {
-            const username = req.files.username;
+router.post("/change_username", async (req, res) => {
+    const v = new Validator(req.body, {
+        username: 'required|username',
+    });
+    await CheckV(v);
 
-            res.sendStatus(200);
-        }
-        catch (err) {
-            console.log(err);
-            res.status(400).send(err.message);
-        }
+    const { username } = req.body;
+
+    const selectable = await selectable_username(username, req.user.username);
+    if (!selectable)
+        CheckErr("this username is not available");
+
+    const result = await db.query(named("UPDATE users SET username=:username WHERE id=:id RETURNING *")({ username: username, id: req.user.id }));
+    await ApplySqlToUser(result, req);
+    res.sendStatus(200);
+});
+
+router.post('/ok_username', async (req, res) => {
+    if (pp.auth(req, res)) {
+
+        const v = new Validator(req.body, {
+            username: 'required|username',
+        });
+        const matched = await v.check();
+        if (!matched)
+            return res.send(false);;
+
+        const { username } = req.body;
+        const selectable = await selectable_username(username, req.user.username);
+        res.send(selectable);
     }
 });
+
+async function UpdateUser(newUser, req) {
+    return new Promise(resolve => {
+        req.logIn(newUser, (err) => {
+            if (err)
+                throw (err);
+            resolve();
+        });
+    });
+}
+
+async function ApplySqlToUser(query_result, req) {
+    await UpdateUser(query_result.rows[0], req);
+}
 
 export default router;

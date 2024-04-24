@@ -42,7 +42,7 @@ import { styled } from '@mui/material/styles';
 import InputAdornment from '@mui/material/InputAdornment';
 import Dialog from '@mui/material/Dialog';
 import { UserData } from "/src/App.jsx";
-import { Error, Modals } from "/src/components/modals";
+import { Error, Modals,ErrorText } from "/src/components/modals";
 import { AlternativeLogin, GrowingLine, BigModal, Or, BottomButtonWithBorder, ByRegistering, margin, bigmargin } from "/src/components/no_user";
 
 function Login(props) {
@@ -62,26 +62,23 @@ function Login(props) {
 
     //email
     const [email, setEmail] = useState("");
-    const [emailError, setemailError] = useState("");
 
     function handleEmail(e) {
         setEmail(e.target.value);
     }
     async function submitEmail() {
         try {
-            await axios.post(Endpoint('/user/exists/email'),
+            const res = await axios.post(Endpoint('/user/exists/email'),
                 {
                     email: email
                 },
             );
-            setPage(pages.password);
-        } catch (error) {
-            let text;
-            if (error.response&&error.response.status === 400)
-                text = "No Y user belongs to this email";
+            if (res.data)
+                setPage(pages.password);
             else
-                text = FormatAxiosError(error);
-            Modals[1].Show(<Error text={text} />);
+                ErrorText("No Y user belongs to this email");
+        } catch (error) {
+            Error(error);
             console.log(error);
         }
     }
@@ -102,7 +99,7 @@ function Login(props) {
             UserData.update();
             Modals[0].Close();
         } catch (error) {
-            Modals[1].Show(<Error text={FormatAxiosError(error)} />);
+            Error(error);
         }
     }
 

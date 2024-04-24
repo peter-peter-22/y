@@ -46,9 +46,7 @@ import { Error, Modals } from "/src/components/modals";
 import { AlternativeLogin, GrowingLine, BigModal, Or, BottomButtonWithBorder, ByRegistering, margin, bigmargin } from "/src/components/no_user";
 
 function CreateAccount(props) {
-    //the timers are stored here
     const timerRef = useRef(null);
-    const waitBeforeSending = 500;//the value of the server verified inputs have to stay still fore a short while before getting verified by the server
 
     //email
     const [email, setEmail] = useState('');
@@ -57,11 +55,23 @@ function CreateAccount(props) {
     const handleEmail = (e) => {
         const value = e.target.value;
         setEmail(value);
-        if (!validateEmail(value)) {
-            setEmailError('Please enter a valid email address.');
+        const valid = validateEmail(value);
+        if (!valid) {
+            setEmailError('Please enter a valid email address');
         } else {
             setEmailError('');
         }
+
+        WaitAfterChange(async () => {
+            if (valid) {
+                const res = await axios.post(Endpoint("/user/exists/email"), {
+                    email: value
+                });
+                if (res.data)
+                    setEmailError('This email address is already taken');
+            }
+        }, timerRef, "email");
+
     };
 
     const validateEmail = (email) => {
@@ -182,7 +192,7 @@ function CreateAccount(props) {
             handleNext();
             UserData.update();
         } catch (error) {
-            Modals[1].Show(<Error text={FormatAxiosError(error)} />);
+            Error(error);
         }
     }
 
@@ -220,7 +230,7 @@ function CreateAccount(props) {
             }
             catch (err) {
                 console.log(err);
-                Modals[1].Show(<Error text={FormatAxiosError(err)} />);
+                Error(err);
             }
         }
         else
@@ -232,14 +242,31 @@ function CreateAccount(props) {
     const [usernameOk, setUserNameOk] = useState(false);
 
     function handleUsername(e) {
-        clearTimeout(timerRef.username);
         const value = e.target.value;
         setUserName(value);
         setUserNameOk(false);
-        if (value.length > 0)
-            timerRef.username = setTimeout(() => {
-                setUserNameOk(true);
-            }, waitBeforeSending);
+
+        WaitAfterChange(async () => {
+            if (value.length > 0) {
+                const res = await axios.post(Endpoint("/member/ok_username"), {
+                    username: value
+                });
+                setUserNameOk(res.data);
+            }
+        }, timerRef, "username");
+    }
+
+    async function submitUsername() {
+        try {
+            await axios.post(Endpoint("/member/change_username"), {
+                username: username
+            });
+            handleNext();
+        }
+        catch (err) {
+            console.log(err);
+            Error(err);
+        }
     }
 
     //step handler
@@ -413,7 +440,7 @@ function CreateAccount(props) {
                         }}
                     />
                     <WideButton color="black" sx={{ my: 3 }}
-                        onClick={handleNext} disabled={!usernameOk}>Next</WideButton>
+                        onClick={submitUsername} disabled={!usernameOk}>Next</WideButton>
                 </Stack>
             );
             break;
@@ -453,6 +480,13 @@ function CreateAccount(props) {
             {currentPage}
         </BigModal>
     );
+}
+
+function WaitAfterChange(cb, timerRef, timerName) {
+    clearTimeout(timerRef[timerName]);
+    timerRef[timerName] = setTimeout(() => {
+        cb();
+    }, 300);
 }
 
 export default CreateAccount;

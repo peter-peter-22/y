@@ -19,30 +19,42 @@ const named = yesql.pg;
 import cors from "cors";
 import axios from "axios";
 import nodemailer from "nodemailer";
-import { Validator } from "node-input-validator";
 import * as g from "./global.js";
+import "./components/validations.js";
 
 import initialize_app from "./components/app_use.js";
 initialize_app();
-import initialize_passport,{router as passport_routes}  from "./components/passport.js";
+import initialize_passport, { router as passport_routes } from "./components/passport.js";
 initialize_passport();
 
 //routes
 import general from "./routes/general.js";
-g.app.use('/', general);
+app.use('/', general);
 
 import register from "./routes/register.js";
-g.app.use('/', register);
+app.use('/', register);
 
 import user from "./routes/user.js";
-g.app.use("/user", user);
+app.use("/user", user);
 
 import member from "./routes/logged_in.js";
-g.app.use("/member", member);
+app.use("/member", member);
 
-g.app.use("/",passport_routes);
+app.use("/", passport_routes);
 
-const port = g.config.port;
-g.app.listen(port, () => {
+//error
+app.use((err, req, res, next) => {
+    if (!err.status) {
+        console.error(err)
+        res.status(500).send("Internal server error: '" + err.message + "'");
+    }
+    else
+    {
+        res.status(err.status).send(err.message);
+    }
+})
+
+const port = config.port;
+app.listen(port, () => {
     console.log(`Server running on port ${port}`);
 });

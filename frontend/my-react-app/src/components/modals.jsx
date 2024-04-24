@@ -37,7 +37,7 @@ import FormControl from '@mui/material/FormControl';
 import FormLabel from '@mui/material/FormLabel';
 import ReCAPTCHA from 'react-google-recaptcha';
 import axios from 'axios';
-import { Endpoint } from "/src/communication.js";
+import { Endpoint, FormatAxiosError } from "/src/communication.js";
 import { styled } from '@mui/material/styles';
 import InputAdornment from '@mui/material/InputAdornment';
 import DialogActions from '@mui/material/DialogActions';
@@ -46,7 +46,7 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Dialog from '@mui/material/Dialog';
 
-function Error(props) {
+function ErrorModal(props) {
     return (
         <>
             <DialogTitle color="error">
@@ -74,8 +74,8 @@ function CreateModal(props) {
     }
 
     function Close() {
-        if(onClose)
-        onClose();
+        if (onClose)
+            onClose();
         setModal(undefined);
     }
 
@@ -101,4 +101,12 @@ function CreateModals(props) {
     );
 }
 
-export { Error, Modals, CreateModals };
+function Error(err) {
+    ErrorText(FormatAxiosError(err));
+}
+
+function ErrorText(text) {
+    Modals[1].Show(<ErrorModal text={text} />);
+}
+
+export { ErrorModal, Modals, CreateModals, Error, ErrorText };

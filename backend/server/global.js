@@ -20,7 +20,6 @@ env.config();
 import cors from "cors";
 import axios from "axios";
 import nodemailer from "nodemailer";
-import { Validator } from "node-input-validator";
 
 const app= express();
 
@@ -61,4 +60,7 @@ const pgPool = new pg.Pool({
     port: process.env.PG_PORT,
 });
 
-export {config, transporter, db, pgPool, app};
+global.app=app;
+global.db = db;
+global.config=config;
+export { transporter, pgPool};

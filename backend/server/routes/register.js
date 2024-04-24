@@ -20,6 +20,7 @@ import cors from "cors";
 import axios from "axios";
 import nodemailer from "nodemailer";
 import { Validator } from "node-input-validator";
+import { CheckV } from "../components/validations.js";
 import * as g from "../global.js";
 import * as pp from "../components/passport.js";
 
@@ -28,46 +29,50 @@ const router = express.Router();
 router.post('/register_start', async (req, res) => {
     const { recaptchaToken, name, email, birthdate, checkboxes } = req.body;
 
-    try {
-        const response = await axios.post(`https://www.google.com/recaptcha/api/siteverify?secret=${g.config.google_rechapta_secret_key}&response=${recaptchaToken}`);
-        const { success } = response.data;
+    const v = new Validator(req.body, {//validate birthdate and checkboxes
+        name: 'required|name',
+        email: "required|email",
+    });
+    console.log(birthdate);
+    console.log(checkboxes);
 
-        if (success) {
-            //send verificationcode in email
-            const code = generateVerificationCode();
-            req.session.registered_data = {
-                name: name,
-                email: email,
-                birthdate: birthdate,
-                verified: false,
-                verification_code: code,
-                checkboxes: checkboxes
-            }
-            console.log(checkboxes);
+    await CheckV(v);
 
-            pp.remember_session(req, g.config.cookie_registering);
+    const response = await axios.post(`https://www.google.com/recaptcha/api/siteverify?secret=${config.google_rechapta_secret_key}&response=${recaptchaToken}`);
+    const { success } = response.data;
 
-            res.send('reCAPTCHA validation successful');
+    if (success) {
 
-            const mailOptions = {
-                from: g.transporter.options.auth.user,
-                to: req.body.email,
-                subject: 'Y email verification',
-                text: 'Your verification code is "' + code + '"'
-            };
-
-            g.transporter.sendMail(mailOptions, function (error, info) {
-                if (error) {
-                    console.log(error);
-                }
-            });
-
-        } else {
-            res.status(400).send('reCAPTCHA validation failed');
+        //send verificationcode in email
+        const code = generateVerificationCode();
+        req.session.registered_data = {
+            name: name,
+            email: email,
+            birthdate: birthdate,
+            verified: false,
+            verification_code: code,
+            checkboxes: checkboxes
         }
-    } catch (error) {
-        console.error('Error validating reCAPTCHA:', error);
-        res.status(500).send('Internal server error');
+
+        pp.remember_session(req, config.cookie_registering);
+
+        res.send('reCAPTCHA validation successful');
+
+        const mailOptions = {
+            from: g.transporter.options.auth.user,
+            to: req.body.email,
+            subject: 'Y email verification',
+            text: 'Your verification code is "' + code + '"'
+        };
+
+        g.transporter.sendMail(mailOptions, function (error, info) {
+            if (error) {
+                console.log(error);
+            }
+        });
+
+    } else {
+        res.status(400).send('reCAPTCHA validation failed');
     }
 });
 
@@ -83,7 +88,7 @@ router.post('/verify_code', async (req, res) => {
         }
     }
     else {
-        res.status(400).send("failed rechapta");
+        res.status(400).send("wrong code");
     }
 });
 
@@ -96,9 +101,11 @@ router.post("/submit_password", async (req, res) => {
     //      verification_code: 123456,
     //  }
 
-    const { password } = req.body;
-    if (password === undefined || password.length < 8)
-        return (res.status(400).send("invalid password"));
+    const v = new Validator(req.body, {
+        password: 'required|minLength:8',
+    });
+    await CheckV(v);
+
 
     if (req.session.registered_data === undefined)
         return (res.status(400).send("no registered data"));
@@ -108,13 +115,13 @@ router.post("/submit_password", async (req, res) => {
         return (res.status(400).send("this email is not verified"));
 
     try {
-
-        bcrypt.hash(password, g.config.saltRounds, async (err, hash) => {
+        const { password } = req.body;
+        bcrypt.hash(password, config.saltRounds, async (err, hash) => {
             if (err) {
                 console.error("Error hashing password:", err);
             } else {
                 try {
-                    const result = await g.db.query(
+                    const result = await db.query(
                         named("INSERT INTO users (username,name,email,password_hash) VALUES (:username, :name,:email,:password_hash) RETURNING *",)({
                             username: "test",
                             name: data.name,
@@ -125,10 +132,9 @@ router.post("/submit_password", async (req, res) => {
 
                     const user = result.rows[0];
                     req.login(user, (err) => {
-                        pp.remember_session(req, g.config.cookie_remember);
+                        pp.remember_session(req, config.cookie_remember);
                         req.session.showStartMessage = true;//this bool will show the dialog the asks for the @username, profile pic...
                         res.send("registered successfully");
-                        //res.redirect("/profile");
                     });
                 } catch (e) {
                     if (e.constraint == "users_email_key")
@@ -147,7 +153,7 @@ router.post("/submit_password", async (req, res) => {
     }
 });
 
-function generateVerificationCode(length) {
+function generateVerificationCode() {
     let result = '';
     const characters = '0123456789';
     const charactersLength = characters.length;

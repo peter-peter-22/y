@@ -1,4 +1,14 @@
-import Axios from "axios";
+import axios from "axios";
+import { Error } from "/src/components/modals";
+
+axios.defaults.withCredentials = true
+
+axios.interceptors.response.use(function (response) {
+    return response;
+}, function (error) {
+    Error(error);
+    return Promise.reject(error);
+});
 
 const url = "http://localhost:3000";
 
@@ -16,4 +26,4 @@ function FormatAxiosError(error) {
     return text;
 }
 
-export { Endpoint,FormatAxiosError }
+export { Endpoint, FormatAxiosError }

@@ -49,7 +49,7 @@ router.post(
             req.logIn(user, function (err) {
                 if (err) { return next(err); }
 
-                remember_session(req, g.config.cookie_remember);
+                remember_session(req, config.cookie_remember);
                 res.sendStatus(200);
             });
 
@@ -65,10 +65,10 @@ router.get("/auth/google",
 );
 
 //redirect after login
-router.get(g.config.google_login_redirect, function (req, res, next) {
+router.get(config.google_login_redirect, function (req, res, next) {
     passport.authenticate('google', function (err, user, info, status) {
         if (err) { return next(err) }
-        if (!user) { return res.redirect(g.config.client_url); }
+        if (!user) { return res.redirect(config.client_url); }
 
         req.logIn(user, function (err) {
             if (err) { return next(err); }
@@ -76,8 +76,8 @@ router.get(g.config.google_login_redirect, function (req, res, next) {
             if (info.new)
                 req.session.showStartMessage = true;
 
-            remember_session(req, g.config.cookie_remember);
-            return res.redirect(g.config.client_url);
+            remember_session(req, config.cookie_remember);
+            return res.redirect(config.client_url);
         });
     })(req, res, next);
 });
@@ -95,7 +95,7 @@ passport.use(
         },
         async function verify(email, password, cb) {
             try {
-                const result = await g.db.query("SELECT * FROM users WHERE email = $1 ", [
+                const result = await db.query("SELECT * FROM users WHERE email = $1 ", [
                     email
                 ]);
                 if (result.rows.length > 0) {
@@ -132,13 +132,13 @@ passport.use(
         {
             clientID: process.env.GOOGLE_CLIENT_ID,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-            callbackURL: g.config.server_url + g.config.google_login_redirect,
+            callbackURL: config.server_url + config.google_login_redirect,
         },
         async (accessToken, refreshToken, profile, cb) => {
             try {
-                const query_result = await g.db.query("SELECT * FROM users WHERE email=$1", [profile.email])
+                const query_result = await db.query("SELECT * FROM users WHERE email=$1", [profile.email])
                 if (query_result.rowCount === 0) {
-                    const result = await g.db.query(
+                    const result = await db.query(
                         named("INSERT INTO users (username,name,email,password_hash) VALUES (:username, :name,:email,:password_hash) RETURNING *",)({
                             username: "test",
                             name: profile.displayName,

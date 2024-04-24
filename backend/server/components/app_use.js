@@ -25,15 +25,15 @@ const pgSession = ConnectPg(session);
 
 function initialize()
 {
-g.app.use(cors({
+app.use(cors({
     origin: process.env.CLIENT_URL,
     credentials: true
 }));
-g.app.use(express.static("public"));
-g.app.use(express.json());//required to get the body of the fetch post
+app.use(express.static("public"));
+app.use(express.json());//required to get the body of the fetch post
 
 
-g.app.use(
+app.use(
     session({
         store: new pgSession({
           pool: g.pgPool,
@@ -50,13 +50,13 @@ g.app.use(
 );
 
 //update session expiration 
-g.app.use((req, res, next) => {
+app.use((req, res, next) => {
     req.session.lastVisit = new Date();
     next();
 });
 
-g.app.use(bodyParser.urlencoded({ extended: true }));
-g.app.use(
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(
     fileUpload({
         limits: {
             fileSize: 10000000, // Around 10MB
@@ -66,7 +66,7 @@ g.app.use(
 );
 
 
-g.app.use(passport.initialize());
-g.app.use(passport.session());
+app.use(passport.initialize());
+app.use(passport.session());
 }
 export default initialize;
