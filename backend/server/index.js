@@ -1,4 +1,5 @@
 import express from "express";
+import "express-async-errors";
 import bodyParser from "body-parser";
 import pg from "pg";
 import bcrypt from "bcrypt";
@@ -20,12 +21,12 @@ import cors from "cors";
 import axios from "axios";
 import nodemailer from "nodemailer";
 import * as g from "./global.js";
+await g.initialize();
 import "./components/validations.js";
 
 import initialize_app from "./components/app_use.js";
 initialize_app();
-import initialize_passport, { router as passport_routes } from "./components/passport.js";
-initialize_passport();
+import { router as passport_routes } from "./components/passport.js";
 
 //routes
 import general from "./routes/general.js";

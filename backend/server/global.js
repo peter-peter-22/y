@@ -21,7 +21,7 @@ import cors from "cors";
 import axios from "axios";
 import nodemailer from "nodemailer";
 
-const app= express();
+const app = express();
 
 const config = {
     port: 3000,
@@ -30,7 +30,6 @@ const config = {
     server_url: process.env.SERVER_URL,
     client_url: process.env.CLIENT_URL,
     google_rechapta_secret_key: process.env.GOOGLE_RECHAPTA_SECRET,
-    google_login_redirect: "/login/google",
     cookie_remember: 1000 * 60 * 60 * 24 * 30,//1 month. the user most log in at least once within a month to prevent logout
     cookie_registering: 1000 * 60 * 60 * 2,//2 hours. the email, name, ect. the user sends at the start of the registration must be finalized within 2 hour
 }
@@ -43,15 +42,6 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-const db = new pg.Client({
-    user: process.env.PG_USER,
-    host: process.env.PG_HOST,
-    database: process.env.PG_DATABASE,
-    password: process.env.PG_PASSWORD,
-    port: process.env.PG_PORT,
-});
-await db.connect();
-
 const pgPool = new pg.Pool({
     user: process.env.PG_USER,
     host: process.env.PG_HOST,
@@ -60,7 +50,18 @@ const pgPool = new pg.Pool({
     port: process.env.PG_PORT,
 });
 
-global.app=app;
-global.db = db;
-global.config=config;
-export { transporter, pgPool};
+async function initialize() {
+    const db = new pg.Client({
+        user: process.env.PG_USER,
+        host: process.env.PG_HOST,
+        database: process.env.PG_DATABASE,
+        password: process.env.PG_PASSWORD,
+        port: process.env.PG_PORT,
+    });
+    await db.connect();
+    global.db = db;
+}
+
+global.app = app;
+global.config = config;
+export { transporter, pgPool, initialize };

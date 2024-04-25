@@ -12,7 +12,7 @@ import axios from "axios";
 import { Endpoint } from "/src/communication.js";
 import Dialog from '@mui/material/Dialog';
 import CreateAccount from "/src/components/create_account.jsx";
-import { Modals, CreateModals } from "/src/components/modals";
+import { Modals, CreateModals, Error } from "/src/components/modals";
 
 //components
 import Main from "./components/logged_in.jsx";
@@ -38,21 +38,30 @@ function App() {
       const response = await axios.get(Endpoint("/get_user"));
       setData(response.data);
 
-      //process user data
-      if (response.data.showStartMessage) {
-        Modals[0].Show(<CreateAccount page={5} />, CloseStartMessage);
-      }
+      //process the recieved data
 
-      async function CloseStartMessage() {
-        try {
+      //after register message
+      if (response.data.showStartMessage) {
+        Modals[0].Show(<CreateAccount pages={[5,6,7,8]}/>, CloseStartMessage);
+
+        async function CloseStartMessage() {
           await axios.get(Endpoint("/member/close_starting_message"));
           UserData.update();
         }
-        catch (err) { console.log(err); }
+      }
+
+      //pending registration
+      if (response.data.pending_registration) {
+        Modals[0].Show(<CreateAccount pages={[1,9]} finish/>, ExitRegistration);
+
+        async function ExitRegistration() {
+          await axios.get(Endpoint("/exit_registration"));
+          UserData.update();
+        }
       }
     }
     catch (err) {
-      console.log(err);
+      Error(err)
     }
   }
 

@@ -46,6 +46,7 @@ import { Error, Modals } from "/src/components/modals";
 import { AlternativeLogin, GrowingLine, BigModal, Or, BottomButtonWithBorder, ByRegistering, margin, bigmargin } from "/src/components/no_user";
 
 function CreateAccount(props) {
+    const pages = props.pages ? props.pages : [0, 1, 2, 3, 4];
     const timerRef = useRef(null);
 
     //email
@@ -107,7 +108,7 @@ function CreateAccount(props) {
         setdateError(!date.isValid() || date.isAfter() || date.year() < 1900);
     }
 
-    const step0ok = !nameError && name && !emailError && email && !dateError;
+    const page0ok = !nameError && name && !emailError && email && !dateError;
 
     //checkboxes
     const [checkboxes, setCheckboxes] = useState([]);
@@ -131,21 +132,17 @@ function CreateAccount(props) {
 
     //submit rechapta
     async function submitChapta() {
-        try {
-            await axios.post(Endpoint('/register_start'),
-                {
-                    email: email,
-                    name: name,
-                    birthdate: date,
-                    recaptchaToken: captchaValue,
-                    checkboxes: checkboxes
-                },
-            );
-            //rechapta ok, next page
-            handleNext();
-        } catch (error) {
-            console.error('Error submitting rechapta:', error);
-        }
+        await axios.post(Endpoint('/register_start'),
+            {
+                email: email,
+                name: name,
+                birthdate: date.toISOString(),
+                recaptchaToken: captchaValue,
+                checkboxes: checkboxes
+            },
+        );
+        //rechapta ok, next page
+        handleNext();
     };
 
     //verification code
@@ -159,17 +156,13 @@ function CreateAccount(props) {
 
     //submit verification code
     async function submitCode() {
-        try {
-            await axios.post(Endpoint('/verify_code'),
-                {
-                    code: code
-                },
-            );
-            //code ok, next page
-            handleNext();
-        } catch (error) {
-            console.error('Error submitting verification code:', error);
-        }
+        await axios.post(Endpoint('/verify_code'),
+            {
+                code: code
+            },
+        );
+        //code ok, next page
+        handleNext();
     };
 
     //password
@@ -182,18 +175,14 @@ function CreateAccount(props) {
     const passwordOk = password.length >= 8;
 
     async function submitPassword() {
-        try {
-            await axios.post(Endpoint('/submit_password'),
-                {
-                    password: password
-                },
-            );
-            //code ok, next page
-            handleNext();
-            UserData.update();
-        } catch (error) {
-            Error(error);
-        }
+        await axios.post(Endpoint('/submit_password'),
+            {
+                password: password
+            },
+        );
+        //code ok, next page
+        handleNext();
+        UserData.update();
     }
 
     //profile pic
@@ -216,22 +205,16 @@ function CreateAccount(props) {
         if (file !== undefined) {
             const formData = new FormData();
             formData.append('image', file);
-            try {
-                await axios.post(
-                    Endpoint('/member/update_profile_picture'),
-                    formData,
-                    {
-                        headers: {
-                            'Content-Type': 'multipart/form-data'
-                        }
+            await axios.post(
+                Endpoint('/member/update_profile_picture'),
+                formData,
+                {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
                     }
-                );
-                handleNext();
-            }
-            catch (err) {
-                console.log(err);
-                Error(err);
-            }
+                }
+            );
+            handleNext();
         }
         else
             handleNext();
@@ -257,37 +240,59 @@ function CreateAccount(props) {
     }
 
     async function submitUsername() {
-        try {
-            await axios.post(Endpoint("/member/change_username"), {
-                username: username
-            });
-            handleNext();
-        }
-        catch (err) {
-            console.log(err);
-            Error(err);
-        }
+        await axios.post(Endpoint("/member/change_username"), {
+            username: username
+        });
+        handleNext();
+    }
+
+    //notifications
+    async function setNotifications(enabled) {
+        await axios.post(Endpoint("/member/change_browser_notifications"), {
+            enabled: enabled
+        });
+        handleNext();
     }
 
     //step handler
-    const [step, setStep] = useState(props.page ? props.page : 0);
-    const allowBack = step > 0 && step != 5;
+    const [stepIndex, setStep] = useState(0);
+    const allowBack = stepIndex > 0;
 
     function handleNext() {
-        setStep((previousValue) => { return previousValue + 1 });
+        if (stepIndex >= pages.length - 1) {
+            if (props.finish)
+                send_finish();
+            else
+                close();
+        }
+        else
+            setStep((previousValue) => { return previousValue + 1 });
     }
 
     function handleBack() {
         if (!allowBack)
-            Modals[0].Close();
+            close();
         else
             setStep((previousValue) => { return previousValue - 1 });
+    }
+    function close() {
+        Modals[0].Close();
+    }
+    async function send_finish() {
+        console.log(date.toISOString());
+        await axios.post(Endpoint("/finish_registration"),
+            {
+                birthdate: date.toISOString(),
+                checkboxes: checkboxes
+            });
+        close();
     }
 
 
     //step renderer
     let currentPage;
-    switch (step) {
+    const page = pages[stepIndex];
+    switch (page) {
 
         case 0://enter email, ect.
             currentPage = (
@@ -309,7 +314,7 @@ function CreateAccount(props) {
                     <LocalizationProvider dateAdapter={AdapterMoment}>
                         <DatePicker label="Date of birth" disableFuture onChange={handleDate} value={date} />
                     </LocalizationProvider>
-                    <WideButton color="black" disabled={!step0ok} sx={{ mt: "auto", mb: 3 }}
+                    <WideButton color="black" disabled={!page0ok} sx={{ mt: "auto", mb: 3 }}
                         onClick={handleNext}>Next</WideButton>
                 </Stack>
             );
@@ -450,8 +455,8 @@ function CreateAccount(props) {
                 <Stack direction="column" sx={{ mx: margin, height: "100%", justifyContent: "center" }}>
                     <Typography variant="verybig_bold">Enable notifications?</Typography>
                     <Typography variant="small_fade" sx={{ mt: 1, mb: 3 }}>Bring out the most of Y and stay up-to-date about the events.</Typography>
-                    <WideButton color="black" sx={{ mb: 2, boxSizing: "border-box" }} onClick={handleNext}>Enable</WideButton>
-                    <OutlinedButton onClick={handleNext}>Not now</OutlinedButton>
+                    <WideButton color="black" sx={{ mb: 2, boxSizing: "border-box" }} onClick={() => { setNotifications(true) }}>Enable</WideButton>
+                    <OutlinedButton onClick={() => { setNotifications(false) }}>Not now</OutlinedButton>
                 </Stack>
             );
             break;
@@ -471,6 +476,22 @@ function CreateAccount(props) {
                 </Stack>
             );
             break;
+
+        case 9://alternative date of birth
+            currentPage = (
+                <Stack direction="column" sx={{ mx: margin, height: "100%" }}>
+                    <CenterLogo />
+                    <Typography variant="medium_bold" sx={{ mb: 2 }}>Date of birth</Typography>
+                    <Typography variant="medium_fade" sx={{ mb: 2 }}>This will not be publicly visible. Verify your own age, even if it's a business account, a pet account, or something else.</Typography>
+                    <LocalizationProvider dateAdapter={AdapterMoment}>
+                        <DatePicker label="Date of birth" disableFuture onChange={handleDate} value={date} />
+                    </LocalizationProvider>
+                    <WideButton color="black" disabled={Boolean(dateError)} sx={{ mt: "auto", mb: 3 }}
+                        onClick={handleNext}>Next</WideButton>
+                </Stack>
+            );
+            break;
+
     }
 
     //final

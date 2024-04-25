@@ -6,7 +6,8 @@ const router = express.Router();
 router.get("/get_user", async (req, res) => {
     res.json({
         user: req.user,
-        showStartMessage: req.session.showStartMessage
+        showStartMessage: req.session.showStartMessage,
+        pending_registration: req.session.pending_registration
     });
 });
 

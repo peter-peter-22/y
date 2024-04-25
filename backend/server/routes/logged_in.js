@@ -81,6 +81,17 @@ router.post('/ok_username', async (req, res) => {
     }
 });
 
+router.post("/change_browser_notifications", async (req, res) => {
+    const v = new Validator(req.body, {
+        enabled: 'required|boolean',
+    });
+    await CheckV(v);
+
+    const result = await db.query(named("UPDATE users SET browser_notifications=:enabled WHERE id=:id RETURNING *")({ enabled: req.body.enabled, id: req.user.id }));
+    await ApplySqlToUser(result, req);
+    res.sendStatus(200);
+});
+
 async function UpdateUser(newUser, req) {
     return new Promise(resolve => {
         req.logIn(newUser, (err) => {

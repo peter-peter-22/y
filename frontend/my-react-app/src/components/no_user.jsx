@@ -70,7 +70,7 @@ export default () => {
                         </Typography>
                         <Stack direction="column" spacing={1} style={{ width: "300px" }}>
                             <a href={Endpoint("/auth/google")}><AlternativeLogin src="/svg/google.svg" text="Sign-up with Google" /></a>
-                            <AlternativeLogin src="/svg/google.svg" text="Sign-up with Google" />
+                            <a href={Endpoint("/auth/github")}><AlternativeLogin src="/svg/github.svg" text="Sign-up with Github" /></a>
                             <Stack direction="row" sx={{ my: 0.5, alignItems: "center" }}>
                                 <Or />
                             </Stack>

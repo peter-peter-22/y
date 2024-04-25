@@ -22,28 +22,37 @@ import nodemailer from "nodemailer";
 import niv from "node-input-validator";
 import * as g from "../global.js";
 import * as pp from "../components/passport.js";
+import Moment from "moment";
 
 async function CheckV(v) {
-    const matched = await v.check();
-    if (!matched) {
-        CheckErr(Object.values(v.errors)[0].message);
-    }
+  const matched = await v.check();
+  if (!matched) {
+    CheckErr(Object.values(v.errors)[0].message);
+  }
 }
 
-function CheckErr(message)
-{
-    const err = new Error(message);
-    err.status = 422;
-    throw err;
+function CheckErr(message) {
+  const err = new Error(message);
+  err.status = 422;
+  throw err;
 }
 
 niv.extend('name', ({ value }) => {
-    const length=value.length;
-    return(length>=3&&length<=50);
-  });  
-  niv.extend('username', ({ value }) => {
-    const length=value.length;
-    return(length>0&&length<=50);
-  });  
+  const length = value.length;
+  return (length >= 3 && length <= 50);
+});
+niv.extend('username', ({ value }) => {
+  const length = value.length;
+  return (length > 0 && length <= 50);
+});
+niv.extend('mydate', ({ value }) => {
+  return !isNaN(new Date(value));
+});
+niv.extend('datepast', ({ value }) => {
+  const moment = new Moment(value);
+  if (!moment.isValid())
+    return false;
+  return !moment.isAfter();
+});
 
-export { CheckV,CheckErr };
+export { CheckV, CheckErr };

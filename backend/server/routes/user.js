@@ -23,7 +23,6 @@ import { Validator } from "node-input-validator";
 import { CheckV } from "../components/validations.js";
 import * as g from "../global.js";
 import * as pp from "../components/passport.js";
-import "express-async-errors";
 
 const router = express.Router();
 
