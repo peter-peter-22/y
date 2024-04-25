@@ -19,6 +19,7 @@ import { BoxList, BoxListOutlined, BlueTextButton } from '/src/components/contai
 import IconButton from '@mui/material/IconButton';
 import Link from '@mui/material/Link';
 import { ResponsiveButton, ButtonIcon, ButtonSvg, TabButton, PostButton, ProfileButton, TopMenuButton,CornerButton } from "/src/components/buttons.jsx";
+import { UserData } from "/src/App.jsx";
 
 function Footer() {
     return (
@@ -59,7 +60,7 @@ function Footer() {
                             </ListItemText>
                         </ListItem>
 
-                       <FollowDialog/>
+                       <FollowDialog user={UserData.getData.user}/>
 
                         <BlueTextButton>
                             Show more

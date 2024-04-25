@@ -8,7 +8,7 @@ import GoogleStrategy from "passport-google-oauth2";
 import session from "express-session";
 import ConnectPg from 'connect-pg-simple';
 import env from "dotenv";
-import { dirname } from "path";
+import { basename, dirname } from "path";
 import { fileURLToPath } from "url";
 import *  as url from "url";
 import path from "path";
@@ -22,6 +22,7 @@ import { Validator } from "node-input-validator";
 import LocalRoutes from "./passport_strategies/local.js";
 import GoogleRoutes from "./passport_strategies/google.js";
 import GithubRoutes from "./passport_strategies/github.js";
+import { CheckV } from "./validations.js";
 const named = yesql.pg;
 
 const router = express.Router();
@@ -110,9 +111,11 @@ router.post("/finish_registration", async (req, res) => {
 
 async function finish_registration(req, res, name, email, password_hash, birthdate, checkboxes) {
     try {
+
+        const uniquefied_name = await unique_username(name);
         const result = await db.query(
             named("INSERT INTO users (username,name,email,password_hash,birthdate,email_notifications) VALUES (:username, :name,:email,:password_hash,:birthdate,:email_notifications) RETURNING *",)({
-                username: "test",
+                username: uniquefied_name,
                 name: name,
                 email: email,
                 password_hash: password_hash,
@@ -139,6 +142,28 @@ async function finish_registration(req, res, name, email, password_hash, birthda
             throw e;
         }
     }
+}
+
+async function unique_username(baseName) {
+    const result = await db.query(named("SELECT username FROM users WHERE name LIKE :baseName || '%'")({ baseName: baseName }));
+    if (result.rowCount === 0)
+        return baseName;
+    const avoid = result.rows.map(row => row.username);
+    const maxUsernameNameLength = 50;
+    const maxNumberLength = maxUsernameNameLength - basename.length;
+    const maxNumber = Math.min(Math.pow(10, maxNumberLength) - 1, Number.MAX_SAFE_INTEGER);
+    //try add a number to the base name until reaching an unique name
+    for (let n = 0; n <= maxNumber; n++) {
+        const attempt = baseName + n;
+        if (!avoid.incudes(attempt))
+            return attempt;
+    }
+    //if the base name is too long and all numbered versions are taken, return only a number
+    for (let n = 0; n <= Number.MAX_SAFE_INTEGER; n++) {
+        if (!avoid.incudes(n))
+            return n;
+    }
+    throw new Error("unique name cannot be created");
 }
 
 export { auth, remember_session, router, universal_auth, finish_registration };

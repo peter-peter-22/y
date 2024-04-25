@@ -5,7 +5,7 @@
 			"label": "open terminals",
 			"dependsOn": [
 				"open backend",
-				"open frontend"
+				"open frontend",
 			],
 			// Try start the task on folder open
 			"runOptions": {
@@ -21,6 +21,9 @@
 				"cd frontend/my-react-app && exec bash"
 			],
 			"problemMatcher": [],
+			"presentation": {
+                "reveal": "always",
+            },
 		},
 		{
 			"label": "open backend",
@@ -30,8 +33,10 @@
 				"-c",
 				"cd backend/server && exec bash"
 			],
-			"isBackground": true,
 			"problemMatcher": [],
+			"presentation": {
+                "reveal": "always",
+            },
 		},
-		]
+	]
 }

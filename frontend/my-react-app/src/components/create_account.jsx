@@ -227,8 +227,10 @@ function CreateAccount(props) {
     function handleUsername(e) {
         const value = e.target.value;
         setUserName(value);
+        checkUsername(value);
+    }
+    function checkUsername(value) {
         setUserNameOk(false);
-
         WaitAfterChange(async () => {
             if (value.length > 0) {
                 const res = await axios.post(Endpoint("/member/ok_username"), {
@@ -238,6 +240,16 @@ function CreateAccount(props) {
             }
         }, timerRef, "username");
     }
+    useEffect(() => {//add the existing username to the textfield on creation
+        let starting_username;
+        try {
+            starting_username = UserData.getData.user.username;
+        } catch {
+            starting_username = "";
+        }
+        setUserName(starting_username);
+        checkUsername(starting_username);
+    }, []);
 
     async function submitUsername() {
         await axios.post(Endpoint("/member/change_username"), {

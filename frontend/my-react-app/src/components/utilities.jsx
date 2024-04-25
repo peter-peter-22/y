@@ -19,6 +19,10 @@ import IconButton from '@mui/material/IconButton';
 import Link from '@mui/material/Link';
 import { ResponsiveButton, ButtonIcon, ButtonSvg, TabButton, PostButton, ProfileButton, TopMenuButton } from "/src/components/buttons.jsx";
 import Moment from "moment";
+import { Endpoint, FormatAxiosError } from "/src/communication.js";
+import { UserData } from "/src/App.jsx";
+import { Error, Modals } from "/src/components/modals";
+import axios from 'axios';
 
 const noOverflow = {
     whiteSpace: 'nowrap',
@@ -81,8 +85,8 @@ function ProfileText(props) {
     return (
         <div style={{ flexGrow: 1, overflow: "hidden" }}>
             <Stack direction={props.row ? "row" : "column"} spacing={props.row ? 0.5 : 0}>
-                {props.link ? <UserLink /> : <UserName />}
-                <UserKey />
+                {props.link ? <UserLink user={props.user} /> : <UserName user={props.user} />}
+                <UserKey user={props.user} />
             </Stack>
         </div>
     );
@@ -91,7 +95,7 @@ function ProfileText(props) {
 function UserName(props) {
     return (
         <Typography variant="small_bold" align="left" style={noOverflow}>
-            <GetUserName />
+            <GetUserName user={props.user} />
         </Typography>
     );
 }
@@ -99,7 +103,7 @@ function UserName(props) {
 function UserLink(props) {
     return (
         <Link typography="small_bold" href="#" align="left" style={noOverflow} {...props}>
-            <GetUserName />
+            <GetUserName user={props.user} />
         </Link>
     );
 }
@@ -107,22 +111,22 @@ function UserLink(props) {
 function UserKeyLink(props) {
     return (
         <Link typography="small" href="#" align="left" style={noOverflow} {...props}>
-            <GetUserKey />
+            <GetUserKey user={props.user} />
         </Link>
     );
 }
 
 function GetUserName(props) {
-    return ("Firstname Lastname abc efd efd afsfas sd fsfd gfg fddhfjhf ghj dgfjhdgfhjjhgd jhfhjb dgfhfjhhdfhjdfg hjdgfjhd hgjfjhgfjh");
+    return props.user ? props.user.name : "name";
 }
 function GetUserKey(props) {
-    return ("@user23543453435768453687548674358765648786734867345687687345876345687345678345786");
+    return props.user ? "@" + props.user.username : "@username";
 }
 
 function UserKey(props) {
     return (
         <Typography variant="small_fade" align="left" fontWeight="normal" style={noOverflow} >
-            <GetUserKey />
+            <GetUserKey user={props.user} />
         </Typography>
     );
 }
@@ -247,13 +251,25 @@ function CenterLogo() {
 const default_profile = "/images/default_profile.jpg";
 
 function FollowDialog(props) {
+    const [following, setFollowing] = useState(false);
+    async function toggleFollow() {
+        setFollowing((prev) => {
+            return !prev;
+        });
+        await axios.post(Endpoint("/member/follow_user"),
+            {
+                id: props.user.id,
+                set: following
+            }
+        );
+    }
     return (
         <ListItem disablePadding>
             <ListItemButton>
                 <Stack direction="row" spacing={1} sx={{ alignItems: "center", width: "100%" }}>
-                    <Avatar src="/images/example profile.jpg" />
-                    <ProfileText />
-                    <Fab variant="extended" size="small" color="black" sx={{ flexShrink: 0 }}>Follow</Fab>
+                    <Avatar src="user" />
+                    <ProfileText user={props.user} />
+                    <Fab onClick={toggleFollow} variant="extended" size="small" color="black" sx={{ flexShrink: 0 }}>{following ? "Following" : "Follow"}</Fab>
                 </Stack>
             </ListItemButton>
         </ListItem>
@@ -261,4 +277,4 @@ function FollowDialog(props) {
 }
 
 
-export { AboveBreakpoint, ResponsiveSelector, ChooseChild, ChooseChildBool, TopMenu, ProfileText, FadeLink, TabSwitcher, UserName, UserKey, noOverflow, BoldLink, UserLink, DateLink, TextRow, UserKeyLink, ReplyingTo, GetUserName, GetUserKey, logo, creation, ToCorner, CenterLogo, default_profile,FollowDialog }
+export { AboveBreakpoint, ResponsiveSelector, ChooseChild, ChooseChildBool, TopMenu, ProfileText, FadeLink, TabSwitcher, UserName, UserKey, noOverflow, BoldLink, UserLink, DateLink, TextRow, UserKeyLink, ReplyingTo, GetUserName, GetUserKey, logo, creation, ToCorner, CenterLogo, default_profile, FollowDialog }

@@ -148,7 +148,7 @@ function ProfileButton() {
                 <Fab onClick={handleClick} variant="extended" color="secondary_noBg" sx={{ height: size, borderRadius: size, width: "100%", p: 1 }}>
                     <Stack direction="row" spacing={1} sx={{ width: "100%", height: "100%", alignItems: "center" }}>
                         <Avatar src="/images/example profile.jpg" />
-                        <ProfileText />
+                        <ProfileText user={UserData.getData.user}/>
                         <Icon fontSize="small">
                             more_horiz
                         </Icon>

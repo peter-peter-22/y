@@ -92,6 +92,30 @@ router.post("/change_browser_notifications", async (req, res) => {
     res.sendStatus(200);
 });
 
+router.post("/follow_user", async (req, res) => {
+    const v = new Validator(req.body, {
+        id: 'required|integer',
+        set: "required|boolean"
+    });
+    await CheckV(v);
+    const { id, set } = req.body;
+    if (set)
+        await db.query(named("INSERT INTO follows (follower,followed) VALUES (:me,:other) ")({ me: req.user.id, other: id }));
+    else
+        await db.query(named("DELETE FROM follows WHERE follower=:me AND followed=:other")({ me: req.user.id, other: id }));
+    res.sendStatus(200);
+});
+
+router.post("/is_following_user", async (req, res) => {
+    const v = new Validator(req.body, {
+        id: 'required|integer',
+    });
+    await CheckV(v);
+    const { id } = req.body;
+    const result = await db.query(named("SELECT count(*) FROM follows WHERE follower=:me AND followed=:id")({ me: req.user.id, followed: id }));
+    res.send(result.rows[0].count > 0)
+});
+
 async function UpdateUser(newUser, req) {
     return new Promise(resolve => {
         req.logIn(newUser, (err) => {
