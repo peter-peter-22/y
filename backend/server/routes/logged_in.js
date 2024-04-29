@@ -37,7 +37,7 @@ router.post("/update_profile_picture", async (req, res) => {
 
     const imagesType = ['image/png', 'image/jpeg', 'image/jpg'];
     if (!imagesType.includes(file.mimetype))
-        res.status(400).send("invalid image");
+        res.status(400).send("invalid image, only .jpg images are accepted");
 
     file.mv(config.__dirname + "/public/images/profiles/" + req.user.id + ".jpg");
     res.sendStatus(200);

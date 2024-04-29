@@ -9,7 +9,7 @@ import Fab from '@mui/material/Fab';
 import { Icon } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey } from '/src/components/utilities';
+import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, GetProfilePicture, default_image } from '/src/components/utilities';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -26,6 +26,7 @@ import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import { theme } from "/src/styles/mui/my_theme";
 import { PlainTextField } from "/src/components/inputs";
+import { UserData } from "/src/App.jsx";
 
 function Prefix(props) {
     return (
@@ -47,25 +48,25 @@ function RowWithPrefix(props) {
 function Post(props) {
     return (
         <ListBlockButton>
-            <Reposted />
+            <Reposted post={props.post} />
             <RowWithPrefix
-                prefix={<Avatar src="/images/example profile.jpg" />}
+                prefix={<Avatar src={GetProfilePicture(props.post.user)} />}
                 contents={
                     <Stack direction="column" style={{ overflow: "hidden" }}>
                         <Stack direction="row" spacing={0.25} style={{ alignItems: "center" }}>
-                            <UserName />
-                            <UserKey />
+                            <UserName user={props.post.user} />
+                            <UserKey user={props.post.user} />
                             ·
-                            <DateLink passed />
+                            <DateLink passed isoString={props.post.date} />
                             <ManagePost />
                         </Stack>
-                        <PostText />
-                        <PostMedia />
+                        <PostText post={props.post} />
+                        <PostMedia post={props.post} />
                     </Stack>
                 } />
             <RowWithPrefix contents={
-                <Stack direction="column" style={{ overflow: "hidden" }}>
-                    <FromUser />
+                <Stack direction="column" style={{ overflow: "hidden",flexGrow:1 }}>
+                    <FromUser post={props.post}/>
                     <PostButtonRow />
                 </Stack>
             } />
@@ -93,7 +94,7 @@ function PostFocused(props) {
         <ListBlock>
             <Reposted />
             <RowWithPrefix
-                prefix={<Avatar src="/images/example profile.jpg" />}
+                prefix={<Avatar src={GetProfilePicture(props.post.user)} />}
                 contents={
                     <Stack direction="column" style={{ overflow: "hidden" }}>
                         <Stack direction="row" spacing={0.25} style={{ alignItems: "center" }}>
@@ -317,9 +318,17 @@ function CommentButton(props) {
 }
 
 function PostList() {
+    const post = {
+        repost: true,
+        reposted_from:UserData.getData.user,
+        user: UserData.getData.user,
+        date: new Date("2024-01-01").toISOString(),
+        text: "post text",
+        images: [default_image],
+    };
     return (
         <List sx={{ p: 0 }}>
-            <PostFocused />
+            <Post post={post} />
         </List>
     );
 }
@@ -330,7 +339,7 @@ function BlockImage(props) {
             aspectRatio: "1 / 1",
             overflow: "hidden"
         }}>
-            <img src={"/images/example profile copy.jpg"} style={{
+            <img src={props.src} style={{
                 width: "100%",
                 height: "100%",
                 objectFit: "cover",
@@ -350,37 +359,76 @@ function PostBottomIcon(props) {
 }
 
 function PostMedia(props) {
-    return (
-        <Box border={1} borderColor="divider" style={{
-            margin: "10px 0px",
-            overflow: "hidden",
-            borderRadius: "10px",
-            boxSizing: "border-box"
-        }}>
-            <Stack direction="column" spacing="2px">
-                <Stack direction="row" spacing="2px">
-                    <BlockImage />
-                    <BlockImage />
+    const spacing = "2px";
+    const images = props.post.images;
+    if (images && images.length > 0) {
+        let imageElements;
+        const count = images.length;
+        if (count === 1) {
+            imageElements = (
+                <BlockImage src={images[0]} />
+            );
+        }
+        else if (count === 2) {
+            imageElements = (
+                <>
+                    <Stack direction="row" spacing={spacing}>
+                        <BlockImage src={images[0]} />
+                        <BlockImage src={images[1]} />
+                    </Stack>
+                </>);
+        }
+        else if (count === 3) {
+            imageElements = (
+                <>
+                    <Stack direction="row" spacing={spacing}>
+                        <BlockImage src={images[0]} />
+                    </Stack>
+                    <Stack direction="row" spacing={spacing}>
+                        <BlockImage src={images[1]} />
+                        <BlockImage src={images[2]} />
+                    </Stack>
+                </>);
+        }
+        else if (count === 4) {
+            imageElements = (
+                <>
+                    <Stack direction="row" spacing={spacing}>
+                        <BlockImage src={images[0]} />
+                        <BlockImage src={images[1]} />
+                    </Stack>
+                    <Stack direction="row" spacing={spacing}>
+                        <BlockImage src={images[2]} />
+                        <BlockImage src={images[3]} />
+                    </Stack>
+                </>);
+        }
+
+        return (
+            <Box border={1} borderColor="divider" style={{
+                margin: "10px 0px",
+                overflow: "hidden",
+                borderRadius: "10px",
+                boxSizing: "border-box"
+            }}>
+                <Stack direction="column" spacing={spacing}>
+                    {imageElements}
                 </Stack>
-                <Stack direction="row" spacing="2px">
-                    <BlockImage />
-                    <BlockImage />
-                </Stack>
-            </Stack>
-        </Box>
-    );
+            </Box>
+        );
+    }
 }
 function PostText(props) {
     return (
         <Typography variant="small">
-            post text dgffd dgf dfg gfddgf dgd gdg
+            {props.post.text}
         </Typography>
     );
 }
 
 function ManagePost(props) {
     return (
-        <IconButton size="small"><Icon fontSize="small">more_horiz</Icon></IconButton>
+        <IconButton size="small" style={{ marginLeft: "auto" }}><Icon fontSize="small">more_horiz</Icon></IconButton>
     );
 }
 
@@ -390,17 +438,18 @@ function FromUser(props) {
             <Typography variant="small_fade">
                 From
             </Typography>
-            <UserName />
+            <UserName user={props.post.reposted_from}/>
         </TextRow>
     );
 }
 
 function Reposted(props) {
-    return (
-        <RowWithPrefix
-            prefix={<Icon color="secondary" style={{ fontSize: "15px", alignSelf: "end" }}>loop</Icon>}
-            contents={<FadeLink style={{ fontWeight: "bold", overflow: "hidden" }}><TextRow><span color="secondary.main" style={noOverflow}><GetUserName /></span>reposted</TextRow></FadeLink>} />
-    );
+    if (props.post.repost)
+        return (
+            <RowWithPrefix
+                prefix={<Icon color="secondary" style={{ fontSize: "15px", alignSelf: "end" }}>loop</Icon>}
+                contents={<FadeLink style={{ fontWeight: "bold", overflow: "hidden" }}><TextRow><span color="secondary.main" style={noOverflow}><GetUserName user={props.post.user} /></span><span>reposted</span></TextRow></FadeLink>} />//clicking leads to the source post
+        );
 }
 
 function ListBlock(props) {
@@ -426,4 +475,4 @@ function ListBlockButton(props) {
 }
 
 
-export { Post, PostList, PostFocused, ListBlockButton, ListBlock, RowWithPrefix,PostButtonRow };
+export { Post, PostList, PostFocused, ListBlockButton, ListBlock, RowWithPrefix, PostButtonRow };

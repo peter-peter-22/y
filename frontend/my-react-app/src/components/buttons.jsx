@@ -6,7 +6,7 @@ import Avatar from '@mui/material/Avatar';
 import Stack from '@mui/material/Stack';
 import { Typography } from '@mui/material';
 import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ChooseChildBool, ProfileText, ToCorner,GetUserKey,noOverflow } from '/src/components/utilities';
+import { ResponsiveSelector, ChooseChildBool, ProfileText, ToCorner,GetUserKey,noOverflow,GetProfilePicture } from '/src/components/utilities';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
@@ -147,7 +147,7 @@ function ProfileButton() {
             <ResponsiveSelector breakpoint={smallerButtons}>
                 <Fab onClick={handleClick} variant="extended" color="secondary_noBg" sx={{ height: size, borderRadius: size, width: "100%", p: 1 }}>
                     <Stack direction="row" spacing={1} sx={{ width: "100%", height: "100%", alignItems: "center" }}>
-                        <Avatar src="/images/example profile.jpg" />
+                        <Avatar src={GetProfilePicture(UserData.getData.user)} />
                         <ProfileText user={UserData.getData.user}/>
                         <Icon fontSize="small">
                             more_horiz
@@ -156,7 +156,7 @@ function ProfileButton() {
                 </Fab>
 
                 <Fab onClick={handleClick} color="secondary_noBg" sx={{ height: size, width: size, borderRadius: "100%", p: 0 }}>
-                    <Avatar src="/images/example profile.jpg" />
+                <Avatar src={GetProfilePicture(UserData.getData.user)} />
                 </Fab>
             </ResponsiveSelector>
 

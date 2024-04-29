@@ -23,6 +23,7 @@ import { Endpoint, FormatAxiosError } from "/src/communication.js";
 import { UserData } from "/src/App.jsx";
 import { Error, Modals } from "/src/components/modals";
 import axios from 'axios';
+import Tooltip from '@mui/material/Tooltip';
 
 const noOverflow = {
     whiteSpace: 'nowrap',
@@ -34,6 +35,10 @@ const noOverflow = {
 const logo = "/svg/y.svg";
 
 const creation = "© 2024 Y Corp.";
+
+const default_profile = "/images/default_profile.jpg";
+
+const default_image = "/images/example profile copy.jpg";
 
 function ResponsiveSelector(props) {
     let isBig = props.override === undefined ? AboveBreakpoint(props.breakpoint) : props.override;
@@ -177,14 +182,14 @@ function TabSwitcher(props) {
 }
 
 function DateLink(props) {
-    const moment = Moment(new Date());
+    const moment = Moment(new Date(props.isoString));
     const hover = moment.format('h:mm a [·] MM DD YYYY');
     let display;
     if (props.short) {
         display = moment.format('MMM DD');
     }
     else if (props.passed) {
-        const passed = Moment.duration(moment.diff("2015-06-02"));
+        const passed = Moment.duration(Moment().diff(moment));
         if (passed.asSeconds() < 60)
             display = Math.round(passed.asSeconds()) + "s";
         else if (passed.asMinutes() < 60)
@@ -201,11 +206,14 @@ function DateLink(props) {
     else
         display = hover;
 
-
     return (
-        <FadeLink style={{ flexShrink: 0, ...noOverflow }}>
-            {display}
-        </FadeLink>
+        <Tooltip title={hover}>
+            <div>
+                <FadeLink style={{ flexShrink: 0, ...noOverflow }}>
+                    {display}
+                </FadeLink>
+            </div>
+        </Tooltip>
     );
 }
 
@@ -248,7 +256,6 @@ function CenterLogo() {
     );
 }
 
-const default_profile = "/images/default_profile.jpg";
 
 function FollowDialog(props) {
     const [following, setFollowing] = useState(false);
@@ -267,7 +274,7 @@ function FollowDialog(props) {
         <ListItem disablePadding>
             <ListItemButton>
                 <Stack direction="row" spacing={1} sx={{ alignItems: "center", width: "100%" }}>
-                    <Avatar src="user" />
+                    <Avatar />
                     <ProfileText user={props.user} />
                     <Fab onClick={toggleFollow} variant="extended" size="small" color="black" sx={{ flexShrink: 0 }}>{following ? "Following" : "Follow"}</Fab>
                 </Stack>
@@ -276,5 +283,9 @@ function FollowDialog(props) {
     );
 }
 
+function GetProfilePicture(user) {
+    return (user ? Endpoint("/images/profiles/" + user.id + ".jpg") : default_profile);
+}
 
-export { AboveBreakpoint, ResponsiveSelector, ChooseChild, ChooseChildBool, TopMenu, ProfileText, FadeLink, TabSwitcher, UserName, UserKey, noOverflow, BoldLink, UserLink, DateLink, TextRow, UserKeyLink, ReplyingTo, GetUserName, GetUserKey, logo, creation, ToCorner, CenterLogo, default_profile, FollowDialog }
+
+export { AboveBreakpoint, ResponsiveSelector, ChooseChild, ChooseChildBool, TopMenu, ProfileText, FadeLink, TabSwitcher, UserName, UserKey, noOverflow, BoldLink, UserLink, DateLink, TextRow, UserKeyLink, ReplyingTo, GetUserName, GetUserKey, logo, creation, ToCorner, CenterLogo, default_profile, FollowDialog, GetProfilePicture,default_image }
