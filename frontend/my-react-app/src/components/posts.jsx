@@ -50,12 +50,12 @@ function Post(props) {
         <ListBlockButton>
             <Reposted post={props.post} />
             <RowWithPrefix
-                prefix={<Avatar src={GetProfilePicture(props.post.user)} />}
+                prefix={<Avatar src={GetProfilePicture(props.post.publisher)} />}
                 contents={
                     <Stack direction="column" style={{ overflow: "hidden" }}>
                         <Stack direction="row" spacing={0.25} style={{ alignItems: "center" }}>
-                            <UserName user={props.post.user} />
-                            <UserKey user={props.post.user} />
+                            <UserName user={props.post.publisher} />
+                            <UserKey user={props.post.publisher} />
                             ·
                             <DateLink passed isoString={props.post.date} />
                             <ManagePost />
@@ -65,9 +65,9 @@ function Post(props) {
                     </Stack>
                 } />
             <RowWithPrefix contents={
-                <Stack direction="column" style={{ overflow: "hidden",flexGrow:1 }}>
-                    <FromUser post={props.post}/>
-                    <PostButtonRow />
+                <Stack direction="column" style={{ overflow: "hidden", flexGrow: 1 }}>
+                    <FromUser post={props.post} />
+                    <PostButtonRow post={props.post} />
                 </Stack>
             } />
         </ListBlockButton>
@@ -92,13 +92,13 @@ function PostFocused(props) {
 
     return (
         <ListBlock>
-            <Reposted />
+            <Reposted post={props.post} />
             <RowWithPrefix
-                prefix={<Avatar src={GetProfilePicture(props.post.user)} />}
+                prefix={<Avatar src={GetProfilePicture(props.post.publisher)} />}
                 contents={
-                    <Stack direction="column" style={{ overflow: "hidden" }}>
+                    <Stack direction="column" style={{ overflow: "hidden", flexGrow: 1 }}>
                         <Stack direction="row" spacing={0.25} style={{ alignItems: "center" }}>
-                            <ProfileText />
+                            <ProfileText user={props.post.publisher} />
                             <Fab variant="extended" size="small" color="black" style={{ flexShrink: 0 }}>Subscribe</Fab>
                             <ManagePost />
                         </Stack>
@@ -106,43 +106,22 @@ function PostFocused(props) {
                 } />
 
             <Stack direction="column" sx={{ overflow: "hidden", mt: 1 }}>
-                <PostText />
-                <PostMedia />
-                <FromUser />
+                <PostText post={props.post} />
+                <PostMedia post={props.post} />
+                <FromUser post={props.post} />
                 <Stack direction="row" spacing={0.5} sx={{ alignItems: "baseline", my: 1 }}>
-                    <DateLink />
+                    <DateLink passed isoString={props.post.date} />
                     <Typography variant="small_fade">·</Typography>
-                    <Typography variant="small_bold">999M</Typography>
+                    <Typography variant="small_bold">{formatNumber(props.post.views)}</Typography>
                     <Typography variant="small_fade">Views</Typography>
                 </Stack>
             </Stack>
 
             <Divider />
 
-            <Stack direction="row" justifyContent="space-between" sx={{ flexGrow: 1, py: 0.5 }}>
-
-                <PostBottomIcon text="999k" >
-                    chat_bubble_outline
-                </PostBottomIcon>
-
-                <PostBottomIcon text="999k" >
-                    loop
-                </PostBottomIcon>
-
-                <PostBottomIcon text="999k" >
-                    favorite_border
-                </PostBottomIcon>
-
-                <PostBottomIcon text="999k" >
-                    bookmark_border
-                </PostBottomIcon>
-
-                <IconButton size="small">
-                    <Icon fontSize="small">
-                        upload
-                    </Icon>
-                </IconButton>
-            </Stack>
+            <Box sx={{ my: 1 }}>
+                <PostButtonRow post={props.post} />
+            </Box>
 
             <Divider />
 
@@ -209,23 +188,41 @@ function PostFocused(props) {
     );
 }
 
-function PostButtonRow() {
-    return (
-        <Stack direction="row" justifyContent="space-between" style={{ flexGrow: 1 }}>
+function formatNumber(number) {
+    const units = [
+        [1000000000, "B"],
+        [1000000, "M"],
+        [1000, "k"],
+    ]
 
-            <PostBottomIcon icon="more_horiz" text="999k" >
+    for (let n = 0; n < units.length; n++) {
+        const unit = units[n];
+        const [multiplier, name] = unit;
+        if (multiplier <= number) {
+            const divided = Math.round(number / multiplier);
+            return divided + name;
+        }
+    }
+    return number;
+}
+
+function PostButtonRow(props) {
+    return (
+        <Stack direction="row" justifyContent="space-between" style={{ flexGrow: 1 }} >
+
+            <PostBottomIcon text={formatNumber(props.post.comment_count)} >
                 chat_bubble_outline
             </PostBottomIcon>
 
-            <PostBottomIcon icon="more_horiz" text="999k" >
+            <PostBottomIcon text={formatNumber(props.post.repost_count)} >
                 loop
             </PostBottomIcon>
 
-            <PostBottomIcon icon="more_horiz" text="999k" >
+            <PostBottomIcon text={formatNumber(props.post.like_count)} >
                 favorite_border
             </PostBottomIcon>
 
-            <PostBottomIcon icon="more_horiz" text="999k" >
+            <PostBottomIcon text={formatNumber(props.post.views)} >
                 align_vertical_bottom
             </PostBottomIcon>
 
@@ -319,15 +316,20 @@ function CommentButton(props) {
 
 function PostList() {
     const post = {
-        repost: true,
-        reposted_from:UserData.getData.user,
-        user: UserData.getData.user,
+        repost: false,
+        reposted_from: UserData.getData.user,
+        publisher: UserData.getData.user,
         date: new Date("2024-01-01").toISOString(),
         text: "post text",
         images: [default_image],
+        views: 9999999,
+        repost_count: 353,
+        like_count: 4242,
+        comment_count: 1234423, 
     };
     return (
         <List sx={{ p: 0 }}>
+            <PostFocused post={post} />
             <Post post={post} />
         </List>
     );
@@ -433,14 +435,15 @@ function ManagePost(props) {
 }
 
 function FromUser(props) {
-    return (
-        <TextRow>
-            <Typography variant="small_fade">
-                From
-            </Typography>
-            <UserName user={props.post.reposted_from}/>
-        </TextRow>
-    );
+    if (props.post.repost)
+        return (
+            <TextRow>
+                <Typography variant="small_fade">
+                    From
+                </Typography>
+                <UserName user={props.post.reposted_from} />
+            </TextRow>
+        );
 }
 
 function Reposted(props) {
@@ -448,7 +451,7 @@ function Reposted(props) {
         return (
             <RowWithPrefix
                 prefix={<Icon color="secondary" style={{ fontSize: "15px", alignSelf: "end" }}>loop</Icon>}
-                contents={<FadeLink style={{ fontWeight: "bold", overflow: "hidden" }}><TextRow><span color="secondary.main" style={noOverflow}><GetUserName user={props.post.user} /></span><span>reposted</span></TextRow></FadeLink>} />//clicking leads to the source post
+                contents={<FadeLink style={{ fontWeight: "bold", overflow: "hidden" }}><TextRow><span color="secondary.main" style={noOverflow}><GetUserName user={props.post.publisher} /></span><span>reposted</span></TextRow></FadeLink>} />//clicking leads to the source post
         );
 }
 

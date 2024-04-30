@@ -42,7 +42,7 @@ import { styled } from '@mui/material/styles';
 import InputAdornment from '@mui/material/InputAdornment';
 import Dialog from '@mui/material/Dialog';
 import { UserData } from "/src/App.jsx";
-import { Error, Modals,ErrorText } from "/src/components/modals";
+import { Error, Modals, ErrorText } from "/src/components/modals";
 import { AlternativeLogin, GrowingLine, BigModal, Or, BottomButtonWithBorder, ByRegistering, margin, bigmargin } from "/src/components/no_user";
 
 function Login(props) {
@@ -117,8 +117,8 @@ function Login(props) {
                     <Typography variant="verybig_bold" sx={{ my: 4 }}>Sign-in to Y!</Typography>
 
                     <Stack direction="column" spacing={2}>
-                        <AlternativeLogin size="small" src="/svg/google.svg" text="Sign-up with Google" />
-                        <AlternativeLogin size="small" src="/svg/google.svg" text="Sign-up with Google" />
+                        <a href={Endpoint("/auth/google")}><AlternativeLogin src="/svg/google.svg" text="Sign-in with Google" /></a>
+                        <a href={Endpoint("/auth/github")}><AlternativeLogin src="/svg/github.svg" text="Sign-in with Github" /></a>
                         <Stack direction="row" sx={{ my: 0.5, alignItems: "center" }}>
                             <Or />
                         </Stack>

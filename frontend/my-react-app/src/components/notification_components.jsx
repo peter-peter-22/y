@@ -131,7 +131,7 @@ function Comment(props) {
                             <TextRow>
                                 <ProfileText row="true" link="true" />
                                 ·
-                                <DateLink short />
+                                <DateLink passed />
                             </TextRow>
                             <ReplyingTo />
                             <Typography variant="small">

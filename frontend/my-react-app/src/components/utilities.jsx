@@ -185,10 +185,7 @@ function DateLink(props) {
     const moment = Moment(new Date(props.isoString));
     const hover = moment.format('h:mm a [·] MM DD YYYY');
     let display;
-    if (props.short) {
-        display = moment.format('MMM DD');
-    }
-    else if (props.passed) {
+     if (props.passed) {
         const passed = Moment.duration(Moment().diff(moment));
         if (passed.asSeconds() < 60)
             display = Math.round(passed.asSeconds()) + "s";
@@ -198,10 +195,7 @@ function DateLink(props) {
             display = Math.round(passed.asHours()) + "h";
         else if (passed.asDays() < 7)
             display = Math.round(passed.asDays()) + "d";
-        else if (passed.asMonths() < 12)
-            display = Math.round(passed.asMonths()) + "M";
-        else
-            display = Math.round(passed.asYears()) + "y";
+        else display= moment.format('MMM DD');
     }
     else
         display = hover;
@@ -258,6 +252,20 @@ function CenterLogo() {
 
 
 function FollowDialog(props) {
+    return (
+        <ListItem disablePadding>
+            <ListItemButton>
+                <Stack direction="row" spacing={1} sx={{ alignItems: "center", width: "100%" }}>
+                    <Avatar />
+                    <ProfileText user={props.user} />
+                    <FollowButton user_id={props.user.id} />
+                </Stack>
+            </ListItemButton>
+        </ListItem>
+    );
+}
+
+function FollowButton(props) {
     const [following, setFollowing] = useState(false);
     async function toggleFollow() {
         setFollowing((prev) => {
@@ -265,21 +273,13 @@ function FollowDialog(props) {
         });
         await axios.post(Endpoint("/member/follow_user"),
             {
-                id: props.user.id,
+                id: props.user_id,
                 set: following
             }
         );
     }
     return (
-        <ListItem disablePadding>
-            <ListItemButton>
-                <Stack direction="row" spacing={1} sx={{ alignItems: "center", width: "100%" }}>
-                    <Avatar />
-                    <ProfileText user={props.user} />
-                    <Fab onClick={toggleFollow} variant="extended" size="small" color="black" sx={{ flexShrink: 0 }}>{following ? "Following" : "Follow"}</Fab>
-                </Stack>
-            </ListItemButton>
-        </ListItem>
+        <Fab onClick={toggleFollow} variant="extended" size="small" color="black" sx={{ flexShrink: 0 }}>{following ? "Following" : "Follow"}</Fab>
     );
 }
 
@@ -288,4 +288,4 @@ function GetProfilePicture(user) {
 }
 
 
-export { AboveBreakpoint, ResponsiveSelector, ChooseChild, ChooseChildBool, TopMenu, ProfileText, FadeLink, TabSwitcher, UserName, UserKey, noOverflow, BoldLink, UserLink, DateLink, TextRow, UserKeyLink, ReplyingTo, GetUserName, GetUserKey, logo, creation, ToCorner, CenterLogo, default_profile, FollowDialog, GetProfilePicture,default_image }
+export { AboveBreakpoint, ResponsiveSelector, ChooseChild, ChooseChildBool, TopMenu, ProfileText, FadeLink, TabSwitcher, UserName, UserKey, noOverflow, BoldLink, UserLink, DateLink, TextRow, UserKeyLink, ReplyingTo, GetUserName, GetUserKey, logo, creation, ToCorner, CenterLogo, default_profile, FollowDialog, GetProfilePicture, default_image,FollowButton }
