@@ -27,6 +27,7 @@ import { CheckV, CheckErr } from "../components/validations.js";
 import modify from "./logged_in/modify.js";
 import create from "./logged_in/create.js";
 import general from "./logged_in/general.js";
+import feed from "./logged_in/feed.js";
 
 const router = express.Router();
 
@@ -36,8 +37,9 @@ router.use((req, res, next) => {
 });
 
 router.use("/", modify);
-router.use("/", create);
+router.use("/create", create);
 router.use("/", general);
+router.use("/feed", feed);
 
 async function UpdateUser(newUser, req) {
     return new Promise(resolve => {

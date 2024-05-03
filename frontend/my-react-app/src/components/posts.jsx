@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Stack from '@mui/material/Stack';
 import SideMenu, { Inside } from "./side_menus.jsx";
 import { TopMenu } from '/src/components/utilities';
@@ -9,7 +9,7 @@ import Fab from '@mui/material/Fab';
 import { Icon } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, GetProfilePicture, default_image } from '/src/components/utilities';
+import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, GetProfilePicture, default_image, GetPostPictures } from '/src/components/utilities';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -25,8 +25,11 @@ import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import { theme } from "/src/styles/mui/my_theme";
-import { PlainTextField } from "/src/components/inputs";
+import { PlainTextField, PasswordFieldWithToggle, VisuallyHiddenInput } from "/src/components/inputs";
 import { UserData } from "/src/App.jsx";
+import config from "/src/components/config.js";
+import axios from 'axios';
+import { Endpoint, FormatAxiosError } from "/src/communication.js";
 
 function Prefix(props) {
     return (
@@ -61,7 +64,7 @@ function Post(props) {
                             <ManagePost />
                         </Stack>
                         <PostText post={props.post} />
-                        <PostMedia post={props.post} />
+                        <PostMedia images={props.post.images} />
                     </Stack>
                 } />
             <RowWithPrefix contents={
@@ -76,20 +79,6 @@ function Post(props) {
 
 
 function PostFocused(props) {
-    const [isFocused, setIsFocused] = React.useState(false);
-    const [getText, setText] = React.useState("");
-    const maxLetters = 280;
-    const keep = getText.substring(0, maxLetters);
-    const overflow = getText.substring(maxLetters);
-
-    const handleFocus = () => {
-        setIsFocused(true);
-    };
-
-    function handleChange(e) {
-        setText(e.target.value);
-    }
-
     return (
         <ListBlock>
             <Reposted post={props.post} />
@@ -107,7 +96,7 @@ function PostFocused(props) {
 
             <Stack direction="column" sx={{ overflow: "hidden", mt: 1 }}>
                 <PostText post={props.post} />
-                <PostMedia post={props.post} />
+                <PostMedia images={props.post.images} />
                 <FromUser post={props.post} />
                 <Stack direction="row" spacing={0.5} sx={{ alignItems: "baseline", my: 1 }}>
                     <DateLink passed isoString={props.post.date} />
@@ -125,7 +114,75 @@ function PostFocused(props) {
 
             <Divider />
 
-            {isFocused &&
+            <PostCreator isComment />
+        </ListBlock>
+    );
+}
+
+function WritePost() {
+    return (
+        <ListBlock>
+            <PostCreator />
+        </ListBlock>
+    );
+}
+
+function PostCreator(props) {
+    const [isFocused, setIsFocused] = React.useState(false);
+    const [getText, setText] = React.useState("");
+    const maxLetters = 280;
+    const keep = getText.substring(0, maxLetters);
+    const overflow = getText.substring(maxLetters);
+
+    const handleFocus = () => {
+        setIsFocused(true);
+    };
+
+    function handleChange(e) {
+        setText(e.target.value);
+    }
+
+    const [files, setFiles] = useState([]);
+    const [urls, setUrls] = useState([]);
+    const inputRef = useRef(null);
+
+    function handleFile(e) {
+        const selected = e.target.files;
+        if (selected !== undefined) {
+            setFiles((prev) => [...prev, ...selected]);
+            for (let n = 0; n < selected.length; n++) {
+                const selectedUrl = URL.createObjectURL(selected[n]);
+                setUrls((prev) => [...prev, selectedUrl]);
+            }
+        }
+    }
+
+    function insertPhoto() {
+        inputRef.current.click();
+    }
+
+    async function submitPost() {
+        const formData = new FormData();
+        files.forEach(file => formData.append('images', file));
+        formData.append('text', getText);
+
+        await axios.post(
+            Endpoint('/member/create/post'),
+            formData,
+            {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            }
+        );
+        setFiles([]);
+        setUrls([]);
+        setText("");
+    }
+
+    return (
+        <>
+            {props.isComment && isFocused &&
                 <Box sx={{ my: 1 }} >
                     <RowWithPrefix contents={
                         <ReplyingTo />
@@ -137,54 +194,60 @@ function PostFocused(props) {
                     <Avatar sx={{ py: 1 }} src="/images/example profile.jpg" />
                 }
                 contents={
-                    <Stack direction={isFocused ? "column" : "row"} style={{ flexGrow: 1 }}>
-                        <Box sx={{ pb: 1, pt: 2, display: "inline-flex", flexGrow: 1, position: "relative" }}>
+                    <Stack direction="column" style={{ flexGrow: 1 }}>
+                        <Stack direction={isFocused ? "column" : "row"}>
+                            <Box sx={{ pb: 1, pt: 2, display: "inline-flex", flexGrow: 1, position: "relative" }}>
 
-                            <Typography variant="body1"
-                                style={{
-                                    position: "absolute",
-                                    height: "100%",
-                                    width: "100%",
-                                    overflow: "hidden",
-                                    whiteSpace: "pre",
-                                    lineHeight: "1.4375em",
-                                    overflowWrap: "break-word",
-                                    textWrap: "wrap",
-                                    color: "transparent"
-                                }}
-                            >
-                                {keep}
-                                <mark style={{ background: "#FF000044" }}>{overflow}</mark>
-                            </Typography>
+                                <Typography variant="body1"
+                                    style={{
+                                        position: "absolute",
+                                        height: "100%",
+                                        width: "100%",
+                                        overflow: "hidden",
+                                        whiteSpace: "pre",
+                                        lineHeight: "1.4375em",
+                                        overflowWrap: "break-word",
+                                        textWrap: "wrap",
+                                        color: "transparent"
+                                    }}
+                                >
+                                    {keep}
+                                    <mark style={{ background: "#FF000044" }}>{overflow}</mark>
+                                </Typography>
 
-                            <PlainTextField
-                                placeholder="Post your reply"
-                                multiline
-                                fullWidth
-                                onFocus={handleFocus}
-                                onChange={handleChange}
-                            />
+                                <PlainTextField
+                                    placeholder={props.isComment ? "Post your reply" : "Write something"}
+                                    multiline
+                                    fullWidth
+                                    onFocus={handleFocus}
+                                    onChange={handleChange}
+                                    value={getText}
+                                />
 
-                        </Box>
+                            </Box>
 
-                        <Stack direction="row" alignItems="center" >
-                            {isFocused &&
-                                <Stack direction="row" alignItems="center" justifyContent={"space-between"} style={{ flexGrow: 1 }}>
-                                    <Stack direction="row" spacing={0.5}>
-                                        <CommentButton>insert_photo</CommentButton>
-                                        <CommentButton>gif_box</CommentButton>
-                                        <CommentButton>sentiment_satisfied_alt</CommentButton>
-                                        <CommentButton>location_on</CommentButton>
+                            <Stack direction="row" alignItems="center" >
+                                {isFocused &&
+                                    <Stack direction="row" alignItems="center" justifyContent={"space-between"} style={{ flexGrow: 1 }}>
+                                        <Stack direction="row" spacing={0.5}>
+                                            <input ref={inputRef} type="file" accept={config.accepted_image_types} onChange={handleFile} multiple style={{ display: "none" }} />
+                                            <CommentButton onClick={insertPhoto}>insert_photo</CommentButton>
+                                            <CommentButton>gif_box</CommentButton>
+                                            <CommentButton>sentiment_satisfied_alt</CommentButton>
+                                            <CommentButton>location_on</CommentButton>
+                                        </Stack>
+
+                                        <LetterCounter maxvalue={maxLetters} letters={getText.length} />
                                     </Stack>
+                                }
+                                <Fab disabled={getText.length === 0 || getText.length > maxLetters} variant="extended" size="small" color="primary" onClick={submitPost}>{props.isComment ? "Reply" : "Post"}</Fab>
+                            </Stack>
 
-                                    <LetterCounter maxvalue={maxLetters} letters={getText.length} />
-                                </Stack>
-                            }
-                            <Fab disabled={getText.length === 0 || getText.length > maxLetters} variant="extended" size="small" color="primary">Reply</Fab>
                         </Stack>
+                        <PostMedia images={urls} />
                     </Stack>
                 } />
-        </ListBlock>
+        </>
     );
 }
 
@@ -306,7 +369,7 @@ function LetterCounter(props) {
 
 function CommentButton(props) {
     return (
-        <IconButton color="primary" size="small">
+        <IconButton color="primary" size="small" onClick={props.onClick}>
             <Icon fontSize="small" baseClassName="material-icons-outlined">
                 {props.children}
             </Icon>
@@ -325,12 +388,37 @@ function PostList() {
         views: 9999999,
         repost_count: 353,
         like_count: 4242,
-        comment_count: 1234423, 
+        comment_count: 1234423,
     };
+    const [posts, setPosts] = useState([]);
+
+    useEffect(() => {
+        async function get_posts() {
+            try {
+                const response = await axios.post(Endpoint("/member/feed/get_posts"), {});
+                const new_posts = response.data;
+                new_posts.forEach((post) => {
+                    post.repost = post.reposted_from !== undefined;
+                    post.images = GetPostPictures(post.id, post.image_count);
+                    post.publisher = {
+                        id: post.poster_id,
+                        name: post.poster_name,
+                        username: post.poster_username
+                    }
+                });
+                setPosts(new_posts);
+            }
+            catch (err) {
+                console.log(err);
+            }
+        }
+        get_posts();
+    }, []);
+
     return (
         <List sx={{ p: 0 }}>
-            <PostFocused post={post} />
-            <Post post={post} />
+            <WritePost />
+            {posts.map((post,index) => <Post key={index} post={post} />)}
         </List>
     );
 }
@@ -338,6 +426,7 @@ function PostList() {
 function BlockImage(props) {
     return (
         <div style={{
+            flex: 1,
             aspectRatio: "1 / 1",
             overflow: "hidden"
         }}>
@@ -362,7 +451,7 @@ function PostBottomIcon(props) {
 
 function PostMedia(props) {
     const spacing = "2px";
-    const images = props.post.images;
+    const images = props.images;
     if (images && images.length > 0) {
         let imageElements;
         const count = images.length;
@@ -458,7 +547,7 @@ function Reposted(props) {
 function ListBlock(props) {
     return (
         <ListItem sx={{ borderBottom: 1, borderColor: "divider" }}>
-            <Stack direction="column" style={{ overflow: "hidden" }}>
+            <Stack direction="column" style={{ overflow: "hidden", width: "100%" }}>
                 {props.children}
             </Stack>
         </ListItem>
@@ -469,7 +558,7 @@ function ListBlockButton(props) {
     return (
         <ListItem disablePadding sx={{ borderBottom: 1, borderColor: "divider" }}>
             <ListItemButton>
-                <Stack direction="column" style={{ overflow: "hidden" }}>
+                <Stack direction="column" style={{ overflow: "hidden", width: "100%" }}>
                     {props.children}
                 </Stack>
             </ListItemButton>

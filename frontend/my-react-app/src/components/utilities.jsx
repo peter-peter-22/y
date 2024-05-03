@@ -24,6 +24,7 @@ import { UserData } from "/src/App.jsx";
 import { Error, Modals } from "/src/components/modals";
 import axios from 'axios';
 import Tooltip from '@mui/material/Tooltip';
+import config from "/src/components/config.js";
 
 const noOverflow = {
     whiteSpace: 'nowrap',
@@ -185,7 +186,7 @@ function DateLink(props) {
     const moment = Moment(new Date(props.isoString));
     const hover = moment.format('h:mm a [·] MM DD YYYY');
     let display;
-     if (props.passed) {
+    if (props.passed) {
         const passed = Moment.duration(Moment().diff(moment));
         if (passed.asSeconds() < 60)
             display = Math.round(passed.asSeconds()) + "s";
@@ -195,7 +196,7 @@ function DateLink(props) {
             display = Math.round(passed.asHours()) + "h";
         else if (passed.asDays() < 7)
             display = Math.round(passed.asDays()) + "d";
-        else display= moment.format('MMM DD');
+        else display = moment.format('MMM DD');
     }
     else
         display = hover;
@@ -284,8 +285,14 @@ function FollowButton(props) {
 }
 
 function GetProfilePicture(user) {
-    return (user ? Endpoint("/images/profiles/" + user.id + ".jpg") : default_profile);
+    return (user ? Endpoint(config.profile_pics_url + "/" + user.id + ".jpg") : default_profile);
+}
+function GetPostPictures(post_id, image_count) {
+    const images = [];
+    for (let n = 0; n < image_count; n++)
+        images.push(Endpoint(config.post_pics_url + "/" + post_id + "_" + n + ".jpg"))
+    return images;
 }
 
 
-export { AboveBreakpoint, ResponsiveSelector, ChooseChild, ChooseChildBool, TopMenu, ProfileText, FadeLink, TabSwitcher, UserName, UserKey, noOverflow, BoldLink, UserLink, DateLink, TextRow, UserKeyLink, ReplyingTo, GetUserName, GetUserKey, logo, creation, ToCorner, CenterLogo, default_profile, FollowDialog, GetProfilePicture, default_image,FollowButton }
+export { AboveBreakpoint, ResponsiveSelector, ChooseChild, ChooseChildBool, TopMenu, ProfileText, FadeLink, TabSwitcher, UserName, UserKey, noOverflow, BoldLink, UserLink, DateLink, TextRow, UserKeyLink, ReplyingTo, GetUserName, GetUserKey, logo, creation, ToCorner, CenterLogo, default_profile, FollowDialog, GetProfilePicture, default_image, FollowButton, GetPostPictures }

@@ -23,17 +23,14 @@ import * as g from "../../global.js";
 import * as pp from "../../components/passport.js";
 import { username_exists, selectable_username } from "../user.js";
 import { Validator } from "node-input-validator";
-import { CheckV, CheckErr } from "../../components/validations.js";
+import { CheckV, CheckErr,validate_image } from "../../components/validations.js";
 import { ApplySqlToUser,UpdateUser } from "../logged_in.js";
 
 const router = express.Router();
 
 router.post("/update_profile_picture", async (req, res) => {
     const file = req.files.image;
-
-    const imagesType = ['image/png', 'image/jpeg', 'image/jpg'];
-    if (!imagesType.includes(file.mimetype))
-        res.status(400).send("invalid image, only .jpg images are accepted");
+    validate_image(file);
 
     file.mv(config.__dirname + "/public/images/profiles/" + req.user.id + ".jpg");
     res.sendStatus(200);

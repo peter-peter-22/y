@@ -1,5 +1,6 @@
 import axios from "axios";
 import { Error } from "/src/components/modals";
+import config from "/src/components/config.js";
 
 axios.defaults.withCredentials = true
 
@@ -10,7 +11,7 @@ axios.interceptors.response.use(function (response) {
     return Promise.reject(error);
 });
 
-const url = "http://localhost:3000";
+const url = config.server_url;
 
 function Endpoint(endpoint) {
     return (url + endpoint);

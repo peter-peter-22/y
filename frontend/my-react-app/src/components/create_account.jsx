@@ -44,6 +44,7 @@ import Dialog from '@mui/material/Dialog';
 import { UserData } from "/src/App.jsx";
 import { Error, Modals } from "/src/components/modals";
 import { AlternativeLogin, GrowingLine, BigModal, Or, BottomButtonWithBorder, ByRegistering, margin, bigmargin } from "/src/components/no_user";
+import config from "/src/components/config.js";
 
 function CreateAccount(props) {
     const pages = props.pages ? props.pages : [0, 1, 2, 3, 4];
@@ -411,7 +412,7 @@ function CreateAccount(props) {
                         <Avatar sx={{ height: "200px", width: "200px" }}>
                             <img src={fileUrl ? fileUrl : default_profile} style={{ height: "100%", width: "100%", objectFit: "cover" }} />
                             <Fab size="small" color="transparentBlack" sx={{ border: 1, borderColor: "divider", position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}>
-                                <VisuallyHiddenInput type="file" accept="image/*" onChange={handleFile} />
+                                <VisuallyHiddenInput type="file" accept={config.accepted_image_types} onChange={handleFile} />
                                 <Icon baseClassName="material-icons-outlined">
                                     add_a_photo
                                 </Icon>

@@ -55,4 +55,10 @@ niv.extend('datepast', ({ value }) => {
   return !moment.isAfter();
 });
 
-export { CheckV, CheckErr };
+function validate_image(file) {
+  const imagesType = ['image/png', 'image/jpeg', 'image/jpg'];
+  if (!imagesType.includes(file.mimetype))
+    CheckErr("invalid image(s), only .jpg and .png images are accepted");
+}
+
+export { CheckV, CheckErr,validate_image };
