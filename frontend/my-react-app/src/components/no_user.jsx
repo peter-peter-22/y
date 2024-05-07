@@ -58,7 +58,7 @@ export default () => {
     return (
         <div style={{ height: "100vh" }}>
 
-            <Stack direction="column" style={{ height: "100%", position: "relative", zIndex: 0 }}>
+            <Stack direction="column" style={{ height: "100%" }}>
                 <Stack direction="row" style={{ justifyContent: "space-evenly", alignItems: "center", flexGrow: 1 }}>
                     <img src={logo} style={{ height: "350px" }} />
                     <Stack direction="column">

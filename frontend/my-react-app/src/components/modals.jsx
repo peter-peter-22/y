@@ -3,7 +3,7 @@ import Stack from '@mui/material/Stack';
 import SideMenu, { Inside } from "./side_menus.jsx";
 import { TopMenu } from '/src/components/utilities';
 import { SearchField } from "/src/components/inputs.jsx";
-import { Box } from '@mui/material';
+import { Backdrop, Box } from '@mui/material';
 import { Typography } from '@mui/material';
 import Fab from '@mui/material/Fab';
 import { Icon } from '@mui/material';
@@ -46,21 +46,6 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Dialog from '@mui/material/Dialog';
 
-function ErrorModal(props) {
-    return (
-        <>
-            <DialogTitle color="error">
-                {props.title ? props.title : "Error"}
-            </DialogTitle>
-            <DialogContent>
-                <DialogContentText>
-                    {props.text}
-                </DialogContentText>
-            </DialogContent>
-        </>
-    );
-}
-
 //creating modal data
 let Modals = [];
 
@@ -97,10 +82,14 @@ function CreateModals(props) {
         <>
             <CreateModal id={0} />
             <CreateModal id={1} />
+            <ImagesModal />
         </>
     );
 }
 
+//specific modals
+
+//error
 function Error(err) {
     ErrorText(FormatAxiosError(err));
 }
@@ -109,4 +98,98 @@ function ErrorText(text) {
     Modals[1].Show(<ErrorModal text={text} />);
 }
 
-export { ErrorModal, Modals, CreateModals, Error, ErrorText };
+function ErrorModal(props) {
+    return (
+        <>
+            <DialogTitle color="error">
+                {props.title ? props.title : "Error"}
+            </DialogTitle>
+            <DialogContent>
+                <DialogContentText>
+                    {props.text}
+                </DialogContentText>
+            </DialogContent>
+        </>
+    );
+}
+
+//image
+const ImagesDisplay = {};
+function ImagesModal(props) {
+    const [open, setOpen] = useState(false);
+    const [index, setIndex] = useState(0);
+    const imagesRef = useRef(null);
+    const url = imagesRef.images?imagesRef.images[index]:"";
+
+    ImagesDisplay.Show = (images, imageIndex) => {
+        try {
+            imagesRef.images = images;
+            setOpen(true);
+            setIndex(imageIndex);
+        }
+        catch (err) {
+            Error(err);
+        }
+    };
+
+    function Close() {
+        setOpen(false);
+    }
+
+    function Step(steps, event) {
+        event.stopPropagation();
+        setIndex((prev) => {
+            let index_ = prev + steps;
+            const length = imagesRef.images.length;
+            if (index_ < 0)
+                index_ += length;
+            else if (index_ >= length)
+                index_ -= length;
+            return index_;
+        });
+    }
+
+    const image = (
+        <div style={{ flexGrow: 1, height: "100%", width: "100%", backgroundImage: "url(" + url + ")", backgroundRepeat: "no-repeat", backgroundPosition: "center", backgroundSize: "contain" }} />
+    );
+
+    return (
+        <Backdrop open={open} onClick={Close} style={{ zIndex: 1 }}>
+            <ResponsiveSelector breakpoint="md">
+                <Stack direction="row" style={{ height: "80%", width: "80%", alignItems: "center", justifyContent: "center" }}>
+                    <StepButton icon="arrow_left" tall={true} onClick={(e) => { Step(1, e); }} />
+                    {image}
+                    <StepButton icon="arrow_right" tall={true} onClick={(e) => { Step(-1, e); }} />
+                </Stack>
+
+                <Stack direction="column" style={{ height: "80%", width: "95%", alignItems: "center", justifyContent: "center" }}>
+                    {image}
+                    <Stack direction="row" style={{ width: "100%" }}>
+                        <StepButton icon="arrow_left" onClick={(e) => { Step(1, e); }} />
+                        <StepButton icon="arrow_right" onClick={(e) => { Step(-1, e); }} />
+                    </Stack>
+                </Stack>
+            </ResponsiveSelector>
+        </Backdrop>
+    );
+}
+
+function StepButton(props) {
+    return (
+        <Box sx={{
+            display: "flex", width: props.tall ? "50px" : "100%", height: props.tall ? "100%" : "50px", justifyContent: "center", alignItems: "center",
+            fontSize: "50px", "&:hover": { fontSize: "75px" }
+        }}
+            onClick={props.onClick}>
+            <Icon sx={{ color: "primary.contrastText", fontSize: "inherit" }}>
+                {props.icon}
+            </Icon>
+        </Box >
+    );
+}
+
+function ShowImage(images, imageIndex) {
+    ImagesDisplay.Show(images, imageIndex);
+}
+
+export { ErrorModal, Modals, ImagesDisplay, CreateModals, Error, ErrorText, ShowImage };

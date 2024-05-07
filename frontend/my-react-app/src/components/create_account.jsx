@@ -188,7 +188,7 @@ function CreateAccount(props) {
 
     //profile pic
     const [file, setFile] = useState();
-    const imageUrlRef = useRef();
+    const imageUrlRef = useRef(null);
     const fileUrl = imageUrlRef.url;
 
     function handleFile(e) {

@@ -30,6 +30,7 @@ import { UserData } from "/src/App.jsx";
 import config from "/src/components/config.js";
 import axios from 'axios';
 import { Endpoint, FormatAxiosError } from "/src/communication.js";
+import { Error, Modals,ShowImage } from "/src/components/modals";
 
 function Prefix(props) {
     return (
@@ -429,7 +430,8 @@ function BlockImage(props) {
             flex: 1,
             aspectRatio: "1 / 1",
             overflow: "hidden"
-        }}>
+        }}
+        onClick={props.onClick}>
             <img src={props.src} style={{
                 width: "100%",
                 height: "100%",
@@ -452,6 +454,12 @@ function PostBottomIcon(props) {
 function PostMedia(props) {
     const spacing = "2px";
     const images = props.images;
+
+    function Show(index)
+    {
+        ShowImage(images,index);
+    }
+
     if (images && images.length > 0) {
         let imageElements;
         const count = images.length;
@@ -464,8 +472,8 @@ function PostMedia(props) {
             imageElements = (
                 <>
                     <Stack direction="row" spacing={spacing}>
-                        <BlockImage src={images[0]} />
-                        <BlockImage src={images[1]} />
+                        <BlockImage src={images[0]} onClick={()=>{Show(0);}}/>
+                        <BlockImage src={images[1]} onClick={()=>{Show(1);}}/>
                     </Stack>
                 </>);
         }
@@ -473,11 +481,11 @@ function PostMedia(props) {
             imageElements = (
                 <>
                     <Stack direction="row" spacing={spacing}>
-                        <BlockImage src={images[0]} />
+                        <BlockImage src={images[0]} onClick={()=>{Show(0);}}/>
                     </Stack>
                     <Stack direction="row" spacing={spacing}>
-                        <BlockImage src={images[1]} />
-                        <BlockImage src={images[2]} />
+                        <BlockImage src={images[1]} onClick={()=>{Show(1);}}/>
+                        <BlockImage src={images[2]} onClick={()=>{Show(2);}}/>
                     </Stack>
                 </>);
         }
@@ -485,12 +493,12 @@ function PostMedia(props) {
             imageElements = (
                 <>
                     <Stack direction="row" spacing={spacing}>
-                        <BlockImage src={images[0]} />
-                        <BlockImage src={images[1]} />
+                        <BlockImage src={images[0]} onClick={()=>{Show(0);}}/>
+                        <BlockImage src={images[1]} onClick={()=>{Show(1);}}/>
                     </Stack>
                     <Stack direction="row" spacing={spacing}>
-                        <BlockImage src={images[2]} />
-                        <BlockImage src={images[3]} />
+                        <BlockImage src={images[2]} onClick={()=>{Show(2);}}/>
+                        <BlockImage src={images[3]} onClick={()=>{Show(3);}}/>
                     </Stack>
                 </>);
         }

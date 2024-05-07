@@ -42,7 +42,7 @@ function App() {
 
       //after register message
       if (response.data.showStartMessage) {
-        Modals[0].Show(<CreateAccount pages={[5,6,7,8]}/>, CloseStartMessage);
+        Modals[0].Show(<CreateAccount pages={[5, 6, 7, 8]} />, CloseStartMessage);
 
         async function CloseStartMessage() {
           await axios.get(Endpoint("/member/close_starting_message"));
@@ -52,7 +52,7 @@ function App() {
 
       //pending registration
       if (response.data.pending_registration) {
-        Modals[0].Show(<CreateAccount pages={[1,9]} finish/>, ExitRegistration);
+        Modals[0].Show(<CreateAccount pages={[1, 9]} finish />, ExitRegistration);
 
         async function ExitRegistration() {
           await axios.get(Endpoint("/exit_registration"));
@@ -82,7 +82,9 @@ function App() {
   return (
     <>
       <CreateModals />
-      {page}
+      <div style={{ position: "relative", zIndex: 0 }}>
+        {page}
+      </div>
     </>
   );
 }
