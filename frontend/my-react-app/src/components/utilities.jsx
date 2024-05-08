@@ -224,7 +224,7 @@ function ReplyingTo(props) {
     return (
         <TextRow >
             <Typography variant="small_fade" style={{ flexShrink: 0, ...noOverflow }}>Replying to</Typography>
-            <UserKeyLink />
+            <UserKeyLink user={props.user}/>
         </TextRow>
     );
 }

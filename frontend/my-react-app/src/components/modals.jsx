@@ -157,16 +157,16 @@ function ImagesModal(props) {
         <Backdrop open={open} onClick={Close} style={{ zIndex: 1 }}>
             <ResponsiveSelector breakpoint="md">
                 <Stack direction="row" style={{ height: "80%", width: "80%", alignItems: "center", justifyContent: "center" }}>
-                    <StepButton icon="arrow_left" tall={true} onClick={(e) => { Step(1, e); }} />
+                    <StepButton icon="arrow_left" tall={true} onClick={(e) => { Step(-1, e); }} />
                     {image}
-                    <StepButton icon="arrow_right" tall={true} onClick={(e) => { Step(-1, e); }} />
+                    <StepButton icon="arrow_right" tall={true} onClick={(e) => { Step(1, e); }} />
                 </Stack>
 
                 <Stack direction="column" style={{ height: "80%", width: "95%", alignItems: "center", justifyContent: "center" }}>
                     {image}
                     <Stack direction="row" style={{ width: "100%" }}>
-                        <StepButton icon="arrow_left" onClick={(e) => { Step(1, e); }} />
-                        <StepButton icon="arrow_right" onClick={(e) => { Step(-1, e); }} />
+                        <StepButton icon="arrow_left" onClick={(e) => { Step(-1, e); }} />
+                        <StepButton icon="arrow_right" onClick={(e) => { Step(1, e); }} />
                     </Stack>
                 </Stack>
             </ResponsiveSelector>

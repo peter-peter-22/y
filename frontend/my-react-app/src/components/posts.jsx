@@ -30,7 +30,7 @@ import { UserData } from "/src/App.jsx";
 import config from "/src/components/config.js";
 import axios from 'axios';
 import { Endpoint, FormatAxiosError } from "/src/communication.js";
-import { Error, Modals,ShowImage } from "/src/components/modals";
+import { Error, Modals, ShowImage } from "/src/components/modals";
 
 function Prefix(props) {
     return (
@@ -50,34 +50,38 @@ function RowWithPrefix(props) {
 }
 
 function Post(props) {
+    function OpenPost() {
+        window.open("/posts/" + props.post.id, "_self");
+    }
     return (
         <ListBlockButton>
-            <Reposted post={props.post} />
-            <RowWithPrefix
-                prefix={<Avatar src={GetProfilePicture(props.post.publisher)} />}
-                contents={
-                    <Stack direction="column" style={{ overflow: "hidden" }}>
-                        <Stack direction="row" spacing={0.25} style={{ alignItems: "center" }}>
-                            <UserName user={props.post.publisher} />
-                            <UserKey user={props.post.publisher} />
-                            ·
-                            <DateLink passed isoString={props.post.date} />
-                            <ManagePost />
+            <div onClick={OpenPost}>
+                <Reposted post={props.post} />
+                <RowWithPrefix
+                    prefix={<Avatar src={GetProfilePicture(props.post.publisher)} />}
+                    contents={
+                        <Stack direction="column" style={{ overflow: "hidden" }}>
+                            <Stack direction="row" spacing={0.25} style={{ alignItems: "center" }}>
+                                <UserName user={props.post.publisher} />
+                                <UserKey user={props.post.publisher} />
+                                ·
+                                <DateLink passed isoString={props.post.date} />
+                                <ManagePost />
+                            </Stack>
+                            <PostText post={props.post} />
+                            <PostMedia images={props.post.images} />
                         </Stack>
-                        <PostText post={props.post} />
-                        <PostMedia images={props.post.images} />
+                    } />
+                <RowWithPrefix contents={
+                    <Stack direction="column" style={{ overflow: "hidden", flexGrow: 1 }}>
+                        <FromUser post={props.post} />
+                        <PostButtonRow post={props.post} />
                     </Stack>
                 } />
-            <RowWithPrefix contents={
-                <Stack direction="column" style={{ overflow: "hidden", flexGrow: 1 }}>
-                    <FromUser post={props.post} />
-                    <PostButtonRow post={props.post} />
-                </Stack>
-            } />
+            </div>
         </ListBlockButton>
     );
 }
-
 
 function PostFocused(props) {
     return (
@@ -115,7 +119,7 @@ function PostFocused(props) {
 
             <Divider />
 
-            <PostCreator isComment />
+            <PostCreator post={props.post} />
         </ListBlock>
     );
 }
@@ -134,6 +138,7 @@ function PostCreator(props) {
     const maxLetters = 280;
     const keep = getText.substring(0, maxLetters);
     const overflow = getText.substring(maxLetters);
+    const isComment = props.post !== undefined;
 
     const handleFocus = () => {
         setIsFocused(true);
@@ -166,9 +171,11 @@ function PostCreator(props) {
         const formData = new FormData();
         files.forEach(file => formData.append('images', file));
         formData.append('text', getText);
+        if (isComment)
+            formData.append("replying_to", props.post.id);
 
         await axios.post(
-            Endpoint('/member/create/post'),
+            Endpoint(isComment ? "/member/create/comment" : '/member/create/post'),
             formData,
             {
                 headers: {
@@ -183,16 +190,16 @@ function PostCreator(props) {
 
     return (
         <>
-            {props.isComment && isFocused &&
+            {isComment && isFocused &&
                 <Box sx={{ my: 1 }} >
                     <RowWithPrefix contents={
-                        <ReplyingTo />
+                        <ReplyingTo user={props.post.publisher} />
                     } />
                 </Box>
             }
             <RowWithPrefix
                 prefix={
-                    <Avatar sx={{ py: 1 }} src="/images/example profile.jpg" />
+                    <Avatar sx={{ my: 1 }} src={GetProfilePicture(UserData.getData.user)} />
                 }
                 contents={
                     <Stack direction="column" style={{ flexGrow: 1 }}>
@@ -241,7 +248,7 @@ function PostCreator(props) {
                                         <LetterCounter maxvalue={maxLetters} letters={getText.length} />
                                     </Stack>
                                 }
-                                <Fab disabled={getText.length === 0 || getText.length > maxLetters} variant="extended" size="small" color="primary" onClick={submitPost}>{props.isComment ? "Reply" : "Post"}</Fab>
+                                <Fab disabled={getText.length === 0 || getText.length > maxLetters} variant="extended" size="small" color="primary" onClick={submitPost}>{isComment ? "Reply" : "Post"}</Fab>
                             </Stack>
 
                         </Stack>
@@ -271,40 +278,93 @@ function formatNumber(number) {
 }
 
 function PostButtonRow(props) {
+    const post = props.post;
+    const { count: like_count, active: liked, pressed: handleLike } = CountableButton(post, post.like_count, post.liked_by_user, "/member/like");
+    const { count: bookmark_count, active: bookmarked, pressed: handleBookmark } = CountableButton(post, post.bookmark_count, post.bookmarked_by_user, "/member/bookmark");
+
+
+    async function handleComment() {
+        console.log("open comment dialog");
+    }
+
+    async function handleShare() {
+    }
+
     return (
         <Stack direction="row" justifyContent="space-between" style={{ flexGrow: 1 }} >
 
-            <PostBottomIcon text={formatNumber(props.post.comment_count)} >
-                chat_bubble_outline
-            </PostBottomIcon>
+            <PostBottomIcon text={formatNumber(post.comment_count)}
+                active_icon="chat_bubble_outline"
+                inactive_icon="chat_bubble_outline"
+                active_color="primary.main"
+                onClick={handleComment} />
 
-            <PostBottomIcon text={formatNumber(props.post.repost_count)} >
-                loop
-            </PostBottomIcon>
+            <PostBottomIcon text={formatNumber(post.repost_count)}
+                active_icon="loop"
+                inactive_icon="loop"
+                active_color="colors.share" />
 
-            <PostBottomIcon text={formatNumber(props.post.like_count)} >
-                favorite_border
-            </PostBottomIcon>
+            <PostBottomIcon text={formatNumber(like_count)}
+                active_icon="favorite"
+                inactive_icon="favorite_border"
+                active_color="colors.like"
+                active={liked}
+                onClick={handleLike} />
 
-            <PostBottomIcon text={formatNumber(props.post.views)} >
-                align_vertical_bottom
-            </PostBottomIcon>
+            <PostBottomIcon text={formatNumber(post.views)}
+                active_icon="align_vertical_bottom"
+                inactive_icon="align_vertical_bottom"
+                active_color="primary.main" />
 
-            <Stack direction="row">
-                <IconButton size="small">
-                    <Icon fontSize="small">
-                        bookmark_border
-                    </Icon>
-                </IconButton>
+            <PostBottomIcon
+                text={formatNumber(bookmark_count)}
+                active_icon="bookmark"
+                inactive_icon="bookmark_border"
+                active_color="primary.main"
+                active={bookmarked}
+                onClick={handleBookmark} />
 
-                <IconButton size="small">
-                    <Icon fontSize="small">
-                        upload
-                    </Icon>
-                </IconButton>
-            </Stack>
+            <IconButton size="small">
+                <Icon fontSize="small">
+                    upload
+                </Icon>
+            </IconButton>
         </Stack>
     );
+}
+
+function CountableButton(post, initial_count, initial_active, url) {
+    const [like, setLike] = useState(initial_active);
+    function handleLike() {
+        setLike((prev) => {
+            const newValue = !prev;
+
+            async function updateServer(newValue) {
+                try {
+                    await axios.post(Endpoint(url), { post: post.id, value: newValue });
+                }
+                catch {
+                    setLike(prev);//server error, put back previous value
+                }
+            }
+            updateServer(newValue);
+
+            return newValue;
+        });
+    }
+
+
+    let like_offset = 0;
+    if (like)
+        like_offset += 1;
+    if (initial_active)
+        like_offset -= 1;
+
+    return {
+        count: initial_count + like_offset,
+        active: like,
+        pressed: handleLike,
+    }
 }
 
 function LetterCounter(props) {
@@ -379,18 +439,21 @@ function CommentButton(props) {
 }
 
 function PostList() {
-    const post = {
-        repost: false,
-        reposted_from: UserData.getData.user,
-        publisher: UserData.getData.user,
-        date: new Date("2024-01-01").toISOString(),
-        text: "post text",
-        images: [default_image],
-        views: 9999999,
-        repost_count: 353,
-        like_count: 4242,
-        comment_count: 1234423,
-    };
+    // const post = {
+    //     repost: false,
+    //     reposted_from: UserData.getData.user,
+    //     publisher: UserData.getData.user,
+    //     date: new Date("2024-01-01").toISOString(),
+    //     text: "post text",
+    //     images: [default_image],
+    //     views: 9999999,
+    //     repost_count: 353,
+    //     like_count: 4242,
+    //     comment_count: 1234423,
+    //     liked_by_user:true,
+    //     bookmark_count,
+    //     bookmarked_by_user:true,
+    // };
     const [posts, setPosts] = useState([]);
 
     useEffect(() => {
@@ -399,13 +462,7 @@ function PostList() {
                 const response = await axios.post(Endpoint("/member/feed/get_posts"), {});
                 const new_posts = response.data;
                 new_posts.forEach((post) => {
-                    post.repost = post.reposted_from !== undefined;
-                    post.images = GetPostPictures(post.id, post.image_count);
-                    post.publisher = {
-                        id: post.poster_id,
-                        name: post.poster_name,
-                        username: post.poster_username
-                    }
+                    AddDataToPost(post);
                 });
                 setPosts(new_posts);
             }
@@ -419,7 +476,7 @@ function PostList() {
     return (
         <List sx={{ p: 0 }}>
             <WritePost />
-            {posts.map((post,index) => <Post key={index} post={post} />)}
+            {posts.map((post, index) => <Post key={index} post={post} />)}
         </List>
     );
 }
@@ -429,23 +486,25 @@ function BlockImage(props) {
         <div style={{
             flex: 1,
             aspectRatio: "1 / 1",
-            overflow: "hidden"
+            overflow: "hidden",
+            position: "relative"
         }}
-        onClick={props.onClick}>
+            onClick={props.onClick}>
             <img src={props.src} style={{
                 width: "100%",
                 height: "100%",
                 objectFit: "cover",
             }} />
+            {props.children}
         </div>
     )
 }
 
 function PostBottomIcon(props) {
     return (
-        <IconButton size="small">
-            <Icon fontSize="small">
-                {props.children}
+        <IconButton size="small" onClick={props.onClick}>
+            <Icon sx={{ color: props.active ? props.active_color : "" }} fontSize="small" baseClassName={props.active ? "material-icons" : "material-icons-outlined"}>
+                {props.active ? props.active_icon : props.inactive_icon}
             </Icon>
             <Typography variant="small" color="secondary" style={{ position: "absolute", left: "90%" }}>{props.text}</Typography>
         </IconButton>);
@@ -455,9 +514,17 @@ function PostMedia(props) {
     const spacing = "2px";
     const images = props.images;
 
-    function Show(index)
-    {
-        ShowImage(images,index);
+    function Show(index, e) {
+        e.stopPropagation();
+        ShowImage(images, index);
+    }
+
+    function ClickableImage(props) {
+        return (
+            <BlockImage src={images[props.index]} onClick={(e) => { Show(props.index, e); }}>
+                {props.children}
+            </BlockImage>
+        );
     }
 
     if (images && images.length > 0) {
@@ -465,15 +532,15 @@ function PostMedia(props) {
         const count = images.length;
         if (count === 1) {
             imageElements = (
-                <BlockImage src={images[0]} />
+                <ClickableImage index={0} />
             );
         }
         else if (count === 2) {
             imageElements = (
                 <>
                     <Stack direction="row" spacing={spacing}>
-                        <BlockImage src={images[0]} onClick={()=>{Show(0);}}/>
-                        <BlockImage src={images[1]} onClick={()=>{Show(1);}}/>
+                        <ClickableImage index={0} />
+                        <ClickableImage index={1} />
                     </Stack>
                 </>);
         }
@@ -481,24 +548,30 @@ function PostMedia(props) {
             imageElements = (
                 <>
                     <Stack direction="row" spacing={spacing}>
-                        <BlockImage src={images[0]} onClick={()=>{Show(0);}}/>
+                        <ClickableImage index={0} />
                     </Stack>
                     <Stack direction="row" spacing={spacing}>
-                        <BlockImage src={images[1]} onClick={()=>{Show(1);}}/>
-                        <BlockImage src={images[2]} onClick={()=>{Show(2);}}/>
+                        <ClickableImage index={1} />
+                        <ClickableImage index={2} />
                     </Stack>
                 </>);
         }
-        else if (count === 4) {
+        else if (count >= 4) {
             imageElements = (
                 <>
                     <Stack direction="row" spacing={spacing}>
-                        <BlockImage src={images[0]} onClick={()=>{Show(0);}}/>
-                        <BlockImage src={images[1]} onClick={()=>{Show(1);}}/>
+                        <ClickableImage index={0} />
+                        <ClickableImage index={1} />
                     </Stack>
                     <Stack direction="row" spacing={spacing}>
-                        <BlockImage src={images[2]} onClick={()=>{Show(2);}}/>
-                        <BlockImage src={images[3]} onClick={()=>{Show(3);}}/>
+                        <ClickableImage index={2} />
+                        <ClickableImage index={3}>
+                            {count > 4 &&
+                                <Box sx={{ backgroundColor: "transparentBlack.main", }} style={{ position: "absolute", width: "100%", height: "100%", top: "0", left: "0", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                    <Typography variant="medium_bold" color="primary.contrastText">+{count - 4}</Typography>
+                                </Box>
+                            }
+                        </ClickableImage>
                     </Stack>
                 </>);
         }
@@ -574,5 +647,15 @@ function ListBlockButton(props) {
     );
 }
 
+function AddDataToPost(post) {
+    post.repost = post.reposted_from !== null;
+    post.images = GetPostPictures(post.id, post.image_count);
+    post.publisher = {
+        id: post.poster_id,
+        name: post.poster_name,
+        username: post.poster_username
+    }
+}
 
-export { Post, PostList, PostFocused, ListBlockButton, ListBlock, RowWithPrefix, PostButtonRow };
+
+export { Post, PostList, PostFocused, ListBlockButton, ListBlock, RowWithPrefix, PostButtonRow, AddDataToPost };

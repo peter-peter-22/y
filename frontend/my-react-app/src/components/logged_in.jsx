@@ -11,6 +11,7 @@ import Home from "/src/pages/home";
 import Test from "/src/pages/test";
 import Notifications from "/src/pages/notifications";
 import Error from "/src/pages/error";
+import PostFocused from "/src/pages/post_focused";
 
 export default () => {
   const isBig = AboveBreakpoint("sm");
@@ -24,6 +25,7 @@ export default () => {
               <Route path="/" element={<Home />} />
               <Route path="/test" element={<Test />} />
               <Route path="/notifications" element={<Notifications />} />
+              <Route path="/posts/:id" element={<PostFocused />} />
               <Route path="*" element={<Error />} />
             </Routes>
           </div>

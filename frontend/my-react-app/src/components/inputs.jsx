@@ -1,8 +1,8 @@
 import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
 import { Icon } from '@mui/material';
-import React, {useState} from "react";
-import {  IconButton } from '@mui/material';
+import React, { useState } from "react";
+import { IconButton } from '@mui/material';
 import { styled } from '@mui/material/styles';
 
 function SearchField() {
@@ -57,9 +57,10 @@ function SearchField() {
         }} />);
 }
 
-function PlainTextField(props) {
+const PlainTextField = React.forwardRef((props, ref) => {
     return (
         <TextField
+        inputRef={ref}
             {...props}
             sx={{
                 "& .MuiInputBase-root": {
@@ -71,43 +72,43 @@ function PlainTextField(props) {
             }}
         />
     );
-}
+});
 
 function PasswordFieldWithToggle(props) {
     const [showPassword, setShowPassword] = useState(false);
-  
+
     const handleTogglePasswordVisibility = () => {
-      setShowPassword((prevShowPassword) => !prevShowPassword);
+        setShowPassword((prevShowPassword) => !prevShowPassword);
     };
-  
+
     const handlePasswordChange = (event) => {
         const value = event.target.value;
-      props.handlechange(value);
+        props.handlechange(value);
     };
 
-    const propsWithoutHandleChange={...props};
-    propsWithoutHandleChange.handlechange=undefined;
-  
+    const propsWithoutHandleChange = { ...props };
+    propsWithoutHandleChange.handlechange = undefined;
+
     return (
         <TextField
-          type={showPassword ? 'text' : 'password'}
-          value={props.value}
-          onChange={handlePasswordChange}
-          {...propsWithoutHandleChange}
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton onClick={handleTogglePasswordVisibility}>
-                  {showPassword ? <Icon>visibility_off</Icon> : <Icon>visibility</Icon>}
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
+            type={showPassword ? 'text' : 'password'}
+            value={props.value}
+            onChange={handlePasswordChange}
+            {...propsWithoutHandleChange}
+            InputProps={{
+                endAdornment: (
+                    <InputAdornment position="end">
+                        <IconButton onClick={handleTogglePasswordVisibility}>
+                            {showPassword ? <Icon>visibility_off</Icon> : <Icon>visibility</Icon>}
+                        </IconButton>
+                    </InputAdornment>
+                ),
+            }}
         />
     );
-  }
+}
 
-  const VisuallyHiddenInput = styled('input')({
+const VisuallyHiddenInput = styled('input')({
     height: "100%",
     overflow: 'hidden',
     position: 'absolute',
@@ -118,6 +119,6 @@ function PasswordFieldWithToggle(props) {
     opacity: 0
 });
 
-  
 
-export { SearchField,PlainTextField,PasswordFieldWithToggle,VisuallyHiddenInput };
+
+export { SearchField, PlainTextField, PasswordFieldWithToggle, VisuallyHiddenInput };

@@ -25,12 +25,13 @@ import { username_exists, selectable_username } from "../user.js";
 import { Validator } from "node-input-validator";
 import { CheckV, CheckErr, validate_image } from "../../components/validations.js";
 import { ApplySqlToUser, UpdateUser } from "../logged_in.js";
+import { postQuery } from "./general.js";
 
 const router = express.Router();
 
-router.post("/get_posts", async (req, res) => {
-    const result = await db.query(named("select post.text, post.id, post.image_count, post.date, (select count(*) from likes where likes.post=post.id)::INT as like_count, (0)::INT as comment_count,(0)::INT as repost_count,poster.id as poster_id,poster.name as poster_name,poster.username as poster_username from posts post left join users poster on post.publisher=poster.id ")({}));
-    res.status(200).send(result.rows);
+router.post("/get_posts", async (req, res,next) => {
+    const result = await postQuery(req,next, " WHERE post.replying_to IS NULL");
+    res.status(200).send(result);
 });
 
 

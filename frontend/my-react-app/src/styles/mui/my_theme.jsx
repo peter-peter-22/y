@@ -41,7 +41,7 @@ const black = {
 
 const colors = {
     like: "#F91880",
-    share: "#00BA7C"
+    share: "#00BA7C",
 }
 
 //fonts

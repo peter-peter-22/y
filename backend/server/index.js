@@ -49,11 +49,10 @@ app.use((err, req, res, next) => {
         console.error(err)
         res.status(500).send("Internal server error: '" + err.message + "'");
     }
-    else
-    {
+    else {
         res.status(err.status).send(err.message);
     }
-})
+});
 
 const port = config.port;
 app.listen(port, () => {
