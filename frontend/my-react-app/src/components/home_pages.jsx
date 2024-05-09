@@ -1,4 +1,4 @@
-import React from "react";
+import React,{useState,useEffect} from "react";
 import Stack from '@mui/material/Stack';
 import SideMenu, { Inside } from "./side_menus.jsx";
 import { TopMenu } from '/src/components/utilities';
@@ -19,12 +19,36 @@ import { BoxList, BoxListOutlined, BlueTextButton } from '/src/components/contai
 import IconButton from '@mui/material/IconButton';
 import Link from '@mui/material/Link';
 import { ResponsiveButton, ButtonIcon, ButtonSvg, TabButton, PostButton, ProfileButton, TopMenuButton, CornerButton } from "/src/components/buttons.jsx";
-import { PostList } from "/src/components/posts.jsx";
+import { PostList, WritePost,AddDataToPost } from "/src/components/posts.jsx";
+import axios from "axios";
+import { Endpoint, FormatAxiosError } from "/src/communication.js";
 
 function ForYou() {
+    const [posts, setPosts] = useState([]);
+
+    useEffect(() => {
+        async function get_posts() {
+            try {
+                const response = await axios.post(Endpoint("/member/feed/get_posts"), {});
+                const new_posts = response.data;
+                new_posts.forEach((post) => {
+                    AddDataToPost(post);
+                });
+                setPosts(new_posts);
+            }
+            catch (err) {
+                console.error(err);
+            }
+        }
+        get_posts();
+    }, []);
+
     return (
-        <PostList />
+        <>
+            <WritePost />
+            <PostList posts={posts} />
+        </>
     )
 }
 
-export {ForYou};
+export { ForYou };

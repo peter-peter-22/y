@@ -62,7 +62,7 @@ router.post("/get_post", async (req, res, next) => {
     const main_post = posts[0];
     const comments = await postQuery(req, next, " WHERE replying_to=:id", { id: id });
     if (posts.length > 0)
-        res.send(main_post);
+        res.send({main:main_post,comments:comments});
     else
         res.status(400).send("This post does not exists");
 });

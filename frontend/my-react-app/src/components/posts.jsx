@@ -85,42 +85,42 @@ function Post(props) {
 
 function PostFocused(props) {
     return (
-        <ListBlock>
-            <Reposted post={props.post} />
-            <RowWithPrefix
-                prefix={<Avatar src={GetProfilePicture(props.post.publisher)} />}
-                contents={
-                    <Stack direction="column" style={{ overflow: "hidden", flexGrow: 1 }}>
-                        <Stack direction="row" spacing={0.25} style={{ alignItems: "center" }}>
-                            <ProfileText user={props.post.publisher} />
-                            <Fab variant="extended" size="small" color="black" style={{ flexShrink: 0 }}>Subscribe</Fab>
-                            <ManagePost />
+            <ListBlock>
+                <Reposted post={props.post} />
+                <RowWithPrefix
+                    prefix={<Avatar src={GetProfilePicture(props.post.publisher)} />}
+                    contents={
+                        <Stack direction="column" style={{ overflow: "hidden", flexGrow: 1 }}>
+                            <Stack direction="row" spacing={0.25} style={{ alignItems: "center" }}>
+                                <ProfileText user={props.post.publisher} />
+                                <Fab variant="extended" size="small" color="black" style={{ flexShrink: 0 }}>Subscribe</Fab>
+                                <ManagePost />
+                            </Stack>
                         </Stack>
+                    } />
+
+                <Stack direction="column" sx={{ overflow: "hidden", mt: 1 }}>
+                    <PostText post={props.post} />
+                    <PostMedia images={props.post.images} />
+                    <FromUser post={props.post} />
+                    <Stack direction="row" spacing={0.5} sx={{ alignItems: "baseline", my: 1 }}>
+                        <DateLink passed isoString={props.post.date} />
+                        <Typography variant="small_fade">·</Typography>
+                        <Typography variant="small_bold">{formatNumber(props.post.views)}</Typography>
+                        <Typography variant="small_fade">Views</Typography>
                     </Stack>
-                } />
-
-            <Stack direction="column" sx={{ overflow: "hidden", mt: 1 }}>
-                <PostText post={props.post} />
-                <PostMedia images={props.post.images} />
-                <FromUser post={props.post} />
-                <Stack direction="row" spacing={0.5} sx={{ alignItems: "baseline", my: 1 }}>
-                    <DateLink passed isoString={props.post.date} />
-                    <Typography variant="small_fade">·</Typography>
-                    <Typography variant="small_bold">{formatNumber(props.post.views)}</Typography>
-                    <Typography variant="small_fade">Views</Typography>
                 </Stack>
-            </Stack>
 
-            <Divider />
+                <Divider />
 
-            <Box sx={{ my: 1 }}>
-                <PostButtonRow post={props.post} />
-            </Box>
+                <Box sx={{ my: 1 }}>
+                    <PostButtonRow post={props.post} />
+                </Box>
 
-            <Divider />
+                <Divider />
 
-            <PostCreator post={props.post} />
-        </ListBlock>
+                <PostCreator post={props.post} />
+            </ListBlock>
     );
 }
 
@@ -438,7 +438,7 @@ function CommentButton(props) {
     );
 }
 
-function PostList() {
+function PostList(props) {
     // const post = {
     //     repost: false,
     //     reposted_from: UserData.getData.user,
@@ -454,29 +454,9 @@ function PostList() {
     //     bookmark_count,
     //     bookmarked_by_user:true,
     // };
-    const [posts, setPosts] = useState([]);
-
-    useEffect(() => {
-        async function get_posts() {
-            try {
-                const response = await axios.post(Endpoint("/member/feed/get_posts"), {});
-                const new_posts = response.data;
-                new_posts.forEach((post) => {
-                    AddDataToPost(post);
-                });
-                setPosts(new_posts);
-            }
-            catch (err) {
-                console.log(err);
-            }
-        }
-        get_posts();
-    }, []);
-
     return (
         <List sx={{ p: 0 }}>
-            <WritePost />
-            {posts.map((post, index) => <Post key={index} post={post} />)}
+            {props.posts.map((post, index) => <Post key={index} post={post} />)}
         </List>
     );
 }
@@ -658,4 +638,4 @@ function AddDataToPost(post) {
 }
 
 
-export { Post, PostList, PostFocused, ListBlockButton, ListBlock, RowWithPrefix, PostButtonRow, AddDataToPost };
+export { Post, PostList, PostFocused, ListBlockButton, ListBlock, RowWithPrefix, PostButtonRow, AddDataToPost ,WritePost};
