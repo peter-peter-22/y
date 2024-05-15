@@ -31,11 +31,10 @@ import axios from 'axios';
 import { Endpoint, FormatAxiosError } from "/src/communication.js";
 import { Error, Modals, ShowImage } from "/src/components/modals";
 import { useParams } from "react-router-dom";
-import { PostFocused, AddDataToPost,PostList } from "/src/components/posts.jsx";
+import { PostFocused, AddDataToPost, CommentList } from "/src/components/posts.jsx";
 
 export default () => {
     const [post, setPost] = useState();
-    const [comments, setComments] = useState();
     const { id } = useParams();
 
     useEffect(() => { getPost(); }, []);
@@ -44,12 +43,9 @@ export default () => {
             const result = await axios.post(Endpoint("/member/get_post"), {
                 id: id
             });
-            const main_post = result.data.main;
-            const comments = result.data.comments;
+            const main_post = result.data;
             AddDataToPost(main_post);
-            AddDataToPost(comments);
             setPost(main_post);
-            setComments(comments);
         }
         catch (err) { console.log(err) }
     }
@@ -58,7 +54,7 @@ export default () => {
         return (
             <List sx={{ p: 0 }}>
                 <PostFocused post={post} />
-                <PostList posts = {comments}/>
+                <CommentList post={post} />
             </List>
         );
     else

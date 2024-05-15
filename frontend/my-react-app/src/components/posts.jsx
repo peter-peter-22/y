@@ -44,7 +44,9 @@ function RowWithPrefix(props) {
     return (
         <Stack direction="row">
             <Prefix>{props.prefix}</Prefix>
-            {props.contents}
+            <div style={{ flexGrow: 1 }}>
+                {props.contents}
+            </div>
         </Stack>
     );
 }
@@ -73,7 +75,7 @@ function Post(props) {
                         </Stack>
                     } />
                 <RowWithPrefix contents={
-                    <Stack direction="column" style={{ overflow: "hidden", flexGrow: 1 }}>
+                    <Stack direction="column" style={{ overflow: "hidden" }}>
                         <FromUser post={props.post} />
                         <PostButtonRow post={props.post} />
                     </Stack>
@@ -85,42 +87,42 @@ function Post(props) {
 
 function PostFocused(props) {
     return (
-            <ListBlock>
-                <Reposted post={props.post} />
-                <RowWithPrefix
-                    prefix={<Avatar src={GetProfilePicture(props.post.publisher)} />}
-                    contents={
-                        <Stack direction="column" style={{ overflow: "hidden", flexGrow: 1 }}>
-                            <Stack direction="row" spacing={0.25} style={{ alignItems: "center" }}>
-                                <ProfileText user={props.post.publisher} />
-                                <Fab variant="extended" size="small" color="black" style={{ flexShrink: 0 }}>Subscribe</Fab>
-                                <ManagePost />
-                            </Stack>
+        <ListBlock>
+            <Reposted post={props.post} />
+            <RowWithPrefix
+                prefix={<Avatar src={GetProfilePicture(props.post.publisher)} />}
+                contents={
+                    <Stack direction="column" style={{ overflow: "hidden" }}>
+                        <Stack direction="row" spacing={0.25} style={{ alignItems: "center" }}>
+                            <ProfileText user={props.post.publisher} />
+                            <Fab variant="extended" size="small" color="black" style={{ flexShrink: 0 }}>Subscribe</Fab>
+                            <ManagePost />
                         </Stack>
-                    } />
-
-                <Stack direction="column" sx={{ overflow: "hidden", mt: 1 }}>
-                    <PostText post={props.post} />
-                    <PostMedia images={props.post.images} />
-                    <FromUser post={props.post} />
-                    <Stack direction="row" spacing={0.5} sx={{ alignItems: "baseline", my: 1 }}>
-                        <DateLink passed isoString={props.post.date} />
-                        <Typography variant="small_fade">·</Typography>
-                        <Typography variant="small_bold">{formatNumber(props.post.views)}</Typography>
-                        <Typography variant="small_fade">Views</Typography>
                     </Stack>
+                } />
+
+            <Stack direction="column" sx={{ overflow: "hidden", mt: 1 }}>
+                <PostText post={props.post} />
+                <PostMedia images={props.post.images} />
+                <FromUser post={props.post} />
+                <Stack direction="row" spacing={0.5} sx={{ alignItems: "baseline", my: 1 }}>
+                    <DateLink passed isoString={props.post.date} />
+                    <Typography variant="small_fade">·</Typography>
+                    <Typography variant="small_bold">{formatNumber(props.post.views)}</Typography>
+                    <Typography variant="small_fade">Views</Typography>
                 </Stack>
+            </Stack>
 
-                <Divider />
+            <Divider />
 
-                <Box sx={{ my: 1 }}>
-                    <PostButtonRow post={props.post} />
-                </Box>
+            <Box sx={{ my: 1 }}>
+                <PostButtonRow post={props.post} />
+            </Box>
 
-                <Divider />
+            <Divider />
 
-                <PostCreator post={props.post} />
-            </ListBlock>
+            <PostCreator post={props.post} />
+        </ListBlock>
     );
 }
 
@@ -202,7 +204,7 @@ function PostCreator(props) {
                     <Avatar sx={{ my: 1 }} src={GetProfilePicture(UserData.getData.user)} />
                 }
                 contents={
-                    <Stack direction="column" style={{ flexGrow: 1 }}>
+                    <Stack direction="column">
                         <Stack direction={isFocused ? "column" : "row"}>
                             <Box sx={{ pb: 1, pt: 2, display: "inline-flex", flexGrow: 1, position: "relative" }}>
 
@@ -438,25 +440,148 @@ function CommentButton(props) {
     );
 }
 
-function PostList(props) {
-    // const post = {
-    //     repost: false,
-    //     reposted_from: UserData.getData.user,
-    //     publisher: UserData.getData.user,
-    //     date: new Date("2024-01-01").toISOString(),
-    //     text: "post text",
-    //     images: [default_image],
-    //     views: 9999999,
-    //     repost_count: 353,
-    //     like_count: 4242,
-    //     comment_count: 1234423,
-    //     liked_by_user:true,
-    //     bookmark_count,
-    //     bookmarked_by_user:true,
-    // };
+function PostList() {
+    async function GetEntries(from) {
+        try {
+            const response = await axios.post(Endpoint("/member/feed/get_posts"), { from: from });
+            const new_posts = response.data;
+            new_posts.forEach((post) => {
+                AddDataToPost(post);
+            });
+            return new_posts;
+        }
+        catch (err) {
+            console.error(err);
+            return [];
+        }
+    }
+
+    function EntryMapper(props) {
+        return (<Post post={props.entry} />);
+    }
     return (
         <List sx={{ p: 0 }}>
-            {props.posts.map((post, index) => <Post key={index} post={post} />)}
+            <OnlineList getEntries={GetEntries} entryMapper={EntryMapper} />
+        </List>
+    );
+}
+
+function CommentList(props) {
+    async function GetEntries(from) {
+        try {
+            const result = await axios.post(Endpoint("/member/get_comments"), {
+                id: props.post.id,
+                from: from
+            });
+            const comments = result.data;
+            comments.forEach((comment) => {
+                AddDataToPost(comment);
+            });
+            return comments;
+        }
+        catch (err) {
+            console.error(err);
+            return [];
+        }
+    }
+
+    function EntryMapper(props) {
+        return (<Post post={props.entry} />);
+    }
+    return (
+        <List sx={{ p: 0 }}>
+            <OnlineList getEntries={GetEntries} entryMapper={EntryMapper} />
+        </List>
+    );
+}
+
+function ExamplePost() {
+    return {
+        id: -1,
+        repost: false,
+        reposted_from: UserData.getData.user,
+        publisher: UserData.getData.user,
+        date: new Date("2024-01-01").toISOString(),
+        text: "post text",
+        images: [default_image],
+        views: 9999999,
+        repost_count: 353,
+        like_count: 4242,
+        comment_count: 1234423,
+        liked_by_user: false,
+        bookmark_count: 10,
+        bookmarked_by_user: false,
+    };
+}
+
+function OnlineList(props) {
+    const [entries, setEntries] = useState([]);
+    const listRef = useRef(null);
+    const savedScrollRef = useRef(0);
+    const [end, setEnd] = useState(false);
+    const [downloading, setDownloading] = useState(false);
+
+    //the minimum distance between the bottom of the screen and the list in px.
+    //it is necessary to not reveal the emptyness when reaching the bottom.
+    const minUnseenHeight = 2000;
+
+    //check the new height after render, adjust the scrolling
+    useEffect(() => {
+        window.scrollTo(0, savedScrollRef.current);
+        Scrolling();
+    }, [entries])
+
+    async function FillEntries() {
+        const from = entries.length;
+        const results = await GetEntries(from);
+        //if no results recieved, then this is the end of the list, do not ask for more entries
+        if (results.length === 0) {
+            setEnd(true);
+            return;
+        }
+        setEntries((prev) => {
+            return prev.concat(results)
+        });
+        //the scolling would stuck at the bottom when the page is expanded by the new posts,
+        //so the last scroll value before rendering must be saved and loaded after rendering
+        savedScrollRef.current = window.scrollY;
+        setDownloading(false);
+    }
+
+    //download new entries when needed
+    useEffect(() => {
+        if (downloading)
+            FillEntries();
+    }, [downloading])
+
+
+    function Scrolling() {
+        if (!end) {
+            const unseenHeight = listRef.current.getBoundingClientRect().bottom - window.innerHeight;
+            if (unseenHeight < minUnseenHeight) {
+                setDownloading(true);
+            }
+        }
+    }
+
+
+    useEffect(() => {
+        window.addEventListener("scroll", Scrolling);
+        Scrolling();
+        return () => { window.removeEventListener("scroll", Scrolling) };
+    }, [])
+
+    function EntryMapper(entryprops) {
+        return props.entryMapper(entryprops);
+    }
+
+    async function GetEntries(from) {
+        return await props.getEntries(from);
+    }
+
+    return (
+        <List sx={{ p: 0 }} ref={listRef}>
+            {entries.map((entry, index) => <EntryMapper key={index} entry={entry} />)}
         </List>
     );
 }
@@ -638,4 +763,4 @@ function AddDataToPost(post) {
 }
 
 
-export { Post, PostList, PostFocused, ListBlockButton, ListBlock, RowWithPrefix, PostButtonRow, AddDataToPost ,WritePost};
+export { Post, PostList, PostFocused, ListBlockButton, ListBlock, RowWithPrefix, PostButtonRow, AddDataToPost, WritePost,CommentList };

@@ -59,13 +59,23 @@ router.post("/get_post", async (req, res, next) => {
     await CheckV(v);
     const { id } = req.body;
     const posts = await postQuery(req, next, " WHERE post.id=:id", { id: id });
-    const main_post = posts[0];
-    const comments = await postQuery(req, next, " WHERE replying_to=:id", { id: id });
     if (posts.length > 0)
-        res.send({main:main_post,comments:comments});
+        res.send(posts[0]);
     else
         res.status(400).send("This post does not exists");
 });
+router.post("/get_comments", async (req, res, next) => {
+    const v = new Validator(req.body, {
+        id: 'required|integer',
+        from: 'required|integer'
+    });
+    await CheckV(v);
+    const { id, from } = req.body;
+    const comments = await postQuery(req, next, " WHERE replying_to=:id OFFSET :from LIMIT 5", { id: id, from: from });
+    res.send(comments);
+});
+
+
 
 async function postQuery(req, next, where, where_params) {
     //select post.text,
@@ -103,26 +113,36 @@ async function postQuery(req, next, where, where_params) {
     }
 }
 
-router.post("/like", async (req, res) => {
-    await CountableToggle(req, res, "likes", "unique_likes");
+router.post("/like", async (req, res, next) => {
+    await CountableToggle(req, res, next, "likes", "unique_likes");
 });
 
-router.post("/bookmark", async (req, res) => {
-    await CountableToggle(req, res, "bookmarks", "unique_bookmarks");
+router.post("/bookmark", async (req, res, next) => {
+    await CountableToggle(req, res, next, "bookmarks", "unique_bookmarks");
 });
 
-async function CountableToggle(req, res, table, unique_constraint_name) {
-    const v = new Validator(req.body, {
-        post: 'required|integer',
-        value: "required|boolean"
-    });
-    await CheckV(v);
-    const { post, value } = req.body;
-    if (value)
-        await db.query(named("INSERT INTO " + table + " (user_id, post_id) VALUES (:user,:post) ON CONFLICT ON CONSTRAINT " + unique_constraint_name + " DO NOTHING")({ user: req.user.id, post: post }));
-    else
-        await db.query(named("DELETE FROM " + table + " WHERE user_id=:user AND post_id=:post")({ user: req.user.id, post: post }));
-    res.sendStatus(200);
+async function CountableToggle(req, res, next, table, unique_constraint_name) {
+    try {
+        const v = new Validator(req.body, {
+            post: 'required|integer',
+            value: "required|boolean"
+        });
+        await CheckV(v);
+        const { post, value } = req.body;
+        try {
+            if (value)
+                await db.query(named("INSERT INTO " + table + " (user_id, post_id) VALUES (:user,:post) ON CONFLICT ON CONSTRAINT " + unique_constraint_name + " DO NOTHING")({ user: req.user.id, post: post }));
+            else
+                await db.query(named("DELETE FROM " + table + " WHERE user_id=:user AND post_id=:post")({ user: req.user.id, post: post }));
+            res.sendStatus(200);
+        }
+        catch (err) {
+            CheckErr(err);
+        }
+    }
+    catch (err) {
+        next(err);
+    }
 }
 
 export default router;
