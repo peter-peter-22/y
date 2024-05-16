@@ -9,7 +9,7 @@ import Fab from '@mui/material/Fab';
 import { Icon } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ChooseChildBool, ProfileText,FadeLink,creation,FollowDialog } from '/src/components/utilities';
+import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink, creation, FollowDialog, NiceLink } from '/src/components/utilities';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -18,8 +18,10 @@ import ListItemText from '@mui/material/ListItemText';
 import { BoxList, BoxListOutlined, BlueTextButton } from '/src/components/containers';
 import IconButton from '@mui/material/IconButton';
 import Link from '@mui/material/Link';
-import { ResponsiveButton, ButtonIcon, ButtonSvg, TabButton, PostButton, ProfileButton, TopMenuButton,CornerButton } from "/src/components/buttons.jsx";
+import { ResponsiveButton, ButtonIcon, ButtonSvg, TabButton, PostButton, ProfileButton, TopMenuButton, CornerButton } from "/src/components/buttons.jsx";
 import { UserData } from "/src/App.jsx";
+import { NavLink } from "react-router-dom";
+
 
 function Footer() {
     return (
@@ -60,11 +62,13 @@ function Footer() {
                             </ListItemText>
                         </ListItem>
 
-                       <FollowDialog user={UserData.getData.user}/>
+                        <FollowDialog user={UserData.getData.user} />
 
-                        <BlueTextButton>
-                            Show more
-                        </BlueTextButton>
+                        <NiceLink to="/add_followers">
+                            <BlueTextButton>
+                                Show more
+                            </BlueTextButton>
+                        </NiceLink>
 
                     </BoxList>
 
@@ -109,14 +113,14 @@ function Footer() {
                     </BoxList>
 
                     <ListItem>
-                        <div style={{display:"flex", flexWrap:"wrap", gap:"0px 10px"}}>
-                        <FadeLink>Terms of Service</FadeLink>
-                        <FadeLink>Privacy Policy</FadeLink>
-                        <FadeLink>Cookie Policy</FadeLink>
-                        <FadeLink>Accessibility</FadeLink>
-                        <FadeLink>Ads Info</FadeLink>
-                        <FadeLink>More···</FadeLink>
-                        <Typography variant="small_fade">{creation}</Typography>
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: "0px 10px" }}>
+                            <FadeLink>Terms of Service</FadeLink>
+                            <FadeLink>Privacy Policy</FadeLink>
+                            <FadeLink>Cookie Policy</FadeLink>
+                            <FadeLink>Accessibility</FadeLink>
+                            <FadeLink>Ads Info</FadeLink>
+                            <FadeLink>More···</FadeLink>
+                            <Typography variant="small_fade">{creation}</Typography>
                         </div>
                     </ListItem>
 

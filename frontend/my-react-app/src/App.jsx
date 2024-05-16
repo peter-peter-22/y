@@ -30,7 +30,7 @@ function App() {
   UserData.update = Update;
 
   React.useEffect(() => {
-    Update();//update is not awaited to show the loading page
+    Update();//update is not awaited, the loading message is visible until it is done
   }, []);
 
   async function Update() {

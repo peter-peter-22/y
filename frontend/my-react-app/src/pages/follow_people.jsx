@@ -1,6 +1,5 @@
-import React,{useState,useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import Stack from '@mui/material/Stack';
-import SideMenu, { Inside } from "./side_menus.jsx";
 import { TopMenu } from '/src/components/utilities';
 import { SearchField } from "/src/components/inputs.jsx";
 import { Box } from '@mui/material';
@@ -9,7 +8,7 @@ import Fab from '@mui/material/Fab';
 import { Icon } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink } from '/src/components/utilities';
+import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, GetProfilePicture, default_image, GetPostPictures ,OnlineList,FollowDialog} from '/src/components/utilities';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -19,26 +18,33 @@ import { BoxList, BoxListOutlined, BlueTextButton } from '/src/components/contai
 import IconButton from '@mui/material/IconButton';
 import Link from '@mui/material/Link';
 import { ResponsiveButton, ButtonIcon, ButtonSvg, TabButton, PostButton, ProfileButton, TopMenuButton, CornerButton } from "/src/components/buttons.jsx";
-import { FeedList, WritePost,AddDataToPost } from "/src/components/posts.jsx";
+import { BookmarkList } from "/src/components/posts.jsx";
 import axios from "axios";
 import { Endpoint, FormatAxiosError } from "/src/communication.js";
 
-function ForYou() {
+function FollowableList(props) {
+    async function GetEntries(from) {
+        try {
+            const response = await axios.post(Endpoint("/member/follower_recommendations"),{
+                from:from
+            });
+            return response.data;
+        }
+        catch (err) {
+            console.error(err);
+            return [];
+        }
+    }
+
+    function EntryMapper(props) {
+        return (<FollowDialog user={props.entry} />);
+    }
     return (
-        <>
-            <WritePost />
-            <FeedList />
-        </>
-    )
-}
-function Following() {
-    return (
-        <>
-        balls
-            <WritePost />
-            <FeedList />
-        </>
-    )
+        <List sx={{ p: 0 }}>
+            <OnlineList getEntries={GetEntries} entryMapper={EntryMapper} />
+        </List>
+    );
 }
 
-export { ForYou,Following };
+
+export default FollowableList;

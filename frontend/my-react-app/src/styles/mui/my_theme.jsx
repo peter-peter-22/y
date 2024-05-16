@@ -125,6 +125,11 @@ const theme = createTheme({
     },
 
     components: {
+        NavLink: {
+            styleOverrides: {
+                display: "none"
+            }
+        },
         MuiButtonBase: {
             defaultProps: {
                 disableRipple: true,
@@ -137,7 +142,7 @@ const theme = createTheme({
                         paddingLeft: "15px",
                         paddingRight: "15px",
                     }),
-                    '&:hover,&': {
+                    '&:hover,&,&:focus': {
                         boxShadow: 'none',
                     }
                 }),
@@ -199,10 +204,6 @@ const theme = createTheme({
         },
     },
 });
-
-
-
-
 
 export default function MyTheme(props) {
     return (

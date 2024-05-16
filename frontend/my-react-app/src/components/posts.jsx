@@ -9,7 +9,7 @@ import Fab from '@mui/material/Fab';
 import { Icon } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, GetProfilePicture, default_image, GetPostPictures } from '/src/components/utilities';
+import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, GetProfilePicture, default_image, GetPostPictures ,OnlineList} from '/src/components/utilities';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -343,7 +343,7 @@ function CountableButton(post, initial_count, initial_active, url) {
 
             async function updateServer(newValue) {
                 try {
-                    await axios.post(Endpoint(url), { post: post.id, value: newValue });
+                    await axios.post(Endpoint(url), { key: post.id, value: newValue });
                 }
                 catch {
                     setLike(prev);//server error, put back previous value
@@ -440,11 +440,10 @@ function CommentButton(props) {
     );
 }
 
-function PostList() {
+function PostList(props) {
     async function GetEntries(from) {
         try {
-            const response = await axios.post(Endpoint("/member/feed/get_posts"), { from: from });
-            const new_posts = response.data;
+            const new_posts = await props.getPosts(from);
             new_posts.forEach((post) => {
                 AddDataToPost(post);
             });
@@ -460,40 +459,38 @@ function PostList() {
         return (<Post post={props.entry} />);
     }
     return (
-        <List sx={{ p: 0 }}>
             <OnlineList getEntries={GetEntries} entryMapper={EntryMapper} />
-        </List>
     );
+}
+function FeedList() {
+    async function getPosts(from) {
+        const response = await axios.post(Endpoint("/member/feed/get_posts"), { from: from });
+        return response.data;
+    }
+    return PostList(getPosts = { getPosts });
 }
 
 function CommentList(props) {
-    async function GetEntries(from) {
-        try {
-            const result = await axios.post(Endpoint("/member/get_comments"), {
-                id: props.post.id,
-                from: from
-            });
-            const comments = result.data;
-            comments.forEach((comment) => {
-                AddDataToPost(comment);
-            });
-            return comments;
-        }
-        catch (err) {
-            console.error(err);
-            return [];
-        }
+    async function getPosts(from) {
+        const result = await axios.post(Endpoint("/member/get_comments"), {
+            id: props.post.id,
+            from: from
+        });
+        return result.data;
     }
-
-    function EntryMapper(props) {
-        return (<Post post={props.entry} />);
-    }
-    return (
-        <List sx={{ p: 0 }}>
-            <OnlineList getEntries={GetEntries} entryMapper={EntryMapper} />
-        </List>
-    );
+    return PostList(getPosts = { getPosts });
 }
+
+function BookmarkList(props) {
+    async function getPosts(from) {
+        const result = await axios.post(Endpoint("/member/get_bookmarks"), {
+            from: from
+        });
+        return result.data;
+    }
+    return PostList(getPosts = { getPosts });
+}
+
 
 function ExamplePost() {
     return {
@@ -512,78 +509,6 @@ function ExamplePost() {
         bookmark_count: 10,
         bookmarked_by_user: false,
     };
-}
-
-function OnlineList(props) {
-    const [entries, setEntries] = useState([]);
-    const listRef = useRef(null);
-    const savedScrollRef = useRef(0);
-    const [end, setEnd] = useState(false);
-    const [downloading, setDownloading] = useState(false);
-
-    //the minimum distance between the bottom of the screen and the list in px.
-    //it is necessary to not reveal the emptyness when reaching the bottom.
-    const minUnseenHeight = 2000;
-
-    //check the new height after render, adjust the scrolling
-    useEffect(() => {
-        window.scrollTo(0, savedScrollRef.current);
-        Scrolling();
-    }, [entries])
-
-    async function FillEntries() {
-        const from = entries.length;
-        const results = await GetEntries(from);
-        //if no results recieved, then this is the end of the list, do not ask for more entries
-        if (results.length === 0) {
-            setEnd(true);
-            return;
-        }
-        setEntries((prev) => {
-            return prev.concat(results)
-        });
-        //the scolling would stuck at the bottom when the page is expanded by the new posts,
-        //so the last scroll value before rendering must be saved and loaded after rendering
-        savedScrollRef.current = window.scrollY;
-        setDownloading(false);
-    }
-
-    //download new entries when needed
-    useEffect(() => {
-        if (downloading)
-            FillEntries();
-    }, [downloading])
-
-
-    function Scrolling() {
-        if (!end) {
-            const unseenHeight = listRef.current.getBoundingClientRect().bottom - window.innerHeight;
-            if (unseenHeight < minUnseenHeight) {
-                setDownloading(true);
-            }
-        }
-    }
-
-
-    useEffect(() => {
-        window.addEventListener("scroll", Scrolling);
-        Scrolling();
-        return () => { window.removeEventListener("scroll", Scrolling) };
-    }, [])
-
-    function EntryMapper(entryprops) {
-        return props.entryMapper(entryprops);
-    }
-
-    async function GetEntries(from) {
-        return await props.getEntries(from);
-    }
-
-    return (
-        <List sx={{ p: 0 }} ref={listRef}>
-            {entries.map((entry, index) => <EntryMapper key={index} entry={entry} />)}
-        </List>
-    );
 }
 
 function BlockImage(props) {
@@ -607,7 +532,7 @@ function BlockImage(props) {
 
 function PostBottomIcon(props) {
     return (
-        <IconButton size="small" onClick={props.onClick}>
+        <IconButton size="small" onClick={(e) => { e.stopPropagation(); props.onClick(e); }}>
             <Icon sx={{ color: props.active ? props.active_color : "" }} fontSize="small" baseClassName={props.active ? "material-icons" : "material-icons-outlined"}>
                 {props.active ? props.active_icon : props.inactive_icon}
             </Icon>
@@ -763,4 +688,4 @@ function AddDataToPost(post) {
 }
 
 
-export { Post, PostList, PostFocused, ListBlockButton, ListBlock, RowWithPrefix, PostButtonRow, AddDataToPost, WritePost,CommentList };
+export { Post, PostList, PostFocused, ListBlockButton, ListBlock, RowWithPrefix, PostButtonRow, AddDataToPost, WritePost, CommentList, FeedList, BookmarkList };

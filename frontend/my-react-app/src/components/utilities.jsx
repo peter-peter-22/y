@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { theme } from '/src/styles/mui/my_theme.jsx';
 import Stack from '@mui/material/Stack';
 import SideMenu, { Inside } from "/src/components/side_menus.jsx";
@@ -25,6 +25,7 @@ import { Error, Modals } from "/src/components/modals";
 import axios from 'axios';
 import Tooltip from '@mui/material/Tooltip';
 import config from "/src/components/config.js";
+import { NavLink } from "react-router-dom";
 
 const noOverflow = {
     whiteSpace: 'nowrap',
@@ -224,7 +225,7 @@ function ReplyingTo(props) {
     return (
         <TextRow >
             <Typography variant="small_fade" style={{ flexShrink: 0, ...noOverflow }}>Replying to</Typography>
-            <UserKeyLink user={props.user}/>
+            <UserKeyLink user={props.user} />
         </TextRow>
     );
 }
@@ -259,7 +260,7 @@ function FollowDialog(props) {
                 <Stack direction="row" spacing={1} sx={{ alignItems: "center", width: "100%" }}>
                     <Avatar />
                     <ProfileText user={props.user} />
-                    <FollowButton user_id={props.user.id} />
+                    <FollowButton user_id={props.user.id} is_followed={props.user.is_followed} />
                 </Stack>
             </ListItemButton>
         </ListItem>
@@ -267,18 +268,24 @@ function FollowDialog(props) {
 }
 
 function FollowButton(props) {
-    const [following, setFollowing] = useState(false);
-    async function toggleFollow() {
+    const [following, setFollowing] = useState(props.is_followed ? true : false);
+
+    function toggleFollow() {
         setFollowing((prev) => {
-            return !prev;
-        });
-        await axios.post(Endpoint("/member/follow_user"),
-            {
-                id: props.user_id,
-                set: following
+            const newValue = !prev;
+            async function update() {
+                await axios.post(Endpoint("/member/follow_user"),
+                    {
+                        key: props.user_id,
+                        value: newValue
+                    }
+                );
             }
-        );
+            update();
+            return newValue;
+        });
     }
+
     return (
         <Fab onClick={toggleFollow} variant="extended" size="small" color="black" sx={{ flexShrink: 0 }}>{following ? "Following" : "Follow"}</Fab>
     );
@@ -294,5 +301,85 @@ function GetPostPictures(post_id, image_count) {
     return images;
 }
 
+function NiceLink(props) {
+    return (
+        <NavLink to={props.to} style={{ textDecoration: "none" }}>
+            {props.children}
+        </NavLink>
+    );
+}
 
-export { AboveBreakpoint, ResponsiveSelector, ChooseChild, ChooseChildBool, TopMenu, ProfileText, FadeLink, TabSwitcher, UserName, UserKey, noOverflow, BoldLink, UserLink, DateLink, TextRow, UserKeyLink, ReplyingTo, GetUserName, GetUserKey, logo, creation, ToCorner, CenterLogo, default_profile, FollowDialog, GetProfilePicture, default_image, FollowButton, GetPostPictures }
+function OnlineList(props) {
+    const [entries, setEntries] = useState([]);
+    const listRef = useRef(null);
+    const savedScrollRef = useRef(0);
+    const [end, setEnd] = useState(false);
+    const [downloading, setDownloading] = useState(false);
+
+    //the minimum distance between the bottom of the screen and the list in px.
+    //it is necessary to not reveal the emptyness when reaching the bottom.
+    const minUnseenHeight = 2000;
+
+    //check the new height after render, adjust the scrolling
+    useEffect(() => {
+        window.scrollTo(0, savedScrollRef.current);
+        Scrolling();
+    }, [entries])
+
+    async function FillEntries() {
+        const from = entries.length;
+        const results = await GetEntries(from);
+        //if no results recieved, then this is the end of the list, do not ask for more entries
+        if (results.length === 0) {
+            setEnd(true);
+            return;
+        }
+        setEntries((prev) => {
+            return prev.concat(results)
+        });
+        //the scolling would stuck at the bottom when the page is expanded by the new posts,
+        //so the last scroll value before rendering must be saved and loaded after rendering
+        savedScrollRef.current = window.scrollY;
+        setDownloading(false);
+    }
+
+    //download new entries when needed
+    useEffect(() => {
+        if (downloading)
+            FillEntries();
+    }, [downloading])
+
+
+    function Scrolling() {
+        if (!end) {
+            const unseenHeight = listRef.current.getBoundingClientRect().bottom - window.innerHeight;
+            if (unseenHeight < minUnseenHeight) {
+                setDownloading(true);
+            }
+        }
+    }
+
+
+    useEffect(() => {
+        window.addEventListener("scroll", Scrolling);
+        Scrolling();
+        return () => { window.removeEventListener("scroll", Scrolling) };
+    }, [])
+
+    function EntryMapper(entryprops) {
+        return props.entryMapper(entryprops);
+    }
+
+    async function GetEntries(from) {
+        return await props.getEntries(from);
+    }
+
+    return (
+        <List sx={{ p: 0 }} ref={listRef}>
+            {entries.map((entry, index) => <EntryMapper key={index} entry={entry} />)}
+        </List>
+    );
+}
+
+
+export { AboveBreakpoint, ResponsiveSelector, ChooseChild, ChooseChildBool, TopMenu, ProfileText, FadeLink, TabSwitcher, UserName, UserKey, noOverflow, BoldLink, UserLink, DateLink, TextRow, UserKeyLink, ReplyingTo, GetUserName, GetUserKey, logo, creation, ToCorner, CenterLogo, default_profile, FollowDialog, GetProfilePicture, default_image, FollowButton, GetPostPictures, NiceLink, OnlineList }

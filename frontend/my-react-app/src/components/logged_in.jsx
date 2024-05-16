@@ -8,10 +8,11 @@ import Footer from "/src/components/footer";
 
 //pages
 import Home from "/src/pages/home";
-import Test from "/src/pages/test";
 import Notifications from "/src/pages/notifications";
 import Error from "/src/pages/error";
 import PostFocused from "/src/pages/post_focused";
+import Bookmarks from "/src/pages/bookmarks";
+import AddFollowers from "/src/pages/follow_people";
 
 export default () => {
   const isBig = AboveBreakpoint("sm");
@@ -23,9 +24,10 @@ export default () => {
           <div style={isBig ? { width: "500px" } : { flexGrow: 1 }}>
             <Routes>
               <Route path="/" element={<Home />} />
-              <Route path="/test" element={<Test />} />
               <Route path="/notifications" element={<Notifications />} />
               <Route path="/posts/:id" element={<PostFocused />} />
+              <Route path="/bookmarks" element={<Bookmarks />} />
+              <Route path="/add_followers" element={<AddFollowers />} />
               <Route path="*" element={<Error />} />
             </Routes>
           </div>

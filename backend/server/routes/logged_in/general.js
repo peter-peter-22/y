@@ -28,18 +28,8 @@ import { ApplySqlToUser, UpdateUser } from "../logged_in.js";
 
 const router = express.Router();
 
-router.post("/follow_user", async (req, res) => {
-    const v = new Validator(req.body, {
-        id: 'required|integer',
-        set: "required|boolean"
-    });
-    await CheckV(v);
-    const { id, set } = req.body;
-    if (set)
-        await db.query(named("INSERT INTO follows (follower,followed) VALUES (:me,:other) ")({ me: req.user.id, other: id }));
-    else
-        await db.query(named("DELETE FROM follows WHERE follower=:me AND followed=:other")({ me: req.user.id, other: id }));
-    res.sendStatus(200);
+router.post("/follow_user", async (req, res,next) => {
+    await CountableToggle(req, res, next, "follows", "follow_unique","follower","followed");
 });
 
 router.post("/is_following_user", async (req, res) => {
@@ -58,7 +48,7 @@ router.post("/get_post", async (req, res, next) => {
     });
     await CheckV(v);
     const { id } = req.body;
-    const posts = await postQuery(req, next, " WHERE post.id=:id", { id: id });
+    const posts = await postQuery(req, next, undefined, " WHERE post.id=:id", { id: id });
     if (posts.length > 0)
         res.send(posts[0]);
     else
@@ -71,13 +61,34 @@ router.post("/get_comments", async (req, res, next) => {
     });
     await CheckV(v);
     const { id, from } = req.body;
-    const comments = await postQuery(req, next, " WHERE replying_to=:id OFFSET :from LIMIT 5", { id: id, from: from });
+    const comments = await postQuery(req, next, undefined, " WHERE replying_to=:id OFFSET :from LIMIT 5", { id: id, from: from });
+    res.send(comments);
+});
+
+router.post("/get_bookmarks", async (req, res, next) => {
+    const v = new Validator(req.body, {
+        from: 'required|integer'
+    });
+    await CheckV(v);
+    const { from } = req.body;
+    const comments = await postQuery(req, next, "SELECT * FROM (", ") as subquery WHERE bookmarked_by_user=TRUE OFFSET :from LIMIT 5", { from: from });
     res.send(comments);
 });
 
 
+router.post("/follower_recommendations", async (req, res, next) => {
+    const v = new Validator(req.body, {
+        from: 'required|integer'
+    });
+    await CheckV(v);
+    const { from } = req.body;
+    const result = await db.query(named("SELECT id,username,name,EXISTS(SELECT * FROM follows WHERE follower = :user_id AND followed = id) as is_followed FROM users OFFSET :from LIMIT 10")({from:from,user_id:req.user.id}))
+    res.send(result.rows);
+});
 
-async function postQuery(req, next, where, where_params) {
+
+
+async function postQuery(req, next, before, after, additional_params) {
     //select post.text,
     //post.id,
     //post.image_count, 
@@ -98,12 +109,14 @@ async function postQuery(req, next, where, where_params) {
         const user_id = req.user.id;
 
         let text = "select post.text, post.id, post.image_count, post.date, post.repost as reposted_from, (select count(*) from likes where likes.post_id=post.id)::INT as like_count, EXISTS(select * from likes where likes.post_id=post.id AND user_id=:user_id) as liked_by_user, (select count(*) from posts reposts_query where reposts_query.repost=post.id)::INT as repost_count, (select count(*) from bookmarks bookmark where bookmark.post_id=post.id)::INT as bookmark_count, EXISTS(select * from bookmarks bookmark where bookmark.post_id=post.id AND bookmark.user_id=post.publisher) as bookmarked_by_user, poster.id as poster_id, poster.name as poster_name, poster.username as poster_username from posts post left join users poster on post.publisher=poster.id";
-        if (where !== undefined)
-            text += where;
+        if (after !== undefined)
+            text += after;
+        if (before !== undefined)
+            text = before + text;
 
         let params = { user_id: user_id };
-        if (params)
-            params = { ...where_params, ...params };
+        if (additional_params)
+            params = { ...params, ...additional_params };
 
         const result = await db.query(named(text)(params));
         return result.rows;
@@ -121,19 +134,19 @@ router.post("/bookmark", async (req, res, next) => {
     await CountableToggle(req, res, next, "bookmarks", "unique_bookmarks");
 });
 
-async function CountableToggle(req, res, next, table, unique_constraint_name) {
+async function CountableToggle(req, res, next, table, unique_constraint_name,first_column_name="user_id",second_column_name="post_id") {
     try {
         const v = new Validator(req.body, {
-            post: 'required|integer',
+            key: 'required|integer',
             value: "required|boolean"
         });
         await CheckV(v);
-        const { post, value } = req.body;
+        const {  key, value } = req.body;
         try {
             if (value)
-                await db.query(named("INSERT INTO " + table + " (user_id, post_id) VALUES (:user,:post) ON CONFLICT ON CONSTRAINT " + unique_constraint_name + " DO NOTHING")({ user: req.user.id, post: post }));
+                await db.query(named("INSERT INTO " + table + " ("+first_column_name+", "+second_column_name+") VALUES (:user,:key) ON CONFLICT ON CONSTRAINT " + unique_constraint_name + " DO NOTHING")({ user: req.user.id, key: key }));
             else
-                await db.query(named("DELETE FROM " + table + " WHERE user_id=:user AND post_id=:post")({ user: req.user.id, post: post }));
+                await db.query(named("DELETE FROM " + table + " WHERE "+first_column_name+"=:user AND "+second_column_name+"=:key")({ user: req.user.id, key: key }));
             res.sendStatus(200);
         }
         catch (err) {

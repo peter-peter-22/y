@@ -19,7 +19,7 @@ import { BoxList, BoxListOutlined, BlueTextButton } from '/src/components/contai
 import IconButton from '@mui/material/IconButton';
 import Link from '@mui/material/Link';
 import { ResponsiveButton, ButtonIcon, ButtonSvg, TabButton, PostButton, ProfileButton, TopMenuButton } from "/src/components/buttons.jsx";
-import { ForYou } from "/src/components/home_pages";
+import { ForYou,Following } from "/src/components/home_pages";
 
 function Page() {
   return (
@@ -32,7 +32,7 @@ function Page() {
         {
           tabName: "following",
           text: "Following",
-          contents: <p>following</p>
+          contents: <Following/>
         }
       ]}>
         <IconButton size="small" sx={{mx:1}}>
