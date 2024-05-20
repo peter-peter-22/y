@@ -25,10 +25,11 @@ import { username_exists, selectable_username } from "../user.js";
 import { Validator } from "node-input-validator";
 import { CheckV, CheckErr, validate_image } from "../../components/validations.js";
 import { ApplySqlToUser, UpdateUser } from "../logged_in.js";
+import { postQuery } from "./general.js";
 
 const router = express.Router();
 
-router.post("/post", async (req, res,next) => {
+router.post("/post", async (req, res, next) => {
     reply_or_post(req, res, next, false);
 });
 
@@ -69,9 +70,9 @@ async function reply_or_post(req, res, next, is_comment) {
             ));
         }
         catch (err) {
-            if(err.constraint==="replying_to_fkey")
+            if (err.constraint === "replying_to_fkey")
                 CheckErr("this post does not exists");
-            throw(err);
+            throw (err);
         }
 
         const post_id = result.rows[0].id;
@@ -81,7 +82,9 @@ async function reply_or_post(req, res, next, is_comment) {
                 file.mv(config.__dirname + "/public/images/posts/" + post_id + "_" + index + ".jpg");
             });
 
-        res.sendStatus(200);
+        //return the created post to client
+        const recentlyAddedPost = await postQuery(req, next, undefined, " WHERE post.id=:post_id", { post_id: post_id });
+        res.send(recentlyAddedPost[0]);
     }
     catch (err) {
         next(err);

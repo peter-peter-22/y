@@ -77,10 +77,7 @@ function Login(props) {
                 setPage(pages.password);
             else
                 ErrorText("No Y user belongs to this email");
-        } catch (error) {
-            Error(error);
-            console.log(error);
-        }
+        } catch  { }
     }
 
     //password
@@ -98,9 +95,7 @@ function Login(props) {
             );
             UserData.update();
             Modals[0].Close();
-        } catch (error) {
-            Error(error);
-        }
+        } catch  {}
     }
 
     //forgot

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useImperativeHandle,forwardRef } from 'react';
+import React, { useState, useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
 import { theme } from '/src/styles/mui/my_theme.jsx';
 import Stack from '@mui/material/Stack';
 import SideMenu, { Inside } from "/src/components/side_menus.jsx";
@@ -274,12 +274,15 @@ function FollowButton(props) {
         setFollowing((prev) => {
             const newValue = !prev;
             async function update() {
+                try{
                 await axios.post(Endpoint("/member/follow_user"),
                     {
                         key: props.user_id,
                         value: newValue
                     }
                 );
+            }
+            catch{}
             }
             update();
             return newValue;
@@ -328,7 +331,10 @@ const OnlineList = forwardRef((props, ref) => {
 
     //check the new height after render, adjust the scrolling
     useEffect(() => {
-        window.scrollTo(0, savedScrollRef.current);
+        if (savedScrollRef.current !== undefined) {
+            window.scrollTo(0, savedScrollRef.current);
+            savedScrollRef.current = undefined;
+        }
         Scrolling();
     }, [entries])
 
@@ -381,7 +387,7 @@ const OnlineList = forwardRef((props, ref) => {
     }
 
     return (
-        <List sx={{ p: 0 }} ref={ref}>
+        <List sx={{ p: 0 }} ref={listRef}>
             {entries.map((entry, index) => <EntryMapper key={index} entry={entry} />)}
         </List>
     );

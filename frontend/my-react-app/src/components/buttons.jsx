@@ -138,8 +138,10 @@ function ProfileButton() {
     };
 
     async function handleLogout(){
+        try{
         await axios.get(Endpoint("/logout"));
         UserData.update();
+        }catch{}
     }
 
     return (

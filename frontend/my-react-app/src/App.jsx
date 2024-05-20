@@ -45,8 +45,11 @@ function App() {
         Modals[0].Show(<CreateAccount pages={[5, 6, 7, 8]} />, CloseStartMessage);
 
         async function CloseStartMessage() {
+          try{
           await axios.get(Endpoint("/member/close_starting_message"));
           UserData.update();
+          }
+          catch{}
         }
       }
 
@@ -55,14 +58,15 @@ function App() {
         Modals[0].Show(<CreateAccount pages={[1, 9]} finish />, ExitRegistration);
 
         async function ExitRegistration() {
+          try{
           await axios.get(Endpoint("/exit_registration"));
           UserData.update();
+          }
+          catch{}
         }
       }
     }
-    catch (err) {
-      Error(err)
-    }
+    catch {}
   }
 
   //choose page

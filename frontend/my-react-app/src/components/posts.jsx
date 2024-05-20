@@ -33,6 +33,7 @@ import { Endpoint, FormatAxiosError } from "/src/communication.js";
 import { Error, Modals, ShowImage } from "/src/components/modals";
 
 const commentSections = {};
+const feedCommentSectionId = -1;
 
 function Prefix(props) {
     return (
@@ -178,7 +179,8 @@ function PostCreator(props) {
         if (isComment)
             formData.append("replying_to", props.post.id);
 
-        await axios.post(
+        try{
+        const result = await axios.post(
             Endpoint(isComment ? "/member/create/comment" : '/member/create/post'),
             formData,
             {
@@ -190,6 +192,13 @@ function PostCreator(props) {
         setFiles([]);
         setUrls([]);
         setText("");
+
+        //update post list on client without refreshing the page
+        const post = result.data;
+        AddDataToPost(post);
+        commentSections[isComment?props.post.id:feedCommentSectionId].addPost(post);
+    }
+    catch{}
     }
 
     return (
@@ -442,7 +451,9 @@ function CommentButton(props) {
     );
 }
 
-function PostList(props, ref) {
+function PostList(props) {
+    const onlineListRef = useRef();
+
     async function GetEntries(from) {
         try {
             const new_posts = await props.getPosts(from);
@@ -452,7 +463,6 @@ function PostList(props, ref) {
             return new_posts;
         }
         catch (err) {
-            console.error(err);
             return [];
         }
     }
@@ -460,17 +470,25 @@ function PostList(props, ref) {
     function EntryMapper(props) {
         return (<Post post={props.entry} />);
     }
+
+    //make the comment section globally accessable
+    if (props.commentSectionId !== undefined) {
+        const thisCommentSection = {};
+        thisCommentSection.addPost = (newPost) => { onlineListRef.current.AddEntryToTop(newPost) };
+        commentSections[props.commentSectionId] = thisCommentSection;
+    }
+
     return (
-        <OnlineList getEntries={GetEntries} entryMapper={EntryMapper} ref={ref} />
+        <OnlineList getEntries={GetEntries} entryMapper={EntryMapper} ref={onlineListRef} />
     );
 }
 
-function forwardRef(props) {
+function FeedList() {
     async function getPosts(from) {
         const response = await axios.post(Endpoint("/member/feed/get_posts"), { from: from });
         return response.data;
     }
-    return <PostList getPosts={getPosts} />;
+    return <PostList getPosts={getPosts} commentSectionId={feedCommentSectionId} />;
 }
 
 function CommentList(props) {
@@ -481,10 +499,10 @@ function CommentList(props) {
         });
         return result.data;
     }
-    return <PostList getPosts={getPosts} />;
+    return <PostList getPosts={getPosts} commentSectionId={props.post.id} />;
 }
 
-function BookmarkList(props) {
+function BookmarkList() {
     async function getPosts(from) {
         const result = await axios.post(Endpoint("/member/get_bookmarks"), {
             from: from

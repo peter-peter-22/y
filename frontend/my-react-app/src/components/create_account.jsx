@@ -66,11 +66,14 @@ function CreateAccount(props) {
 
         WaitAfterChange(async () => {
             if (valid) {
+                try{
                 const res = await axios.post(Endpoint("/user/exists/email"), {
                     email: value
                 });
                 if (res.data)
                     setEmailError('This email address is already taken');
+            }
+            catch{}
             }
         }, timerRef, "email");
 
@@ -133,6 +136,7 @@ function CreateAccount(props) {
 
     //submit rechapta
     async function submitChapta() {
+        try{
         await axios.post(Endpoint('/register_start'),
             {
                 email: email,
@@ -144,6 +148,8 @@ function CreateAccount(props) {
         );
         //rechapta ok, next page
         handleNext();
+    }
+    catch{}
     };
 
     //verification code
@@ -157,6 +163,7 @@ function CreateAccount(props) {
 
     //submit verification code
     async function submitCode() {
+        try{
         await axios.post(Endpoint('/verify_code'),
             {
                 code: code
@@ -164,6 +171,8 @@ function CreateAccount(props) {
         );
         //code ok, next page
         handleNext();
+    }
+    catch{}
     };
 
     //password
@@ -176,6 +185,7 @@ function CreateAccount(props) {
     const passwordOk = password.length >= 8;
 
     async function submitPassword() {
+        try{
         await axios.post(Endpoint('/submit_password'),
             {
                 password: password
@@ -184,6 +194,8 @@ function CreateAccount(props) {
         //code ok, next page
         handleNext();
         UserData.update();
+    }
+    catch{}
     }
 
     //profile pic
@@ -206,6 +218,7 @@ function CreateAccount(props) {
         if (file !== undefined) {
             const formData = new FormData();
             formData.append('image', file);
+            try{
             await axios.post(
                 Endpoint('/member/update_profile_picture'),
                 formData,
@@ -216,6 +229,8 @@ function CreateAccount(props) {
                 }
             );
             handleNext();
+        }
+        catch{}
         }
         else
             handleNext();
@@ -234,10 +249,13 @@ function CreateAccount(props) {
         setUserNameOk(false);
         WaitAfterChange(async () => {
             if (value.length > 0) {
+                try{
                 const res = await axios.post(Endpoint("/member/ok_username"), {
                     username: value
                 });
                 setUserNameOk(res.data);
+            }
+            catch{}
             }
         }, timerRef, "username");
     }
@@ -253,18 +271,22 @@ function CreateAccount(props) {
     }, []);
 
     async function submitUsername() {
+        try{
         await axios.post(Endpoint("/member/change_username"), {
             username: username
         });
         handleNext();
+    }catch{}
     }
 
     //notifications
     async function setNotifications(enabled) {
+        try{
         await axios.post(Endpoint("/member/change_browser_notifications"), {
             enabled: enabled
         });
         handleNext();
+    }catch{}
     }
 
     //step handler
@@ -292,13 +314,15 @@ function CreateAccount(props) {
         Modals[0].Close();
     }
     async function send_finish() {
-        console.log(date.toISOString());
+       try{
         await axios.post(Endpoint("/finish_registration"),
             {
                 birthdate: date.toISOString(),
                 checkboxes: checkboxes
             });
         close();
+       }
+       catch{}
     }
 
 
