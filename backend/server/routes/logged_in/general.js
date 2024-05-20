@@ -82,29 +82,46 @@ router.post("/follower_recommendations", async (req, res, next) => {
     });
     await CheckV(v);
     const { from } = req.body;
-    const result = await db.query(named("SELECT * FROM ( SELECT ID, USERNAME, NAME, EXISTS (SELECT * FROM FOLLOWS WHERE FOLLOWER = 50 AND FOLLOWED = ID) AS IS_FOLLOWED FROM USERS OFFSET :from LIMIT 10 ) as sq WHERE IS_FOLLOWED=FALSE")({ from: from, user_id: req.user.id }))
-    res.send(result.rows);
+    const users = await followable_query(req, next, undefined, " WHERE IS_FOLLOWED=FALSE OFFSET :from LIMIT 10", { from: from });
+    res.send(users);
 });
 
+router.get("/follower_recommendations_preview", async (req, res, next) => {
+    const users = await followable_query(req, next, undefined, " WHERE IS_FOLLOWED=FALSE LIMIT 10");
+    res.send(users);
+});
 
+async function followable_query(req, next, before, after, additional_params) {
+    try {
+        const text = "SELECT * FROM ( SELECT ID, USERNAME, NAME, EXISTS (SELECT * FROM FOLLOWS WHERE FOLLOWER = :user_id AND FOLLOWED = ID) AS IS_FOLLOWED FROM USERS  ) as sq";
+        const params = { user_id: req.user.id };
+        const users = await editable_query(text, before, after, params, additional_params);
+        return users;
+    }
+    catch (err) {
+        next(err);
+    }
+}
+
+async function editable_query(text, before, after, params, additional_params) {
+    if (after !== undefined)
+        text += after;
+    if (before !== undefined)
+        text = before + text;
+    if (additional_params)
+        params = { ...params, ...additional_params };
+
+    const result = await db.query(named(text)(params));
+    return result.rows;
+}
 
 async function postQuery(req, next, before, after, additional_params) {
     try {
-        const user_id = req.user.id;
-
-        let text = "select post.text, post.id, post.image_count, post.date, post.views, post.repost as reposted_from, (select count(*) from likes where likes.post_id=post.id)::INT as like_count, EXISTS(select * from likes where likes.post_id=post.id AND user_id=50) as liked_by_user, (select count(*) from posts reposts_query where reposts_query.repost=post.id)::INT as repost_count, (select count(*) from bookmarks bookmark where bookmark.post_id=post.id)::INT as bookmark_count, EXISTS(select * from bookmarks bookmark where bookmark.post_id=post.id AND bookmark.user_id=post.publisher) as bookmarked_by_user, poster.id as poster_id, poster.name as poster_name, poster.username as poster_username, 	(SELECT count(*) from posts as comments_table where comments_table.replying_to = post.id) as comment_count from posts post left join users poster on post.publisher=poster.id";
-        if (after !== undefined)
-            text += after;
-        if (before !== undefined)
-            text = before + text;
-
-        let params = { user_id: user_id };
-        if (additional_params)
-            params = { ...params, ...additional_params };
-
-        const result = await db.query(named(text)(params));
-        updateViews(result.rows);//the viewcount update is not awaited
-        return result.rows;
+        const text = "select post.text, post.id, post.image_count, post.date, post.views, post.repost as reposted_from, (select count(*) from likes where likes.post_id=post.id)::INT as like_count, EXISTS(select * from likes where likes.post_id=post.id AND user_id=50) as liked_by_user, (select count(*) from posts reposts_query where reposts_query.repost=post.id)::INT as repost_count, (select count(*) from bookmarks bookmark where bookmark.post_id=post.id)::INT as bookmark_count, EXISTS(select * from bookmarks bookmark where bookmark.post_id=post.id AND bookmark.user_id=post.publisher) as bookmarked_by_user, poster.id as poster_id, poster.name as poster_name, poster.username as poster_username, 	(SELECT count(*) from posts as comments_table where comments_table.replying_to = post.id) as comment_count from posts post left join users poster on post.publisher=poster.id";
+        const params = { user_id: req.user.id };
+        const posts = await editable_query(text, before, after, params, additional_params);
+        updateViews(posts);//the viewcount update is not awaited
+        return posts;
     }
     catch (err) {
         next(err);

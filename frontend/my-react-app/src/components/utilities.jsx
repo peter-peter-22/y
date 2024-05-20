@@ -26,6 +26,7 @@ import axios from 'axios';
 import Tooltip from '@mui/material/Tooltip';
 import config from "/src/components/config.js";
 import { NavLink } from "react-router-dom";
+import CircularProgress from '@mui/material/CircularProgress';
 
 const noOverflow = {
     whiteSpace: 'nowrap',
@@ -274,15 +275,15 @@ function FollowButton(props) {
         setFollowing((prev) => {
             const newValue = !prev;
             async function update() {
-                try{
-                await axios.post(Endpoint("/member/follow_user"),
-                    {
-                        key: props.user_id,
-                        value: newValue
-                    }
-                );
-            }
-            catch{}
+                try {
+                    await axios.post(Endpoint("/member/follow_user"),
+                        {
+                            key: props.user_id,
+                            value: newValue
+                        }
+                    );
+                }
+                catch { }
             }
             update();
             return newValue;
@@ -325,7 +326,7 @@ const OnlineList = forwardRef((props, ref) => {
     //add an entry from outside
     useImperativeHandle(ref, () => ({
         AddEntryToTop(newEntry) {
-            setEntries((prev) => [newEntry, ...entries]);
+            setEntries((prev) => [newEntry, ...prev]);
         }
     }));
 
@@ -389,9 +390,17 @@ const OnlineList = forwardRef((props, ref) => {
     return (
         <List sx={{ p: 0 }} ref={listRef}>
             {entries.map((entry, index) => <EntryMapper key={index} entry={entry} />)}
+            {!end && <Loading />}
         </List>
     );
 });
 
+function Loading() {
+    return (
+        <div style={{ display: "flex", justifyContent: "center", margin: "10px 0px" }}>
+            <CircularProgress size={20} />
+        </div>
+    );
+}
 
-export { AboveBreakpoint, ResponsiveSelector, ChooseChild, ChooseChildBool, TopMenu, ProfileText, FadeLink, TabSwitcher, UserName, UserKey, noOverflow, BoldLink, UserLink, DateLink, TextRow, UserKeyLink, ReplyingTo, GetUserName, GetUserKey, logo, creation, ToCorner, CenterLogo, default_profile, FollowDialog, GetProfilePicture, default_image, FollowButton, GetPostPictures, NiceLink, OnlineList }
+export { AboveBreakpoint, ResponsiveSelector, ChooseChild, ChooseChildBool, TopMenu, ProfileText, FadeLink, TabSwitcher, UserName, UserKey, noOverflow, BoldLink, UserLink, DateLink, TextRow, UserKeyLink, ReplyingTo, GetUserName, GetUserKey, logo, creation, ToCorner, CenterLogo, default_profile, FollowDialog, GetProfilePicture, default_image, FollowButton, GetPostPictures, NiceLink, OnlineList, Loading }

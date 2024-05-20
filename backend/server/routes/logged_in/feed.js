@@ -39,6 +39,16 @@ router.post("/get_posts", async (req, res, next) => {
     const result = await postQuery(req, next, undefined, " WHERE post.replying_to IS NULL OFFSET :from LIMIT 5", { from: from });
     res.status(200).send(result);
 });
+router.post("/get_followed_posts", async (req, res, next) => {
+    const v = new Validator(req.body, {
+        from: 'required|integer',
+    });
+    await CheckV(v);
+    const { from } = req.body;
+
+    const result = await postQuery(req, next, undefined, " WHERE post.replying_to IS NULL AND post.publisher=ANY(SELECT follows.followed from follows WHERE follows.follower=:user_id) OFFSET :from LIMIT 5", { from: from });
+    res.status(200).send(result);
+});
 
 
 export default router;

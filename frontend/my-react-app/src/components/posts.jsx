@@ -491,6 +491,14 @@ function FeedList() {
     return <PostList getPosts={getPosts} commentSectionId={feedCommentSectionId} />;
 }
 
+function FollowingFeedList() {
+    async function getPosts(from) {
+        const response = await axios.post(Endpoint("/member/feed/get_followed_posts"), { from: from });
+        return response.data;
+    }
+    return <PostList getPosts={getPosts} commentSectionId={feedCommentSectionId} />;
+}
+
 function CommentList(props) {
     async function getPosts(from) {
         const result = await axios.post(Endpoint("/member/get_comments"), {
@@ -709,4 +717,4 @@ function AddDataToPost(post) {
 }
 
 
-export { Post, PostList, PostFocused, ListBlockButton, ListBlock, RowWithPrefix, PostButtonRow, AddDataToPost, WritePost, CommentList, FeedList, BookmarkList };
+export { Post, PostList, PostFocused, ListBlockButton, ListBlock, RowWithPrefix, PostButtonRow, AddDataToPost, WritePost, CommentList, FeedList, BookmarkList,FollowingFeedList };

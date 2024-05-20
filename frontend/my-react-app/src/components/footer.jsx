@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Stack from '@mui/material/Stack';
 import SideMenu, { Inside } from "./side_menus.jsx";
 import { TopMenu } from '/src/components/utilities';
@@ -9,7 +9,7 @@ import Fab from '@mui/material/Fab';
 import { Icon } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink, creation, FollowDialog, NiceLink } from '/src/components/utilities';
+import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink, creation, FollowDialog, NiceLink, Loading } from '/src/components/utilities';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -21,114 +21,133 @@ import Link from '@mui/material/Link';
 import { ResponsiveButton, ButtonIcon, ButtonSvg, TabButton, PostButton, ProfileButton, TopMenuButton, CornerButton } from "/src/components/buttons.jsx";
 import { UserData } from "/src/App.jsx";
 import { NavLink } from "react-router-dom";
-
+import { Endpoint, FormatAxiosError } from "/src/communication.js";
+import axios from 'axios';
 
 function Footer() {
     return (
         <div>
-        <SideMenu border="borderLeft">
-            <Box sx={{ pl: 4, width: "300px" }}>
-                <TopMenu>
-                    <SearchField />
-                </TopMenu>
-                <Stack direction="column" spacing={2} sx={{ my: 2 }} >
+            <SideMenu border="borderLeft">
+                <Box sx={{ pl: 4, width: "300px" }}>
+                    <TopMenu>
+                        <SearchField />
+                    </TopMenu>
+                    <Stack direction="column" spacing={2} sx={{ my: 2 }} >
 
-                    <BoxList>
+                        <BoxList>
 
-                        <ListItem>
-                            <Typography variant="big_bold">
-                                Subscribe to Premium
-                            </Typography>
-                        </ListItem>
-
-                        <ListItem>
-                            <Typography variant="small">
-                                Subscribe to unlock new features and if eligible, receive a share of ads revenue.
-                            </Typography>
-                        </ListItem>
-
-                        <ListItem >
-                            <Fab variant="extended" size="small" color="black">Subscribe</Fab>
-                        </ListItem>
-
-                    </BoxList>
-
-                    <BoxList>
-
-                        <ListItem>
-                            <ListItemText>
+                            <ListItem>
                                 <Typography variant="big_bold">
-                                    Who to follow
+                                    Subscribe to Premium
                                 </Typography>
-                            </ListItemText>
-                        </ListItem>
+                            </ListItem>
 
-                        <FollowDialog user={UserData.getData.user} />
+                            <ListItem>
+                                <Typography variant="small">
+                                    Subscribe to unlock new features and if eligible, receive a share of ads revenue.
+                                </Typography>
+                            </ListItem>
 
-                        <NiceLink to="/add_followers">
+                            <ListItem >
+                                <Fab variant="extended" size="small" color="black">Subscribe</Fab>
+                            </ListItem>
+
+                        </BoxList>
+
+                        <WhoToFollow />
+
+                        <BoxList>
+
+                            <ListItem>
+                                <ListItemText>
+                                    <Typography variant="big_bold">
+                                        Hungary trends
+                                    </Typography>
+                                </ListItemText>
+                            </ListItem>
+
+                            <ListItem disablePadding>
+                                <ListItemButton>
+                                    <ListItemText>
+                                        <Typography variant="small_fade">
+                                            <div>
+                                                <span>1</span><span style={{ margin: "0px 4px" }}>·</span><span>Trending</span>
+                                            </div>
+                                        </Typography>
+                                        <Typography variant="small_bold">
+                                            <div>
+                                                #Hungary
+                                            </div>
+                                        </Typography>
+                                        <Typography variant="small_fade">
+                                            <div>
+                                                999K posts
+                                            </div>
+                                        </Typography>
+
+                                        <CornerButton>more_horiz</CornerButton>
+                                    </ListItemText>
+                                </ListItemButton>
+                            </ListItem>
+
                             <BlueTextButton>
                                 Show more
                             </BlueTextButton>
-                        </NiceLink>
 
-                    </BoxList>
-
-                    <BoxList>
+                        </BoxList>
 
                         <ListItem>
-                            <ListItemText>
-                                <Typography variant="big_bold">
-                                    Hungary trends
-                                </Typography>
-                            </ListItemText>
+                            <div style={{ display: "flex", flexWrap: "wrap", gap: "0px 10px" }}>
+                                <FadeLink>Terms of Service</FadeLink>
+                                <FadeLink>Privacy Policy</FadeLink>
+                                <FadeLink>Cookie Policy</FadeLink>
+                                <FadeLink>Accessibility</FadeLink>
+                                <FadeLink>Ads Info</FadeLink>
+                                <FadeLink>More···</FadeLink>
+                                <Typography variant="small_fade">{creation}</Typography>
+                            </div>
                         </ListItem>
 
-                        <ListItem disablePadding>
-                            <ListItemButton>
-                                <ListItemText>
-                                    <Typography variant="small_fade">
-                                        <div>
-                                            <span>1</span><span style={{ margin: "0px 4px" }}>·</span><span>Trending</span>
-                                        </div>
-                                    </Typography>
-                                    <Typography variant="small_bold">
-                                        <div>
-                                            #Hungary
-                                        </div>
-                                    </Typography>
-                                    <Typography variant="small_fade">
-                                        <div>
-                                            999K posts
-                                        </div>
-                                    </Typography>
-
-                                    <CornerButton>more_horiz</CornerButton>
-                                </ListItemText>
-                            </ListItemButton>
-                        </ListItem>
-
-                        <BlueTextButton>
-                            Show more
-                        </BlueTextButton>
-
-                    </BoxList>
-
-                    <ListItem>
-                        <div style={{ display: "flex", flexWrap: "wrap", gap: "0px 10px" }}>
-                            <FadeLink>Terms of Service</FadeLink>
-                            <FadeLink>Privacy Policy</FadeLink>
-                            <FadeLink>Cookie Policy</FadeLink>
-                            <FadeLink>Accessibility</FadeLink>
-                            <FadeLink>Ads Info</FadeLink>
-                            <FadeLink>More···</FadeLink>
-                            <Typography variant="small_fade">{creation}</Typography>
-                        </div>
-                    </ListItem>
-
-                </Stack>
-            </Box>
-        </SideMenu>
+                    </Stack>
+                </Box>
+            </SideMenu>
         </div>
+    );
+}
+
+function WhoToFollow() {
+    const [users, setUsers] = useState();
+    useEffect(() => {
+        async function getFollowRecommendations() {
+            try {
+                const res = await axios.get(Endpoint("/member/follower_recommendations_preview"));
+                setUsers(res.data);
+            }
+            catch { }
+        }
+        getFollowRecommendations();
+    }, []);
+
+    return (
+        <BoxList>
+
+            <ListItem>
+                <ListItemText>
+                    <Typography variant="big_bold">
+                        Who to follow
+                    </Typography>
+                </ListItemText>
+            </ListItem>
+
+            {users ? users.map((user,index) => <FollowDialog user={user} key={index}/>) : <Loading />}
+
+            <NiceLink to="/add_followers">
+                <BlueTextButton>
+                    Show more
+                </BlueTextButton>
+            </NiceLink>
+
+        </BoxList>
     );
 }
 

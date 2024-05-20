@@ -1,4 +1,4 @@
-import React,{useState,useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import Stack from '@mui/material/Stack';
 import SideMenu, { Inside } from "./side_menus.jsx";
 import { TopMenu } from '/src/components/utilities';
@@ -19,7 +19,7 @@ import { BoxList, BoxListOutlined, BlueTextButton } from '/src/components/contai
 import IconButton from '@mui/material/IconButton';
 import Link from '@mui/material/Link';
 import { ResponsiveButton, ButtonIcon, ButtonSvg, TabButton, PostButton, ProfileButton, TopMenuButton, CornerButton } from "/src/components/buttons.jsx";
-import { FeedList, WritePost,AddDataToPost } from "/src/components/posts.jsx";
+import { FeedList, WritePost, FollowingFeedList } from "/src/components/posts.jsx";
 import axios from "axios";
 import { Endpoint, FormatAxiosError } from "/src/communication.js";
 
@@ -34,11 +34,10 @@ function ForYou() {
 function Following() {
     return (
         <>
-        balls
             <WritePost />
-            <FeedList />
+            <FollowingFeedList />
         </>
     )
 }
 
-export { ForYou,Following };
+export { ForYou, Following };
