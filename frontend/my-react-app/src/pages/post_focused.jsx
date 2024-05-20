@@ -36,6 +36,7 @@ import { PostFocused, AddDataToPost, CommentList } from "/src/components/posts.j
 export default () => {
     const [post, setPost] = useState();
     const { id } = useParams();
+    const commentListRef=useRef();
 
     useEffect(() => { getPost(); }, []);
     async function getPost() {
@@ -52,9 +53,10 @@ export default () => {
 
     if (post)
         return (
-            <List sx={{ p: 0 }}>
-                <PostFocused post={post} />
-                <CommentList post={post} />
+            <List sx={{ p: 0 }} onClick={()=>{    commentListRef.current.AddEntryToTop();
+            }}>
+                <PostFocused post={post} commentListRef={commentListRef}/>
+                <CommentList post={post} ref={commentListRef}/>
             </List>
         );
     else

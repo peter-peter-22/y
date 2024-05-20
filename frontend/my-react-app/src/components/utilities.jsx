@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useImperativeHandle,forwardRef } from 'react';
 import { theme } from '/src/styles/mui/my_theme.jsx';
 import Stack from '@mui/material/Stack';
 import SideMenu, { Inside } from "/src/components/side_menus.jsx";
@@ -309,16 +309,22 @@ function NiceLink(props) {
     );
 }
 
-function OnlineList(props) {
+const OnlineList = forwardRef((props, ref) => {
     const [entries, setEntries] = useState([]);
     const listRef = useRef(null);
     const savedScrollRef = useRef(0);
     const [end, setEnd] = useState(false);
     const [downloading, setDownloading] = useState(false);
 
-    //the minimum distance between the bottom of the screen and the list in px.
-    //it is necessary to not reveal the emptyness when reaching the bottom.
+    //the minimum distance between the bottom of the screen and the bottom of the list in px.
     const minUnseenHeight = 2000;
+
+    //add an entry from outside
+    useImperativeHandle(ref, () => ({
+        AddEntryToTop(newEntry) {
+            setEntries((prev) => [newEntry, ...entries]);
+        }
+    }));
 
     //check the new height after render, adjust the scrolling
     useEffect(() => {
@@ -375,11 +381,11 @@ function OnlineList(props) {
     }
 
     return (
-        <List sx={{ p: 0 }} ref={listRef}>
+        <List sx={{ p: 0 }} ref={ref}>
             {entries.map((entry, index) => <EntryMapper key={index} entry={entry} />)}
         </List>
     );
-}
+});
 
 
 export { AboveBreakpoint, ResponsiveSelector, ChooseChild, ChooseChildBool, TopMenu, ProfileText, FadeLink, TabSwitcher, UserName, UserKey, noOverflow, BoldLink, UserLink, DateLink, TextRow, UserKeyLink, ReplyingTo, GetUserName, GetUserKey, logo, creation, ToCorner, CenterLogo, default_profile, FollowDialog, GetProfilePicture, default_image, FollowButton, GetPostPictures, NiceLink, OnlineList }

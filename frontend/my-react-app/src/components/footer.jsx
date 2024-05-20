@@ -25,6 +25,7 @@ import { NavLink } from "react-router-dom";
 
 function Footer() {
     return (
+        <div>
         <SideMenu border="borderLeft">
             <Box sx={{ pl: 4, width: "300px" }}>
                 <TopMenu>
@@ -127,6 +128,7 @@ function Footer() {
                 </Stack>
             </Box>
         </SideMenu>
+        </div>
     );
 }
 

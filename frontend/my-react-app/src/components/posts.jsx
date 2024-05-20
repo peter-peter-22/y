@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, forwardRef } from "react";
 import Stack from '@mui/material/Stack';
 import SideMenu, { Inside } from "./side_menus.jsx";
 import { TopMenu } from '/src/components/utilities';
@@ -9,7 +9,7 @@ import Fab from '@mui/material/Fab';
 import { Icon } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, GetProfilePicture, default_image, GetPostPictures ,OnlineList} from '/src/components/utilities';
+import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, GetProfilePicture, default_image, GetPostPictures, OnlineList } from '/src/components/utilities';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -31,6 +31,8 @@ import config from "/src/components/config.js";
 import axios from 'axios';
 import { Endpoint, FormatAxiosError } from "/src/communication.js";
 import { Error, Modals, ShowImage } from "/src/components/modals";
+
+const commentSections = {};
 
 function Prefix(props) {
     return (
@@ -440,7 +442,7 @@ function CommentButton(props) {
     );
 }
 
-function PostList(props) {
+function PostList(props, ref) {
     async function GetEntries(from) {
         try {
             const new_posts = await props.getPosts(from);
@@ -459,15 +461,16 @@ function PostList(props) {
         return (<Post post={props.entry} />);
     }
     return (
-            <OnlineList getEntries={GetEntries} entryMapper={EntryMapper} />
+        <OnlineList getEntries={GetEntries} entryMapper={EntryMapper} ref={ref} />
     );
 }
-function FeedList() {
+
+function forwardRef(props) {
     async function getPosts(from) {
         const response = await axios.post(Endpoint("/member/feed/get_posts"), { from: from });
         return response.data;
     }
-    return PostList(getPosts = { getPosts });
+    return <PostList getPosts={getPosts} />;
 }
 
 function CommentList(props) {
@@ -478,7 +481,7 @@ function CommentList(props) {
         });
         return result.data;
     }
-    return PostList(getPosts = { getPosts });
+    return <PostList getPosts={getPosts} />;
 }
 
 function BookmarkList(props) {
@@ -488,7 +491,7 @@ function BookmarkList(props) {
         });
         return result.data;
     }
-    return PostList(getPosts = { getPosts });
+    return <PostList getPosts={getPosts} />;
 }
 
 
@@ -532,7 +535,7 @@ function BlockImage(props) {
 
 function PostBottomIcon(props) {
     return (
-        <IconButton size="small" onClick={(e) => { e.stopPropagation(); props.onClick(e); }}>
+        <IconButton size="small" onClick={(e) => { e.stopPropagation(); if (props.onClick) props.onClick(e); }}>
             <Icon sx={{ color: props.active ? props.active_color : "" }} fontSize="small" baseClassName={props.active ? "material-icons" : "material-icons-outlined"}>
                 {props.active ? props.active_icon : props.inactive_icon}
             </Icon>

@@ -3,7 +3,7 @@ import { Box } from '@mui/system';
 
 function SideMenu(props) {
     return (
-        <Box sx={{ minHeight: "100vh", [props.border]: 1, borderColor: 'divider' }}>
+        <Box sx={{height:"100%",width:"100%",  [props.border]: 1, borderColor: 'divider' }}>
             {props.children}
         </Box>
     );

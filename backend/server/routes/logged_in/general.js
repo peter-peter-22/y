@@ -28,8 +28,8 @@ import { ApplySqlToUser, UpdateUser } from "../logged_in.js";
 
 const router = express.Router();
 
-router.post("/follow_user", async (req, res,next) => {
-    await CountableToggle(req, res, next, "follows", "follow_unique","follower","followed");
+router.post("/follow_user", async (req, res, next) => {
+    await CountableToggle(req, res, next, "follows", "follow_unique", "follower", "followed");
 });
 
 router.post("/is_following_user", async (req, res) => {
@@ -82,33 +82,17 @@ router.post("/follower_recommendations", async (req, res, next) => {
     });
     await CheckV(v);
     const { from } = req.body;
-    const result = await db.query(named("SELECT id,username,name,EXISTS(SELECT * FROM follows WHERE follower = :user_id AND followed = id) as is_followed FROM users OFFSET :from LIMIT 10")({from:from,user_id:req.user.id}))
+    const result = await db.query(named("SELECT * FROM ( SELECT ID, USERNAME, NAME, EXISTS (SELECT * FROM FOLLOWS WHERE FOLLOWER = 50 AND FOLLOWED = ID) AS IS_FOLLOWED FROM USERS OFFSET :from LIMIT 10 ) as sq WHERE IS_FOLLOWED=FALSE")({ from: from, user_id: req.user.id }))
     res.send(result.rows);
 });
 
 
 
 async function postQuery(req, next, before, after, additional_params) {
-    //select post.text,
-    //post.id,
-    //post.image_count, 
-    //post.date, 
-    //post.repost as reposted_from,
-    //(select count(*) from likes where likes.post_id=post.id)::INT as like_count, 
-    //EXISTS(select * from likes where likes.post_id=post.id AND user_id=:user_id) as liked_by_user,
-    //(select count(*) from posts reposts_query where reposts_query.repost=post.id)::INT as repost_count, 
-    //(select count(*) from bookmarks bookmark where bookmark.post_id=post.id)::INT as bookmark_count,
-    //EXISTS(select * from bookmarks bookmark where bookmark.post_id=post.id AND bookmark.user_id=post.publisher) as bookmarked_by_user,
-    //poster.id as poster_id,
-    //poster.name as poster_name,
-    //poster.username as poster_username 
-    //from posts post 
-    //left join users poster on post.publisher=poster.id
-
     try {
         const user_id = req.user.id;
 
-        let text = "select post.text, post.id, post.image_count, post.date, post.repost as reposted_from, (select count(*) from likes where likes.post_id=post.id)::INT as like_count, EXISTS(select * from likes where likes.post_id=post.id AND user_id=:user_id) as liked_by_user, (select count(*) from posts reposts_query where reposts_query.repost=post.id)::INT as repost_count, (select count(*) from bookmarks bookmark where bookmark.post_id=post.id)::INT as bookmark_count, EXISTS(select * from bookmarks bookmark where bookmark.post_id=post.id AND bookmark.user_id=post.publisher) as bookmarked_by_user, poster.id as poster_id, poster.name as poster_name, poster.username as poster_username from posts post left join users poster on post.publisher=poster.id";
+        let text = "select post.text, post.id, post.image_count, post.date, post.views, post.repost as reposted_from, (select count(*) from likes where likes.post_id=post.id)::INT as like_count, EXISTS(select * from likes where likes.post_id=post.id AND user_id=50) as liked_by_user, (select count(*) from posts reposts_query where reposts_query.repost=post.id)::INT as repost_count, (select count(*) from bookmarks bookmark where bookmark.post_id=post.id)::INT as bookmark_count, EXISTS(select * from bookmarks bookmark where bookmark.post_id=post.id AND bookmark.user_id=post.publisher) as bookmarked_by_user, poster.id as poster_id, poster.name as poster_name, poster.username as poster_username, 	(SELECT count(*) from posts as comments_table where comments_table.replying_to = post.id) as comment_count from posts post left join users poster on post.publisher=poster.id";
         if (after !== undefined)
             text += after;
         if (before !== undefined)
@@ -119,11 +103,17 @@ async function postQuery(req, next, before, after, additional_params) {
             params = { ...params, ...additional_params };
 
         const result = await db.query(named(text)(params));
+        updateViews(result.rows);//the viewcount update is not awaited
         return result.rows;
     }
     catch (err) {
         next(err);
     }
+}
+
+async function updateViews(posts) {
+    const ids = posts.map((post) => post.id);
+    await db.query(named("UPDATE posts SET views = views + 1 WHERE id=ANY(:post_ids)")({ post_ids: ids }));
 }
 
 router.post("/like", async (req, res, next) => {
@@ -134,19 +124,19 @@ router.post("/bookmark", async (req, res, next) => {
     await CountableToggle(req, res, next, "bookmarks", "unique_bookmarks");
 });
 
-async function CountableToggle(req, res, next, table, unique_constraint_name,first_column_name="user_id",second_column_name="post_id") {
+async function CountableToggle(req, res, next, table, unique_constraint_name, first_column_name = "user_id", second_column_name = "post_id") {
     try {
         const v = new Validator(req.body, {
             key: 'required|integer',
             value: "required|boolean"
         });
         await CheckV(v);
-        const {  key, value } = req.body;
+        const { key, value } = req.body;
         try {
             if (value)
-                await db.query(named("INSERT INTO " + table + " ("+first_column_name+", "+second_column_name+") VALUES (:user,:key) ON CONFLICT ON CONSTRAINT " + unique_constraint_name + " DO NOTHING")({ user: req.user.id, key: key }));
+                await db.query(named("INSERT INTO " + table + " (" + first_column_name + ", " + second_column_name + ") VALUES (:user,:key) ON CONFLICT ON CONSTRAINT " + unique_constraint_name + " DO NOTHING")({ user: req.user.id, key: key }));
             else
-                await db.query(named("DELETE FROM " + table + " WHERE "+first_column_name+"=:user AND "+second_column_name+"=:key")({ user: req.user.id, key: key }));
+                await db.query(named("DELETE FROM " + table + " WHERE " + first_column_name + "=:user AND " + second_column_name + "=:key")({ user: req.user.id, key: key }));
             res.sendStatus(200);
         }
         catch (err) {
