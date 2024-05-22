@@ -11,7 +11,7 @@ axios.interceptors.response.use(function (response) {
     return Promise.reject(error);
 });
 
-const url = config.server_url;
+const url = config.address_mode.server;
 
 function Endpoint(endpoint) {
     return (url + endpoint);
@@ -27,4 +27,10 @@ function FormatAxiosError(error) {
     return text;
 }
 
-export { Endpoint, FormatAxiosError }
+function ThrowIfNotAxios(err)
+{
+    if (err.name !== "AxiosError")
+        throw (err);
+}
+
+export { Endpoint, FormatAxiosError ,ThrowIfNotAxios}

@@ -27,6 +27,7 @@ import Tooltip from '@mui/material/Tooltip';
 import config from "/src/components/config.js";
 import { NavLink } from "react-router-dom";
 import CircularProgress from '@mui/material/CircularProgress';
+import Popover from '@mui/material/Popover';
 
 const noOverflow = {
     whiteSpace: 'nowrap',
@@ -307,9 +308,9 @@ function GetPostPictures(post_id, image_count) {
 
 function NiceLink(props) {
     return (
-        <NavLink to={props.to} style={{ textDecoration: "none" }}>
+        <Link to={props.to} style={{ textDecoration: "none" }}>
             {props.children}
-        </NavLink>
+        </Link>
     );
 }
 
@@ -403,4 +404,45 @@ function Loading() {
     );
 }
 
-export { AboveBreakpoint, ResponsiveSelector, ChooseChild, ChooseChildBool, TopMenu, ProfileText, FadeLink, TabSwitcher, UserName, UserKey, noOverflow, BoldLink, UserLink, DateLink, TextRow, UserKeyLink, ReplyingTo, GetUserName, GetUserKey, logo, creation, ToCorner, CenterLogo, default_profile, FollowDialog, GetProfilePicture, default_image, FollowButton, GetPostPictures, NiceLink, OnlineList, Loading }
+function SimplePopOver() {
+    const [anchorEl, setAnchorEl] = React.useState(null);
+
+    const handleOpen = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleClose = (e) => {
+        e.stopPropagation();
+        setAnchorEl(null);
+    };
+
+    function ShowPopover(props) {
+        return (
+            <Popover
+                open={Boolean(anchorEl)}
+                anchorEl={anchorEl}
+                onClose={handleClose}
+                onClick={(e)=>e.stopPropagation()}
+                anchorOrigin={{
+                    vertical: 'top',
+                    horizontal: 'left',
+                }}
+                transformOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left',
+                }}
+            >
+                {props.children}
+            </Popover>
+        );
+    };
+
+    return {
+        handleOpen: handleOpen,
+        handleClose: handleClose,
+        ShowPopover: ShowPopover
+    };
+}
+
+
+export { AboveBreakpoint, ResponsiveSelector, ChooseChild, ChooseChildBool, TopMenu, ProfileText, FadeLink, TabSwitcher, UserName, UserKey, noOverflow, BoldLink, UserLink, DateLink, TextRow, UserKeyLink, ReplyingTo, GetUserName, GetUserKey, logo, creation, ToCorner, CenterLogo, default_profile, FollowDialog, GetProfilePicture, default_image, FollowButton, GetPostPictures, NiceLink, OnlineList, Loading,SimplePopOver }

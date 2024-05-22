@@ -36,8 +36,8 @@ router.post("/get_posts", async (req, res, next) => {
     await CheckV(v);
     const { from } = req.body;
 
-    const result = await postQuery(req, next, undefined, " WHERE post.replying_to IS NULL OFFSET :from LIMIT 5", { from: from });
-    res.status(200).send(result);
+    const posts = await postQuery(req, next, undefined, " WHERE post.replying_to IS NULL OFFSET :from LIMIT 5", { from: from });
+    res.status(200).send(posts);
 });
 router.post("/get_followed_posts", async (req, res, next) => {
     const v = new Validator(req.body, {

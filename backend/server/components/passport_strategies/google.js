@@ -50,7 +50,7 @@ const google_login_redirect=  process.env.GOOGLE_CALLBACK;
             {
                 clientID: process.env.GOOGLE_CLIENT_ID,
                 clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-                callbackURL: config.server_url + google_login_redirect,
+                callbackURL: config.address_mode.server + google_login_redirect,
             },
             async (accessToken, refreshToken, profile, cb) => {
                 try {

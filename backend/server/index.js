@@ -46,6 +46,7 @@ app.use("/", passport_routes);
 //error
 app.use((err, req, res, next) => {
     if (!err.status) {
+        console.log("CAUGHT internal server error:");
         console.error(err)
         res.status(500).send("Internal server error: '" + err.message + "'");
     }

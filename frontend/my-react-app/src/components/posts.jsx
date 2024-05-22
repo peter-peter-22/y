@@ -9,7 +9,7 @@ import Fab from '@mui/material/Fab';
 import { Icon } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, GetProfilePicture, default_image, GetPostPictures, OnlineList } from '/src/components/utilities';
+import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, GetProfilePicture, default_image, GetPostPictures, OnlineList, SimplePopOver } from '/src/components/utilities';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -29,8 +29,9 @@ import { PlainTextField, PasswordFieldWithToggle, VisuallyHiddenInput } from "/s
 import { UserData } from "/src/App.jsx";
 import config from "/src/components/config.js";
 import axios from 'axios';
-import { Endpoint, FormatAxiosError } from "/src/communication.js";
+import { Endpoint, FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
 import { Error, Modals, ShowImage } from "/src/components/modals";
+import { NavLink } from "react-router-dom";
 
 const commentSections = {};
 const feedCommentSectionId = -1;
@@ -55,32 +56,38 @@ function RowWithPrefix(props) {
 }
 
 function Post(props) {
+    const original = props.post;
+    const overriden = OverrideWithRepostOrQuote(original);
+    const link = "/posts/" + original.id;
+    const linkRef = useRef();
+
     function OpenPost() {
-        window.open("/posts/" + props.post.id, "_self");
+        linkRef.current.click();
     }
+
     return (
         <ListBlockButton>
             <div onClick={OpenPost}>
-                <Reposted post={props.post} />
+                <NavLink to={link} ref={linkRef} style={{ display: "none" }} />
+                <RepostedOrQuoted post={original} />
                 <RowWithPrefix
-                    prefix={<Avatar src={GetProfilePicture(props.post.publisher)} />}
+                    prefix={<Avatar src={GetProfilePicture(overriden)} />}
                     contents={
                         <Stack direction="column" style={{ overflow: "hidden" }}>
                             <Stack direction="row" spacing={0.25} style={{ alignItems: "center" }}>
-                                <UserName user={props.post.publisher} />
-                                <UserKey user={props.post.publisher} />
+                                <UserName user={overriden.publisher} />
+                                <UserKey user={overriden.publisher} />
                                 ·
-                                <DateLink passed isoString={props.post.date} />
+                                <DateLink passed isoString={overriden.date} />
                                 <ManagePost />
                             </Stack>
-                            <PostText post={props.post} />
-                            <PostMedia images={props.post.images} />
+                            <PostText post={overriden} />
+                            <PostMedia images={overriden.images} />
                         </Stack>
                     } />
                 <RowWithPrefix contents={
                     <Stack direction="column" style={{ overflow: "hidden" }}>
-                        <FromUser post={props.post} />
-                        <PostButtonRow post={props.post} />
+                        <PostButtonRow post={overriden} />
                     </Stack>
                 } />
             </div>
@@ -89,15 +96,18 @@ function Post(props) {
 }
 
 function PostFocused(props) {
+    const original = props.post;
+    const overriden = OverrideWithRepostOrQuote(original);
+
     return (
         <ListBlock>
-            <Reposted post={props.post} />
+            <RepostedOrQuoted post={original} />
             <RowWithPrefix
-                prefix={<Avatar src={GetProfilePicture(props.post.publisher)} />}
+                prefix={<Avatar src={GetProfilePicture(overriden.publisher)} />}
                 contents={
                     <Stack direction="column" style={{ overflow: "hidden" }}>
                         <Stack direction="row" spacing={0.25} style={{ alignItems: "center" }}>
-                            <ProfileText user={props.post.publisher} />
+                            <ProfileText user={overriden.publisher} />
                             <Fab variant="extended" size="small" color="black" style={{ flexShrink: 0 }}>Subscribe</Fab>
                             <ManagePost />
                         </Stack>
@@ -105,13 +115,12 @@ function PostFocused(props) {
                 } />
 
             <Stack direction="column" sx={{ overflow: "hidden", mt: 1 }}>
-                <PostText post={props.post} />
-                <PostMedia images={props.post.images} />
-                <FromUser post={props.post} />
+                <PostText post={overriden} />
+                <PostMedia images={overriden.images} />
                 <Stack direction="row" spacing={0.5} sx={{ alignItems: "baseline", my: 1 }}>
-                    <DateLink passed isoString={props.post.date} />
+                    <DateLink passed isoString={overriden.date} />
                     <Typography variant="small_fade">·</Typography>
-                    <Typography variant="small_bold">{formatNumber(props.post.views)}</Typography>
+                    <Typography variant="small_bold">{formatNumber(overriden.views)}</Typography>
                     <Typography variant="small_fade">Views</Typography>
                 </Stack>
             </Stack>
@@ -119,12 +128,12 @@ function PostFocused(props) {
             <Divider />
 
             <Box sx={{ my: 1 }}>
-                <PostButtonRow post={props.post} />
+                <PostButtonRow post={overriden} />
             </Box>
 
             <Divider />
 
-            <PostCreator post={props.post} />
+            <PostCreator post={overriden} />
         </ListBlock>
     );
 }
@@ -179,26 +188,28 @@ function PostCreator(props) {
         if (isComment)
             formData.append("replying_to", props.post.id);
 
-        try{
-        const result = await axios.post(
-            Endpoint(isComment ? "/member/create/comment" : '/member/create/post'),
-            formData,
-            {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
+        try {
+            const result = await axios.post(
+                Endpoint(isComment ? "/member/create/comment" : '/member/create/post'),
+                formData,
+                {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
                 }
-            }
-        );
-        setFiles([]);
-        setUrls([]);
-        setText("");
+            );
+            setFiles([]);
+            setUrls([]);
+            setText("");
 
-        //update post list on client without refreshing the page
-        const post = result.data;
-        AddDataToPost(post);
-        commentSections[isComment?props.post.id:feedCommentSectionId].addPost(post);
-    }
-    catch{}
+            //update post list on client without refreshing the page
+            const post = result.data;
+            AddDataToPost(post);
+            commentSections[isComment ? props.post.id : feedCommentSectionId].addPost(post);
+        }
+        catch (err) {
+            ThrowIfNotAxios(err);
+        }
     }
 
     return (
@@ -294,7 +305,7 @@ function PostButtonRow(props) {
     const post = props.post;
     const { count: like_count, active: liked, pressed: handleLike } = CountableButton(post, post.like_count, post.liked_by_user, "/member/like");
     const { count: bookmark_count, active: bookmarked, pressed: handleBookmark } = CountableButton(post, post.bookmark_count, post.bookmarked_by_user, "/member/bookmark");
-
+    const { count: repost_count, active: reposted, pressed: handleRepost } = CountableButton(post, post.repost_count, post.reposted_by_user, "/member/repost");
 
     async function handleComment() {
         console.log("open comment dialog");
@@ -302,6 +313,8 @@ function PostButtonRow(props) {
 
     async function handleShare() {
     }
+
+    const { handleOpen: showRepostDialog, ShowPopover: RepostPopover } = SimplePopOver();
 
     return (
         <Stack direction="row" justifyContent="space-between" style={{ flexGrow: 1 }} >
@@ -312,10 +325,12 @@ function PostButtonRow(props) {
                 active_color="primary.main"
                 onClick={handleComment} />
 
-            <PostBottomIcon text={formatNumber(post.repost_count)}
+            <PostBottomIcon text={formatNumber(repost_count)}
                 active_icon="loop"
                 inactive_icon="loop"
-                active_color="colors.share" />
+                active_color="colors.share"
+                active={reposted}
+                onClick={showRepostDialog} />
 
             <PostBottomIcon text={formatNumber(like_count)}
                 active_icon="favorite"
@@ -342,6 +357,23 @@ function PostButtonRow(props) {
                     upload
                 </Icon>
             </IconButton>
+
+            <RepostPopover>
+                <ListItem disablePadding>
+                    <ListItemButton onClick={handleRepost}>
+                        <Typography variant="medium_bold">
+                            Repost
+                        </Typography>
+                    </ListItemButton>
+                </ListItem>
+                <ListItem disablePadding>
+                    <ListItemButton onClick={handleRepost}>
+                        <Typography variant="medium_bold">
+                            Quote
+                        </Typography>
+                    </ListItemButton>
+                </ListItem>
+            </RepostPopover>
         </Stack>
     );
 }
@@ -463,6 +495,7 @@ function PostList(props) {
             return new_posts;
         }
         catch (err) {
+            ThrowIfNotAxios(err);
             return [];
         }
     }
@@ -520,13 +553,21 @@ function BookmarkList() {
     return <PostList getPosts={getPosts} />;
 }
 
+function ExampleUser() {
+    return {
+        id: -1,
+        name: "name",
+        username: "username"
+    }
+}
 
 function ExamplePost() {
     return {
-        id: -1,
+        id: -2,
         repost: false,
-        reposted_from: UserData.getData.user,
-        publisher: UserData.getData.user,
+        quote: false,
+        reposted_post: undefined,
+        publisher: ExampleUser(),
         date: new Date("2024-01-01").toISOString(),
         text: "post text",
         images: [default_image],
@@ -534,6 +575,47 @@ function ExamplePost() {
         repost_count: 353,
         like_count: 4242,
         comment_count: 1234423,
+        liked_by_user: false,
+        bookmark_count: 10,
+        bookmarked_by_user: false,
+    };
+}
+
+function ExampleQuote() {
+    return {
+        id: -3,
+        repost: false,
+        quote: true,
+        reposted_post: ExamplePost(),
+        publisher: ExampleUser(),
+        date: new Date("2024-01-01").toISOString(),
+        text: undefined,
+        images: undefined,
+        views: 0,
+        repost_count: 0,
+        like_count: 0,
+        comment_count: 0,
+        liked_by_user: false,
+        bookmark_count: 10,
+        bookmarked_by_user: false,
+    };
+}
+
+function ExampleRepost() {
+    const reposted_post = ExamplePost();
+    return {
+        id: reposted_post.id,
+        repost: true,
+        quote: false,
+        reposted_post: ExamplePost(),
+        publisher: ExampleUser(),
+        date: new Date("2024-01-01").toISOString(),
+        text: undefined,
+        images: undefined,
+        views: 0,
+        repost_count: 0,
+        like_count: 0,
+        comment_count: 0,
         liked_by_user: false,
         bookmark_count: 10,
         bookmarked_by_user: false,
@@ -670,18 +752,28 @@ function FromUser(props) {
                 <Typography variant="small_fade">
                     From
                 </Typography>
-                <UserName user={props.post.reposted_from} />
+                <UserName user={ExampleUser()} />
             </TextRow>
         );
 }
 
-function Reposted(props) {
-    if (props.post.repost)
+function RepostedOrQuoted(props) {
+    if (props.post.repost || props.post.quote) {
         return (
             <RowWithPrefix
                 prefix={<Icon color="secondary" style={{ fontSize: "15px", alignSelf: "end" }}>loop</Icon>}
-                contents={<FadeLink style={{ fontWeight: "bold", overflow: "hidden" }}><TextRow><span color="secondary.main" style={noOverflow}><GetUserName user={props.post.publisher} /></span><span>reposted</span></TextRow></FadeLink>} />//clicking leads to the source post
+                contents={
+                    <FadeLink style={{ fontWeight: "bold", overflow: "hidden" }}>
+                        <TextRow>
+                            <span color="secondary.main" style={noOverflow}>
+                                <GetUserName user={props.post.publisher} />
+                            </span>
+                            <span>{props.post.repost ? "reposted" : "quoted"}</span>
+                        </TextRow>
+                    </FadeLink>
+                } />//clicking leads to the source post
         );
+    }
 }
 
 function ListBlock(props) {
@@ -707,14 +799,27 @@ function ListBlockButton(props) {
 }
 
 function AddDataToPost(post) {
-    post.repost = post.reposted_from !== null;
+    const repost = post.reposted_id !== null;
+    post.repost = repost;
+    if (repost) {
+        AddDataToPost(post.reposted_post);
+    }
+
     post.images = GetPostPictures(post.id, post.image_count);
     post.publisher = {
         id: post.poster_id,
         name: post.poster_name,
         username: post.poster_username
+    };
+}
+
+//if this is a repost, the data of the reposted post will be displayed instead of the original post
+function OverrideWithRepostOrQuote(post) {
+    if (post.repost) {
+        return post.reposted_post;
     }
+    return post;
 }
 
 
-export { Post, PostList, PostFocused, ListBlockButton, ListBlock, RowWithPrefix, PostButtonRow, AddDataToPost, WritePost, CommentList, FeedList, BookmarkList,FollowingFeedList };
+export { Post, PostList, PostFocused, ListBlockButton, ListBlock, RowWithPrefix, PostButtonRow, WritePost, CommentList, FeedList, BookmarkList, FollowingFeedList, AddDataToPost, OverrideWithRepostOrQuote };

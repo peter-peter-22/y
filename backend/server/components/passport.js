@@ -72,7 +72,7 @@ function universal_auth(req, res, err, user, info) {
             if (info.registering) {
                 req.session.pending_data = info.registering
                 req.session.pending_registration = true;
-                return res.redirect(config.client_url);
+                return res.redirect(config.address_mode.client);
             }
             else
                 throw new Error("failed to get user");
@@ -81,7 +81,7 @@ function universal_auth(req, res, err, user, info) {
         req.logIn(user, function (err) {
             if (err) { throw err; }
             remember_session(req, config.cookie_remember);
-            res.redirect(config.client_url);
+            res.redirect(config.address_mode.client);
         });
     }
     catch (err) {

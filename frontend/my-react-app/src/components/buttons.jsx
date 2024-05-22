@@ -6,11 +6,10 @@ import Avatar from '@mui/material/Avatar';
 import Stack from '@mui/material/Stack';
 import { Typography } from '@mui/material';
 import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ChooseChildBool, ProfileText, ToCorner,GetUserKey,noOverflow,GetProfilePicture } from '/src/components/utilities';
+import { ResponsiveSelector, ChooseChildBool, ProfileText, ToCorner, GetUserKey, noOverflow, GetProfilePicture, SimplePopOver } from '/src/components/utilities';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
-import Popover from '@mui/material/Popover';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -127,64 +126,44 @@ function PostButton() {
 function ProfileButton() {
     const size = "60px";
 
-    const [anchorEl, setAnchorEl] = React.useState(null);
+    const { handleOpen, handleClose, ShowPopover } = SimplePopOver();
 
-    const handleClick = (event) => {
-        setAnchorEl(event.currentTarget);
-    };
-
-    const handleClose = () => {
-        setAnchorEl(null);
-    };
-
-    async function handleLogout(){
-        try{
-        await axios.get(Endpoint("/logout"));
-        UserData.update();
-        }catch{}
+    async function handleLogout() {
+        try {
+            await axios.get(Endpoint("/logout"));
+            UserData.update();
+        } catch { }
     }
 
     return (
         <>
             <ResponsiveSelector breakpoint={smallerButtons}>
-                <Fab onClick={handleClick} variant="extended" color="secondary_noBg" sx={{ height: size, borderRadius: size, width: "100%", p: 1 }}>
+                <Fab onClick={handleOpen} variant="extended" color="secondary_noBg" sx={{ height: size, borderRadius: size, width: "100%", p: 1 }}>
                     <Stack direction="row" spacing={1} sx={{ width: "100%", height: "100%", alignItems: "center" }}>
                         <Avatar src={GetProfilePicture(UserData.getData.user)} />
-                        <ProfileText user={UserData.getData.user}/>
+                        <ProfileText user={UserData.getData.user} />
                         <Icon fontSize="small">
                             more_horiz
                         </Icon>
                     </Stack>
                 </Fab>
 
-                <Fab onClick={handleClick} color="secondary_noBg" sx={{ height: size, width: size, borderRadius: "100%", p: 0 }}>
-                <Avatar src={GetProfilePicture(UserData.getData.user)} />
+                <Fab onClick={handleOpen} color="secondary_noBg" sx={{ height: size, width: size, borderRadius: "100%", p: 0 }}>
+                    <Avatar src={GetProfilePicture(UserData.getData.user)} />
                 </Fab>
             </ResponsiveSelector>
 
-            <Popover
-                open={Boolean(anchorEl)}
-                anchorEl={anchorEl}
-                onClose={handleClose}
-                anchorOrigin={{
-                    vertical: 'top',
-                    horizontal: 'left',
-                }}
-                transformOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left',
-                }}
-            >
+            <ShowPopover>
                 <List>
                     <ListItem disablePadding>
                         <ListItemButton onClick={handleLogout}>
-                            <Typography variant="medium_bold" sx={{maxWidth:"70vw"}} style={noOverflow}>
-                                Logout <GetUserKey/>
+                            <Typography variant="medium_bold" sx={{ maxWidth: "70vw" }} style={noOverflow}>
+                                Logout <GetUserKey />
                             </Typography>
                         </ListItemButton>
                     </ListItem>
                 </List>
-            </Popover>
+            </ShowPopover>
         </>
     );
 }

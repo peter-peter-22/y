@@ -50,7 +50,7 @@ const github_login_redirect = process.env.GITHUB_CALLBACK;
             {
                 clientID: process.env.GITHUB_CLIENT_ID,
                 clientSecret: process.env.GITHUB_CLIENT_SECRET,
-                callbackURL: config.server_url + github_login_redirect,
+                callbackURL: config.address_mode.server + github_login_redirect,
             },
             async (accessToken, refreshToken, profile, cb) => {
                 try {

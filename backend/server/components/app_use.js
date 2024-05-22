@@ -23,50 +23,49 @@ import { Validator } from "node-input-validator";
 import * as g from "../global.js";
 const pgSession = ConnectPg(session);
 
-function initialize()
-{
-app.use(cors({
-    origin: process.env.CLIENT_URL,
-    credentials: true
-}));
-app.use(express.static("public"));
-app.use(express.json());//required to get the body of the fetch post
+function initialize() {
+    app.use(cors({
+        origin: [config.all_clients],
+        credentials: true
+    }));
+    app.use(express.static("public"));
+    app.use(express.json());//required to get the body of the fetch post
 
 
-app.use(
-    session({
-        store: new pgSession({
-          pool: g.pgPool,
-          tableName: 'session'
-        }),
-        secret: process.env.SESSION_SECRET,
-        resave: false,
-        saveUninitialized: false,
-        cookie: {
-            secure: false, // Set to true if using HTTPS
-            maxAge: false,
-        }
-    })
-);
+    app.use(
+        session({
+            store: new pgSession({
+                pool: g.pgPool,
+                tableName: 'session'
+            }),
+            secret: process.env.SESSION_SECRET,
+            resave: false,
+            saveUninitialized: false,
+            cookie: {
+                secure: false, // Set to true if using HTTPS
+                maxAge: false,
+            }
+        })
+    );
 
-//update session expiration 
-app.use((req, res, next) => {
-    req.session.lastVisit = new Date();
-    next();
-});
+    //update session expiration 
+    app.use((req, res, next) => {
+        req.session.lastVisit = new Date();
+        next();
+    });
 
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(
-    fileUpload({
-        limits: {
-            fileSize: 10000000, // Around 10MB
-        },
-        abortOnLimit: true,
-    })
-);
+    app.use(bodyParser.urlencoded({ extended: true }));
+    app.use(
+        fileUpload({
+            limits: {
+                fileSize: 10000000, // Around 10MB
+            },
+            abortOnLimit: true,
+        })
+    );
 
 
-app.use(passport.initialize());
-app.use(passport.session());
+    app.use(passport.initialize());
+    app.use(passport.session());
 }
 export default initialize;

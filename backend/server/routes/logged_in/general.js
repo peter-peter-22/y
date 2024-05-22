@@ -115,12 +115,37 @@ async function editable_query(text, before, after, params, additional_params) {
     return result.rows;
 }
 
-async function postQuery(req, next, before, after, additional_params) {
+async function postQuery(req, next, before, after, additional_params, skipReposts) {
     try {
-        const text = "select post.text, post.id, post.image_count, post.date, post.views, post.repost as reposted_from, (select count(*) from likes where likes.post_id=post.id)::INT as like_count, EXISTS(select * from likes where likes.post_id=post.id AND user_id=50) as liked_by_user, (select count(*) from posts reposts_query where reposts_query.repost=post.id)::INT as repost_count, (select count(*) from bookmarks bookmark where bookmark.post_id=post.id)::INT as bookmark_count, EXISTS(select * from bookmarks bookmark where bookmark.post_id=post.id AND bookmark.user_id=post.publisher) as bookmarked_by_user, poster.id as poster_id, poster.name as poster_name, poster.username as poster_username, 	(SELECT count(*) from posts as comments_table where comments_table.replying_to = post.id) as comment_count from posts post left join users poster on post.publisher=poster.id";
+        const text = "SELECT POST.TEXT, POST.ID, POST.IMAGE_COUNT, POST.DATE, POST.VIEWS, POST.REPOST AS REPOSTED_ID, (SELECT COUNT(*) FROM LIKES WHERE LIKES.POST_ID = POST.ID)::INT AS LIKE_COUNT, EXISTS (SELECT * FROM LIKES WHERE LIKES.POST_ID = POST.ID AND USER_ID = :user_id) AS LIKED_BY_USER, (SELECT COUNT(*) FROM POSTS REPOSTS_QUERY WHERE REPOSTS_QUERY.REPOST = POST.ID)::INT AS REPOST_COUNT, (SELECT COUNT(*) FROM BOOKMARKS BOOKMARK WHERE BOOKMARK.POST_ID = POST.ID)::INT AS BOOKMARK_COUNT, EXISTS (SELECT * FROM BOOKMARKS BOOKMARK WHERE BOOKMARK.POST_ID = POST.ID AND BOOKMARK.USER_ID = :user_id) AS BOOKMARKED_BY_USER, POSTER.ID AS POSTER_ID, POSTER.NAME AS POSTER_NAME, POSTER.USERNAME AS POSTER_USERNAME, (SELECT COUNT(*) FROM POSTS AS COMMENTS_TABLE WHERE COMMENTS_TABLE.REPLYING_TO = POST.ID) AS COMMENT_COUNT FROM (SELECT * FROM POSTS ORDER BY POSTS.DATE DESC) POST LEFT JOIN USERS POSTER ON POST.PUBLISHER = POSTER.ID";
         const params = { user_id: req.user.id };
         const posts = await editable_query(text, before, after, params, additional_params);
+
+        //the reposted posts must be downloaded and added to their reposters
+        if (!skipReposts) {
+            //getting the ids of the reposted posts
+            const reposted_ids = [];
+            posts.forEach(post => {
+                if (post.reposted_id !== null) {
+                    reposted_ids.push(post.reposted_id);
+                }
+            });
+            if (reposted_ids.length !== 0) {
+                //downloading the reposted posts and assigning them to their reposter
+                const reposted_posts = await postQuery(req, next, undefined, " WHERE post.id=ANY(:reposted_ids)", { reposted_ids: reposted_ids }, true);
+                posts.forEach(post => {
+                    if (post.reposted_id !== null) {
+                        const my_reposted_post = reposted_posts.find(reposted => post.reposted_id === reposted.id);
+                        if (my_reposted_post === undefined)
+                            throw new Error("failed to download the reposted post");
+                        post.reposted_post = my_reposted_post;
+                    }
+                })
+            }
+        }
+
         updateViews(posts);//the viewcount update is not awaited
+
         return posts;
     }
     catch (err) {

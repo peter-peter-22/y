@@ -23,15 +23,30 @@ import nodemailer from "nodemailer";
 
 const app = express();
 
+const address_modes = {
+    localhost: {
+        server: process.env.SERVER_URL_LOCALHOST,
+        client: process.env.CLIENT_URL_LOCALHOST,
+        pg: process.env.PG_HOST_LOCALHOST,
+    },
+    dev: {
+        server: process.env.SERVER_URL_DEV,
+        client: process.env.CLIENT_URL_DEV,
+        pg: process.env.PG_HOST_DEV,
+    }
+}
+
+const all_clients = Object.values(address_modes).map((mode) => mode.client);
+
 const config = {
-    port: 3000,
+    port:3000,
     saltRounds: 10,
     __dirname: dirname(fileURLToPath(import.meta.url)),
-    server_url: process.env.SERVER_URL,
-    client_url: process.env.CLIENT_URL,
     google_rechapta_secret_key: process.env.GOOGLE_RECHAPTA_SECRET,
     cookie_remember: 1000 * 60 * 60 * 24 * 30,//1 month. the user most log in at least once within a month to prevent logout
     cookie_registering: 1000 * 60 * 60 * 2,//2 hours. the email, name, ect. the user sends at the start of the registration must be finalized within 2 hour
+    all_clients: all_clients,
+    address_mode: address_modes.localhost
 }
 
 const transporter = nodemailer.createTransport({
@@ -44,20 +59,21 @@ const transporter = nodemailer.createTransport({
 
 const pgPool = new pg.Pool({
     user: process.env.PG_USER,
-    host: process.env.PG_HOST,
+    host: config.address_mode.pg,
     database: process.env.PG_DATABASE,
     password: process.env.PG_PASSWORD,
     port: process.env.PG_PORT,
 });
 
 async function initialize() {
-    const db = new pg.Client({
-        user: process.env.PG_USER,
-        host: process.env.PG_HOST,
-        database: process.env.PG_DATABASE,
-        password: process.env.PG_PASSWORD,
-        port: process.env.PG_PORT,
-    });
+    //  const db = new pg.Client({
+    //      user: process.env.PG_USER,
+    //      host: config.address_mode.pg,
+    //      database: process.env.PG_DATABASE,
+    //      password: process.env.PG_PASSWORD,
+    //      port: process.env.PG_PORT,
+    //  });
+    const db = pgPool;
     await db.connect();
     global.db = db;
 }
