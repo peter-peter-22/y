@@ -37,7 +37,7 @@ export default () => {
     const [post, setPost] = useState();
     const { id } = useParams();
 
-    useEffect(() => { getPost(); }, []);
+    useEffect(() => { getPost(); }, [id]);
     async function getPost() {
         try {
             const result = await axios.post(Endpoint("/member/get_post"), {

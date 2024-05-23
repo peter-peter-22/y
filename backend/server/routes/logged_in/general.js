@@ -91,6 +91,44 @@ router.get("/follower_recommendations_preview", async (req, res, next) => {
     res.send(users);
 });
 
+router.post("/repost", async (req, res) => {
+    const v = new Validator(req.body, {
+        key: 'required|integer',
+        value: "required|boolean"
+    });
+    await CheckV(v);
+    const { key: reposted_post_id, value: set_respost } = req.body;
+    const user_id = req.user.id;
+    try {
+        if (set_respost) {
+            const validation = await db.query(named("select exists(select * from posts where id=:post_id and repost is not null and text is null) as is_a_repost")({ post_id: reposted_post_id, user_id: user_id }));
+            if (validation.rowCount !== 0) {//if the reposted post does not exists, the constraint will throw an error in the next query so it can be ignored here
+                const tests = validation.rows[0];
+                if (tests.is_a_repost)
+                    throw ("a repost cannot be reposted");
+            }
+
+            try {
+                await db.query(named("INSERT INTO POSTS (PUBLISHER,REPOST) SELECT :user_id,:post_id WHERE NOT EXISTS (SELECT * FROM POSTS WHERE PUBLISHER = :user_id AND REPOST = :post_id) AND NOT EXISTS (SELECT * FROM POSTS WHERE ID = :post_id AND REPOST IS NOT NULL AND text IS NULL)")({ user_id: user_id, post_id: reposted_post_id }));
+            }
+            catch (err) {
+                if (err.constraint === "posts_repost_fkey")
+                    throw new Error("this post does not exists");
+                if (err.constraint === "unique_repost") {
+                    //ignore to prevent error message in strictmode
+                } else
+                    throw (err);
+            }
+        }
+        else
+            await db.query(named("DELETE FROM posts WHERE publisher=:user_id AND repost=:post_id")({ user_id: user_id, post_id: reposted_post_id }));
+        res.sendStatus(200);
+    }
+    catch (err) {
+        CheckErr(err);
+    }
+});
+
 async function followable_query(req, next, before, after, additional_params) {
     try {
         const text = "SELECT * FROM ( SELECT ID, USERNAME, NAME, EXISTS (SELECT * FROM FOLLOWS WHERE FOLLOWER = :user_id AND FOLLOWED = ID) AS IS_FOLLOWED FROM USERS  ) as sq";
@@ -115,14 +153,15 @@ async function editable_query(text, before, after, params, additional_params) {
     return result.rows;
 }
 
-async function postQuery(req, next, before, after, additional_params, skipReposts) {
+async function postQuery(req, next, before, after, additional_params, level = 0) {
     try {
-        const text = "SELECT POST.TEXT, POST.ID, POST.IMAGE_COUNT, POST.DATE, POST.VIEWS, POST.REPOST AS REPOSTED_ID, (SELECT COUNT(*) FROM LIKES WHERE LIKES.POST_ID = POST.ID)::INT AS LIKE_COUNT, EXISTS (SELECT * FROM LIKES WHERE LIKES.POST_ID = POST.ID AND USER_ID = :user_id) AS LIKED_BY_USER, (SELECT COUNT(*) FROM POSTS REPOSTS_QUERY WHERE REPOSTS_QUERY.REPOST = POST.ID)::INT AS REPOST_COUNT, (SELECT COUNT(*) FROM BOOKMARKS BOOKMARK WHERE BOOKMARK.POST_ID = POST.ID)::INT AS BOOKMARK_COUNT, EXISTS (SELECT * FROM BOOKMARKS BOOKMARK WHERE BOOKMARK.POST_ID = POST.ID AND BOOKMARK.USER_ID = :user_id) AS BOOKMARKED_BY_USER, POSTER.ID AS POSTER_ID, POSTER.NAME AS POSTER_NAME, POSTER.USERNAME AS POSTER_USERNAME, (SELECT COUNT(*) FROM POSTS AS COMMENTS_TABLE WHERE COMMENTS_TABLE.REPLYING_TO = POST.ID) AS COMMENT_COUNT FROM (SELECT * FROM POSTS ORDER BY POSTS.DATE DESC) POST LEFT JOIN USERS POSTER ON POST.PUBLISHER = POSTER.ID";
+        const text = "SELECT POST.TEXT, POST.ID, POST.IMAGE_COUNT, POST.DATE, POST.VIEWS, POST.REPOST AS REPOSTED_ID, (SELECT COUNT(*) FROM LIKES WHERE LIKES.POST_ID = POST.ID)::INT AS LIKE_COUNT, EXISTS (SELECT * FROM LIKES WHERE LIKES.POST_ID = POST.ID AND USER_ID = :user_id) AS LIKED_BY_USER, (SELECT COUNT(*) FROM POSTS REPOSTS WHERE REPOSTS.REPOST = POST.ID)::INT AS REPOST_COUNT, EXISTS( SELECT * FROM POSTS REPOSTS WHERE REPOSTS.REPOST = POST.ID AND REPOSTS.TEXT IS NULL AND REPOSTS.PUBLISHER=:user_id) AS REPOSTED_BY_USER, (SELECT COUNT(*) FROM BOOKMARKS BOOKMARK WHERE BOOKMARK.POST_ID = POST.ID)::INT AS BOOKMARK_COUNT, EXISTS (SELECT * FROM BOOKMARKS BOOKMARK WHERE BOOKMARK.POST_ID = POST.ID AND BOOKMARK.USER_ID = :user_id) AS BOOKMARKED_BY_USER, POSTER.ID AS POSTER_ID, POSTER.NAME AS POSTER_NAME, POSTER.USERNAME AS POSTER_USERNAME, (SELECT COUNT(*) FROM POSTS AS COMMENTS_TABLE WHERE COMMENTS_TABLE.REPLYING_TO = POST.ID) AS COMMENT_COUNT FROM (SELECT * FROM POSTS ORDER BY POSTS.DATE DESC) POST LEFT JOIN USERS POSTER ON POST.PUBLISHER = POSTER.ID";
         const params = { user_id: req.user.id };
         const posts = await editable_query(text, before, after, params, additional_params);
 
         //the reposted posts must be downloaded and added to their reposters
-        if (!skipReposts) {
+        //level means how much parent posts are above this post
+        if (level < 2) {
             //getting the ids of the reposted posts
             const reposted_ids = [];
             posts.forEach(post => {
@@ -132,7 +171,8 @@ async function postQuery(req, next, before, after, additional_params, skipRepost
             });
             if (reposted_ids.length !== 0) {
                 //downloading the reposted posts and assigning them to their reposter
-                const reposted_posts = await postQuery(req, next, undefined, " WHERE post.id=ANY(:reposted_ids)", { reposted_ids: reposted_ids }, true);
+                const reposted_posts = await postQuery(req, (err)=>{throw(err)}, undefined, " WHERE post.id=ANY(:reposted_ids)", { reposted_ids: reposted_ids }, level+1);
+
                 posts.forEach(post => {
                     if (post.reposted_id !== null) {
                         const my_reposted_post = reposted_posts.find(reposted => post.reposted_id === reposted.id);
@@ -166,7 +206,7 @@ router.post("/bookmark", async (req, res, next) => {
     await CountableToggle(req, res, next, "bookmarks", "unique_bookmarks");
 });
 
-async function CountableToggle(req, res, next, table, unique_constraint_name, first_column_name = "user_id", second_column_name = "post_id") {
+async function CountableToggle(req, res, next, table, unique_constraint_name, first_column_name = "user_id", second_column_name = "post_id",) {
     try {
         const v = new Validator(req.body, {
             key: 'required|integer',

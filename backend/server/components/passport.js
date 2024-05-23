@@ -134,10 +134,10 @@ async function finish_registration(req, res, name, email, password_hash, birthda
         });
     }
     catch (e) {
-        if (e.constraint == "users_email_key")
-            res.status(400).send("this email is already registered");
-        else if (e.constraint == "users_username_key")
-            res.status(400).send("this username is already registered");
+        if (e.constraint === "users_email_key")
+            res.status(422).send("this email is already registered");
+        else if (e.constraint === "users_username_key")
+            res.status(422).send("this username is already registered");
         else {
             throw e;
         }

@@ -9,7 +9,7 @@ import '@fontsource/roboto/900.css';
 import 'material-icons/iconfont/material-icons.css';
 import { AboveBreakpoint } from '/src/components/utilities';
 import axios from "axios";
-import { Endpoint } from "/src/communication.js";
+import { Endpoint,ThrowIfNotAxios } from "/src/communication.js";
 import Dialog from '@mui/material/Dialog';
 import CreateAccount from "/src/components/create_account.jsx";
 import { Modals, CreateModals, Error } from "/src/components/modals";
@@ -30,17 +30,18 @@ function App() {
   UserData.update = Update;
 
   React.useEffect(() => {
-    Update();//update is not awaited, the loading message is visible until it is done
+    Update();//the loading message is visible until it is done
   }, []);
 
   async function Update() {
     try {
+      //get user and messages from server
       const response = await axios.get(Endpoint("/get_user"));
       setData(response.data);
 
-      //process the recieved data
+      //process the messages
 
-      //after register message
+      //after register 
       if (response.data.showStartMessage) {
         Modals[0].Show(<CreateAccount pages={[5, 6, 7, 8]} />, CloseStartMessage);
 
@@ -65,8 +66,9 @@ function App() {
           catch{}
         }
       }
+
     }
-    catch {}
+    catch (err){}
   }
 
   //choose page
@@ -84,12 +86,12 @@ function App() {
   }
 
   return (
-    <>
+    <Router>
       <CreateModals />
       <div style={{ position: "relative", zIndex: 0 }}>
         {page}
       </div>
-    </>
+    </Router>
   );
 }
 

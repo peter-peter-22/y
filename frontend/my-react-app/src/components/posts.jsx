@@ -31,7 +31,7 @@ import config from "/src/components/config.js";
 import axios from 'axios';
 import { Endpoint, FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
 import { Error, Modals, ShowImage } from "/src/components/modals";
-import { NavLink } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const commentSections = {};
 const feedCommentSectionId = -1;
@@ -56,48 +56,64 @@ function RowWithPrefix(props) {
 }
 
 function Post(props) {
-    const original = props.post;
-    const overriden = OverrideWithRepostOrQuote(original);
-    const link = "/posts/" + original.id;
-    const linkRef = useRef();
-
-    function OpenPost() {
-        linkRef.current.click();
-    }
-
     return (
         <ListBlockButton>
-            <div onClick={OpenPost}>
-                <NavLink to={link} ref={linkRef} style={{ display: "none" }} />
-                <RepostedOrQuoted post={original} />
-                <RowWithPrefix
-                    prefix={<Avatar src={GetProfilePicture(overriden)} />}
-                    contents={
-                        <Stack direction="column" style={{ overflow: "hidden" }}>
-                            <Stack direction="row" spacing={0.25} style={{ alignItems: "center" }}>
-                                <UserName user={overriden.publisher} />
-                                <UserKey user={overriden.publisher} />
-                                ·
-                                <DateLink passed isoString={overriden.date} />
-                                <ManagePost />
-                            </Stack>
-                            <PostText post={overriden} />
-                            <PostMedia images={overriden.images} />
-                        </Stack>
-                    } />
-                <RowWithPrefix contents={
-                    <Stack direction="column" style={{ overflow: "hidden" }}>
-                        <PostButtonRow post={overriden} />
-                    </Stack>
-                } />
-            </div>
+            <BorderlessPost post={props.post} />
         </ListBlockButton>
     );
 }
 
+function BorderlessPost(props) {
+    const original = props.post;
+    const overriden = OverrideWithRepost(original);
+    const navigate = useNavigate();
+
+    function OpenPost(e) {
+        e.stopPropagation();
+        const link = "/posts/" + original.id;
+        navigate(link);
+    }
+
+    return (
+        <div onClick={OpenPost}>
+            <RepostedOrQuoted post={original} />
+            <RowWithPrefix
+                prefix={<Avatar src={GetProfilePicture(overriden)} />}
+                contents={
+                    <Stack direction="column" style={{ overflow: "hidden" }}>
+                        <Stack direction="row" spacing={0.25} style={{ alignItems: "center" }}>
+                            <UserName user={overriden.publisher} />
+                            <UserKey user={overriden.publisher} />
+                            ·
+                            <DateLink passed isoString={overriden.date} />
+                            <ManagePost />
+                        </Stack>
+                        <PostText post={overriden} />
+                        <PostMedia images={overriden.images} />
+                    </Stack>
+                } />
+            <RowWithPrefix contents={
+                <Stack direction="column" spacing={1} style={{ overflow: "hidden" }}>
+                    {overriden.quote &&
+                        <Box sx={{ pt: 1 }}>
+                            <QuotedFrame>
+                                <BorderlessPost post={overriden.reposted_post} hideButtons={true} />
+                            </QuotedFrame>
+                        </Box>
+                    }
+                    {!props.hideButtons &&
+                        <PostButtonRow post={overriden} />
+                    }
+                </Stack>
+            } />
+        </div>
+    );
+}
+
+
 function PostFocused(props) {
     const original = props.post;
-    const overriden = OverrideWithRepostOrQuote(original);
+    const overriden = OverrideWithRepost(original);
 
     return (
         <ListBlock>
@@ -124,6 +140,14 @@ function PostFocused(props) {
                     <Typography variant="small_fade">Views</Typography>
                 </Stack>
             </Stack>
+
+            {overriden.quote &&
+                <Box sx={{ my: 1 }}>
+                    <QuotedFrame>
+                        <BorderlessPost post={overriden.reposted_post} />
+                    </QuotedFrame>
+                </Box>
+            }
 
             <Divider />
 
@@ -153,6 +177,8 @@ function PostCreator(props) {
     const keep = getText.substring(0, maxLetters);
     const overflow = getText.substring(maxLetters);
     const isComment = props.post !== undefined;
+    const isQuote = props.quoted !== undefined;
+    const onPost = props.onPost;
 
     const handleFocus = () => {
         setIsFocused(true);
@@ -185,12 +211,23 @@ function PostCreator(props) {
         const formData = new FormData();
         files.forEach(file => formData.append('images', file));
         formData.append('text', getText);
-        if (isComment)
+
+        let endpoint;
+        if (isComment) {
             formData.append("replying_to", props.post.id);
+            endpoint = "/member/create/comment";
+        }
+        else if (isQuote) {
+            formData.append("quoted", props.quoted.id);
+            endpoint = "/member/create/quote";
+        }
+        else {
+            endpoint = "/member/create/post";
+        }
 
         try {
             const result = await axios.post(
-                Endpoint(isComment ? "/member/create/comment" : '/member/create/post'),
+                Endpoint(endpoint),
                 formData,
                 {
                     headers: {
@@ -205,7 +242,9 @@ function PostCreator(props) {
             //update post list on client without refreshing the page
             const post = result.data;
             AddDataToPost(post);
-            commentSections[isComment ? props.post.id : feedCommentSectionId].addPost(post);
+            AddPostToCommentSection(isComment ? props.post.id : feedCommentSectionId, post);
+            if (onPost)
+                onPost();
         }
         catch (err) {
             ThrowIfNotAxios(err);
@@ -213,7 +252,7 @@ function PostCreator(props) {
     }
 
     return (
-        <>
+        <Stack direction="column" spacing={1}>
             {isComment && isFocused &&
                 <Box sx={{ my: 1 }} >
                     <RowWithPrefix contents={
@@ -279,8 +318,21 @@ function PostCreator(props) {
                         <PostMedia images={urls} />
                     </Stack>
                 } />
-        </>
+
+            {isQuote &&
+                <QuotedFrame>
+                    <BorderlessPost post={props.quoted} />
+                </QuotedFrame>
+            }
+
+        </Stack>
     );
+}
+
+function AddPostToCommentSection(comment_section_id, post) {
+    const mySection = commentSections[comment_section_id];
+    if (mySection)
+        mySection.addPost(post);
 }
 
 function formatNumber(number) {
@@ -311,10 +363,19 @@ function PostButtonRow(props) {
         console.log("open comment dialog");
     }
 
-    async function handleShare() {
+    async function handleQuote() {
+        Modals[0].Show(
+            <PostModalFrame>
+                <PostCreator quoted={post} onPost={onQuotePost} />
+            </PostModalFrame>
+        );
     }
 
-    const { handleOpen: showRepostDialog, ShowPopover: RepostPopover } = SimplePopOver();
+    function onQuotePost() {
+        Modals[0].Close();
+    }
+
+    const { handleOpen: showRepostDialog, handleClose, ShowPopover: RepostPopover } = SimplePopOver();
 
     return (
         <Stack direction="row" justifyContent="space-between" style={{ flexGrow: 1 }} >
@@ -360,14 +421,14 @@ function PostButtonRow(props) {
 
             <RepostPopover>
                 <ListItem disablePadding>
-                    <ListItemButton onClick={handleRepost}>
+                    <ListItemButton onClick={(e) => { handleClose(e); handleRepost() }}>
                         <Typography variant="medium_bold">
-                            Repost
+                            {reposted ? "Undo repost" : "Repost"}
                         </Typography>
                     </ListItemButton>
                 </ListItem>
                 <ListItem disablePadding>
-                    <ListItemButton onClick={handleRepost}>
+                    <ListItemButton onClick={(e) => { handleClose(e); handleQuote() }}>
                         <Typography variant="medium_bold">
                             Quote
                         </Typography>
@@ -378,8 +439,25 @@ function PostButtonRow(props) {
     );
 }
 
+function QuotedFrame(props) {
+    return (
+        <Box sx={{ borderRadius: "10px", border: 1, borderColor: "divider", overflow: "hidden", p: 1, w: "100%", transition: "background-color 0.2s", "&:hover": { backgroundColor: "rgba(0, 0, 0, 0.04)" } }}>
+            {props.children}
+        </Box>
+    );
+}
+
+function PostModalFrame(props) {
+    return (
+        <div style={{ width: "500px", margin: "20px" }}>
+            {props.children}
+        </div>
+    );
+}
+
 function CountableButton(post, initial_count, initial_active, url) {
     const [like, setLike] = useState(initial_active);
+
     function handleLike() {
         setLike((prev) => {
             const newValue = !prev;
@@ -388,7 +466,7 @@ function CountableButton(post, initial_count, initial_active, url) {
                 try {
                     await axios.post(Endpoint(url), { key: post.id, value: newValue });
                 }
-                catch {
+                catch (err) {
                     setLike(prev);//server error, put back previous value
                 }
             }
@@ -799,9 +877,11 @@ function ListBlockButton(props) {
 }
 
 function AddDataToPost(post) {
-    const repost = post.reposted_id !== null;
-    post.repost = repost;
-    if (repost) {
+    if (post.reposted_post) {
+        const is_quote = post.text !== null;
+        post.repost = !is_quote;
+        post.quote = is_quote;
+
         AddDataToPost(post.reposted_post);
     }
 
@@ -814,7 +894,7 @@ function AddDataToPost(post) {
 }
 
 //if this is a repost, the data of the reposted post will be displayed instead of the original post
-function OverrideWithRepostOrQuote(post) {
+function OverrideWithRepost(post) {
     if (post.repost) {
         return post.reposted_post;
     }
@@ -822,4 +902,4 @@ function OverrideWithRepostOrQuote(post) {
 }
 
 
-export { Post, PostList, PostFocused, ListBlockButton, ListBlock, RowWithPrefix, PostButtonRow, WritePost, CommentList, FeedList, BookmarkList, FollowingFeedList, AddDataToPost, OverrideWithRepostOrQuote };
+export { Post, PostList, PostFocused, ListBlockButton, ListBlock, RowWithPrefix, PostButtonRow, WritePost, CommentList, FeedList, BookmarkList, FollowingFeedList, AddDataToPost, OverrideWithRepost as OverrideWithRepostOrQuote };

@@ -17,7 +17,6 @@ import AddFollowers from "/src/pages/follow_people";
 export default () => {
   const isBig = AboveBreakpoint("sm");
   return (
-    <Router>
       <div style={{ display: "flex", flexDirection: "column", alignItems: isBig ? "center" : "stretch", overflowY: "hidden" }}>
         <div style={{ display: "flex", flexDirection: "row", padding: isBig ? "revert-layer" : 0 }}>
           <Header />
@@ -34,6 +33,5 @@ export default () => {
           <Footer />
         </div>
       </div>
-    </Router>
   );
 }

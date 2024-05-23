@@ -27,10 +27,15 @@ function FormatAxiosError(error) {
     return text;
 }
 
+function IsAxiosError(err)
+{
+    return err.name === "AxiosError";
+}
+
 function ThrowIfNotAxios(err)
 {
-    if (err.name !== "AxiosError")
+    if(!IsAxiosError(err));
         throw (err);
 }
 
-export { Endpoint, FormatAxiosError ,ThrowIfNotAxios}
+export { Endpoint, FormatAxiosError ,ThrowIfNotAxios,IsAxiosError}
