@@ -5,6 +5,7 @@ import { ResponsiveButton, ButtonIcon, ButtonSvg, TabButton, PostButton, Profile
 import SideMenu, { Inside } from "./side_menus.jsx";
 import { ThemeProvider } from '@mui/material';
 import { AboveBreakpoint, logo } from './utilities';
+import { UserData } from "/src/App.jsx";
 
 function Header() {
     let isBig = AboveBreakpoint("leftMenu");
@@ -61,7 +62,7 @@ function Header() {
                                     <ButtonSvg src={logo} useWeight={true} />
                                 </TabButton>
 
-                                <TabButton to="/profile" text="profile" icon="home_outlined" >
+                                <TabButton to={"/profile/"+UserData.getData.user.username} text="profile" icon="home_outlined" >
                                     <ButtonIcon icon="person" filled={false} />
                                     <ButtonIcon icon="person" filled={true} />
                                 </TabButton>

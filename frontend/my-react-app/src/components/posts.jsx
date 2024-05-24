@@ -9,7 +9,7 @@ import Fab from '@mui/material/Fab';
 import { Icon } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, GetProfilePicture, default_image, GetPostPictures, OnlineList, SimplePopOver } from '/src/components/utilities';
+import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, GetProfilePicture, default_image, GetPostPictures, OnlineList, SimplePopOver, formatNumber } from '/src/components/utilities';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -34,7 +34,6 @@ import { Error, Modals, ShowImage } from "/src/components/modals";
 import { useNavigate } from "react-router-dom";
 
 const commentSections = {};
-const feedCommentSectionId = -1;
 
 function Prefix(props) {
     return (
@@ -152,7 +151,7 @@ function PostFocused(props) {
             <Divider />
 
             <Box sx={{ my: 1 }}>
-                <PostButtonRow post={overriden} />
+                <PostButtonRow post={overriden} key={overriden.id} />
             </Box>
 
             <Divider />
@@ -242,7 +241,7 @@ function PostCreator(props) {
             //update post list on client without refreshing the page
             const post = result.data;
             AddDataToPost(post);
-            AddPostToCommentSection(isComment ? props.post.id : feedCommentSectionId, post);
+            AddPostToCommentSection(post);
             if (onPost)
                 onPost();
         }
@@ -329,58 +328,51 @@ function PostCreator(props) {
     );
 }
 
-function AddPostToCommentSection(comment_section_id, post) {
-    const mySection = commentSections[comment_section_id];
+function AddPostToCommentSection(post) {
+    const mySection = commentSections.acctive;
     if (mySection)
         mySection.addPost(post);
 }
 
-function formatNumber(number) {
-    const units = [
-        [1000000000, "B"],
-        [1000000, "M"],
-        [1000, "k"],
-    ]
-
-    for (let n = 0; n < units.length; n++) {
-        const unit = units[n];
-        const [multiplier, name] = unit;
-        if (multiplier <= number) {
-            const divided = Math.round(number / multiplier);
-            return divided + name;
-        }
-    }
-    return number;
-}
 
 function PostButtonRow(props) {
     const post = props.post;
     const { count: like_count, active: liked, pressed: handleLike } = CountableButton(post, post.like_count, post.liked_by_user, "/member/like");
     const { count: bookmark_count, active: bookmarked, pressed: handleBookmark } = CountableButton(post, post.bookmark_count, post.bookmarked_by_user, "/member/bookmark");
     const { count: repost_count, active: reposted, pressed: handleRepost } = CountableButton(post, post.repost_count, post.reposted_by_user, "/member/repost");
+    const [comment_count, set_comment_count] = useState(post.comment_count);
 
     async function handleComment() {
-        console.log("open comment dialog");
+        Modals[0].Show(
+            <PostModalFrame>
+                <PostCreator post={post} onPost={commented} />
+            </PostModalFrame>
+        );
+    }
+
+    function commented() {
+        set_comment_count((prev) => prev + 1);
+        closeModal();
     }
 
     async function handleQuote() {
         Modals[0].Show(
             <PostModalFrame>
-                <PostCreator quoted={post} onPost={onQuotePost} />
+                <PostCreator quoted={post} onPost={closeModal} />
             </PostModalFrame>
         );
     }
 
-    function onQuotePost() {
+    function closeModal() {
         Modals[0].Close();
     }
 
     const { handleOpen: showRepostDialog, handleClose, ShowPopover: RepostPopover } = SimplePopOver();
 
     return (
-        <Stack direction="row" justifyContent="space-between" style={{ flexGrow: 1 }} >
+        <Stack direction="row" justifyContent="space-between" style={{ flexGrow: 1 }}>
 
-            <PostBottomIcon text={formatNumber(post.comment_count)}
+            <PostBottomIcon text={formatNumber(comment_count)}
                 active_icon="chat_bubble_outline"
                 inactive_icon="chat_bubble_outline"
                 active_color="primary.main"
@@ -563,6 +555,7 @@ function CommentButton(props) {
 
 function PostList(props) {
     const onlineListRef = useRef();
+    const key = props.post ? props.post.id : -1;
 
     async function GetEntries(from) {
         try {
@@ -583,52 +576,50 @@ function PostList(props) {
     }
 
     //make the comment section globally accessable
-    if (props.commentSectionId !== undefined) {
-        const thisCommentSection = {};
-        thisCommentSection.addPost = (newPost) => { onlineListRef.current.AddEntryToTop(newPost) };
-        commentSections[props.commentSectionId] = thisCommentSection;
-    }
+    const thisCommentSection = {};
+    thisCommentSection.addPost = (newPost) => { onlineListRef.current.AddEntryToTop(newPost) };
+    commentSections.acctive = thisCommentSection;
 
     return (
-        <OnlineList getEntries={GetEntries} entryMapper={EntryMapper} ref={onlineListRef} />
+        <OnlineList getEntries={GetEntries} entryMapper={EntryMapper} ref={onlineListRef} key={key} />
     );
 }
 
-function FeedList() {
+function SimplifiedPostList(props) {
     async function getPosts(from) {
-        const response = await axios.post(Endpoint("/member/feed/get_posts"), { from: from });
+        let params = { from: from };
+        const additional_params = props.params;
+        if (additional_params)
+            params = { ...params, ...additional_params };
+        const response = await axios.post(Endpoint(props.endpoint), params);
         return response.data;
     }
-    return <PostList getPosts={getPosts} commentSectionId={feedCommentSectionId} />;
+    return <PostList getPosts={getPosts} post={props.post} />;
+}
+
+function FeedList() {
+    return <SimplifiedPostList endpoint="/member/feed/get_posts" />;
+}
+
+function PostsOfUser(props) {
+    const user_id = props.user.id;
+    return <SimplifiedPostList endpoint="/member/posts_of_user" params={{ user_id: user_id }} />;
+}
+function CommentsOfUser(props) {
+    const user_id = props.user.id;
+    return <SimplifiedPostList endpoint="/member/comments_of_user" params={{ user_id: user_id }} />;
 }
 
 function FollowingFeedList() {
-    async function getPosts(from) {
-        const response = await axios.post(Endpoint("/member/feed/get_followed_posts"), { from: from });
-        return response.data;
-    }
-    return <PostList getPosts={getPosts} commentSectionId={feedCommentSectionId} />;
+    return <SimplifiedPostList endpoint="/member/feed/get_followed_posts" />;
 }
 
 function CommentList(props) {
-    async function getPosts(from) {
-        const result = await axios.post(Endpoint("/member/get_comments"), {
-            id: props.post.id,
-            from: from
-        });
-        return result.data;
-    }
-    return <PostList getPosts={getPosts} commentSectionId={props.post.id} />;
+    return <SimplifiedPostList endpoint="/member/get_comments" params={{ id: props.post.id }} />;
 }
 
 function BookmarkList() {
-    async function getPosts(from) {
-        const result = await axios.post(Endpoint("/member/get_bookmarks"), {
-            from: from
-        });
-        return result.data;
-    }
-    return <PostList getPosts={getPosts} />;
+    return <SimplifiedPostList endpoint="/member/get_bookmarks" />;
 }
 
 function ExampleUser() {
@@ -641,7 +632,7 @@ function ExampleUser() {
 
 function ExamplePost() {
     return {
-        id: -2,
+        id: -1,
         repost: false,
         quote: false,
         reposted_post: undefined,
@@ -661,7 +652,7 @@ function ExamplePost() {
 
 function ExampleQuote() {
     return {
-        id: -3,
+        id: -2,
         repost: false,
         quote: true,
         reposted_post: ExamplePost(),
@@ -902,4 +893,4 @@ function OverrideWithRepost(post) {
 }
 
 
-export { Post, PostList, PostFocused, ListBlockButton, ListBlock, RowWithPrefix, PostButtonRow, WritePost, CommentList, FeedList, BookmarkList, FollowingFeedList, AddDataToPost, OverrideWithRepost as OverrideWithRepostOrQuote };
+export { Post, PostList, PostFocused, ListBlockButton, ListBlock, RowWithPrefix, PostButtonRow, WritePost, CommentList, FeedList, BookmarkList, FollowingFeedList, AddDataToPost, OverrideWithRepost, PostsOfUser, CommentsOfUser };

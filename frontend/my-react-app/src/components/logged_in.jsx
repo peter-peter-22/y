@@ -13,6 +13,7 @@ import Error from "/src/pages/error";
 import PostFocused from "/src/pages/post_focused";
 import Bookmarks from "/src/pages/bookmarks";
 import AddFollowers from "/src/pages/follow_people";
+import Profile from "/src/pages/profile";
 
 export default () => {
   const isBig = AboveBreakpoint("sm");
@@ -27,6 +28,8 @@ export default () => {
               <Route path="/posts/:id" element={<PostFocused />} />
               <Route path="/bookmarks" element={<Bookmarks />} />
               <Route path="/add_followers" element={<AddFollowers />} />
+              <Route path="/add_followers" element={<AddFollowers />} />
+              <Route path="/profile/:id/*" element={<Profile />} />
               <Route path="*" element={<Error />} />
             </Routes>
           </div>

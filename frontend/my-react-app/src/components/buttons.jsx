@@ -63,7 +63,7 @@ function TopMenuButton(props) {
                 borderColor: 'primary.main',
                 m: "auto"
             }}>
-                <Typography fontWeight={props.selected ? "bold" : "normal"} sx={{ p: 0 }}>
+                <Typography variant={props.selected ? "medium_bold" : "medium"} sx={{ p: 0 }}>
                     {props.children}
                 </Typography>
             </Box>

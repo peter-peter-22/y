@@ -25,29 +25,15 @@ import { username_exists, selectable_username } from "../user.js";
 import { Validator } from "node-input-validator";
 import { CheckV, CheckErr, validate_image } from "../../components/validations.js";
 import { ApplySqlToUser, UpdateUser } from "../logged_in.js";
-import { postQuery } from "./general.js";
+import { postQuery, post_list } from "./general.js";
 
 const router = express.Router();
 
 router.post("/get_posts", async (req, res, next) => {
-    const v = new Validator(req.body, {
-        from: 'required|integer',
-    });
-    await CheckV(v);
-    const { from } = req.body;
-
-    const posts = await postQuery(req, next, undefined, " WHERE post.replying_to IS NULL OFFSET :from LIMIT 5", { from: from });
-    res.status(200).send(posts);
+    await post_list(req, res, next, undefined, undefined, " WHERE post.replying_to IS NULL");
 });
 router.post("/get_followed_posts", async (req, res, next) => {
-    const v = new Validator(req.body, {
-        from: 'required|integer',
-    });
-    await CheckV(v);
-    const { from } = req.body;
-
-    const result = await postQuery(req, next, undefined, " WHERE post.replying_to IS NULL AND post.publisher=ANY(SELECT follows.followed from follows WHERE follows.follower=:user_id) OFFSET :from LIMIT 5", { from: from });
-    res.status(200).send(result);
+    await post_list(req, res, next, undefined, undefined, " WHERE post.replying_to IS NULL AND post.publisher=ANY(SELECT follows.followed from follows WHERE follows.follower=:user_id)");
 });
 
 

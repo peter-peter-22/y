@@ -46,7 +46,9 @@ const config = {
     cookie_remember: 1000 * 60 * 60 * 24 * 30,//1 month. the user most log in at least once within a month to prevent logout
     cookie_registering: 1000 * 60 * 60 * 2,//2 hours. the email, name, ect. the user sends at the start of the registration must be finalized within 2 hour
     all_clients: all_clients,
-    address_mode: address_modes.localhost
+    address_mode: address_modes.localhost,
+    posts_per_request:5,
+    users_per_request:10
 }
 
 const transporter = nodemailer.createTransport({

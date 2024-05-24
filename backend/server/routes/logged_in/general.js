@@ -43,37 +43,41 @@ router.post("/is_following_user", async (req, res) => {
 });
 
 router.post("/get_post", async (req, res, next) => {
-    const v = new Validator(req.body, {
-        id: 'required|integer',
-    });
-    await CheckV(v);
-    const { id } = req.body;
-    const posts = await postQuery(req, next, undefined, " WHERE post.id=:id", { id: id });
-    if (posts.length > 0)
-        res.send(posts[0]);
-    else
-        res.status(400).send("This post does not exists");
+    await post_list(req, res, next, { id: 'required|integer' }, undefined, " WHERE post.id=:id", { id: req.body.id });
 });
+
 router.post("/get_comments", async (req, res, next) => {
-    const v = new Validator(req.body, {
-        id: 'required|integer',
-        from: 'required|integer'
-    });
-    await CheckV(v);
-    const { id, from } = req.body;
-    const comments = await postQuery(req, next, undefined, " WHERE replying_to=:id OFFSET :from LIMIT 5", { id: id, from: from });
-    res.send(comments);
+    await post_list(req, res, next, { id: 'required|integer' }, undefined, " WHERE replying_to=:id", { id: req.body.id });
+});
+
+router.post("/posts_of_user", async (req, res, next) => {
+    await post_list(req, res, next, { user_id: "required|integer" }, undefined, " WHERE post.publisher=:target_user_id AND post.replying_to IS NULL", { target_user_id: req.body.user_id });
+});
+
+router.post("/comments_of_user", async (req, res, next) => {
+    await post_list(req, res, next, { user_id: "required|integer" }, undefined, " WHERE post.publisher=:target_user_id  AND post.replying_to IS NOT NULL", { target_user_id: req.body.user_id });
 });
 
 router.post("/get_bookmarks", async (req, res, next) => {
-    const v = new Validator(req.body, {
-        from: 'required|integer'
-    });
-    await CheckV(v);
-    const { from } = req.body;
-    const comments = await postQuery(req, next, "SELECT * FROM (", ") as subquery WHERE bookmarked_by_user=TRUE OFFSET :from LIMIT 5", { from: from });
-    res.send(comments);
+    await post_list(req, res, next, undefined, "SELECT * FROM (", ") as subquery WHERE bookmarked_by_user=TRUE");
 });
+
+async function post_list(req, res, next, add_validations, before, after, query_params) {
+    try {
+        let validations = { from: "required|integer" };
+        if (add_validations)
+            validations = { ...validations, ...add_validations };
+        const v = new Validator(req.body, validations);
+        await CheckV(v);
+
+        const { from } = req.body;
+        const comments = await postQuery(req, next, before, after, query_params, undefined,undefined,from);
+        res.send(comments);
+    }
+    catch (err) {
+        next(err);
+    }
+}
 
 
 router.post("/follower_recommendations", async (req, res, next) => {
@@ -82,12 +86,12 @@ router.post("/follower_recommendations", async (req, res, next) => {
     });
     await CheckV(v);
     const { from } = req.body;
-    const users = await followable_query(req, next, undefined, " WHERE IS_FOLLOWED=FALSE OFFSET :from LIMIT 10", { from: from });
+    const users = await user_query(req, next, undefined, " WHERE IS_FOLLOWED=FALSE OFFSET :from", { from: from });
     res.send(users);
 });
 
 router.get("/follower_recommendations_preview", async (req, res, next) => {
-    const users = await followable_query(req, next, undefined, " WHERE IS_FOLLOWED=FALSE LIMIT 10");
+    const users = await user_query(req, next, undefined, " WHERE IS_FOLLOWED=FALSE", undefined, 3);
     res.send(users);
 });
 
@@ -129,10 +133,15 @@ router.post("/repost", async (req, res) => {
     }
 });
 
-async function followable_query(req, next, before, after, additional_params) {
+async function user_query(req, next, before, after, additional_params, limit) {
     try {
         const text = "SELECT * FROM ( SELECT ID, USERNAME, NAME, EXISTS (SELECT * FROM FOLLOWS WHERE FOLLOWER = :user_id AND FOLLOWED = ID) AS IS_FOLLOWED FROM USERS  ) as sq";
-        const params = { user_id: req.user.id };
+        if (limit === undefined)
+            limit = config.users_per_request;
+        if (after === undefined)
+            after = "";
+        after += " LIMIT :limit"
+        const params = { user_id: req.user.id, limit: limit };
         const users = await editable_query(text, before, after, params, additional_params);
         return users;
     }
@@ -153,10 +162,15 @@ async function editable_query(text, before, after, params, additional_params) {
     return result.rows;
 }
 
-async function postQuery(req, next, before, after, additional_params, level = 0) {
+async function postQuery(req, next, before, after, additional_params, level = 0, limit, offset = 0) {
     try {
-        const text = "SELECT POST.TEXT, POST.ID, POST.IMAGE_COUNT, POST.DATE, POST.VIEWS, POST.REPOST AS REPOSTED_ID, (SELECT COUNT(*) FROM LIKES WHERE LIKES.POST_ID = POST.ID)::INT AS LIKE_COUNT, EXISTS (SELECT * FROM LIKES WHERE LIKES.POST_ID = POST.ID AND USER_ID = :user_id) AS LIKED_BY_USER, (SELECT COUNT(*) FROM POSTS REPOSTS WHERE REPOSTS.REPOST = POST.ID)::INT AS REPOST_COUNT, EXISTS( SELECT * FROM POSTS REPOSTS WHERE REPOSTS.REPOST = POST.ID AND REPOSTS.TEXT IS NULL AND REPOSTS.PUBLISHER=:user_id) AS REPOSTED_BY_USER, (SELECT COUNT(*) FROM BOOKMARKS BOOKMARK WHERE BOOKMARK.POST_ID = POST.ID)::INT AS BOOKMARK_COUNT, EXISTS (SELECT * FROM BOOKMARKS BOOKMARK WHERE BOOKMARK.POST_ID = POST.ID AND BOOKMARK.USER_ID = :user_id) AS BOOKMARKED_BY_USER, POSTER.ID AS POSTER_ID, POSTER.NAME AS POSTER_NAME, POSTER.USERNAME AS POSTER_USERNAME, (SELECT COUNT(*) FROM POSTS AS COMMENTS_TABLE WHERE COMMENTS_TABLE.REPLYING_TO = POST.ID) AS COMMENT_COUNT FROM (SELECT * FROM POSTS ORDER BY POSTS.DATE DESC) POST LEFT JOIN USERS POSTER ON POST.PUBLISHER = POSTER.ID";
-        const params = { user_id: req.user.id };
+        const text = "SELECT POST.TEXT, POST.ID, POST.IMAGE_COUNT, POST.DATE, POST.VIEWS, POST.REPOST AS REPOSTED_ID, (SELECT COUNT(*) FROM LIKES WHERE LIKES.POST_ID = POST.ID)::INT AS LIKE_COUNT, EXISTS (SELECT * FROM LIKES WHERE LIKES.POST_ID = POST.ID AND USER_ID = :user_id) AS LIKED_BY_USER, (SELECT COUNT(*) FROM POSTS REPOSTS WHERE REPOSTS.REPOST = POST.ID)::INT AS REPOST_COUNT, EXISTS( SELECT * FROM POSTS REPOSTS WHERE REPOSTS.REPOST = POST.ID AND REPOSTS.TEXT IS NULL AND REPOSTS.PUBLISHER=:user_id) AS REPOSTED_BY_USER, (SELECT COUNT(*) FROM BOOKMARKS BOOKMARK WHERE BOOKMARK.POST_ID = POST.ID)::INT AS BOOKMARK_COUNT, EXISTS (SELECT * FROM BOOKMARKS BOOKMARK WHERE BOOKMARK.POST_ID = POST.ID AND BOOKMARK.USER_ID = :user_id) AS BOOKMARKED_BY_USER, POSTER.ID AS POSTER_ID, POSTER.NAME AS POSTER_NAME, POSTER.USERNAME AS POSTER_USERNAME, (SELECT COUNT(*) FROM POSTS AS COMMENTS_TABLE WHERE COMMENTS_TABLE.REPLYING_TO = POST.ID)::INT AS COMMENT_COUNT FROM (SELECT * FROM POSTS ORDER BY POSTS.DATE DESC) POST LEFT JOIN USERS POSTER ON POST.PUBLISHER = POSTER.ID";
+        if (limit === undefined)
+            limit = config.posts_per_request;
+        if (after === undefined)
+            after = "";
+        after += " OFFSET :offset LIMIT :limit"
+        const params = { user_id: req.user.id, limit: limit, offset: offset };
         const posts = await editable_query(text, before, after, params, additional_params);
 
         //the reposted posts must be downloaded and added to their reposters
@@ -171,7 +185,7 @@ async function postQuery(req, next, before, after, additional_params, level = 0)
             });
             if (reposted_ids.length !== 0) {
                 //downloading the reposted posts and assigning them to their reposter
-                const reposted_posts = await postQuery(req, (err)=>{throw(err)}, undefined, " WHERE post.id=ANY(:reposted_ids)", { reposted_ids: reposted_ids }, level+1);
+                const reposted_posts = await postQuery(req, (err) => { throw (err) }, undefined, " WHERE post.id=ANY(:reposted_ids)", { reposted_ids: reposted_ids }, level + 1);
 
                 posts.forEach(post => {
                     if (post.reposted_id !== null) {
@@ -231,4 +245,4 @@ async function CountableToggle(req, res, next, table, unique_constraint_name, fi
 }
 
 export default router;
-export { postQuery };
+export { postQuery, post_list };

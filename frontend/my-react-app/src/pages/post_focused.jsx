@@ -8,7 +8,7 @@ import Fab from '@mui/material/Fab';
 import { Icon } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, GetProfilePicture, default_image, GetPostPictures,Loading } from '/src/components/utilities';
+import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, GetProfilePicture, default_image, GetPostPictures, Loading } from '/src/components/utilities';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -31,7 +31,7 @@ import axios from 'axios';
 import { Endpoint, FormatAxiosError } from "/src/communication.js";
 import { Error, Modals, ShowImage } from "/src/components/modals";
 import { useParams } from "react-router-dom";
-import { PostFocused, AddDataToPost, CommentList, OverrideWithRepostOrQuote } from "/src/components/posts.jsx";
+import { PostFocused, AddDataToPost, CommentList, OverrideWithRepost } from "/src/components/posts.jsx";
 
 export default () => {
     const [post, setPost] = useState();
@@ -51,14 +51,14 @@ export default () => {
     }
 
     if (post) {
-        const overriden = OverrideWithRepostOrQuote(post);
+        const overriden = OverrideWithRepost(post);
         return (
-            <List sx={{ p: 0 }}>
+            <List sx={{ p: 0 }} key={id}>
                 <PostFocused post={post} />
                 <CommentList post={overriden} />
             </List>
         );
     }
     else
-        return <Loading/>;
+        return <Loading />;
 };

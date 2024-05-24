@@ -9,7 +9,7 @@ import Fab from '@mui/material/Fab';
 import { Icon } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink, creation, FollowDialog, NiceLink, Loading } from '/src/components/utilities';
+import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink, creation, FollowDialog, LinelessLink, Loading } from '/src/components/utilities';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -54,7 +54,9 @@ function Footer() {
 
                         </BoxList>
 
-                        <WhoToFollow />
+                        <BoxList>
+                            <WhoToFollow />
+                        </BoxList>
 
                         <BoxList>
 
@@ -129,8 +131,7 @@ function WhoToFollow() {
     }, []);
 
     return (
-        <BoxList>
-
+        <List sx={{ p: 0 }}>
             <ListItem>
                 <ListItemText>
                     <Typography variant="big_bold">
@@ -139,16 +140,16 @@ function WhoToFollow() {
                 </ListItemText>
             </ListItem>
 
-            {users ? users.map((user,index) => <FollowDialog user={user} key={index}/>) : <Loading />}
+            {users ? users.map((user, index) => <FollowDialog user={user} key={index} />) : <Loading />}
 
-            <NiceLink to="/add_followers">
+            <LinelessLink href="/add_followers">
                 <BlueTextButton>
                     Show more
                 </BlueTextButton>
-            </NiceLink>
-
-        </BoxList>
+            </LinelessLink>
+        </List>
     );
 }
 
 export default Footer;
+export { WhoToFollow }

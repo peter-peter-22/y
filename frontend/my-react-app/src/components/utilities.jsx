@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { theme } from '/src/styles/mui/my_theme.jsx';
 import Stack from '@mui/material/Stack';
 import SideMenu, { Inside } from "/src/components/side_menus.jsx";
@@ -81,7 +82,16 @@ function ChooseChild(props) {
 
 function TopMenu(props) {
     return (
-        <div style={{ height: "40px", position: "static" }}>
+        <div style={{ position: "static" }}>
+            <NavMenu>
+                {props.children}
+            </NavMenu>
+        </div>);
+}
+
+function NavMenu(props) {
+    return (
+        <div style={{ height: "40px" }}>
             {props.children}
         </div>);
 }
@@ -154,13 +164,13 @@ function BoldLink(props) {
 }
 
 function TabSwitcher(props) {
-    const [getTab, setTab] = React.useState(props.tabs[0].text);
+    const [getTab, setTab] = React.useState(0);
 
-    function SelectTab(tabName) {
-        setTab(tabName);
+    function SelectTab(tabIndex) {
+        setTab(tabIndex);
     }
 
-    const selectedTab = props.tabs.find((tab) => { return tab.text === getTab });
+    const selectedTab = props.tabs[getTab];
 
     return (
         <>
@@ -169,9 +179,9 @@ function TabSwitcher(props) {
                     {props.tabs.map((tab, index) => {
                         return (
                             <TopMenuButton
-                                selected={getTab === tab.text ? true : false}
+                                selected={getTab === index}
                                 onClick={() => {
-                                    SelectTab(tab.text)
+                                    SelectTab(index);
                                 }}
                                 key={index}>
                                 {tab.text}
@@ -182,6 +192,34 @@ function TabSwitcher(props) {
             </TopMenu>
             {selectedTab.contents}
         </>
+    );
+}
+
+function TabSwitcherLinks(props) {
+    return (
+        <NavMenu>
+            <NavMenuButtonContainer>
+                {props.tabs.map((tab, index) => {
+                    return (
+                        <NavLink to={tab.link} key={index} style={{textDecoration:"none",height:"100%",flexGrow:1}} end>
+                            {({ isActive }) => (
+                                <TopMenuButton
+                                    selected={isActive} >
+                                    {tab.text}
+                                </TopMenuButton>)}
+                        </NavLink>
+                    );
+                })}
+            </NavMenuButtonContainer>
+        </NavMenu>
+    );
+}
+
+function NavMenuButtonContainer(props) {
+    return (
+        <Box sx={{ borderBottom: 1, borderColor: 'divider', height: "100%", width: "100%", display: "flex", alignItems: "center", flexDirection: "row" }}>
+            {props.children}
+        </Box>
     );
 }
 
@@ -217,7 +255,7 @@ function DateLink(props) {
 
 function TextRow(props) {
     return (
-        <Stack direction="row" spacing={0.5} style={{ overflow: "hidden" }}>
+        <Stack direction="row" spacing={0.5} style={{ overflow: "hidden", alignItems: "center" }}>
             {props.children}
         </Stack>
     );
@@ -306,9 +344,9 @@ function GetPostPictures(post_id, image_count) {
     return images;
 }
 
-function NiceLink(props) {
+function LinelessLink(props) {
     return (
-        <Link to={props.to} style={{ textDecoration: "none" }}>
+        <Link href={props.href} style={{ textDecoration: "none" }}>
             {props.children}
         </Link>
     );
@@ -320,6 +358,8 @@ const OnlineList = forwardRef((props, ref) => {
     const savedScrollRef = useRef(0);
     const [end, setEnd] = useState(false);
     const [downloading, setDownloading] = useState(false);
+    const updateRef = useRef({ end, downloading });
+    useEffect(() => { updateRef.current = { end, downloading } }, [end, downloading]);
 
     //the minimum distance between the bottom of the screen and the bottom of the list in px.
     const minUnseenHeight = 2000;
@@ -348,12 +388,14 @@ const OnlineList = forwardRef((props, ref) => {
             setEnd(true);
             return;
         }
-        setEntries((prev) => {
-            return prev.concat(results)
-        });
-        //the scolling would stuck at the bottom when the page is expanded by the new posts,
-        //so the last scroll value before rendering must be saved and loaded after rendering
-        savedScrollRef.current = window.scrollY;
+        else {
+            setEntries((prev) => {
+                return prev.concat(results)
+            });
+            //the scolling would stuck at the bottom when the page is expanded by the new posts,
+            //so the last scroll value before rendering must be saved and loaded after rendering
+            savedScrollRef.current = window.scrollY;
+        }
         setDownloading(false);
     }
 
@@ -365,7 +407,7 @@ const OnlineList = forwardRef((props, ref) => {
 
 
     function Scrolling() {
-        if (!end) {
+        if (!updateRef.current.end && !updateRef.current.downloading) {
             const unseenHeight = listRef.current.getBoundingClientRect().bottom - window.innerHeight;
             if (unseenHeight < minUnseenHeight) {
                 setDownloading(true);
@@ -422,7 +464,7 @@ function SimplePopOver() {
                 open={Boolean(anchorEl)}
                 anchorEl={anchorEl}
                 onClose={handleClose}
-                onClick={(e)=>e.stopPropagation()}
+                onClick={(e) => e.stopPropagation()}
                 anchorOrigin={{
                     vertical: 'top',
                     horizontal: 'left',
@@ -444,5 +486,22 @@ function SimplePopOver() {
     };
 }
 
+function formatNumber(number) {
+    const units = [
+        [1000000000, "B"],
+        [1000000, "M"],
+        [1000, "k"],
+    ]
 
-export { AboveBreakpoint, ResponsiveSelector, ChooseChild, ChooseChildBool, TopMenu, ProfileText, FadeLink, TabSwitcher, UserName, UserKey, noOverflow, BoldLink, UserLink, DateLink, TextRow, UserKeyLink, ReplyingTo, GetUserName, GetUserKey, logo, creation, ToCorner, CenterLogo, default_profile, FollowDialog, GetProfilePicture, default_image, FollowButton, GetPostPictures, NiceLink, OnlineList, Loading,SimplePopOver }
+    for (let n = 0; n < units.length; n++) {
+        const unit = units[n];
+        const [multiplier, name] = unit;
+        if (multiplier <= number) {
+            const divided = Math.round(number / multiplier);
+            return divided + name;
+        }
+    }
+    return number;
+}
+
+export { AboveBreakpoint, ResponsiveSelector, ChooseChild, ChooseChildBool, TopMenu, ProfileText, FadeLink, TabSwitcher, UserName, UserKey, noOverflow, BoldLink, UserLink, DateLink, TextRow, UserKeyLink, ReplyingTo, GetUserName, GetUserKey, logo, creation, ToCorner, CenterLogo, default_profile, FollowDialog, GetProfilePicture, default_image, FollowButton, GetPostPictures, LinelessLink, OnlineList, Loading, SimplePopOver, formatNumber, TabSwitcherLinks }
