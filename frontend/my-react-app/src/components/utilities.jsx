@@ -201,7 +201,7 @@ function TabSwitcherLinks(props) {
             <NavMenuButtonContainer>
                 {props.tabs.map((tab, index) => {
                     return (
-                        <NavLink to={tab.link} key={index} style={{textDecoration:"none",height:"100%",flexGrow:1}} end>
+                        <NavLink to={tab.link} key={index} style={{ textDecoration: "none", height: "100%", flexGrow: 1 }} end>
                             {({ isActive }) => (
                                 <TopMenuButton
                                     selected={isActive} >
@@ -359,10 +359,19 @@ const OnlineList = forwardRef((props, ref) => {
     const [end, setEnd] = useState(false);
     const [downloading, setDownloading] = useState(false);
     const updateRef = useRef({ end, downloading });
+    const Container = props.container ? props.container : defaultContainer;
     useEffect(() => { updateRef.current = { end, downloading } }, [end, downloading]);
 
     //the minimum distance between the bottom of the screen and the bottom of the list in px.
     const minUnseenHeight = 2000;
+
+    function defaultContainer(props) {
+        return (
+            <List sx={{ p: 0 }} ref={listRef}>
+                {props.children}
+            </List>
+        );
+    }
 
     //add an entry from outside
     useImperativeHandle(ref, () => ({
@@ -431,10 +440,10 @@ const OnlineList = forwardRef((props, ref) => {
     }
 
     return (
-        <List sx={{ p: 0 }} ref={listRef}>
+        <Container ref={listRef}>
             {entries.map((entry, index) => <EntryMapper key={index} entry={entry} />)}
             {!end && <Loading />}
-        </List>
+        </Container>
     );
 });
 

@@ -55,12 +55,28 @@ router.post("/posts_of_user", async (req, res, next) => {
 });
 
 router.post("/comments_of_user", async (req, res, next) => {
-    await post_list(req, res, next, { user_id: "required|integer" }, undefined, " WHERE post.publisher=:target_user_id  AND post.replying_to IS NOT NULL", { target_user_id: req.body.user_id });
+    await post_list(req, res, next, { user_id: "required|integer" }, undefined, " WHERE post.publisher=:target_user_id AND post.replying_to IS NOT NULL", { target_user_id: req.body.user_id });
+});
+
+router.post("/likes_of_user", async (req, res, next) => {
+    await post_list(req, res, next, { user_id: "required|integer" }, undefined, " WHERE EXISTS(select * from likes WHERE post_id=posts.id AND user_id = 50)", { target_user_id: req.body.user_id });
 });
 
 router.post("/get_bookmarks", async (req, res, next) => {
     await post_list(req, res, next, undefined, "SELECT * FROM (", ") as subquery WHERE bookmarked_by_user=TRUE");
 });
+
+router.post("/get_media_of_user", async (req, res) => {
+    const v = new Validator(req.body, {
+        from: "required|integer",
+        target_user_id: "required|integer"
+    });
+    await CheckV(v);
+
+    const q = await db.query(named("select id, image_count from posts where image_count != 0 and publisher=:target_user_id")({ target_user_id: target_user_id }));
+    res.send(q.rows);
+});
+
 
 async function post_list(req, res, next, add_validations, before, after, query_params) {
     try {
@@ -71,7 +87,7 @@ async function post_list(req, res, next, add_validations, before, after, query_p
         await CheckV(v);
 
         const { from } = req.body;
-        const comments = await postQuery(req, next, before, after, query_params, undefined,undefined,from);
+        const comments = await postQuery(req, next, before, after, query_params, undefined, undefined, from);
         res.send(comments);
     }
     catch (err) {

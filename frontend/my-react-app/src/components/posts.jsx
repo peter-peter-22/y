@@ -605,7 +605,18 @@ function PostsOfUser(props) {
     const user_id = props.user.id;
     return <SimplifiedPostList endpoint="/member/posts_of_user" params={{ user_id: user_id }} />;
 }
+
 function CommentsOfUser(props) {
+    const user_id = props.user.id;
+    return <SimplifiedPostList endpoint="/member/comments_of_user" params={{ user_id: user_id }} />;
+}
+
+function LikesOfUser(props) {
+    const user_id = props.user.id;
+    return <SimplifiedPostList endpoint="/member/likes_of_user" params={{ user_id: user_id }} />;
+}
+
+function MediaOfUser(props) {
     const user_id = props.user.id;
     return <SimplifiedPostList endpoint="/member/comments_of_user" params={{ user_id: user_id }} />;
 }
@@ -893,4 +904,4 @@ function OverrideWithRepost(post) {
 }
 
 
-export { Post, PostList, PostFocused, ListBlockButton, ListBlock, RowWithPrefix, PostButtonRow, WritePost, CommentList, FeedList, BookmarkList, FollowingFeedList, AddDataToPost, OverrideWithRepost, PostsOfUser, CommentsOfUser };
+export { Post, PostList, PostFocused, ListBlockButton, ListBlock, RowWithPrefix, PostButtonRow, WritePost, CommentList, FeedList, BookmarkList, FollowingFeedList, AddDataToPost, OverrideWithRepost, PostsOfUser, CommentsOfUser,LikesOfUser,MediaOfUser };

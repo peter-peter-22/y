@@ -34,7 +34,7 @@ import { Error, Modals, ShowImage } from "/src/components/modals";
 import { useNavigate } from "react-router-dom";
 import { WhoToFollow } from "/src/components/footer";
 import Moment from "moment";
-import {PostsOfUser,CommentsOfUser} from "/src/components/posts";
+import {PostsOfUser,CommentsOfUser,LikesOfUser,MediaOfUser} from "/src/components/posts";
 
 function Profile() {
     const user = UserData.getData.user;
@@ -133,6 +133,8 @@ function Profile() {
                 <Routes>
                     <Route path="" element={<PostsOfUser user={user}/>} />
                     <Route path="/replies" element={<CommentsOfUser user={user}/>} />
+                    <Route path="/media" element={<LikesOfUser user={user}/>} />
+                    <Route path="/likes" element={<MediaOfUser user={user}/>} />
                 </Routes>
             </Stack>
 
