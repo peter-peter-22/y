@@ -337,6 +337,10 @@ function FollowButton(props) {
 function GetProfilePicture(user) {
     return (user ? Endpoint(config.profile_pics_url + "/" + user.id + ".jpg") : default_profile);
 }
+function GetProfileBanner(user)
+{
+    return (user ? Endpoint(config.profile_banner_url + "/" + user.id + ".jpg") : default_profile);
+}
 function GetPostPictures(post_id, image_count) {
     const images = [];
     for (let n = 0; n < image_count; n++)
@@ -359,19 +363,10 @@ const OnlineList = forwardRef((props, ref) => {
     const [end, setEnd] = useState(false);
     const [downloading, setDownloading] = useState(false);
     const updateRef = useRef({ end, downloading });
-    const Container = props.container ? props.container : defaultContainer;
     useEffect(() => { updateRef.current = { end, downloading } }, [end, downloading]);
 
     //the minimum distance between the bottom of the screen and the bottom of the list in px.
     const minUnseenHeight = 2000;
-
-    function defaultContainer(props) {
-        return (
-            <List sx={{ p: 0 }} ref={listRef}>
-                {props.children}
-            </List>
-        );
-    }
 
     //add an entry from outside
     useImperativeHandle(ref, () => ({
@@ -424,7 +419,6 @@ const OnlineList = forwardRef((props, ref) => {
         }
     }
 
-
     useEffect(() => {
         window.addEventListener("scroll", Scrolling);
         Scrolling();
@@ -439,11 +433,21 @@ const OnlineList = forwardRef((props, ref) => {
         return await props.getEntries(from);
     }
 
+    function defaultEntryMapController(props) {
+        return (
+            <List sx={{ p: 0 }}>
+                {props.entries.map((entry, index) => <EntryMapper key={index} entry={entry} />)}
+            </List>
+        );
+    }
+    const overrideEntryMapController=props.entryMapController;
+    const EntryMapController = overrideEntryMapController?overrideEntryMapController:defaultEntryMapController;
+
     return (
-        <Container ref={listRef}>
-            {entries.map((entry, index) => <EntryMapper key={index} entry={entry} />)}
+        <div ref={listRef}>
+            <EntryMapController entries={entries} />
             {!end && <Loading />}
-        </Container>
+        </div>
     );
 });
 
@@ -513,4 +517,4 @@ function formatNumber(number) {
     return number;
 }
 
-export { AboveBreakpoint, ResponsiveSelector, ChooseChild, ChooseChildBool, TopMenu, ProfileText, FadeLink, TabSwitcher, UserName, UserKey, noOverflow, BoldLink, UserLink, DateLink, TextRow, UserKeyLink, ReplyingTo, GetUserName, GetUserKey, logo, creation, ToCorner, CenterLogo, default_profile, FollowDialog, GetProfilePicture, default_image, FollowButton, GetPostPictures, LinelessLink, OnlineList, Loading, SimplePopOver, formatNumber, TabSwitcherLinks }
+export { AboveBreakpoint, ResponsiveSelector, ChooseChild, ChooseChildBool, TopMenu, ProfileText, FadeLink, TabSwitcher, UserName, UserKey, noOverflow, BoldLink, UserLink, DateLink, TextRow, UserKeyLink, ReplyingTo, GetUserName, GetUserKey, logo, creation, ToCorner, CenterLogo, default_profile, FollowDialog, GetProfilePicture, default_image, FollowButton, GetPostPictures, LinelessLink, OnlineList, Loading, SimplePopOver, formatNumber, TabSwitcherLinks,GetProfileBanner }

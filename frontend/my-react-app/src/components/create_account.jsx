@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
 import Stack from '@mui/material/Stack';
 import SideMenu, { Inside } from "./side_menus.jsx";
 import { TopMenu } from '/src/components/utilities';
@@ -66,16 +66,16 @@ function CreateAccount(props) {
 
         WaitAfterChange(async () => {
             if (valid) {
-                try{
-                const res = await axios.post(Endpoint("/user/exists/email"), {
-                    email: value
-                });
-                if (res.data)
-                    setEmailError('This email address is already taken');
+                try {
+                    const res = await axios.post(Endpoint("/user/exists/email"), {
+                        email: value
+                    });
+                    if (res.data)
+                        setEmailError('This email address is already taken');
+                }
+                catch { }
             }
-            catch{}
-            }
-        }, timerRef, "email");
+        }, timerRef);
 
     };
 
@@ -87,32 +87,13 @@ function CreateAccount(props) {
 
     //name
     const [name, setName] = useState('');
-    const [nameError, setNameError] = useState('');
-
-    function handleName(e) {
-        const value = e.target.value;
-        setName(value);
-        if (!validateName(value)) {
-            setNameError('The name must be at least 3 characters long.');
-        } else {
-            setNameError('');
-        }
-    }
-
-    const validateName = (name) => {
-        return name.length >= 3;
-    };
+    const [nameOk, setNameOk] = useState('');
 
     //date
     const [date, setDate] = useState(null);
-    const [dateError, setdateError] = useState(true);
+    const [dateOk, setDateOk] = useState(true);
 
-    function handleDate(date) {
-        setDate(date);
-        setdateError(!date.isValid() || date.isAfter() || date.year() < 1900);
-    }
-
-    const page0ok = !nameError && name && !emailError && email && !dateError;
+    const page0ok = nameOk && name && !emailError && email && dateOk;
 
     //checkboxes
     const [checkboxes, setCheckboxes] = useState([]);
@@ -136,20 +117,20 @@ function CreateAccount(props) {
 
     //submit rechapta
     async function submitChapta() {
-        try{
-        await axios.post(Endpoint('/register_start'),
-            {
-                email: email,
-                name: name,
-                birthdate: date.toISOString(),
-                recaptchaToken: captchaValue,
-                checkboxes: checkboxes
-            },
-        );
-        //rechapta ok, next page
-        handleNext();
-    }
-    catch{}
+        try {
+            await axios.post(Endpoint('/register_start'),
+                {
+                    email: email,
+                    name: name,
+                    birthdate: date.toISOString(),
+                    recaptchaToken: captchaValue,
+                    checkboxes: checkboxes
+                },
+            );
+            //rechapta ok, next page
+            handleNext();
+        }
+        catch { }
     };
 
     //verification code
@@ -163,16 +144,16 @@ function CreateAccount(props) {
 
     //submit verification code
     async function submitCode() {
-        try{
-        await axios.post(Endpoint('/verify_code'),
-            {
-                code: code
-            },
-        );
-        //code ok, next page
-        handleNext();
-    }
-    catch{}
+        try {
+            await axios.post(Endpoint('/verify_code'),
+                {
+                    code: code
+                },
+            );
+            //code ok, next page
+            handleNext();
+        }
+        catch { }
     };
 
     //password
@@ -185,52 +166,39 @@ function CreateAccount(props) {
     const passwordOk = password.length >= 8;
 
     async function submitPassword() {
-        try{
-        await axios.post(Endpoint('/submit_password'),
-            {
-                password: password
-            },
-        );
-        //code ok, next page
-        handleNext();
-        UserData.update();
-    }
-    catch{}
+        try {
+            await axios.post(Endpoint('/submit_password'),
+                {
+                    password: password
+                },
+            );
+            //code ok, next page
+            handleNext();
+            UserData.update();
+        }
+        catch { }
     }
 
     //profile pic
-    const [file, setFile] = useState();
-    const imageUrlRef = useRef(null);
-    const fileUrl = imageUrlRef.url;
-
-    function handleFile(e) {
-        const selected = e.target.files[0];
-        setFile(selected);
-        if (selected === undefined)
-            imageUrlRef.url = undefined;
-        else {
-            const selectedUrl = URL.createObjectURL(selected);
-            imageUrlRef.url = selectedUrl;
-        }
-    }
+    const [file, setFile] = usestate();
 
     async function submitImage() {
         if (file !== undefined) {
             const formData = new FormData();
             formData.append('image', file);
-            try{
-            await axios.post(
-                Endpoint('/member/update_profile_picture'),
-                formData,
-                {
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
+            try {
+                await axios.post(
+                    Endpoint('/member/update_profile_picture'),
+                    formData,
+                    {
+                        headers: {
+                            'Content-Type': 'multipart/form-data'
+                        }
                     }
-                }
-            );
-            handleNext();
-        }
-        catch{}
+                );
+                handleNext();
+            }
+            catch { }
         }
         else
             handleNext();
@@ -240,53 +208,23 @@ function CreateAccount(props) {
     const [username, setUserName] = useState("");
     const [usernameOk, setUserNameOk] = useState(false);
 
-    function handleUsername(e) {
-        const value = e.target.value;
-        setUserName(value);
-        checkUsername(value);
-    }
-    function checkUsername(value) {
-        setUserNameOk(false);
-        WaitAfterChange(async () => {
-            if (value.length > 0) {
-                try{
-                const res = await axios.post(Endpoint("/member/ok_username"), {
-                    username: value
-                });
-                setUserNameOk(res.data);
-            }
-            catch{}
-            }
-        }, timerRef, "username");
-    }
-    useEffect(() => {//add the existing username to the textfield on creation
-        let starting_username;
-        try {
-            starting_username = UserData.getData.user.username;
-        } catch {
-            starting_username = "";
-        }
-        setUserName(starting_username);
-        checkUsername(starting_username);
-    }, []);
-
     async function submitUsername() {
-        try{
-        await axios.post(Endpoint("/member/change_username"), {
-            username: username
-        });
-        handleNext();
-    }catch{}
+        try {
+            await axios.post(Endpoint("/member/change_username"), {
+                username: username
+            });
+            handleNext();
+        } catch { }
     }
 
     //notifications
     async function setNotifications(enabled) {
-        try{
-        await axios.post(Endpoint("/member/change_browser_notifications"), {
-            enabled: enabled
-        });
-        handleNext();
-    }catch{}
+        try {
+            await axios.post(Endpoint("/member/change_browser_notifications"), {
+                enabled: enabled
+            });
+            handleNext();
+        } catch { }
     }
 
     //step handler
@@ -314,15 +252,15 @@ function CreateAccount(props) {
         Modals[0].Close();
     }
     async function send_finish() {
-       try{
-        await axios.post(Endpoint("/finish_registration"),
-            {
-                birthdate: date.toISOString(),
-                checkboxes: checkboxes
-            });
-        close();
-       }
-       catch{}
+        try {
+            await axios.post(Endpoint("/finish_registration"),
+                {
+                    birthdate: date.toISOString(),
+                    checkboxes: checkboxes
+                });
+            close();
+        }
+        catch { }
     }
 
 
@@ -336,11 +274,7 @@ function CreateAccount(props) {
                 <Stack direction="column" sx={{ mx: margin, height: "100%" }}>
                     <CenterLogo />
                     <Typography variant="verybig_bold" sx={{ my: 4 }}>Create account</Typography>
-                    <TextField autoComplete="name" variant="outlined" type="text" label="Name" inputProps={{ maxLength: "50" }} sx={{ mb: 3 }}
-                        onChange={handleName}
-                        error={Boolean(nameError)}
-                        helperText={nameError}
-                        value={name} />
+                    <NameEditor onChangeName={setName} onChangeOk={setNameOk} />
                     <TextField autoComplete="email" variant="outlined" type="email" label="Email" sx={{ mb: 4 }}
                         onChange={handleEmail}
                         error={Boolean(emailError)}
@@ -348,9 +282,7 @@ function CreateAccount(props) {
                         value={email} />
                     <Typography variant="medium_bold" sx={{ mb: 2 }}>Date of birth</Typography>
                     <Typography variant="medium_fade" sx={{ mb: 2 }}>This will not be publicly visible. Verify your own age, even if it's a business account, a pet account, or something else.</Typography>
-                    <LocalizationProvider dateAdapter={AdapterMoment}>
-                        <DatePicker label="Date of birth" disableFuture onChange={handleDate} value={date} />
-                    </LocalizationProvider>
+                    <BirthDateEditor onChangeDate={setDate} onChangeOk={setDateOk} />
                     <WideButton color="black" disabled={!page0ok} sx={{ mt: "auto", mb: 3 }}
                         onClick={handleNext}>Next</WideButton>
                 </Stack>
@@ -433,15 +365,7 @@ function CreateAccount(props) {
                     <Typography variant="verybig_bold" sx={{ mt: 4 }}>Select profile picture!</Typography>
                     <Typography variant="small_fade" sx={{ mt: 3 }}>Do you have a favourite selfie? Upload now! {email}</Typography>
                     <div style={{ flexGrow: 1, display: "flex", justifyContent: "center", alignItems: "center" }}>
-                        <Avatar sx={{ height: "200px", width: "200px" }}>
-                            <img src={fileUrl ? fileUrl : default_profile} style={{ height: "100%", width: "100%", objectFit: "cover" }} />
-                            <Fab size="small" color="transparentBlack" sx={{ border: 1, borderColor: "divider", position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}>
-                                <VisuallyHiddenInput type="file" accept={config.accepted_image_types} onChange={handleFile} />
-                                <Icon baseClassName="material-icons-outlined">
-                                    add_a_photo
-                                </Icon>
-                            </Fab>
-                        </Avatar>
+                        <ProfilePicEditor size="200px" onChange={setFile} />
                     </div>
                     <Box sx={{ my: 3, boxSizing: "border-box" }}>
                         {file ?
@@ -464,23 +388,7 @@ function CreateAccount(props) {
                     <CenterLogo />
                     <Typography variant="verybig_bold" sx={{ mt: 4 }}>How should we call you?</Typography>
                     <Typography variant="small_fade" sx={{ mt: 3 }}>The @username is unique. You can modify it anytime.</Typography>
-                    <TextField variant="outlined" type="text" label="Username" sx={{ my: 3 }}
-                        onChange={handleUsername}
-                        value={username}
-                        InputProps={{
-                            maxLength: "50",
-                            endAdornment: (
-                                <InputAdornment position="end">
-                                    {usernameOk ? <Icon color="success">check_circle</Icon> : <Icon color="error">cancel</Icon>}
-                                </InputAdornment>
-                            ),
-                            startAdornment: (
-                                <InputAdornment position="start">
-                                    @
-                                </InputAdornment>
-                            ),
-                        }}
-                    />
+                    <UserNameEditor changedUserName={setUserName} changedOk={setUserNameOk} />
                     <WideButton color="black" sx={{ my: 3 }}
                         onClick={submitUsername} disabled={!usernameOk}>Next</WideButton>
                 </Stack>
@@ -523,7 +431,7 @@ function CreateAccount(props) {
                     <LocalizationProvider dateAdapter={AdapterMoment}>
                         <DatePicker label="Date of birth" disableFuture onChange={handleDate} value={date} />
                     </LocalizationProvider>
-                    <WideButton color="black" disabled={Boolean(dateError)} sx={{ mt: "auto", mb: 3 }}
+                    <WideButton color="black" disabled={Boolean(dateOk)} sx={{ mt: "auto", mb: 3 }}
                         onClick={handleNext}>Next</WideButton>
                 </Stack>
             );
@@ -540,11 +448,195 @@ function CreateAccount(props) {
     );
 }
 
-function WaitAfterChange(cb, timerRef, timerName) {
-    clearTimeout(timerRef[timerName]);
-    timerRef[timerName] = setTimeout(() => {
+function WaitAfterChange(cb, timerRef) {
+    clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
         cb();
     }, 300);
 }
 
+function ProfilePicEditor(props) {
+    const size = props.size ? props.size : "100px";
+
+    function ProfileDisplayer(props) {
+        const url = props.url;
+        return (
+            <div style={{ position: "relative", width: "fit-content" }}>
+                <Avatar src={url} style={{ height: size, width: size }} />
+                {props.button}
+            </div>
+        );
+    }
+
+    return (
+        <ChangeablePicture displayer={ProfileDisplayer} onChange={props.onChange} current={props.current} />
+    );
+}
+
+function ChangeablePicture(props) {
+    const [file, setFile] = useState();
+    const imageUrlRef = useRef(props.current);
+    const fileUrl = imageUrlRef.current;
+    const onChange = props.onChange;
+
+    function handleFile(e) {
+        const selected = e.target.files[0];
+        setFile(selected);
+        if (selected === undefined)
+            imageUrlRef.current = undefined;
+        else {
+            const selectedUrl = URL.createObjectURL(selected);
+            imageUrlRef.current = selectedUrl;
+        }
+        if (onChange)
+            onChange(selected);
+    }
+
+    const Displayer = props.displayer;
+
+    function ChangeButton(props) {
+        return (
+            <Fab size="small" color="transparentBlack" sx={{ border: 1, borderColor: "divider", position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}>
+                <VisuallyHiddenInput type="file" accept={config.accepted_image_types} onChange={handleFile} />
+                <Icon baseClassName="material-icons-outlined">
+                    add_a_photo
+                </Icon>
+            </Fab>
+        );
+    }
+
+    return (
+        <Displayer
+            button={<ChangeButton />}
+            url={fileUrl} />
+    );
+}
+
+function UserNameEditor(props) {
+    const [username, setUserName] = useState("");
+    const [usernameOk, setUserNameOk] = useState(false);
+    const changedUserName = props.onChangeUserName;
+    const changedOk = props.onChangeOk;
+    const timerRef = useRef();
+
+    useEffect(() => {
+        if (changedOk)
+            changedOk(usernameOk);
+        if (changedUserName)
+            changedUserName(username);
+    }, [username, usernameOk]);
+
+    function handleUsername(e) {
+        const value = e.target.value;
+        setUserName(value);
+        checkUsername(value);
+    }
+    function checkUsername(value) {
+        setUserNameOk(false);
+        WaitAfterChange(async () => {
+            if (value.length > 0) {
+                try {
+                    const res = await axios.post(Endpoint("/member/ok_username"), {
+                        username: value
+                    });
+                    setUserNameOk(res.data);
+                }
+                catch { }
+            }
+        }, timerRef);
+    }
+    useEffect(() => {//add the existing username to the textfield on creation
+        let starting_username;
+        try {
+            starting_username = UserData.getData.user.username;
+        } catch {
+            starting_username = "";
+        }
+        setUserName(starting_username);
+        checkUsername(starting_username);
+    }, []);
+
+    return (
+        <TextField variant="outlined" type="text" label="Username" sx={{ my: 3 }}
+            onChange={handleUsername}
+            value={username}
+            InputProps={{
+                maxLength: "50",
+                endAdornment: (
+                    <InputAdornment position="end">
+                        {usernameOk ? <Icon color="success">check_circle</Icon> : <Icon color="error">cancel</Icon>}
+                    </InputAdornment>
+                ),
+                startAdornment: (
+                    <InputAdornment position="start">
+                        @
+                    </InputAdornment>
+                ),
+            }}
+        />
+    );
+}
+
+function NameEditor(props) {
+    const [name, setName] = useState(props.current !== undefined ? props.current : "");
+    const [nameError, setNameError] = useState('');
+    const onChangeName = props.onChangeName;
+    const onChangeOk = props.onChangeOk;
+
+    useEffect(() => {
+        if (onChangeName)
+            onChangeName(name);
+        if (onChangeOk)
+            onChangeOk(!nameError);
+    }, [name, nameError]);
+
+    function handleName(e) {
+        const value = e.target.value;
+        setName(value);
+        if (!validateName(value)) {
+            setNameError('The name must be at least 3 characters long.');
+        } else {
+            setNameError('');
+        }
+
+    }
+
+    const validateName = (name) => {
+        return name.length >= 3;
+    };
+
+    return (
+        <TextField autoComplete="name" variant="outlined" type="text" label="Name" inputProps={{ maxLength: "50" }} sx={{ mb: 3 }}
+            onChange={handleName}
+            error={Boolean(nameError)}
+            helperText={nameError}
+            value={name} />
+    );
+}
+
+function BirthDateEditor(props) {
+    const [date, setDate] = useState(null);
+    const [dateOk, setDateOk] = useState(true);
+    const onChangeDate = props.onChangeDate;
+    const onChangeOk = props.onChangeOk;
+
+    useEffect(() => {
+        if (onChangeDate)
+            onChangeDate(date);
+        if (onChangeOk)
+            onChangeOk(dateOk);
+    }, [date, dateOk]);
+
+    function handleDate(date) {
+        setDate(date);
+        setDateOk(date.isValid() && !date.isAfter() && date.year() >= 1900);
+    }
+    return (
+        <LocalizationProvider dateAdapter={AdapterMoment}>
+            <DatePicker label="Date of birth" disableFuture onChange={handleDate} value={date} />
+        </LocalizationProvider>
+    );
+}
+
 export default CreateAccount;
+export { ProfilePicEditor, ChangeablePicture, UserNameEditor, NameEditor,BirthDateEditor }

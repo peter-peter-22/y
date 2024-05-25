@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, forwardRef } from "react";
+import React, { useState, useRef, useEffect, forwardRef, createContext, useContext } from "react";
 import Stack from '@mui/material/Stack';
 import SideMenu, { Inside } from "./side_menus.jsx";
 import { TopMenu } from '/src/components/utilities';
@@ -77,7 +77,7 @@ function BorderlessPost(props) {
         <div onClick={OpenPost}>
             <RepostedOrQuoted post={original} />
             <RowWithPrefix
-                prefix={<Avatar src={GetProfilePicture(overriden)} />}
+                prefix={<Avatar src={GetProfilePicture(overriden.user)} />}
                 contents={
                     <Stack direction="column" style={{ overflow: "hidden" }}>
                         <Stack direction="row" spacing={0.25} style={{ alignItems: "center" }}>
@@ -616,11 +616,6 @@ function LikesOfUser(props) {
     return <SimplifiedPostList endpoint="/member/likes_of_user" params={{ user_id: user_id }} />;
 }
 
-function MediaOfUser(props) {
-    const user_id = props.user.id;
-    return <SimplifiedPostList endpoint="/member/comments_of_user" params={{ user_id: user_id }} />;
-}
-
 function FollowingFeedList() {
     return <SimplifiedPostList endpoint="/member/feed/get_followed_posts" />;
 }
@@ -708,7 +703,8 @@ function BlockImage(props) {
             flex: 1,
             aspectRatio: "1 / 1",
             overflow: "hidden",
-            position: "relative"
+            position: "relative",
+            cursor:"pointer"
         }}
             onClick={props.onClick}>
             <img src={props.src} style={{
@@ -731,22 +727,24 @@ function PostBottomIcon(props) {
         </IconButton>);
 }
 
-function PostMedia(props) {
-    const spacing = "2px";
-    const images = props.images;
-
+function ClickableImage(props) {
+    const images = useContext(ImageContext);
     function Show(index, e) {
         e.stopPropagation();
         ShowImage(images, index);
     }
+    return (
+        <BlockImage src={images[props.index]} onClick={(e) => { Show(props.index, e); }}>
+            {props.children}
+        </BlockImage>
+    );
+}
 
-    function ClickableImage(props) {
-        return (
-            <BlockImage src={images[props.index]} onClick={(e) => { Show(props.index, e); }}>
-                {props.children}
-            </BlockImage>
-        );
-    }
+const ImageContext = createContext([]);
+
+function PostMedia(props) {
+    const spacing = "2px";
+    const images = props.images;
 
     if (images && images.length > 0) {
         let imageElements;
@@ -804,9 +802,11 @@ function PostMedia(props) {
                 borderRadius: "10px",
                 boxSizing: "border-box"
             }}>
-                <Stack direction="column" spacing={spacing}>
-                    {imageElements}
-                </Stack>
+                <ImageContext.Provider value={images}>
+                    <Stack direction="column" spacing={spacing}>
+                        {imageElements}
+                    </Stack>
+                </ImageContext.Provider>
             </Box>
         );
     }
@@ -904,4 +904,4 @@ function OverrideWithRepost(post) {
 }
 
 
-export { Post, PostList, PostFocused, ListBlockButton, ListBlock, RowWithPrefix, PostButtonRow, WritePost, CommentList, FeedList, BookmarkList, FollowingFeedList, AddDataToPost, OverrideWithRepost, PostsOfUser, CommentsOfUser,LikesOfUser,MediaOfUser };
+export { Post, PostList, PostFocused, ListBlockButton, ListBlock, RowWithPrefix, PostButtonRow, WritePost, CommentList, FeedList, BookmarkList, FollowingFeedList, AddDataToPost, OverrideWithRepost, PostsOfUser, CommentsOfUser, LikesOfUser, BlockImage,ImageContext ,ClickableImage,PostModalFrame};

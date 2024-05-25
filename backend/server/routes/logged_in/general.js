@@ -59,24 +59,37 @@ router.post("/comments_of_user", async (req, res, next) => {
 });
 
 router.post("/likes_of_user", async (req, res, next) => {
-    await post_list(req, res, next, { user_id: "required|integer" }, undefined, " WHERE EXISTS(select * from likes WHERE post_id=posts.id AND user_id = 50)", { target_user_id: req.body.user_id });
+    await post_list(req, res, next, { user_id: "required|integer" }, undefined, " WHERE EXISTS(select * from likes WHERE likes.post_id=post.id AND post.publisher=:target_user_id)", { target_user_id: req.body.user_id });
 });
 
 router.post("/get_bookmarks", async (req, res, next) => {
     await post_list(req, res, next, undefined, "SELECT * FROM (", ") as subquery WHERE bookmarked_by_user=TRUE");
 });
 
-router.post("/get_media_of_user", async (req, res) => {
+router.post("/media_of_user", async (req, res) => {
     const v = new Validator(req.body, {
         from: "required|integer",
-        target_user_id: "required|integer"
+        user_id: "required|integer"
     });
     await CheckV(v);
 
-    const q = await db.query(named("select id, image_count from posts where image_count != 0 and publisher=:target_user_id")({ target_user_id: target_user_id }));
+    const q = await db.query(named("select id, image_count from posts where image_count != 0 and publisher=:target_user_id OFFSET :from LIMIT :limit")({ target_user_id: req.body.user_id, limit: config.posts_per_request, from: req.body.from }));
     res.send(q.rows);
 });
 
+router.post("/user_profile", async (req, res) => {
+    const v = new Validator(req.body, {
+        user_id: "required|integer"
+    });
+    await CheckV(v);
+
+    const { user_id } = req.body;
+    const q = await db.query(named("select name,username,id,registration_date,bio, (select count(*) from follows where followed=id) as followers , (select count(*) from follows where follower=id) as follows from users where id=:user_id")({ user_id: user_id }));
+    const user = q.rows[0];
+    if (!user)
+        CheckErr("this user does not exists");
+    res.send(user);
+});
 
 async function post_list(req, res, next, add_validations, before, after, query_params) {
     try {

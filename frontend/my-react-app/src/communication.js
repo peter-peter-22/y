@@ -34,7 +34,7 @@ function IsAxiosError(err)
 
 function ThrowIfNotAxios(err)
 {
-    if(!IsAxiosError(err));
+    if(!IsAxiosError(err))
         throw (err);
 }
 

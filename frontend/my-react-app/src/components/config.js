@@ -10,6 +10,7 @@ const address_modes = {
 const config = {
     accepted_image_types: "image/png, image/jpeg, image/jpg",
     profile_pics_url: "/images/profiles",
+    profile_banner_url: "/images/banners",
     post_pics_url: "/images/posts",
     address_mode: address_modes.localhost,
 }
