@@ -1,5 +1,5 @@
 //functions and resources
-import React from "react";
+import React, { useState,useRef } from "react";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
@@ -9,7 +9,7 @@ import '@fontsource/roboto/900.css';
 import 'material-icons/iconfont/material-icons.css';
 import { AboveBreakpoint } from '/src/components/utilities';
 import axios from "axios";
-import { Endpoint,ThrowIfNotAxios } from "/src/communication.js";
+import { Endpoint, ThrowIfNotAxios } from "/src/communication.js";
 import Dialog from '@mui/material/Dialog';
 import CreateAccount from "/src/components/create_account.jsx";
 import { Modals, CreateModals, Error } from "/src/components/modals";
@@ -24,7 +24,7 @@ let UserData = {};
 
 function App() {
   //get user data
-  const [getData, setData] = React.useState();
+  const [getData, setData] = useState();
   UserData.getData = getData;
   UserData.setData = setData;
   UserData.update = Update;
@@ -37,6 +37,7 @@ function App() {
     try {
       //get user and messages from server
       const response = await axios.get(Endpoint("/get_user"));
+      response.data.user.last_update=new Date().getMilliseconds();
       setData(response.data);
 
       //process the messages
@@ -46,11 +47,11 @@ function App() {
         Modals[0].Show(<CreateAccount pages={[5, 6, 7, 8]} />, CloseStartMessage);
 
         async function CloseStartMessage() {
-          try{
-          await axios.get(Endpoint("/member/close_starting_message"));
-          UserData.update();
+          try {
+            await axios.get(Endpoint("/member/modify/close_starting_message"));
+            UserData.update();
           }
-          catch{}
+          catch { }
         }
       }
 
@@ -59,16 +60,16 @@ function App() {
         Modals[0].Show(<CreateAccount pages={[1, 9]} finish />, ExitRegistration);
 
         async function ExitRegistration() {
-          try{
-          await axios.get(Endpoint("/exit_registration"));
-          UserData.update();
+          try {
+            await axios.get(Endpoint("/exit_registration"));
+            UserData.update();
           }
-          catch{}
+          catch { }
         }
       }
 
     }
-    catch (err){}
+    catch (err) { }
   }
 
   //choose page

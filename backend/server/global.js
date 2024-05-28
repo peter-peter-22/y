@@ -20,6 +20,7 @@ env.config();
 import cors from "cors";
 import axios from "axios";
 import nodemailer from "nodemailer";
+import Moment from "moment";
 
 const app = express();
 
@@ -82,4 +83,5 @@ async function initialize() {
 
 global.app = app;
 global.config = config;
+global.ISOToSQL = (iso)=>{return new Moment(iso).format()};
 export { transporter, pgPool, initialize };

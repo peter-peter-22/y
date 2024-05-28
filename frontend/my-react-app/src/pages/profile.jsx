@@ -47,14 +47,21 @@ function Profile() {
         async function get() {
             try {
                 const res = await axios.post(Endpoint("/member/user_profile"), { user_id: id });
-                setUser(res.data);
+                const user=res.data;
+                setUser(user);
             } catch (err) {
                 setUser(undefined);
                 ThrowIfNotAxios(err);
             }
         }
         get(id);
-    }, [id]);
+    }, [id,UserData.getData]);
+
+    function EditProfile() {
+        Modals[0].Show(
+            <ProfileEditor user={user} />
+        );
+    }
 
     if (user) {
         const profileSize = "100px";
@@ -73,8 +80,8 @@ function Profile() {
                     borderBottom: 1,
                     borderColor: "divider"
                 }}>
-                    <ProfileBanner url={GetProfileBanner(user)} />
-                    <Avatar src={GetProfilePicture(user)} sx={{
+                    <ProfileBanner url={GetProfileBanner(user,true)} />
+                    <Avatar src={GetProfilePicture(user,true)} sx={{
                         position: "absolute",
                         transform: "translateY(-50%)",
                         top: "100%",
@@ -212,56 +219,88 @@ function MediaOfUser(props) {
     );
 }
 
-function EditProfile(user) {
-    Modals[0].Show(
-        <ProfileEditor user={user} />
-    );
-}
-
 function ProfileEditor(props) {
     const user = props.user;
-    const [profile, setProfile] = useState();
-    const [banner, setBanner] = useState();
-    const [username, setUsername] = useState("");
-    const [usernameOk, setUsernameOk] = useState();
-    const [name, setName] = useState("");
-    const [nameOk, setNameOk] = useState();
-    const [bio, setBio] = useState("");
-    const [date, setDate] = useState();
-    const [dateOk, setDateOk] = useState();
+    const [ok, setOk] = useState(false);
+    const valuesRef = useRef({});
 
-    const saveable = usernameOk && nameOk&&dateOk;
+    function updateValue(name, value) {
+        valuesRef.current[name] = value;
+        const { username_ok, name_ok, date_ok } = valuesRef.current;
+        const ok_all = username_ok && name_ok && date_ok;
+        setOk(ok_all);
+    }
 
-    function submit()
-    {
-console.log(date);
+    async function submit() {
+        try {
+            const form_values = valuesRef.current;
+            if (form_values.birthdate)
+                form_values.birthdate = new Moment(form_values.birthdate).toISOString();
+            await axios.post(
+                Endpoint("/member/modify/update_profile"),
+                form_values,
+                {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                }
+            );
+            UserData.update();
+            Close();
+        }
+        catch (err) {
+            ThrowIfNotAxios(err);
+        }
+    }
+
+    function Close() {
+        Modals[0].Close();
     }
 
     return (
         <PostModalFrame>
-            <CornerButton onClick={() => { Modals[0].Close(); }}>close</CornerButton>
+            <CornerButton onClick={Close}>close</CornerButton>
             <Stack direction="column" spacing={1.5}>
                 <Stack direction="row" style={{ justifyContent: "space-between" }}>
                     <Typography variant="big_bold" style={{ marginLeft: "30px" }}>
                         Edit profile
                     </Typography>
-                    <Fab variant="extended" size="small" color="black" disabled={!saveable} onClick={submit}>
+                    <Fab variant="extended" size="small" color="black" disabled={!ok} onClick={submit}>
                         Save
                     </Fab>
                 </Stack>
-                <BannerChanger onChange={setBanner} current={GetProfileBanner(user)} />
-                <ProfilePicEditor size="100px" onChane={setProfile} current={GetProfilePicture(user)} />
-                <UserNameEditor onChangeUserName={setUsername} onChangeOk={setUsernameOk} />
-                <NameEditor onChangeName={setName} onChangeOk={setNameOk} />
-                <TextField
-                    label="Bio"
-                    multiline
-                    rows={"auto"}
-                    onChange={(e) => { setBio(e.target.value) }}
-                />
-                <BirthDateEditor onChangeDate={setDate} onChangeOk={setDateOk} />
+                <BannerChanger onUploadFile={(v) => { updateValue("banner_pic", v) }} current={GetProfileBanner(user,true)} />
+                <ProfilePicEditor size="100px" onUploadFile={(v) => { updateValue("profile_pic", v) }} current={GetProfilePicture(user,true)} />
+                <UserNameEditor onChangeUserName={(v) => { updateValue("username", v) }} onChangeOk={(v) => { updateValue("username_ok", v) }} />
+                <NameEditor onChangeName={(v) => { updateValue("name", v) }} onChangeOk={(v) => { updateValue("name_ok", v) }} current={user.name} />
+                <BioEditor onChange={(v) => { updateValue("bio", v) }} current={user.bio}/>
+                <BirthDateEditor onChangeDate={(v) => { updateValue("birthdate", v) }} onChangeOk={(v) => { updateValue("date_ok", v) }} current={user.birthdate} />
             </Stack>
         </PostModalFrame>
+    );
+}
+
+function BioEditor(props) {
+    const [value, setValue] = useState(props.current ? props.current : "");
+    const onChange = props.onChange;
+
+    useEffect(() => {
+        if (onChange)
+            onChange(value);
+    }, [value]);
+
+    function handleChange(e) {
+        setValue(e.target.value);
+    }
+
+    return (
+        <TextField
+            label="Bio"
+            multiline
+            rows={"auto"}
+            onChange={handleChange}
+            value={value}
+        />
     );
 }
 
@@ -277,7 +316,7 @@ function BannerChanger(props) {
     }
 
     return (
-        <ChangeablePicture displayer={Displayer} onChange={props.onChange} current={props.current} />
+        <ChangeablePicture displayer={Displayer} {...props}/>
     );
 }
 

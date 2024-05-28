@@ -6,6 +6,7 @@ import SideMenu, { Inside } from "./side_menus.jsx";
 import { ThemeProvider } from '@mui/material';
 import { AboveBreakpoint, logo } from './utilities';
 import { UserData } from "/src/App.jsx";
+import { GetProfileLink } from '/src/components/utilities';
 
 function Header() {
     let isBig = AboveBreakpoint("leftMenu");
@@ -62,7 +63,7 @@ function Header() {
                                     <ButtonSvg src={logo} useWeight={true} />
                                 </TabButton>
 
-                                <TabButton to={"/profile/"+UserData.getData.user.id} text="profile" icon="home_outlined" >
+                                <TabButton to={GetProfileLink(UserData.getData.user)} text="profile" icon="home_outlined" >
                                     <ButtonIcon icon="person" filled={false} />
                                     <ButtonIcon icon="person" filled={true} />
                                 </TabButton>

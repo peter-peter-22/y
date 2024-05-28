@@ -9,7 +9,7 @@ import Fab from '@mui/material/Fab';
 import { Icon } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink, UserName, UserKey, noOverflow, BoldLink, UserLink, DateLink, TextRow, UserKeyLink, GetUserName, GetUserKey, ReplyingTo } from '/src/components/utilities';
+import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink, UserName, UserKey, noOverflow, BoldLink, UserLink, DateLink, TextRow, GetUserName, GetUserKey, ReplyingTo } from '/src/components/utilities';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -129,7 +129,7 @@ function Comment(props) {
                     contents={
                         <Stack direction="column" style={{ overflow: "hidden" }}>
                             <TextRow>
-                                <ProfileText row="true" link="true" />
+                                <ProfileText row="true" link="true"/>
                                 ·
                                 <DateLink passed />
                             </TextRow>

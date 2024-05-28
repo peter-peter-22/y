@@ -29,6 +29,7 @@ import config from "/src/components/config.js";
 import { NavLink } from "react-router-dom";
 import CircularProgress from '@mui/material/CircularProgress';
 import Popover from '@mui/material/Popover';
+import {ExampleUser} from "/src/components/posts";
 
 const noOverflow = {
     whiteSpace: 'nowrap',
@@ -121,7 +122,7 @@ function UserName(props) {
 
 function UserLink(props) {
     return (
-        <Link typography="small_bold" href="#" align="left" style={noOverflow} {...props}>
+        <Link typography="small_bold" href={GetProfileLink(props.user)} align="left" style={noOverflow} {...props} onClick={e=>e.stopPropagation()}>
             <GetUserName user={props.user} />
         </Link>
     );
@@ -129,10 +130,15 @@ function UserLink(props) {
 
 function UserKeyLink(props) {
     return (
-        <Link typography="small" href="#" align="left" style={noOverflow} {...props}>
+        <Link typography="small_fade" href={GetProfileLink(props.user)} align="left" style={noOverflow} {...props} onClick={e=>e.stopPropagation()}>
             <GetUserKey user={props.user} />
         </Link>
     );
+}
+
+function GetProfileLink(user)
+{
+    return "/profile/"+(user?user.id:-1);
 }
 
 function GetUserName(props) {
@@ -273,7 +279,7 @@ function ReplyingTo(props) {
 function ToCorner(props) {
     const offset = "10px";
     const style = { position: "absolute" };
-    if (props.left)
+    if (props.right)
         style.right = offset;
     else
         style.left = offset;
@@ -334,13 +340,19 @@ function FollowButton(props) {
     );
 }
 
-function GetProfilePicture(user) {
-    return (user ? Endpoint(config.profile_pics_url + "/" + user.id + ".jpg") : default_profile);
+function GetProfilePicture(user, isUser) {
+    return GetAnyProfileImage(user, config.profile_pics_url, isUser);
 }
-function GetProfileBanner(user)
-{
-    return (user ? Endpoint(config.profile_banner_url + "/" + user.id + ".jpg") : default_profile);
+function GetProfileBanner(user, isUser) {
+    return GetAnyProfileImage(user, config.profile_banner_url, isUser);
 }
+function GetAnyProfileImage(user, baseUrl, isUser) {
+    let url = user ? Endpoint(baseUrl + "/" + user.id + ".jpg") : default_image;//the default image is overridden by the onerror function of the image, this is just secondary
+    if (isUser)
+        url += "?" + UserData.getData.user.last_update;//updatecount grows by 1 each time the user is downloaded from the server, this updates the profile picture or banner when the user changes it
+    return (url);
+}
+
 function GetPostPictures(post_id, image_count) {
     const images = [];
     for (let n = 0; n < image_count; n++)
@@ -440,8 +452,8 @@ const OnlineList = forwardRef((props, ref) => {
             </List>
         );
     }
-    const overrideEntryMapController=props.entryMapController;
-    const EntryMapController = overrideEntryMapController?overrideEntryMapController:defaultEntryMapController;
+    const overrideEntryMapController = props.entryMapController;
+    const EntryMapController = overrideEntryMapController ? overrideEntryMapController : defaultEntryMapController;
 
     return (
         <div ref={listRef}>
@@ -517,4 +529,4 @@ function formatNumber(number) {
     return number;
 }
 
-export { AboveBreakpoint, ResponsiveSelector, ChooseChild, ChooseChildBool, TopMenu, ProfileText, FadeLink, TabSwitcher, UserName, UserKey, noOverflow, BoldLink, UserLink, DateLink, TextRow, UserKeyLink, ReplyingTo, GetUserName, GetUserKey, logo, creation, ToCorner, CenterLogo, default_profile, FollowDialog, GetProfilePicture, default_image, FollowButton, GetPostPictures, LinelessLink, OnlineList, Loading, SimplePopOver, formatNumber, TabSwitcherLinks,GetProfileBanner }
+export { AboveBreakpoint, ResponsiveSelector, ChooseChild, ChooseChildBool, TopMenu, ProfileText, FadeLink, TabSwitcher, UserName, UserKey, noOverflow, BoldLink, UserLink,UserKeyLink, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, logo, creation, ToCorner, CenterLogo, default_profile, FollowDialog, GetProfilePicture, default_image, FollowButton, GetPostPictures, LinelessLink, OnlineList, Loading, SimplePopOver, formatNumber, TabSwitcherLinks, GetProfileBanner,GetProfileLink }

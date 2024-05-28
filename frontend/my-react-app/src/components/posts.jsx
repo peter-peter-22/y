@@ -9,7 +9,7 @@ import Fab from '@mui/material/Fab';
 import { Icon } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, GetProfilePicture, default_image, GetPostPictures, OnlineList, SimplePopOver, formatNumber } from '/src/components/utilities';
+import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, GetProfilePicture, default_image, GetPostPictures, OnlineList, SimplePopOver, formatNumber,UserLink } from '/src/components/utilities';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -77,11 +77,11 @@ function BorderlessPost(props) {
         <div onClick={OpenPost}>
             <RepostedOrQuoted post={original} />
             <RowWithPrefix
-                prefix={<Avatar src={GetProfilePicture(overriden.user)} />}
+                prefix={<Avatar src={GetProfilePicture(overriden.publisher)} />}
                 contents={
                     <Stack direction="column" style={{ overflow: "hidden" }}>
                         <Stack direction="row" spacing={0.25} style={{ alignItems: "center" }}>
-                            <UserName user={overriden.publisher} />
+                            <UserLink user={overriden.publisher} />
                             <UserKey user={overriden.publisher} />
                             ·
                             <DateLink passed isoString={overriden.date} />
@@ -336,7 +336,9 @@ function AddPostToCommentSection(post) {
 
 
 function PostButtonRow(props) {
-    const post = props.post;
+    let post = props.post;
+    if(post===undefined)
+        post=ExamplePost();
     const { count: like_count, active: liked, pressed: handleLike } = CountableButton(post, post.like_count, post.liked_by_user, "/member/like");
     const { count: bookmark_count, active: bookmarked, pressed: handleBookmark } = CountableButton(post, post.bookmark_count, post.bookmarked_by_user, "/member/bookmark");
     const { count: repost_count, active: reposted, pressed: handleRepost } = CountableButton(post, post.repost_count, post.reposted_by_user, "/member/repost");
@@ -904,4 +906,4 @@ function OverrideWithRepost(post) {
 }
 
 
-export { Post, PostList, PostFocused, ListBlockButton, ListBlock, RowWithPrefix, PostButtonRow, WritePost, CommentList, FeedList, BookmarkList, FollowingFeedList, AddDataToPost, OverrideWithRepost, PostsOfUser, CommentsOfUser, LikesOfUser, BlockImage,ImageContext ,ClickableImage,PostModalFrame};
+export { Post, PostList, PostFocused, ListBlockButton, ListBlock, RowWithPrefix, PostButtonRow, WritePost, CommentList, FeedList, BookmarkList, FollowingFeedList, AddDataToPost, OverrideWithRepost, PostsOfUser, CommentsOfUser, LikesOfUser, BlockImage,ImageContext ,ClickableImage,PostModalFrame,ExampleUser};

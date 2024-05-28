@@ -57,6 +57,8 @@ niv.extend('datepast', ({ value }) => {
 
 function validate_image(file) {
   const imagesType = ['image/png', 'image/jpeg', 'image/jpg'];
+  if(file===undefined)
+    CheckErr("failed to upload image");
   if (!imagesType.includes(file.mimetype))
     CheckErr("invalid image(s), only .jpg and .png images are accepted");
 }

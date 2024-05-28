@@ -28,7 +28,7 @@ import { PlainTextField, PasswordFieldWithToggle, VisuallyHiddenInput } from "/s
 import { UserData } from "/src/App.jsx";
 import config from "/src/components/config.js";
 import axios from 'axios';
-import { Endpoint, FormatAxiosError } from "/src/communication.js";
+import { Endpoint, FormatAxiosError,ThrowIfNotAxios } from "/src/communication.js";
 import { Error, Modals, ShowImage } from "/src/components/modals";
 import { useParams } from "react-router-dom";
 import { PostFocused, AddDataToPost, CommentList, OverrideWithRepost } from "/src/components/posts.jsx";
@@ -47,7 +47,9 @@ export default () => {
             AddDataToPost(main_post);
             setPost(main_post);
         }
-        catch (err) { console.log(err) }
+        catch (err) { 
+            ThrowIfNotAxios(err);
+        }
     }
 
     if (post) {

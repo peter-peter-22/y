@@ -87,7 +87,7 @@ function Footer() {
                                             </div>
                                         </Typography>
 
-                                        <CornerButton>more_horiz</CornerButton>
+                                        <CornerButton right>more_horiz</CornerButton>
                                     </ListItemText>
                                 </ListItemButton>
                             </ListItem>

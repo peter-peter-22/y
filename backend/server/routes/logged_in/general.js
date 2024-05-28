@@ -24,12 +24,11 @@ import * as pp from "../../components/passport.js";
 import { username_exists, selectable_username } from "../user.js";
 import { Validator } from "node-input-validator";
 import { CheckV, CheckErr } from "../../components/validations.js";
-import { ApplySqlToUser, UpdateUser } from "../logged_in.js";
 
 const router = express.Router();
 
-router.post("/follow_user", async (req, res, next) => {
-    await CountableToggle(req, res, next, "follows", "follow_unique", "follower", "followed");
+router.post("/follow_user", async (req, res) => {
+    await CountableToggle(req, res, "follows", "follow_unique", "follower", "followed");
 });
 
 router.post("/is_following_user", async (req, res) => {
@@ -42,28 +41,34 @@ router.post("/is_following_user", async (req, res) => {
     res.send(result.rows[0].count > 0)
 });
 
-router.post("/get_post", async (req, res, next) => {
-    await post_list(req, res, next, { id: 'required|integer' }, undefined, " WHERE post.id=:id", { id: req.body.id });
+router.post("/get_post", async (req, res) => {
+    const v = new Validator(req.body, {
+        id: 'required|integer',
+    });
+    await CheckV(v);
+    const { id } = req.body;
+    const posts = await postQuery(req, undefined, " WHERE post.id=:id", { id: id });
+    res.send(posts[0]);
 });
 
-router.post("/get_comments", async (req, res, next) => {
-    await post_list(req, res, next, { id: 'required|integer' }, undefined, " WHERE replying_to=:id", { id: req.body.id });
+router.post("/get_comments", async (req, res) => {
+    await post_list(req, res, { id: 'required|integer' }, undefined, " WHERE replying_to=:id", { id: req.body.id });
 });
 
-router.post("/posts_of_user", async (req, res, next) => {
-    await post_list(req, res, next, { user_id: "required|integer" }, undefined, " WHERE post.publisher=:target_user_id AND post.replying_to IS NULL", { target_user_id: req.body.user_id });
+router.post("/posts_of_user", async (req, res) => {
+    await post_list(req, res, { user_id: "required|integer" }, undefined, " WHERE post.publisher=:target_user_id AND post.replying_to IS NULL", { target_user_id: req.body.user_id });
 });
 
-router.post("/comments_of_user", async (req, res, next) => {
-    await post_list(req, res, next, { user_id: "required|integer" }, undefined, " WHERE post.publisher=:target_user_id AND post.replying_to IS NOT NULL", { target_user_id: req.body.user_id });
+router.post("/comments_of_user", async (req, res) => {
+    await post_list(req, res, { user_id: "required|integer" }, undefined, " WHERE post.publisher=:target_user_id AND post.replying_to IS NOT NULL", { target_user_id: req.body.user_id });
 });
 
-router.post("/likes_of_user", async (req, res, next) => {
-    await post_list(req, res, next, { user_id: "required|integer" }, undefined, " WHERE EXISTS(select * from likes WHERE likes.post_id=post.id AND post.publisher=:target_user_id)", { target_user_id: req.body.user_id });
+router.post("/likes_of_user", async (req, res) => {
+    await post_list(req, res, { user_id: "required|integer" }, undefined, " WHERE EXISTS(select * from likes WHERE likes.post_id=post.id AND post.publisher=:target_user_id)", { target_user_id: req.body.user_id });
 });
 
-router.post("/get_bookmarks", async (req, res, next) => {
-    await post_list(req, res, next, undefined, "SELECT * FROM (", ") as subquery WHERE bookmarked_by_user=TRUE");
+router.post("/get_bookmarks", async (req, res) => {
+    await post_list(req, res, undefined, "SELECT * FROM (", ") as subquery WHERE bookmarked_by_user=TRUE");
 });
 
 router.post("/media_of_user", async (req, res) => {
@@ -84,43 +89,38 @@ router.post("/user_profile", async (req, res) => {
     await CheckV(v);
 
     const { user_id } = req.body;
-    const q = await db.query(named("select name,username,id,registration_date,bio, (select count(*) from follows where followed=id) as followers , (select count(*) from follows where follower=id) as follows from users where id=:user_id")({ user_id: user_id }));
+    const q = await db.query(named("select name,username,id,registration_date,birthdate,bio, (select count(*) from follows where followed=id) as followers , (select count(*) from follows where follower=id) as follows from users where id=:user_id")({ user_id: user_id }));
     const user = q.rows[0];
     if (!user)
         CheckErr("this user does not exists");
     res.send(user);
 });
 
-async function post_list(req, res, next, add_validations, before, after, query_params) {
-    try {
-        let validations = { from: "required|integer" };
-        if (add_validations)
-            validations = { ...validations, ...add_validations };
-        const v = new Validator(req.body, validations);
-        await CheckV(v);
+async function post_list(req, res, add_validations, before, after, query_params) {
+    let validations = { from: "required|integer" };
+    if (add_validations)
+        validations = { ...validations, ...add_validations };
+    const v = new Validator(req.body, validations);
+    await CheckV(v);
 
-        const { from } = req.body;
-        const comments = await postQuery(req, next, before, after, query_params, undefined, undefined, from);
-        res.send(comments);
-    }
-    catch (err) {
-        next(err);
-    }
+    const { from } = req.body;
+    const comments = await postQuery(req, before, after, query_params, undefined, undefined, from);
+    res.send(comments);
 }
 
 
-router.post("/follower_recommendations", async (req, res, next) => {
+router.post("/follower_recommendations", async (req, res) => {
     const v = new Validator(req.body, {
         from: 'required|integer'
     });
     await CheckV(v);
     const { from } = req.body;
-    const users = await user_query(req, next, undefined, " WHERE IS_FOLLOWED=FALSE OFFSET :from", { from: from });
+    const users = await user_query(req, undefined, " WHERE IS_FOLLOWED=FALSE OFFSET :from", { from: from });
     res.send(users);
 });
 
-router.get("/follower_recommendations_preview", async (req, res, next) => {
-    const users = await user_query(req, next, undefined, " WHERE IS_FOLLOWED=FALSE", undefined, 3);
+router.get("/follower_recommendations_preview", async (req, res) => {
+    const users = await user_query(req, undefined, " WHERE IS_FOLLOWED=FALSE", undefined, 3);
     res.send(users);
 });
 
@@ -162,21 +162,16 @@ router.post("/repost", async (req, res) => {
     }
 });
 
-async function user_query(req, next, before, after, additional_params, limit) {
-    try {
-        const text = "SELECT * FROM ( SELECT ID, USERNAME, NAME, EXISTS (SELECT * FROM FOLLOWS WHERE FOLLOWER = :user_id AND FOLLOWED = ID) AS IS_FOLLOWED FROM USERS  ) as sq";
-        if (limit === undefined)
-            limit = config.users_per_request;
-        if (after === undefined)
-            after = "";
-        after += " LIMIT :limit"
-        const params = { user_id: req.user.id, limit: limit };
-        const users = await editable_query(text, before, after, params, additional_params);
-        return users;
-    }
-    catch (err) {
-        next(err);
-    }
+async function user_query(req, before, after, additional_params, limit) {
+    const text = "SELECT * FROM ( SELECT ID, USERNAME, NAME, EXISTS (SELECT * FROM FOLLOWS WHERE FOLLOWER = :user_id AND FOLLOWED = ID) AS IS_FOLLOWED FROM USERS  ) as sq";
+    if (limit === undefined)
+        limit = config.users_per_request;
+    if (after === undefined)
+        after = "";
+    after += " LIMIT :limit"
+    const params = { user_id: req.user.id, limit: limit };
+    const users = await editable_query(text, before, after, params, additional_params);
+    return users;
 }
 
 async function editable_query(text, before, after, params, additional_params) {
@@ -191,49 +186,44 @@ async function editable_query(text, before, after, params, additional_params) {
     return result.rows;
 }
 
-async function postQuery(req, next, before, after, additional_params, level = 0, limit, offset = 0) {
-    try {
-        const text = "SELECT POST.TEXT, POST.ID, POST.IMAGE_COUNT, POST.DATE, POST.VIEWS, POST.REPOST AS REPOSTED_ID, (SELECT COUNT(*) FROM LIKES WHERE LIKES.POST_ID = POST.ID)::INT AS LIKE_COUNT, EXISTS (SELECT * FROM LIKES WHERE LIKES.POST_ID = POST.ID AND USER_ID = :user_id) AS LIKED_BY_USER, (SELECT COUNT(*) FROM POSTS REPOSTS WHERE REPOSTS.REPOST = POST.ID)::INT AS REPOST_COUNT, EXISTS( SELECT * FROM POSTS REPOSTS WHERE REPOSTS.REPOST = POST.ID AND REPOSTS.TEXT IS NULL AND REPOSTS.PUBLISHER=:user_id) AS REPOSTED_BY_USER, (SELECT COUNT(*) FROM BOOKMARKS BOOKMARK WHERE BOOKMARK.POST_ID = POST.ID)::INT AS BOOKMARK_COUNT, EXISTS (SELECT * FROM BOOKMARKS BOOKMARK WHERE BOOKMARK.POST_ID = POST.ID AND BOOKMARK.USER_ID = :user_id) AS BOOKMARKED_BY_USER, POSTER.ID AS POSTER_ID, POSTER.NAME AS POSTER_NAME, POSTER.USERNAME AS POSTER_USERNAME, (SELECT COUNT(*) FROM POSTS AS COMMENTS_TABLE WHERE COMMENTS_TABLE.REPLYING_TO = POST.ID)::INT AS COMMENT_COUNT FROM (SELECT * FROM POSTS ORDER BY POSTS.DATE DESC) POST LEFT JOIN USERS POSTER ON POST.PUBLISHER = POSTER.ID";
-        if (limit === undefined)
-            limit = config.posts_per_request;
-        if (after === undefined)
-            after = "";
-        after += " OFFSET :offset LIMIT :limit"
-        const params = { user_id: req.user.id, limit: limit, offset: offset };
-        const posts = await editable_query(text, before, after, params, additional_params);
+async function postQuery(req, before, after, additional_params, level = 0, limit = 1, offset = 0) {
+    const text = "SELECT POST.TEXT, POST.ID, POST.IMAGE_COUNT, POST.DATE, POST.VIEWS, POST.REPOST AS REPOSTED_ID, (SELECT COUNT(*) FROM LIKES WHERE LIKES.POST_ID = POST.ID)::INT AS LIKE_COUNT, EXISTS (SELECT * FROM LIKES WHERE LIKES.POST_ID = POST.ID AND USER_ID = :user_id) AS LIKED_BY_USER, (SELECT COUNT(*) FROM POSTS REPOSTS WHERE REPOSTS.REPOST = POST.ID)::INT AS REPOST_COUNT, EXISTS( SELECT * FROM POSTS REPOSTS WHERE REPOSTS.REPOST = POST.ID AND REPOSTS.TEXT IS NULL AND REPOSTS.PUBLISHER=:user_id) AS REPOSTED_BY_USER, (SELECT COUNT(*) FROM BOOKMARKS BOOKMARK WHERE BOOKMARK.POST_ID = POST.ID)::INT AS BOOKMARK_COUNT, EXISTS (SELECT * FROM BOOKMARKS BOOKMARK WHERE BOOKMARK.POST_ID = POST.ID AND BOOKMARK.USER_ID = :user_id) AS BOOKMARKED_BY_USER, POSTER.ID AS POSTER_ID, POSTER.NAME AS POSTER_NAME, POSTER.USERNAME AS POSTER_USERNAME, (SELECT COUNT(*) FROM POSTS AS COMMENTS_TABLE WHERE COMMENTS_TABLE.REPLYING_TO = POST.ID)::INT AS COMMENT_COUNT FROM (SELECT * FROM POSTS ORDER BY POSTS.DATE DESC) POST LEFT JOIN USERS POSTER ON POST.PUBLISHER = POSTER.ID";
+    if (limit === undefined)
+        limit = config.posts_per_request;
+    if (after === undefined)
+        after = "";
+    after += " OFFSET :offset LIMIT :limit"
+    const params = { user_id: req.user.id, limit: limit, offset: offset };
+    const posts = await editable_query(text, before, after, params, additional_params);
 
-        //the reposted posts must be downloaded and added to their reposters
-        //level means how much parent posts are above this post
-        if (level < 2) {
-            //getting the ids of the reposted posts
-            const reposted_ids = [];
+    //the reposted posts must be downloaded and added to their reposters
+    //level means how much parent posts are above this post
+    if (level < 2) {
+        //getting the ids of the reposted posts
+        const reposted_ids = [];
+        posts.forEach(post => {
+            if (post.reposted_id !== null) {
+                reposted_ids.push(post.reposted_id);
+            }
+        });
+        if (reposted_ids.length !== 0) {
+            //downloading the reposted posts and assigning them to their reposter
+            const reposted_posts = await postQuery(req, undefined, " WHERE post.id=ANY(:reposted_ids)", { reposted_ids: reposted_ids }, level + 1);
+
             posts.forEach(post => {
                 if (post.reposted_id !== null) {
-                    reposted_ids.push(post.reposted_id);
+                    const my_reposted_post = reposted_posts.find(reposted => post.reposted_id === reposted.id);
+                    if (my_reposted_post === undefined)
+                        throw new Error("failed to download the reposted post");
+                    post.reposted_post = my_reposted_post;
                 }
-            });
-            if (reposted_ids.length !== 0) {
-                //downloading the reposted posts and assigning them to their reposter
-                const reposted_posts = await postQuery(req, (err) => { throw (err) }, undefined, " WHERE post.id=ANY(:reposted_ids)", { reposted_ids: reposted_ids }, level + 1);
-
-                posts.forEach(post => {
-                    if (post.reposted_id !== null) {
-                        const my_reposted_post = reposted_posts.find(reposted => post.reposted_id === reposted.id);
-                        if (my_reposted_post === undefined)
-                            throw new Error("failed to download the reposted post");
-                        post.reposted_post = my_reposted_post;
-                    }
-                })
-            }
+            })
         }
-
-        updateViews(posts);//the viewcount update is not awaited
-
-        return posts;
     }
-    catch (err) {
-        next(err);
-    }
+
+    updateViews(posts);//the viewcount update is not awaited
+
+    return posts;
 }
 
 async function updateViews(posts) {
@@ -242,34 +232,29 @@ async function updateViews(posts) {
 }
 
 router.post("/like", async (req, res, next) => {
-    await CountableToggle(req, res, next, "likes", "unique_likes");
+    await CountableToggle(req, res, "likes", "unique_likes");
 });
 
 router.post("/bookmark", async (req, res, next) => {
-    await CountableToggle(req, res, next, "bookmarks", "unique_bookmarks");
+    await CountableToggle(req, res, "bookmarks", "unique_bookmarks");
 });
 
-async function CountableToggle(req, res, next, table, unique_constraint_name, first_column_name = "user_id", second_column_name = "post_id",) {
+async function CountableToggle(req, res, table, unique_constraint_name, first_column_name = "user_id", second_column_name = "post_id",) {
+    const v = new Validator(req.body, {
+        key: 'required|integer',
+        value: "required|boolean"
+    });
+    await CheckV(v);
+    const { key, value } = req.body;
     try {
-        const v = new Validator(req.body, {
-            key: 'required|integer',
-            value: "required|boolean"
-        });
-        await CheckV(v);
-        const { key, value } = req.body;
-        try {
-            if (value)
-                await db.query(named("INSERT INTO " + table + " (" + first_column_name + ", " + second_column_name + ") VALUES (:user,:key) ON CONFLICT ON CONSTRAINT " + unique_constraint_name + " DO NOTHING")({ user: req.user.id, key: key }));
-            else
-                await db.query(named("DELETE FROM " + table + " WHERE " + first_column_name + "=:user AND " + second_column_name + "=:key")({ user: req.user.id, key: key }));
-            res.sendStatus(200);
-        }
-        catch (err) {
-            CheckErr(err);
-        }
+        if (value)
+            await db.query(named("INSERT INTO " + table + " (" + first_column_name + ", " + second_column_name + ") VALUES (:user,:key) ON CONFLICT ON CONSTRAINT " + unique_constraint_name + " DO NOTHING")({ user: req.user.id, key: key }));
+        else
+            await db.query(named("DELETE FROM " + table + " WHERE " + first_column_name + "=:user AND " + second_column_name + "=:key")({ user: req.user.id, key: key }));
+        res.sendStatus(200);
     }
     catch (err) {
-        next(err);
+        CheckErr(err);
     }
 }
 

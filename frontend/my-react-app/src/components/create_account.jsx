@@ -45,6 +45,7 @@ import { UserData } from "/src/App.jsx";
 import { Error, Modals } from "/src/components/modals";
 import { AlternativeLogin, GrowingLine, BigModal, Or, BottomButtonWithBorder, ByRegistering, margin, bigmargin } from "/src/components/no_user";
 import config from "/src/components/config.js";
+import Moment from "moment";
 
 function CreateAccount(props) {
     const pages = props.pages ? props.pages : [0, 1, 2, 3, 4];
@@ -188,7 +189,7 @@ function CreateAccount(props) {
             formData.append('image', file);
             try {
                 await axios.post(
-                    Endpoint('/member/update_profile_picture'),
+                    Endpoint('/member/modify/update_profile_picture'),
                     formData,
                     {
                         headers: {
@@ -210,7 +211,7 @@ function CreateAccount(props) {
 
     async function submitUsername() {
         try {
-            await axios.post(Endpoint("/member/change_username"), {
+            await axios.post(Endpoint("/member/modify/change_username"), {
                 username: username
             });
             handleNext();
@@ -220,7 +221,7 @@ function CreateAccount(props) {
     //notifications
     async function setNotifications(enabled) {
         try {
-            await axios.post(Endpoint("/member/change_browser_notifications"), {
+            await axios.post(Endpoint("/member/modify/change_browser_notifications"), {
                 enabled: enabled
             });
             handleNext();
@@ -365,7 +366,7 @@ function CreateAccount(props) {
                     <Typography variant="verybig_bold" sx={{ mt: 4 }}>Select profile picture!</Typography>
                     <Typography variant="small_fade" sx={{ mt: 3 }}>Do you have a favourite selfie? Upload now! {email}</Typography>
                     <div style={{ flexGrow: 1, display: "flex", justifyContent: "center", alignItems: "center" }}>
-                        <ProfilePicEditor size="200px" onChange={setFile} />
+                        <ProfilePicEditor size="200px" onUploadFile={setFile} />
                     </div>
                     <Box sx={{ my: 3, boxSizing: "border-box" }}>
                         {file ?
@@ -469,7 +470,7 @@ function ProfilePicEditor(props) {
     }
 
     return (
-        <ChangeablePicture displayer={ProfileDisplayer} onChange={props.onChange} current={props.current} />
+        <ChangeablePicture displayer={ProfileDisplayer} {...props} />
     );
 }
 
@@ -477,7 +478,12 @@ function ChangeablePicture(props) {
     const [file, setFile] = useState();
     const imageUrlRef = useRef(props.current);
     const fileUrl = imageUrlRef.current;
-    const onChange = props.onChange;
+    const onUploadFile = props.onUploadFile;//only runs when the user uploads a new image, it does nothing in start, unlike the other similar onchange functions
+
+    useEffect(() => {
+        if (onUploadFile)
+            onUploadFile(file);
+    }, [file]);
 
     function handleFile(e) {
         const selected = e.target.files[0];
@@ -488,9 +494,8 @@ function ChangeablePicture(props) {
             const selectedUrl = URL.createObjectURL(selected);
             imageUrlRef.current = selectedUrl;
         }
-        if (onChange)
-            onChange(selected);
     }
+
 
     const Displayer = props.displayer;
 
@@ -536,7 +541,7 @@ function UserNameEditor(props) {
         WaitAfterChange(async () => {
             if (value.length > 0) {
                 try {
-                    const res = await axios.post(Endpoint("/member/ok_username"), {
+                    const res = await axios.post(Endpoint("/member/modify/ok_username"), {
                         username: value
                     });
                     setUserNameOk(res.data);
@@ -615,8 +620,9 @@ function NameEditor(props) {
 }
 
 function BirthDateEditor(props) {
-    const [date, setDate] = useState(null);
-    const [dateOk, setDateOk] = useState(true);
+    const startingValue = props.current ? new Moment(props.current) : undefined;
+    const [date, setDate] = useState(startingValue);
+    const [dateOk, setDateOk] = useState(validateDate(startingValue));
     const onChangeDate = props.onChangeDate;
     const onChangeOk = props.onChangeOk;
 
@@ -629,8 +635,13 @@ function BirthDateEditor(props) {
 
     function handleDate(date) {
         setDate(date);
-        setDateOk(date.isValid() && !date.isAfter() && date.year() >= 1900);
+        setDateOk(validateDate(date));
     }
+
+    function validateDate(myDate) {
+        return myDate.isValid() && !myDate.isAfter() && myDate.year() >= 1900;
+    }
+
     return (
         <LocalizationProvider dateAdapter={AdapterMoment}>
             <DatePicker label="Date of birth" disableFuture onChange={handleDate} value={date} />
@@ -639,4 +650,4 @@ function BirthDateEditor(props) {
 }
 
 export default CreateAccount;
-export { ProfilePicEditor, ChangeablePicture, UserNameEditor, NameEditor,BirthDateEditor }
+export { ProfilePicEditor, ChangeablePicture, UserNameEditor, NameEditor, BirthDateEditor }

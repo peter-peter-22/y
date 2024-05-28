@@ -36,7 +36,7 @@ router.use((req, res, next) => {
         next();
 });
 
-router.use("/", modify);
+router.use("/modify", modify);
 router.use("/create", create);
 router.use("/", general);
 router.use("/feed", feed);
@@ -55,5 +55,10 @@ async function ApplySqlToUser(query_result, req) {
     await UpdateUser(query_result.rows[0], req);
 }
 
+async function UpdateUserAfterChange( req) {
+    const q =await db.query(named("select * from users where id=:id")({id:req.user.id}));
+    await ApplySqlToUser(q, req);
+}
+
 export default router;
-export { ApplySqlToUser, UpdateUser };
+export { ApplySqlToUser, UpdateUser,UpdateUserAfterChange };
