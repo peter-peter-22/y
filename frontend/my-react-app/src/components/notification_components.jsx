@@ -143,7 +143,7 @@ function SmallIcon(props) {
 function Comment(props) {
     const data = props.data;
     return (
-        <Post post={data.reply} />
+        <Post post={data} />
     );
 }
 
@@ -198,7 +198,7 @@ function ExampleNotifications() {
         //reply
         {
             type: 1,
-            reply: ExampleReply(),
+             ...ExampleReply(),
         },
         //repost, 1 user
         {
