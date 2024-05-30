@@ -122,7 +122,7 @@ function WhoToFollow() {
     useEffect(() => {
         async function getFollowRecommendations() {
             try {
-                const res = await axios.get(Endpoint("/member/follower_recommendations_preview"));
+                const res = await axios.get(Endpoint("/member/general/follower_recommendations_preview"));
                 setUsers(res.data);
             }
             catch { }

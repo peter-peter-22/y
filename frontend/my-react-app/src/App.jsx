@@ -35,9 +35,11 @@ function App() {
 
   async function Update() {
     try {
+
       //get user and messages from server
       const response = await axios.get(Endpoint("/get_user"));
-      response.data.user.last_update=new Date().getMilliseconds();
+      const user = response.data.user;
+      if(user)user.last_update=new Date().getMilliseconds();
       setData(response.data);
 
       //process the messages
@@ -51,7 +53,9 @@ function App() {
             await axios.get(Endpoint("/member/modify/close_starting_message"));
             UserData.update();
           }
-          catch { }
+          catch (err){
+            ThrowIfNotAxios(err);
+          }
         }
       }
 
@@ -64,12 +68,16 @@ function App() {
             await axios.get(Endpoint("/exit_registration"));
             UserData.update();
           }
-          catch { }
+          catch (err){
+            ThrowIfNotAxios(err);
+          }
         }
       }
 
     }
-    catch (err) { }
+    catch (err) {
+      ThrowIfNotAxios(err);
+    }
   }
 
   //choose page

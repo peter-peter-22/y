@@ -25,7 +25,7 @@ import { Endpoint, FormatAxiosError } from "/src/communication.js";
 function FollowableList(props) {
     async function GetEntries(from) {
         try {
-            const response = await axios.post(Endpoint("/member/follower_recommendations"),{
+            const response = await axios.post(Endpoint("/member/general/follower_recommendations"),{
                 from:from
             });
             return response.data;

@@ -46,7 +46,7 @@ function Profile() {
     useEffect(() => {
         async function get() {
             try {
-                const res = await axios.post(Endpoint("/member/user_profile"), { user_id: id });
+                const res = await axios.post(Endpoint("/member/general/user_profile"), { user_id: id });
                 const user=res.data;
                 setUser(user);
             } catch (err) {
@@ -186,7 +186,7 @@ function MediaOfUser(props) {
 
     async function GetEntries(from) {
         try {
-            const res = await axios.post(Endpoint("/member/media_of_user"), { from: from, user_id: user.id });
+            const res = await axios.post(Endpoint("/member/general/media_of_user"), { from: from, user_id: user.id });
             return res.data;
         }
         catch (err) {

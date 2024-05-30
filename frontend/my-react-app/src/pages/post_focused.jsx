@@ -40,7 +40,7 @@ export default () => {
     useEffect(() => { getPost(); }, [id]);
     async function getPost() {
         try {
-            const result = await axios.post(Endpoint("/member/get_post"), {
+            const result = await axios.post(Endpoint("/member/general/get_post"), {
                 id: id
             });
             const main_post = result.data;
@@ -55,7 +55,7 @@ export default () => {
     if (post) {
         const overriden = OverrideWithRepost(post);
         return (
-            <List sx={{ p: 0 }} key={id}>
+            <List sx={{ p: 0 }}>
                 <PostFocused post={post} />
                 <CommentList post={overriden} />
             </List>

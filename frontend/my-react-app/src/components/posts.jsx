@@ -9,7 +9,7 @@ import Fab from '@mui/material/Fab';
 import { Icon } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, GetProfilePicture, default_image, GetPostPictures, OnlineList, SimplePopOver, formatNumber,UserLink } from '/src/components/utilities';
+import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, GetProfilePicture, default_image, GetPostPictures, OnlineList, SimplePopOver, formatNumber, UserLink } from '/src/components/utilities';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -65,21 +65,15 @@ function Post(props) {
 function BorderlessPost(props) {
     const original = props.post;
     const overriden = OverrideWithRepost(original);
-    const navigate = useNavigate();
-
-    function OpenPost(e) {
-        e.stopPropagation();
-        const link = "/posts/" + original.id;
-        navigate(link);
-    }
 
     return (
-        <div onClick={OpenPost}>
+        <OpenPostOnClick id={original.id}>
             <RepostedOrQuoted post={original} />
             <RowWithPrefix
                 prefix={<Avatar src={GetProfilePicture(overriden.publisher)} />}
                 contents={
                     <Stack direction="column" style={{ overflow: "hidden" }}>
+
                         <Stack direction="row" spacing={0.25} style={{ alignItems: "center" }}>
                             <UserLink user={overriden.publisher} />
                             <UserKey user={overriden.publisher} />
@@ -87,6 +81,7 @@ function BorderlessPost(props) {
                             <DateLink passed isoString={overriden.date} />
                             <ManagePost />
                         </Stack>
+                        <ReplyingToPost post={overriden} />
                         <PostText post={overriden} />
                         <PostMedia images={overriden.images} />
                     </Stack>
@@ -105,10 +100,31 @@ function BorderlessPost(props) {
                     }
                 </Stack>
             } />
+        </OpenPostOnClick>
+    );
+}
+
+function OpenPostOnClick(props) {
+    const navigate = useNavigate();
+    function Clicked(e) {
+        e.stopPropagation();
+        const link = "/posts/" + props.id;
+        navigate(link);
+    }
+    return (
+        <div onClick={Clicked}>
+            {props.children}
         </div>
     );
 }
 
+
+function ReplyingToPost(props) {
+    const user = props.post.replied_user;
+    if (user !== undefined) {
+        return (<ReplyingTo user={user} />);
+    }
+}
 
 function PostFocused(props) {
     const original = props.post;
@@ -126,6 +142,7 @@ function PostFocused(props) {
                             <Fab variant="extended" size="small" color="black" style={{ flexShrink: 0 }}>Subscribe</Fab>
                             <ManagePost />
                         </Stack>
+                        <ReplyingToPost post={overriden} />
                     </Stack>
                 } />
 
@@ -337,11 +354,11 @@ function AddPostToCommentSection(post) {
 
 function PostButtonRow(props) {
     let post = props.post;
-    if(post===undefined)
-        post=ExamplePost();
-    const { count: like_count, active: liked, pressed: handleLike } = CountableButton(post, post.like_count, post.liked_by_user, "/member/like");
-    const { count: bookmark_count, active: bookmarked, pressed: handleBookmark } = CountableButton(post, post.bookmark_count, post.bookmarked_by_user, "/member/bookmark");
-    const { count: repost_count, active: reposted, pressed: handleRepost } = CountableButton(post, post.repost_count, post.reposted_by_user, "/member/repost");
+    if (post === undefined)
+        post = ExamplePost();
+    const { count: like_count, active: liked, pressed: handleLike } = CountableButton(post, post.like_count, post.liked_by_user, "/member/general/like");
+    const { count: bookmark_count, active: bookmarked, pressed: handleBookmark } = CountableButton(post, post.bookmark_count, post.bookmarked_by_user, "/member/general/bookmark");
+    const { count: repost_count, active: reposted, pressed: handleRepost } = CountableButton(post, post.repost_count, post.reposted_by_user, "/member/general/repost");
     const [comment_count, set_comment_count] = useState(post.comment_count);
 
     async function handleComment() {
@@ -578,9 +595,11 @@ function PostList(props) {
     }
 
     //make the comment section globally accessable
-    const thisCommentSection = {};
-    thisCommentSection.addPost = (newPost) => { onlineListRef.current.AddEntryToTop(newPost) };
-    commentSections.acctive = thisCommentSection;
+    useEffect(() => {
+        const thisCommentSection = {};
+        thisCommentSection.addPost = (newPost) => { onlineListRef.current.AddEntryToTop(newPost) };
+        commentSections.acctive = thisCommentSection;
+    }, []);
 
     return (
         <OnlineList getEntries={GetEntries} entryMapper={EntryMapper} ref={onlineListRef} key={key} />
@@ -605,17 +624,17 @@ function FeedList() {
 
 function PostsOfUser(props) {
     const user_id = props.user.id;
-    return <SimplifiedPostList endpoint="/member/posts_of_user" params={{ user_id: user_id }} />;
+    return <SimplifiedPostList endpoint="/member/general/posts_of_user" params={{ user_id: user_id }} />;
 }
 
 function CommentsOfUser(props) {
     const user_id = props.user.id;
-    return <SimplifiedPostList endpoint="/member/comments_of_user" params={{ user_id: user_id }} />;
+    return <SimplifiedPostList endpoint="/member/general/comments_of_user" params={{ user_id: user_id }} />;
 }
 
 function LikesOfUser(props) {
     const user_id = props.user.id;
-    return <SimplifiedPostList endpoint="/member/likes_of_user" params={{ user_id: user_id }} />;
+    return <SimplifiedPostList endpoint="/member/general/likes_of_user" params={{ user_id: user_id }} />;
 }
 
 function FollowingFeedList() {
@@ -623,11 +642,12 @@ function FollowingFeedList() {
 }
 
 function CommentList(props) {
-    return <SimplifiedPostList endpoint="/member/get_comments" params={{ id: props.post.id }} />;
+    const id = props.post.id;
+    return <SimplifiedPostList endpoint="/member/general/get_comments" params={{ id: id }} key={id} />;
 }
 
 function BookmarkList() {
-    return <SimplifiedPostList endpoint="/member/get_bookmarks" />;
+    return <SimplifiedPostList endpoint="/member/general/get_bookmarks" />;
 }
 
 function ExampleUser() {
@@ -643,6 +663,7 @@ function ExamplePost() {
         id: -1,
         repost: false,
         quote: false,
+        replying_to: null,
         reposted_post: undefined,
         publisher: ExampleUser(),
         date: new Date("2024-01-01").toISOString(),
@@ -656,6 +677,13 @@ function ExamplePost() {
         bookmark_count: 10,
         bookmarked_by_user: false,
     };
+}
+
+function ExampleReply() {
+    const post = ExamplePost();
+    post.replying_to = post.id;
+    post.replied_user = ExampleUser();
+    return post;
 }
 
 function ExampleQuote() {
@@ -706,7 +734,7 @@ function BlockImage(props) {
             aspectRatio: "1 / 1",
             overflow: "hidden",
             position: "relative",
-            cursor:"pointer"
+            cursor: "pointer"
         }}
             onClick={props.onClick}>
             <img src={props.src} style={{
@@ -906,4 +934,4 @@ function OverrideWithRepost(post) {
 }
 
 
-export { Post, PostList, PostFocused, ListBlockButton, ListBlock, RowWithPrefix, PostButtonRow, WritePost, CommentList, FeedList, BookmarkList, FollowingFeedList, AddDataToPost, OverrideWithRepost, PostsOfUser, CommentsOfUser, LikesOfUser, BlockImage,ImageContext ,ClickableImage,PostModalFrame,ExampleUser};
+export { Post, PostList, PostFocused, ListBlockButton, ListBlock, RowWithPrefix, PostButtonRow, WritePost, CommentList, FeedList, BookmarkList, FollowingFeedList, AddDataToPost, OverrideWithRepost, PostsOfUser, CommentsOfUser, LikesOfUser, BlockImage, ImageContext, ClickableImage, PostModalFrame, ExampleUser, ExamplePost, ExampleReply, OpenPostOnClick };

@@ -47,8 +47,11 @@ router.post("/get_post", async (req, res) => {
     });
     await CheckV(v);
     const { id } = req.body;
-    const posts = await postQuery(req, undefined, " WHERE post.id=:id", { id: id });
-    res.send(posts[0]);
+    const posts = await postQuery(req, undefined, " WHERE post.id=:id", { id: id }, undefined, 1);
+    const post = posts[0];
+    if (post === undefined)
+        CheckErr("this post does not exists");
+    res.send(post);
 });
 
 router.post("/get_comments", async (req, res) => {
@@ -186,8 +189,8 @@ async function editable_query(text, before, after, params, additional_params) {
     return result.rows;
 }
 
-async function postQuery(req, before, after, additional_params, level = 0, limit = 1, offset = 0) {
-    const text = "SELECT POST.TEXT, POST.ID, POST.IMAGE_COUNT, POST.DATE, POST.VIEWS, POST.REPOST AS REPOSTED_ID, (SELECT COUNT(*) FROM LIKES WHERE LIKES.POST_ID = POST.ID)::INT AS LIKE_COUNT, EXISTS (SELECT * FROM LIKES WHERE LIKES.POST_ID = POST.ID AND USER_ID = :user_id) AS LIKED_BY_USER, (SELECT COUNT(*) FROM POSTS REPOSTS WHERE REPOSTS.REPOST = POST.ID)::INT AS REPOST_COUNT, EXISTS( SELECT * FROM POSTS REPOSTS WHERE REPOSTS.REPOST = POST.ID AND REPOSTS.TEXT IS NULL AND REPOSTS.PUBLISHER=:user_id) AS REPOSTED_BY_USER, (SELECT COUNT(*) FROM BOOKMARKS BOOKMARK WHERE BOOKMARK.POST_ID = POST.ID)::INT AS BOOKMARK_COUNT, EXISTS (SELECT * FROM BOOKMARKS BOOKMARK WHERE BOOKMARK.POST_ID = POST.ID AND BOOKMARK.USER_ID = :user_id) AS BOOKMARKED_BY_USER, POSTER.ID AS POSTER_ID, POSTER.NAME AS POSTER_NAME, POSTER.USERNAME AS POSTER_USERNAME, (SELECT COUNT(*) FROM POSTS AS COMMENTS_TABLE WHERE COMMENTS_TABLE.REPLYING_TO = POST.ID)::INT AS COMMENT_COUNT FROM (SELECT * FROM POSTS ORDER BY POSTS.DATE DESC) POST LEFT JOIN USERS POSTER ON POST.PUBLISHER = POSTER.ID";
+async function postQuery(req, before, after, additional_params, level = 0, limit, offset = 0) {
+    const text = "SELECT POST.TEXT, POST.ID, POST.IMAGE_COUNT, POST.DATE, POST.VIEWS, POST.REPOST AS REPOSTED_ID, POST.REPLYING_TO, (SELECT COUNT(*) FROM LIKES WHERE LIKES.POST_ID = POST.ID)::INT AS LIKE_COUNT, EXISTS (SELECT * FROM LIKES WHERE LIKES.POST_ID = POST.ID AND USER_ID = :user_id) AS LIKED_BY_USER, (SELECT COUNT(*) FROM POSTS REPOSTS WHERE REPOSTS.REPOST = POST.ID)::INT AS REPOST_COUNT, EXISTS( SELECT * FROM POSTS REPOSTS WHERE REPOSTS.REPOST = POST.ID AND REPOSTS.TEXT IS NULL AND REPOSTS.PUBLISHER=:user_id) AS REPOSTED_BY_USER, (SELECT COUNT(*) FROM BOOKMARKS BOOKMARK WHERE BOOKMARK.POST_ID = POST.ID)::INT AS BOOKMARK_COUNT, EXISTS (SELECT * FROM BOOKMARKS BOOKMARK WHERE BOOKMARK.POST_ID = POST.ID AND BOOKMARK.USER_ID = :user_id) AS BOOKMARKED_BY_USER, POSTER.ID AS POSTER_ID, POSTER.NAME AS POSTER_NAME, POSTER.USERNAME AS POSTER_USERNAME, (SELECT COUNT(*) FROM POSTS AS COMMENTS_TABLE WHERE COMMENTS_TABLE.REPLYING_TO = POST.ID)::INT AS COMMENT_COUNT FROM (SELECT * FROM POSTS ORDER BY POSTS.DATE DESC) POST LEFT JOIN USERS POSTER ON POST.PUBLISHER = POSTER.ID";
     if (limit === undefined)
         limit = config.posts_per_request;
     if (after === undefined)
@@ -195,6 +198,21 @@ async function postQuery(req, before, after, additional_params, level = 0, limit
     after += " OFFSET :offset LIMIT :limit"
     const params = { user_id: req.user.id, limit: limit, offset: offset };
     const posts = await editable_query(text, before, after, params, additional_params);
+    const comments = posts.filter(post => post.replying_to !== null);
+    if (comments.length !== 0) {
+        const replied_ids = [];
+        comments.forEach(comment => {
+            const replied_id = comment.replying_to;
+            if (!replied_ids.includes(replied_id))
+                replied_ids.push(replied_id);
+        });
+        const replied_query = await db.query(named("SELECT POST.ID as post_id, POSTER.ID, POSTER.USERNAME, POSTER.NAME FROM POSTS POST LEFT JOIN USERS POSTER ON POSTER.ID = POST.PUBLISHER WHERE POST.ID = ANY(:ids)")({ ids: replied_ids }));
+        const replied_users = replied_query.rows;
+        comments.forEach(comment => {
+            const myUser = replied_users.find(user => user.post_id === comment.replying_to);
+            comment.replied_user = myUser;
+        });
+    }
 
     //the reposted posts must be downloaded and added to their reposters
     //level means how much parent posts are above this post
@@ -231,11 +249,11 @@ async function updateViews(posts) {
     await db.query(named("UPDATE posts SET views = views + 1 WHERE id=ANY(:post_ids)")({ post_ids: ids }));
 }
 
-router.post("/like", async (req, res, next) => {
+router.post("/like", async (req, res) => {
     await CountableToggle(req, res, "likes", "unique_likes");
 });
 
-router.post("/bookmark", async (req, res, next) => {
+router.post("/bookmark", async (req, res) => {
     await CountableToggle(req, res, "bookmarks", "unique_bookmarks");
 });
 

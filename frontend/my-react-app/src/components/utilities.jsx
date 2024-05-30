@@ -321,7 +321,7 @@ function FollowButton(props) {
             const newValue = !prev;
             async function update() {
                 try {
-                    await axios.post(Endpoint("/member/follow_user"),
+                    await axios.post(Endpoint("/member/general/follow_user"),
                         {
                             key: props.user_id,
                             value: newValue

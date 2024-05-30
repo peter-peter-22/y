@@ -28,6 +28,7 @@ import modify from "./logged_in/modify.js";
 import create from "./logged_in/create.js";
 import general from "./logged_in/general.js";
 import feed from "./logged_in/feed.js";
+import notifications from "./logged_in/feed.js";
 
 const router = express.Router();
 
@@ -38,8 +39,9 @@ router.use((req, res, next) => {
 
 router.use("/modify", modify);
 router.use("/create", create);
-router.use("/", general);
+router.use("/general", general);
 router.use("/feed", feed);
+router.use("/notifications", notifications);
 
 async function UpdateUser(newUser, req) {
     return new Promise(resolve => {
