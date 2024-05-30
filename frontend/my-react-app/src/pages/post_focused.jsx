@@ -31,7 +31,7 @@ import axios from 'axios';
 import { Endpoint, FormatAxiosError,ThrowIfNotAxios } from "/src/communication.js";
 import { Error, Modals, ShowImage } from "/src/components/modals";
 import { useParams } from "react-router-dom";
-import { PostFocused, AddDataToPost, CommentList, OverrideWithRepost } from "/src/components/posts.jsx";
+import { PostFocused, CommentList, OverrideWithRepost } from "/src/components/posts.jsx";
 
 export default () => {
     const [post, setPost] = useState();
@@ -44,7 +44,6 @@ export default () => {
                 id: id
             });
             const main_post = result.data;
-            AddDataToPost(main_post);
             setPost(main_post);
         }
         catch (err) { 

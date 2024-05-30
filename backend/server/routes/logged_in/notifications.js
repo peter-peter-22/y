@@ -24,18 +24,10 @@ import * as pp from "../../components/passport.js";
 import { username_exists, selectable_username } from "../user.js";
 import { Validator } from "node-input-validator";
 import { CheckV, CheckErr, validate_image } from "../../components/validations.js";
-import { postQuery, post_list } from "./general.js";
-
-const columns = `
-SELECT TYPE,
-POST_ID,
-USER_COUNT,timestamp,
-${users_column},
-${posts_column}
-`;
+import { postQuery, post_list, postQueryText } from "./general.js";
 
 const users_column = `
-(SELECT JSON_AGG(JSON_BUILD_OBJECT('id',
+(SELECT JSONB_AGG(JSONB_BUILD_OBJECT('id',
 
 							USERS.ID,
 							'name',
@@ -44,10 +36,10 @@ const users_column = `
 		WHERE USERS.ID = ANY(USER_IDS))AS USERS`;
 
 const posts_column = `
-(SELECT JSON_AGG(JSON_BUILD_OBJECT('id',
+(SELECT JSONB_BUILD_OBJECT('id',
 POSTS.ID,
 'text',
-POSTS.TEXT))
+POSTS.TEXT)
 FROM POSTS
 WHERE POSTS.ID = POST_ID)AS POST`;
 
@@ -98,25 +90,54 @@ FROM
 		ORDER BY timestamp DESC
 		LIMIT 3) AS FOLLOWS`;
 
+const comment_query = `
+SELECT
+1 AS TYPE,
+id as post_id,
+1 AS USER_COUNT,
+date as timestamp,
+null as users,
+TO_JSONB(FORMATTED_POSTS.*) as post
+
+FROM (${postQueryText}) as FORMATTED_POSTS
+WHERE REPLYING_TO_PUBLISHER = :user_id`;
+
+const columns = `
+TYPE,
+POST_ID,
+USER_COUNT,
+timestamp,
+${users_column},
+${posts_column}
+`;
+
 const notifications_query = `
-${columns}
-FROM
-    (
-        ${repost_query}
-        UNION ALL 
-        ${likes_query}
-        UNION ALL 
-        ${follows_query}
-    ) 
-AS LIKES_FOLLOWS_REPOSTS
-ORDER BY timestamp DESC`;
+SELECT * FROM(
+    SELECT
+    ${columns}
+    FROM
+        (
+            ${repost_query}
+            UNION ALL 
+            ${likes_query}
+            UNION ALL 
+            ${follows_query}
+        ) 
+    AS LIKES_FOLLOWS_REPOSTS
+UNION ALL ${comment_query}
+    ) AS NOTIFICATIONS
+ORDER BY timestamp DESC
+OFFSET :from LIMIT ${config.notifications_per_request}`;
 
 const router = express.Router();
 router.post("/get", async (req, res) => {
-    //const comment_notifications = await postQuery(req, "select 1 as type,* from (", ")", undefined, undefined, 99);
-    //const other_notifications = await db.query(named(notifications_query)({ user_id: req.user.id }));
-    console.log(notifications_query);
-    res.sendStatus(200);
+	const v = new Validator(req.body, {
+		from: 'required|integer'
+	});
+	await CheckV(v);
+	const { from } = req.body;
+	const other_notifications = await db.query(named(notifications_query)({ user_id: req.user.id, from: from }));
+	res.send(other_notifications.rows);
 });
 
 export default router;

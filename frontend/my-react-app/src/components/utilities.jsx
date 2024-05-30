@@ -437,6 +437,7 @@ const OnlineList = forwardRef((props, ref) => {
         return () => { window.removeEventListener("scroll", Scrolling) };
     }, [])
 
+    //getting functions from props
     function EntryMapper(entryprops) {
         return props.entryMapper(entryprops);
     }

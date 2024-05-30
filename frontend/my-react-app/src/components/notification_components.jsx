@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Stack from '@mui/material/Stack';
 import SideMenu, { Inside } from "./side_menus.jsx";
 import { TopMenu } from '/src/components/utilities';
@@ -9,7 +9,7 @@ import Fab from '@mui/material/Fab';
 import { Icon } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink, UserName, UserKey, noOverflow, BoldLink, UserLink, DateLink, TextRow, GetUserName, GetUserKey, ReplyingTo, GetProfilePicture } from '/src/components/utilities';
+import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink, UserName, UserKey, noOverflow, BoldLink, UserLink, DateLink, TextRow, GetUserName, GetUserKey, ReplyingTo, GetProfilePicture,OnlineList } from '/src/components/utilities';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -26,7 +26,10 @@ import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import { theme } from "/src/styles/mui/my_theme";
 import { PlainTextField } from "/src/components/inputs";
-import { Post, PostList, PostFocused, ListBlockButton, ListBlock, RowWithPrefix, PostButtonRow, ExampleUser, ExamplePost, ExampleReply, OpenPostOnClick } from "/src/components/posts";
+import { Post, PostList, PostFocused, ListBlockButton, ListBlock, RowWithPrefix, PostButtonRow, ExampleUser, ExamplePost, ExampleReply, OpenPostOnClick, OpenOnClick } from "/src/components/posts";
+import { Endpoint, FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
+import axios from 'axios';
+import { UserData } from "/src/App.jsx";
 
 const spacing = 1.5;
 
@@ -34,7 +37,7 @@ function Like(props) {
     const data = props.data;
     return (
         <ListBlockButton>
-            <OpenPostOnClick id={data.post.id}>
+            <OpenPostOnClick id={data.post_id}>
                 <Stack direction="column" spacing={spacing}>
                     <RowWithPrefix
                         prefix={<SmallIcon color={theme.palette.colors.like} icon="favorite" />}
@@ -66,23 +69,26 @@ function ReplyOrPost(post) {
 
 function Follow(props) {
     const data = props.data;
+    const link = "/profile/" + data.users[0].id;
     return (
         <ListBlockButton>
-            <Stack direction="column" spacing={spacing}>
-                <RowWithPrefix
-                    prefix={<SmallIcon color={theme.palette.primary.main} icon="person" />}
-                    contents={
-                        <UserBalls users={data.users} />
-                    }
-                />
-                <RowWithPrefix
-                    contents={
-                        <Stack direction="column" spacing={spacing} style={{ overflow: "hidden" }}>
-                            <UserCounter data={data} after="followed you" />
-                        </Stack>
-                    }
-                />
-            </Stack>
+            <OpenOnClick link={link}>
+                <Stack direction="column" spacing={spacing}>
+                    <RowWithPrefix
+                        prefix={<SmallIcon color={theme.palette.primary.main} icon="person" />}
+                        contents={
+                            <UserBalls users={data.users} />
+                        }
+                    />
+                    <RowWithPrefix
+                        contents={
+                            <Stack direction="column" spacing={spacing} style={{ overflow: "hidden" }}>
+                                <UserCounter data={data} after="followed you" />
+                            </Stack>
+                        }
+                    />
+                </Stack>
+            </OpenOnClick>
         </ListBlockButton>
     );
 }
@@ -91,7 +97,7 @@ function UserCounter(props) {
     const data = props.data;
     return (
         <TextRow>
-            <UserLink user={data.user} />
+            <UserLink user={data.users[0]} />
             {data.user_count > 1 && <Typography variant="small" style={{ flexShrink: 0, ...noOverflow }}>and {data.user_count - 1} others</Typography>}
             <Typography variant="small" style={{ flexShrink: 0, ...noOverflow }}>{props.after}</Typography>
         </TextRow>
@@ -110,7 +116,7 @@ function Repost(props) {
     const data = props.data;
     return (
         <ListBlockButton>
-            <OpenPostOnClick id={data.post.id}>
+            <OpenPostOnClick id={data.post_id}>
                 <Stack direction="column" spacing={spacing}>
                     <RowWithPrefix
                         prefix={<SmallIcon color={theme.palette.colors.share} icon="loop" />}
@@ -141,9 +147,10 @@ function SmallIcon(props) {
 }
 
 function Comment(props) {
-    const data = props.data;
+    const post = props.data.post;
+    post.replied_user = UserData.getData.user;
     return (
-        <Post post={data} />
+        <Post post={post} />
     );
 }
 
@@ -198,7 +205,7 @@ function ExampleNotifications() {
         //reply
         {
             type: 1,
-             ...ExampleReply(),
+            post: ExampleReply(),
         },
         //repost, 1 user
         {
@@ -224,9 +231,19 @@ function ExampleNotifications() {
 }
 
 function NotificationList(props) {
-    const notifications = ExampleNotifications();
+    async function download(from) {
+        try {
+            const res = await axios.post(Endpoint("/member/notifications/get"), { from: from });
+            return res.data;
+        }
+        catch (err) {
+            ThrowIfNotAxios(err);
+            return [];
+        }
+    }
+
     function Notification(props) {
-        const data = props.data;
+        const data = props.entry;
         const type = data.type;
         switch (type) {
             case notificationTypes.like:
@@ -242,9 +259,7 @@ function NotificationList(props) {
         }
     }
     return (
-        <List sx={{ p: 0 }}>
-            {notifications.map((notification, index) => <Notification data={notification} key={index} />)}
-        </List>
+        <OnlineList getEntries={download} entryMapper={Notification} />
     );
 }
 

@@ -64,6 +64,7 @@ function Post(props) {
 
 function BorderlessPost(props) {
     const original = props.post;
+    AddDataToPost(original);
     const overriden = OverrideWithRepost(original);
 
     return (
@@ -81,7 +82,9 @@ function BorderlessPost(props) {
                             <DateLink passed isoString={overriden.date} />
                             <ManagePost />
                         </Stack>
-                        <ReplyingToPost post={overriden} />
+                        <Box sx={{mb:1}}>
+                            <ReplyingToPost post={overriden} />
+                        </Box>
                         <PostText post={overriden} />
                         <PostMedia images={overriden.images} />
                     </Stack>
@@ -105,11 +108,19 @@ function BorderlessPost(props) {
 }
 
 function OpenPostOnClick(props) {
+    const link = "/posts/" + props.id;
+    return (
+        <OpenOnClick link={link}>
+            {props.children}
+        </OpenOnClick>
+    )
+}
+
+function OpenOnClick(props) {
     const navigate = useNavigate();
     function Clicked(e) {
         e.stopPropagation();
-        const link = "/posts/" + props.id;
-        navigate(link);
+        navigate(props.link);
     }
     return (
         <div onClick={Clicked}>
@@ -128,6 +139,7 @@ function ReplyingToPost(props) {
 
 function PostFocused(props) {
     const original = props.post;
+    AddDataToPost(original);
     const overriden = OverrideWithRepost(original);
 
     return (
@@ -257,7 +269,6 @@ function PostCreator(props) {
 
             //update post list on client without refreshing the page
             const post = result.data;
-            AddDataToPost(post);
             AddPostToCommentSection(post);
             if (onPost)
                 onPost();
@@ -580,7 +591,6 @@ function PostList(props) {
         try {
             const new_posts = await props.getPosts(from);
             new_posts.forEach((post) => {
-                AddDataToPost(post);
             });
             return new_posts;
         }
@@ -918,11 +928,6 @@ function AddDataToPost(post) {
     }
 
     post.images = GetPostPictures(post.id, post.image_count);
-    post.publisher = {
-        id: post.poster_id,
-        name: post.poster_name,
-        username: post.poster_username
-    };
 }
 
 //if this is a repost, the data of the reposted post will be displayed instead of the original post
@@ -934,4 +939,4 @@ function OverrideWithRepost(post) {
 }
 
 
-export { Post, PostList, PostFocused, ListBlockButton, ListBlock, RowWithPrefix, PostButtonRow, WritePost, CommentList, FeedList, BookmarkList, FollowingFeedList, AddDataToPost, OverrideWithRepost, PostsOfUser, CommentsOfUser, LikesOfUser, BlockImage, ImageContext, ClickableImage, PostModalFrame, ExampleUser, ExamplePost, ExampleReply, OpenPostOnClick };
+export { Post, PostList, PostFocused, ListBlockButton, ListBlock, RowWithPrefix, PostButtonRow, WritePost, CommentList, FeedList, BookmarkList, FollowingFeedList, OverrideWithRepost, PostsOfUser, CommentsOfUser, LikesOfUser, BlockImage, ImageContext, ClickableImage, PostModalFrame, ExampleUser, ExamplePost, ExampleReply, OpenPostOnClick, OpenOnClick };

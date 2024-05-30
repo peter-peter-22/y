@@ -49,7 +49,8 @@ const config = {
     all_clients: all_clients,
     address_mode: address_modes.localhost,
     posts_per_request:5,
-    users_per_request:10
+    users_per_request:10,
+    notifications_per_request:10
 }
 
 const transporter = nodemailer.createTransport({

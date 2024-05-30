@@ -189,8 +189,84 @@ async function editable_query(text, before, after, params, additional_params) {
     return result.rows;
 }
 
+const like_count = `
+(SELECT COUNT(*)
+		FROM LIKES
+		WHERE LIKES.POST_ID = POST.ID)::INT AS LIKE_COUNT`;
+
+const liked_by_user = `
+EXISTS
+	(SELECT *
+		FROM LIKES
+		WHERE LIKES.POST_ID = POST.ID
+			AND USER_ID = :user_id) AS LIKED_BY_USER`;
+
+const repost_count = `
+(SELECT COUNT(*)
+		FROM POSTS REPOSTS
+		WHERE REPOSTS.REPOST = POST.ID)::INT AS REPOST_COUNT`;
+
+const reposted_by_user = `
+EXISTS
+	(SELECT *
+		FROM POSTS REPOSTS
+		WHERE REPOSTS.REPOST = POST.ID
+			AND REPOSTS.TEXT IS NULL
+			AND REPOSTS.PUBLISHER = :user_id) AS REPOSTED_BY_USER`;
+
+const bookmark_count = `
+(SELECT COUNT(*)
+		FROM BOOKMARKS BOOKMARK
+		WHERE BOOKMARK.POST_ID = POST.ID)::INT AS BOOKMARK_COUNT`;
+
+const bookmarked_by_user = `
+EXISTS
+	(SELECT *
+		FROM BOOKMARKS BOOKMARK
+		WHERE BOOKMARK.POST_ID = POST.ID
+			AND BOOKMARK.USER_ID = :user_id) AS BOOKMARKED_BY_USER`;
+
+const comment_count = `
+(SELECT COUNT(*)
+		FROM POSTS AS COMMENTS_TABLE
+		WHERE COMMENTS_TABLE.REPLYING_TO = POST.ID)::INT AS COMMENT_COUNT`;
+
+const publisher = `
+JSONB_BUILD_OBJECT(
+	'id',POSTER.ID,
+	'name',POSTER.NAME,
+	'username',POSTER.USERNAME
+) AS PUBLISHER`;
+
+const columns = `
+    POST.TEXT,
+    POST.ID,
+	POST.IMAGE_COUNT,
+	POST.DATE,
+	POST.VIEWS,
+	POST.REPOST AS REPOSTED_ID,
+	POST.REPLYING_TO,
+    POST.REPLYING_TO_PUBLISHER,
+	${like_count},
+	${liked_by_user},
+	${repost_count},
+	${reposted_by_user},
+	${bookmark_count},
+	${bookmarked_by_user},
+    ${publisher},
+    ${comment_count}`;
+
+const postQueryText = `
+SELECT 
+	${columns}
+FROM
+(SELECT *
+    FROM POSTS
+    ORDER BY POSTS.DATE DESC) POST
+LEFT JOIN USERS POSTER ON POST.PUBLISHER = POSTER.ID`;
+
 async function postQuery(req, before, after, additional_params, level = 0, limit, offset = 0) {
-    const text = "SELECT POST.TEXT, POST.ID, POST.IMAGE_COUNT, POST.DATE, POST.VIEWS, POST.REPOST AS REPOSTED_ID, POST.REPLYING_TO, (SELECT COUNT(*) FROM LIKES WHERE LIKES.POST_ID = POST.ID)::INT AS LIKE_COUNT, EXISTS (SELECT * FROM LIKES WHERE LIKES.POST_ID = POST.ID AND USER_ID = :user_id) AS LIKED_BY_USER, (SELECT COUNT(*) FROM POSTS REPOSTS WHERE REPOSTS.REPOST = POST.ID)::INT AS REPOST_COUNT, EXISTS( SELECT * FROM POSTS REPOSTS WHERE REPOSTS.REPOST = POST.ID AND REPOSTS.TEXT IS NULL AND REPOSTS.PUBLISHER=:user_id) AS REPOSTED_BY_USER, (SELECT COUNT(*) FROM BOOKMARKS BOOKMARK WHERE BOOKMARK.POST_ID = POST.ID)::INT AS BOOKMARK_COUNT, EXISTS (SELECT * FROM BOOKMARKS BOOKMARK WHERE BOOKMARK.POST_ID = POST.ID AND BOOKMARK.USER_ID = :user_id) AS BOOKMARKED_BY_USER, POSTER.ID AS POSTER_ID, POSTER.NAME AS POSTER_NAME, POSTER.USERNAME AS POSTER_USERNAME, (SELECT COUNT(*) FROM POSTS AS COMMENTS_TABLE WHERE COMMENTS_TABLE.REPLYING_TO = POST.ID)::INT AS COMMENT_COUNT FROM (SELECT * FROM POSTS ORDER BY POSTS.DATE DESC) POST LEFT JOIN USERS POSTER ON POST.PUBLISHER = POSTER.ID";
+    const text = postQueryText;
     if (limit === undefined)
         limit = config.posts_per_request;
     if (after === undefined)
@@ -277,4 +353,4 @@ async function CountableToggle(req, res, table, unique_constraint_name, first_co
 }
 
 export default router;
-export { postQuery, post_list };
+export { postQuery, post_list, postQueryText };
