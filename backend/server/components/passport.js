@@ -109,12 +109,17 @@ router.post("/finish_registration", async (req, res) => {
     await finish_registration(req, res, name, email, "", birthdate, checkboxes);
 });
 
+const user_columns = "id,username,name";
+
 async function finish_registration(req, res, name, email, password_hash, birthdate, checkboxes) {
     try {
 
         const uniquefied_name = await unique_username(name);
         const result = await db.query(
-            named("INSERT INTO users (username,name,email,password_hash,birthdate,email_notifications) VALUES (:username, :name,:email,:password_hash,:birthdate,:email_notifications) RETURNING *",)({
+            named(`
+            INSERT INTO users (username,name,email,password_hash,birthdate,email_notifications) 
+            VALUES (:username, :name,:email,:password_hash,:birthdate,:email_notifications) 
+            RETURNING ${user_columns}`,)({
                 username: uniquefied_name,
                 name: name,
                 email: email,
@@ -166,5 +171,5 @@ async function unique_username(baseName) {//ha rövid nevet ír be akkor sok avo
     throw new Error("unique name cannot be created");
 }
 
-export { auth, remember_session, router, universal_auth, finish_registration };
+export { auth, remember_session, router, universal_auth, finish_registration,user_columns };
 

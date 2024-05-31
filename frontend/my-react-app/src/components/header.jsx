@@ -12,7 +12,7 @@ function Header() {
     let isBig = AboveBreakpoint("leftMenu");
     const width = isBig ? "300px" : "100px";
     return (
-        <div style={{ width: width }}>
+        <div style={{ width: width ,height:"100vh"}}>
             <div style={{ position: "fixed", width: width,height:"100vh" }}>
                 <SideMenu border="borderRight">
                     <Inside>

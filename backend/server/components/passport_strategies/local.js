@@ -19,7 +19,7 @@ import cors from "cors";
 import axios from "axios";
 import nodemailer from "nodemailer";
 import { Validator } from "node-input-validator";
-import { universal_auth,finish_registration } from "../passport.js";
+import { universal_auth, finish_registration, user_columns } from "../passport.js";
 import { CheckV } from "../validations.js";
 const named = yesql.pg;
 
@@ -48,7 +48,7 @@ const router = express.Router();
             },
             async function verify(email, password, cb) {
                 try {
-                    const result = await db.query("SELECT * FROM users WHERE email = $1 ", [
+                    const result = await db.query(`SELECT ${user_columns} FROM users WHERE email = $1 `, [
                         email
                     ]);
                     if (result.rows.length > 0) {
@@ -100,7 +100,7 @@ router.post("/submit_password", async (req, res) => {
             if (err) {
                 console.error("Error hashing password:", err);
             } else {
-                await finish_registration(req,res,data.name, data.email, hash, data.birthdate, data.checkboxes);
+                await finish_registration(req, res, data.name, data.email, hash, data.birthdate, data.checkboxes);
             }
         });
     } catch (err) {

@@ -3,13 +3,13 @@ import Stack from '@mui/material/Stack';
 import SideMenu, { Inside } from "./side_menus.jsx";
 import { TopMenu } from '/src/components/utilities';
 import { SearchField } from "/src/components/inputs.jsx";
-import { Box } from '@mui/material';
+import { Box, Hidden } from '@mui/material';
 import { Typography } from '@mui/material';
 import Fab from '@mui/material/Fab';
 import { Icon } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, GetProfilePicture, default_image, GetPostPictures, OnlineList, SimplePopOver, formatNumber, UserLink } from '/src/components/utilities';
+import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, GetProfilePicture, default_image, GetPostPictures, OnlineList, SimplePopOver, formatNumber, UserLink ,ReplyingFrom} from '/src/components/utilities';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -47,7 +47,7 @@ function RowWithPrefix(props) {
     return (
         <Stack direction="row">
             <Prefix>{props.prefix}</Prefix>
-            <div style={{ flexGrow: 1 }}>
+            <div style={{ flexGrow: 1,overflow:"hidden" }}>
                 {props.contents}
             </div>
         </Stack>
@@ -64,7 +64,6 @@ function Post(props) {
 
 function BorderlessPost(props) {
     const original = props.post;
-    AddDataToPost(original);
     const overriden = OverrideWithRepost(original);
 
     return (
@@ -73,7 +72,7 @@ function BorderlessPost(props) {
             <RowWithPrefix
                 prefix={<Avatar src={GetProfilePicture(overriden.publisher)} />}
                 contents={
-                    <Stack direction="column" style={{ overflow: "hidden" }}>
+                    <Stack direction="column" spacing={1} sx={{mb:1, overflow: "hidden" }}>
 
                         <Stack direction="row" spacing={0.25} style={{ alignItems: "center" }}>
                             <UserLink user={overriden.publisher} />
@@ -82,9 +81,7 @@ function BorderlessPost(props) {
                             <DateLink passed isoString={overriden.date} />
                             <ManagePost />
                         </Stack>
-                        <Box sx={{mb:1}}>
-                            <ReplyingToPost post={overriden} />
-                        </Box>
+                        <ReplyingToPost post={overriden} />
                         <PostText post={overriden} />
                         <PostMedia images={overriden.images} />
                     </Stack>
@@ -131,15 +128,14 @@ function OpenOnClick(props) {
 
 
 function ReplyingToPost(props) {
-    const user = props.post.replied_user;
-    if (user !== undefined) {
-        return (<ReplyingTo user={user} />);
+    const post = props.post;
+    if (post.replied_user) {
+        return (<ReplyingFrom post={post} />);
     }
 }
 
 function PostFocused(props) {
     const original = props.post;
-    AddDataToPost(original);
     const overriden = OverrideWithRepost(original);
 
     return (
@@ -283,7 +279,7 @@ function PostCreator(props) {
             {isComment && isFocused &&
                 <Box sx={{ my: 1 }} >
                     <RowWithPrefix contents={
-                        <ReplyingTo user={props.post.publisher} />
+                        <ReplyingTo post={props.post} />
                     } />
                 </Box>
             }
@@ -878,17 +874,18 @@ function FromUser(props) {
 }
 
 function RepostedOrQuoted(props) {
-    if (props.post.repost || props.post.quote) {
+    const post = props.post;
+    if (post.repost || post.quote) {
         return (
             <RowWithPrefix
                 prefix={<Icon color="secondary" style={{ fontSize: "15px", alignSelf: "end" }}>loop</Icon>}
                 contents={
-                    <FadeLink style={{ fontWeight: "bold", overflow: "hidden" }}>
+                    <FadeLink to={"/posts/" + post.reposted_post.id} style={{ fontWeight: "bold", overflow: "hidden" }}>
                         <TextRow>
                             <span color="secondary.main" style={noOverflow}>
-                                <GetUserName user={props.post.publisher} />
+                                <GetUserName user={post.publisher} />
                             </span>
-                            <span>{props.post.repost ? "reposted" : "quoted"}</span>
+                            <span>{post.repost ? "reposted" : "quoted"}</span>
                         </TextRow>
                     </FadeLink>
                 } />//clicking leads to the source post
@@ -932,6 +929,8 @@ function AddDataToPost(post) {
 
 //if this is a repost, the data of the reposted post will be displayed instead of the original post
 function OverrideWithRepost(post) {
+    AddDataToPost(post);
+
     if (post.repost) {
         return post.reposted_post;
     }

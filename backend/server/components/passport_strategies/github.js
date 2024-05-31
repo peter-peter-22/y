@@ -19,7 +19,7 @@ import cors from "cors";
 import axios from "axios";
 import nodemailer from "nodemailer";
 import { Validator } from "node-input-validator";
-import { universal_auth } from "../passport.js";
+import { universal_auth,user_columns } from "../passport.js";
 const named = yesql.pg;
 
 const router = express.Router();
@@ -64,7 +64,7 @@ const github_login_redirect = process.env.GITHUB_CALLBACK;
                         return cb(new Error("this github account has no public email"));
                     }
 
-                    const query_result = await db.query("SELECT * FROM users WHERE email=$1", [email])
+                    const query_result = await db.query(`SELECT ${user_columns} FROM users WHERE email=$1`, [email])
                     if (query_result.rowCount === 0) {
                         // const result = await db.query(
                         //     named("INSERT INTO users (username,name,email,password_hash) VALUES (:username, :name,:email,:password_hash) RETURNING *",)({

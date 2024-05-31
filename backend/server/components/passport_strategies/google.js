@@ -19,7 +19,7 @@ import cors from "cors";
 import axios from "axios";
 import nodemailer from "nodemailer";
 import { Validator } from "node-input-validator";
-import { universal_auth } from "../passport.js";
+import { universal_auth,user_columns } from "../passport.js";
 const named = yesql.pg;
 
 const router = express.Router();
@@ -54,17 +54,8 @@ const google_login_redirect=  process.env.GOOGLE_CALLBACK;
             },
             async (accessToken, refreshToken, profile, cb) => {
                 try {
-                    const query_result = await db.query("SELECT * FROM users WHERE email=$1", [profile.email])
+                    const query_result = await db.query(`SELECT ${user_columns} FROM users WHERE email=$1`, [profile.email])
                     if (query_result.rowCount === 0) {
-                      //  const result = await db.query(
-                      //      named("INSERT INTO users (username,name,email,password_hash) VALUES (:username, :name,:email,:password_hash) RETURNING *",)({
-                      //          username: "test",
-                      //          name: profile.displayName,
-                      //          email: profile.email,
-                      //          password_hash: "google"
-                      //      })
-                      //  );
-                      //  cb(null, result.rows[0], { new: true });
                       cb(null, null, {
                         registering: {
                             name: profile.displayName,

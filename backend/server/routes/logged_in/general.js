@@ -28,7 +28,7 @@ import { CheckV, CheckErr } from "../../components/validations.js";
 const router = express.Router();
 
 router.post("/follow_user", async (req, res) => {
-    await CountableToggle(req, res, "follows", "follow_unique", "follower", "followed");
+    await CountableToggleSimplified(req, res, "follows", "follow_unique", "follower", "followed");
 });
 
 router.post("/is_following_user", async (req, res) => {
@@ -128,41 +128,45 @@ router.get("/follower_recommendations_preview", async (req, res) => {
 });
 
 router.post("/repost", async (req, res) => {
-    const v = new Validator(req.body, {
-        key: 'required|integer',
-        value: "required|boolean"
-    });
-    await CheckV(v);
-    const { key: reposted_post_id, value: set_respost } = req.body;
-    const user_id = req.user.id;
-    try {
-        if (set_respost) {
-            const validation = await db.query(named("select exists(select * from posts where id=:post_id and repost is not null and text is null) as is_a_repost")({ post_id: reposted_post_id, user_id: user_id }));
-            if (validation.rowCount !== 0) {//if the reposted post does not exists, the constraint will throw an error in the next query so it can be ignored here
-                const tests = validation.rows[0];
-                if (tests.is_a_repost)
-                    throw ("a repost cannot be reposted");
-            }
 
-            try {
-                await db.query(named("INSERT INTO POSTS (PUBLISHER,REPOST) SELECT :user_id,:post_id WHERE NOT EXISTS (SELECT * FROM POSTS WHERE PUBLISHER = :user_id AND REPOST = :post_id) AND NOT EXISTS (SELECT * FROM POSTS WHERE ID = :post_id AND REPOST IS NOT NULL AND text IS NULL)")({ user_id: user_id, post_id: reposted_post_id }));
-            }
-            catch (err) {
-                if (err.constraint === "posts_repost_fkey")
-                    throw new Error("this post does not exists");
-                if (err.constraint === "unique_repost") {
-                    //ignore to prevent error message in strictmode
-                } else
-                    throw (err);
-            }
+    //create repost
+    async function onAdd(reposted_post_id, user_id) {
+        //check if this post can be reposted
+        //if the reposted post does not exists, the constraint will throw an error in the next query so it can be ignored here
+        const validation = await db.query(named("select exists(select * from posts where id=:post_id and repost is not null and text is null) as is_a_repost")({ post_id: reposted_post_id, user_id: user_id }));
+        if (validation.rowCount !== 0) {
+            const tests = validation.rows[0];
+            if (tests.is_a_repost)
+                throw ("a repost cannot be reposted");
         }
-        else
-            await db.query(named("DELETE FROM posts WHERE publisher=:user_id AND repost=:post_id")({ user_id: user_id, post_id: reposted_post_id }));
-        res.sendStatus(200);
+
+        //insert
+        try {
+            const getRepostedUser = `(SELECT publisher FROM POSTS WHERE id=:post_id)`;
+            await db.query(named(`
+            INSERT INTO POSTS (PUBLISHER,REPOST,REPOSTED_FROM_USER)
+            SELECT :user_id,:post_id,${getRepostedUser} WHERE 
+            NOT EXISTS 
+            (SELECT * FROM POSTS WHERE PUBLISHER = :user_id AND REPOST = :post_id)
+            AND NOT EXISTS 
+            (SELECT * FROM POSTS WHERE ID = :post_id AND REPOST IS NOT NULL AND text IS NULL)`)({ user_id: user_id, post_id: reposted_post_id }));
+        }
+        catch (err) {
+            if (err.constraint === "posts_repost_fkey")
+                throw new Error("this post does not exists");
+            if (err.constraint === "unique_repost") {
+                //ignore
+            } else
+                throw (err);
+        }
     }
-    catch (err) {
-        CheckErr(err);
+
+    //delete repost
+    async function onRemove(reposted_post_id, user_id) {
+        await db.query(named("DELETE FROM posts WHERE publisher=:user_id AND repost=:post_id")({ user_id: user_id, post_id: reposted_post_id }));
     }
+
+    await CountableToggle(req, res, onAdd, onRemove);
 });
 
 async function user_query(req, before, after, additional_params, limit) {
@@ -231,6 +235,11 @@ const comment_count = `
 		FROM POSTS AS COMMENTS_TABLE
 		WHERE COMMENTS_TABLE.REPLYING_TO = POST.ID)::INT AS COMMENT_COUNT`;
 
+        const view_count = `
+(SELECT COUNT(*)
+		FROM VIEWS
+		WHERE VIEWS.POST_ID = POST.ID)::INT AS VIEWS`;
+
 const publisher = `
 JSONB_BUILD_OBJECT(
 	'id',POSTER.ID,
@@ -243,10 +252,10 @@ const columns = `
     POST.ID,
 	POST.IMAGE_COUNT,
 	POST.DATE,
-	POST.VIEWS,
 	POST.REPOST AS REPOSTED_ID,
 	POST.REPLYING_TO,
     POST.REPLYING_TO_PUBLISHER,
+    ${view_count},
 	${like_count},
 	${liked_by_user},
 	${repost_count},
@@ -266,14 +275,20 @@ FROM
 LEFT JOIN USERS POSTER ON POST.PUBLISHER = POSTER.ID`;
 
 async function postQuery(req, before, after, additional_params, level = 0, limit, offset = 0) {
+    //adding the input values to the default values if necessary
     const text = postQueryText;
     if (limit === undefined)
         limit = config.posts_per_request;
     if (after === undefined)
         after = "";
     after += " OFFSET :offset LIMIT :limit"
-    const params = { user_id: req.user.id, limit: limit, offset: offset };
+    const user_id=req.user.id;
+    const params = { user_id: user_id, limit: limit, offset: offset };
+
+    //getting the posts
     const posts = await editable_query(text, before, after, params, additional_params);
+
+    //for each comment, getting the name of the replied user
     const comments = posts.filter(post => post.replying_to !== null);
     if (comments.length !== 0) {
         const replied_ids = [];
@@ -290,7 +305,7 @@ async function postQuery(req, before, after, additional_params, level = 0, limit
         });
     }
 
-    //the reposted posts must be downloaded and added to their reposters
+    //adding the referenced post to each repost or quote
     //level means how much parent posts are above this post
     if (level < 2) {
         //getting the ids of the reposted posts
@@ -315,36 +330,73 @@ async function postQuery(req, before, after, additional_params, level = 0, limit
         }
     }
 
-    updateViews(posts);//the viewcount update is not awaited
+    await updateViews(posts,user_id);//the viewcount update is not awaited
 
     return posts;
 }
 
-async function updateViews(posts) {
+async function updateViews(posts, user_id) {
     const ids = posts.map((post) => post.id);
-    await db.query(named("UPDATE posts SET views = views + 1 WHERE id=ANY(:post_ids)")({ post_ids: ids }));
+    try {
+        await db.query(named(`
+    insert into views (post_id, user_id)
+    select UNNEST(:post_ids::int[]),:user_id 
+    ON CONFLICT ON CONSTRAINT unique_view DO NOTHING
+    `)
+            ({
+                post_ids: ids,
+                user_id: user_id
+            }));
+    }
+    catch (err) {
+        CheckErr(err);
+    }
 }
 
 router.post("/like", async (req, res) => {
-    await CountableToggle(req, res, "likes", "unique_likes");
+    async function onAdd(key, user_id) {
+        const get_publisher_id = `(SELECT publisher from posts where id=:post_id)`;
+        const addLike = `INSERT INTO likes (user_id,post_id,publisher_id) VALUES (:user,:post_id, ${get_publisher_id}) ON CONFLICT ON CONSTRAINT unique_likes DO NOTHING`;
+        await db.query(named(addLike)({ user: user_id, post_id: key }));
+    }
+
+    async function onRemove(key, user_id) {
+        await db.query(named("DELETE FROM likes WHERE user_id=:user AND post_id=:post_id")({ user: user_id, post_id: key }));
+    }
+
+    await CountableToggle(req, res, onAdd, onRemove);
 });
 
 router.post("/bookmark", async (req, res) => {
-    await CountableToggle(req, res, "bookmarks", "unique_bookmarks");
+    await CountableToggleSimplified(req, res, "bookmarks", "unique_bookmarks");
 });
 
-async function CountableToggle(req, res, table, unique_constraint_name, first_column_name = "user_id", second_column_name = "post_id",) {
+async function CountableToggleSimplified(req, res, table, unique_constraint_name, first_column_name = "user_id", second_column_name = "post_id") {
+    async function onAdd(key, user_id) {
+        await db.query(named("INSERT INTO " + table + " (" + first_column_name + ", " + second_column_name + ") VALUES (:user,:key) ON CONFLICT ON CONSTRAINT " + unique_constraint_name + " DO NOTHING")({ user: user_id, key: key }));
+    }
+
+    async function onRemove(key, user_id) {
+        await db.query(named("DELETE FROM " + table + " WHERE " + first_column_name + "=:user AND " + second_column_name + "=:key")({ user: user_id, key: key }));
+    }
+
+    await CountableToggle(req, res, onAdd, onRemove);
+}
+
+async function CountableToggle(req, res, onAdd, onRemove) {
     const v = new Validator(req.body, {
         key: 'required|integer',
         value: "required|boolean"
     });
     await CheckV(v);
     const { key, value } = req.body;
+    const user_id = req.user.id;
     try {
-        if (value)
-            await db.query(named("INSERT INTO " + table + " (" + first_column_name + ", " + second_column_name + ") VALUES (:user,:key) ON CONFLICT ON CONSTRAINT " + unique_constraint_name + " DO NOTHING")({ user: req.user.id, key: key }));
+        if (value) {
+            await onAdd(key, user_id);
+        }
         else
-            await db.query(named("DELETE FROM " + table + " WHERE " + first_column_name + "=:user AND " + second_column_name + "=:key")({ user: req.user.id, key: key }));
+            await onRemove(key, user_id);
         res.sendStatus(200);
     }
     catch (err) {
@@ -353,4 +405,4 @@ async function CountableToggle(req, res, table, unique_constraint_name, first_co
 }
 
 export default router;
-export { postQuery, post_list, postQueryText };
+export { postQuery, post_list, postQueryText, CountableToggle };

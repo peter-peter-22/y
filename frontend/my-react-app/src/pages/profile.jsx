@@ -47,7 +47,7 @@ function Profile() {
         async function get() {
             try {
                 const res = await axios.post(Endpoint("/member/general/user_profile"), { user_id: id });
-                const user=res.data;
+                const user = res.data;
                 setUser(user);
             } catch (err) {
                 setUser(undefined);
@@ -55,7 +55,7 @@ function Profile() {
             }
         }
         get(id);
-    }, [id,UserData.getData]);
+    }, [id, UserData.getData]);
 
     function EditProfile() {
         Modals[0].Show(
@@ -72,75 +72,85 @@ function Profile() {
         const following = user.follows;
         const followers = user.followers;
 
+        function ProfileInfo() {
+            return (
+                <>
+                    <Box sx={{
+                        position: "relative",
+                        marginBottom: "70px",
+                        borderBottom: 1,
+                        borderColor: "divider"
+                    }}>
+                        <ProfileBanner url={GetProfileBanner(user, true)} />
+                        <Avatar src={GetProfilePicture(user, true)} sx={{
+                            position: "absolute",
+                            transform: "translateY(-50%)",
+                            top: "100%",
+                            left: "0px",
+                            ml: sideMargins,
+                            height: profileSize,
+                            width: profileSize,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            border: "solid white 3px",
+                        }} />
+                    </Box>
+                    <Box sx={{ mx: sideMargins, position: "relative" }}>
+                        <Stack direction="column" spacing={1.5}>
+                            <div>
+                                <Typography variant="big_bold"><GetUserName user={user} /></Typography>
+                                <UserKey user={user} />
+                                <Fab onClick={EditProfile} sx={{ border: 1, borderColor: "divider", position: "absolute", right: "0px", top: "0px" }} size="small" variant="extended" color="secondary_noBg">
+                                    Edit profile
+                                </Fab>
+                            </div>
+                            <Typography variant="small_fade" >
+                                <TextRow>
+                                    <Icon style={{ fontSize: "1.5em" }}>calendar_month</Icon>
+                                    <span>Joined {moment.format('MMMM YYYY')}</span>
+                                </TextRow>
+                            </Typography>
+
+                            {user.bio !== null &&
+                                <Typography variant="medium" >
+                                    {user.bio}
+                                </Typography >
+                            }
+
+                            <Stack direction="row" spacing={1}>
+                                <FadeLink href="#">
+                                    <TextRow>
+                                        <Typography variant="small_bold">
+                                            {formatNumber(followers)}
+                                        </Typography>
+                                        <Typography variant="small_fade">
+                                            followers
+                                        </Typography>
+                                    </TextRow>
+                                </FadeLink>
+                                <FadeLink href="#">
+                                    <TextRow>
+                                        <Typography variant="small_bold">
+                                            {formatNumber(following)}
+                                        </Typography>
+                                        <Typography variant="small_fade">
+                                            following
+                                        </Typography>
+                                    </TextRow>
+                                </FadeLink>
+                            </Stack>
+                        </Stack>
+                    </Box>
+                </>
+            );
+        }
+
         return (
             <Stack direction="column">
-                <Box sx={{
-                    position: "relative",
-                    marginBottom: "70px",
-                    borderBottom: 1,
-                    borderColor: "divider"
-                }}>
-                    <ProfileBanner url={GetProfileBanner(user,true)} />
-                    <Avatar src={GetProfilePicture(user,true)} sx={{
-                        position: "absolute",
-                        transform: "translateY(-50%)",
-                        top: "100%",
-                        left: "0px",
-                        ml: sideMargins,
-                        height: profileSize,
-                        width: profileSize,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        border: "solid white 3px",
-                    }} />
-                </Box>
-                <Box sx={{ mx: sideMargins, position: "relative" }}>
-                    <Stack direction="column" spacing={1.5}>
-                        <div>
-                            <Typography variant="big_bold"><GetUserName user={user} /></Typography>
-                            <UserKey user={user} />
-                            <Fab onClick={EditProfile} sx={{ border: 1, borderColor: "divider", position: "absolute", right: "0px", top: "0px" }} size="small" variant="extended" color="secondary_noBg">
-                                Edit profile
-                            </Fab>
-                        </div>
-                        <Typography variant="small_fade" >
-                            <TextRow>
-                                <Icon style={{ fontSize: "1.5em" }}>calendar_month</Icon>
-                                <span>Joined {moment.format('MMMM YYYY')}</span>
-                            </TextRow>
-                        </Typography>
+                <ProfileInfo />
 
-                        {user.bio !== null &&
-                            <Typography variant="medium" >
-                                {user.bio}
-                            </Typography >
-                        }
-
-                        <Stack direction="row" spacing={1}>
-                            <FadeLink href="#">
-                                <TextRow>
-                                    <Typography variant="small_bold">
-                                        {formatNumber(followers)}
-                                    </Typography>
-                                    <Typography variant="small_fade">
-                                        followers
-                                    </Typography>
-                                </TextRow>
-                            </FadeLink>
-                            <FadeLink href="#">
-                                <TextRow>
-                                    <Typography variant="small_bold">
-                                        {formatNumber(following)}
-                                    </Typography>
-                                    <Typography variant="small_fade">
-                                        following
-                                    </Typography>
-                                </TextRow>
-                            </FadeLink>
-                        </Stack>
-                    </Stack>
-                </Box>
+                <WhoToFollow />
 
                 <Stack direction="column" sx={{ mt: 1.5 }}>
                     <TabSwitcherLinks tabs={[
@@ -168,8 +178,6 @@ function Profile() {
                         <Route path="/likes" element={<LikesOfUser user={user} />} />
                     </Routes>
                 </Stack>
-
-                <WhoToFollow />
             </Stack>
         );
     }
@@ -269,11 +277,11 @@ function ProfileEditor(props) {
                         Save
                     </Fab>
                 </Stack>
-                <BannerChanger onUploadFile={(v) => { updateValue("banner_pic", v) }} current={GetProfileBanner(user,true)} />
-                <ProfilePicEditor size="100px" onUploadFile={(v) => { updateValue("profile_pic", v) }} current={GetProfilePicture(user,true)} />
+                <BannerChanger onUploadFile={(v) => { updateValue("banner_pic", v) }} current={GetProfileBanner(user, true)} />
+                <ProfilePicEditor size="100px" onUploadFile={(v) => { updateValue("profile_pic", v) }} current={GetProfilePicture(user, true)} />
                 <UserNameEditor onChangeUserName={(v) => { updateValue("username", v) }} onChangeOk={(v) => { updateValue("username_ok", v) }} />
                 <NameEditor onChangeName={(v) => { updateValue("name", v) }} onChangeOk={(v) => { updateValue("name_ok", v) }} current={user.name} />
-                <BioEditor onChange={(v) => { updateValue("bio", v) }} current={user.bio}/>
+                <BioEditor onChange={(v) => { updateValue("bio", v) }} current={user.bio} />
                 <BirthDateEditor onChangeDate={(v) => { updateValue("birthdate", v) }} onChangeOk={(v) => { updateValue("date_ok", v) }} current={user.birthdate} />
             </Stack>
         </PostModalFrame>
@@ -316,7 +324,7 @@ function BannerChanger(props) {
     }
 
     return (
-        <ChangeablePicture displayer={Displayer} {...props}/>
+        <ChangeablePicture displayer={Displayer} {...props} />
     );
 }
 

@@ -29,7 +29,7 @@ import config from "/src/components/config.js";
 import { NavLink } from "react-router-dom";
 import CircularProgress from '@mui/material/CircularProgress';
 import Popover from '@mui/material/Popover';
-import {ExampleUser} from "/src/components/posts";
+import { ExampleUser } from "/src/components/posts";
 
 const noOverflow = {
     whiteSpace: 'nowrap',
@@ -122,23 +122,22 @@ function UserName(props) {
 
 function UserLink(props) {
     return (
-        <Link typography="small_bold" href={GetProfileLink(props.user)} align="left" style={noOverflow} {...props} onClick={e=>e.stopPropagation()}>
+        <StyledNavlink typography="small_bold" to={GetProfileLink(props.user)} style={noOverflow} >
             <GetUserName user={props.user} />
-        </Link>
+        </StyledNavlink>
     );
 }
 
 function UserKeyLink(props) {
     return (
-        <Link typography="small_fade" href={GetProfileLink(props.user)} align="left" style={noOverflow} {...props} onClick={e=>e.stopPropagation()}>
+        <StyledNavlink typography="small_fade" to={GetProfileLink(props.user)} style={noOverflow} >
             <GetUserKey user={props.user} />
-        </Link>
+        </StyledNavlink>
     );
 }
 
-function GetProfileLink(user)
-{
-    return "/profile/"+(user?user.id:-1);
+function GetProfileLink(user) {
+    return "/profile/" + (user ? user.id : -1);
 }
 
 function GetUserName(props) {
@@ -159,13 +158,13 @@ function UserKey(props) {
 
 function FadeLink(props) {
     return (
-        <Link typography="small_fade" {...props}>{props.children}</Link>
+        <StyledNavlink typography="small_fade" {...props}>{props.children}</StyledNavlink>
     );
 }
 
 function BoldLink(props) {
     return (
-        <Link typography="small_bold" {...props}>{props.children}</Link>
+        <StyledNavlink typography="small_bold" {...props}>{props.children}</StyledNavlink>
     );
 }
 
@@ -261,18 +260,43 @@ function DateLink(props) {
 
 function TextRow(props) {
     return (
-        <Stack direction="row" spacing={0.5} style={{ overflow: "hidden", alignItems: "center" }}>
+        <Stack direction="row" spacing={0.5} style={{ overflow: "hidden", alignItems: "center", margin: 0 }}>
             {props.children}
         </Stack>
     );
 }
 
-function ReplyingTo(props) {
+function ReplyingFrom(props) {
+    const post = props.post;
     return (
         <TextRow >
-            <Typography variant="small_fade" style={{ flexShrink: 0, ...noOverflow }}>Replying to</Typography>
-            <UserKeyLink user={props.user} />
+            <Typography variant="small_fade" style={{ flexShrink: 0, ...noOverflow, margin: 0 }}>Replying to</Typography>
+            <StyledNavlink to={"/posts/" + post.replying_to} typography="small_fade">
+                <GetUserKey user={post.replied_user} />
+            </StyledNavlink>
         </TextRow>
+    );
+}
+
+function ReplyingTo(props) {
+    const user = props.post.publisher;
+    return (
+        <TextRow >
+            <Typography variant="small_fade" style={{ flexShrink: 0, ...noOverflow, margin: 0 }}>Replying to</Typography>
+            <StyledNavlink to={"/posts/" + user.id} typography="small_fade">
+                <GetUserKey user={user} />
+            </StyledNavlink>
+        </TextRow>
+    );
+}
+
+function StyledNavlink(props) {
+    return (
+        <NavLink to={props.to} style={{ textDecoration: "none", ...noOverflow }} onClick={(e) => { e.stopPropagation(9) }}>
+            <Typography variant={props.typography} sx={{ "&:hover": { textDecoration: "underline" } }} {...props}>
+                {props.children}
+            </Typography>
+        </NavLink>
     );
 }
 
@@ -530,4 +554,4 @@ function formatNumber(number) {
     return number;
 }
 
-export { AboveBreakpoint, ResponsiveSelector, ChooseChild, ChooseChildBool, TopMenu, ProfileText, FadeLink, TabSwitcher, UserName, UserKey, noOverflow, BoldLink, UserLink,UserKeyLink, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, logo, creation, ToCorner, CenterLogo, default_profile, FollowDialog, GetProfilePicture, default_image, FollowButton, GetPostPictures, LinelessLink, OnlineList, Loading, SimplePopOver, formatNumber, TabSwitcherLinks, GetProfileBanner,GetProfileLink }
+export { AboveBreakpoint, ResponsiveSelector, ChooseChild, ChooseChildBool, TopMenu, ProfileText, FadeLink, TabSwitcher, UserName, UserKey, noOverflow, BoldLink, UserLink, UserKeyLink, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, logo, creation, ToCorner, CenterLogo, default_profile, FollowDialog, GetProfilePicture, default_image, FollowButton, GetPostPictures, LinelessLink, OnlineList, Loading, SimplePopOver, formatNumber, TabSwitcherLinks, GetProfileBanner, GetProfileLink,ReplyingFrom }
