@@ -7,7 +7,8 @@ router.get("/get_user", async (req, res) => {
     res.json({
         user: req.user,
         showStartMessage: req.session.showStartMessage,
-        pending_registration: req.session.pending_registration
+        pending_registration: req.session.pending_registration,
+        maxLetters:req.session.maxLetters
     });
 });
 

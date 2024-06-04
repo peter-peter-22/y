@@ -150,7 +150,7 @@ async function postAny(req, res, next, saveToDatabase) {
 
 async function getAndValidatePost(req) {
     const v = new Validator(req.body, {
-        text: "required|string|maxLength:5"
+        text: "required|string|maxLength:"+req.session.maxLetters
     });
     await CheckV(v);
 

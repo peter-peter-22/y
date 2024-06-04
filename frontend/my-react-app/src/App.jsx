@@ -39,7 +39,7 @@ function App() {
       //get user and messages from server
       const response = await axios.get(Endpoint("/get_user"));
       const user = response.data.user;
-      if(user)user.last_update=new Date().getMilliseconds();
+      if(user)user.last_update=new Date().getTime();
       setData(response.data);
 
       //process the messages

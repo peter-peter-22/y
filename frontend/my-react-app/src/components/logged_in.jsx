@@ -14,6 +14,7 @@ import PostFocused from "/src/pages/post_focused";
 import Bookmarks from "/src/pages/bookmarks";
 import AddFollowers from "/src/pages/follow_people";
 import Profile from "/src/pages/profile";
+import PostEngagements from "/src/pages/post_engagements";
 
 export default () => {
   const isBig = AboveBreakpoint("sm");
@@ -26,6 +27,7 @@ export default () => {
               <Route path="/" element={<Home />} />
               <Route path="/notifications" element={<Notifications />} />
               <Route path="/posts/:id" element={<PostFocused />} />
+              <Route path="/posts/:id/*" element={<PostEngagements />} />
               <Route path="/bookmarks" element={<Bookmarks />} />
               <Route path="/add_followers" element={<AddFollowers />} />
               <Route path="/add_followers" element={<AddFollowers />} />

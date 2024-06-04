@@ -20,7 +20,7 @@ import IconButton from '@mui/material/IconButton';
 import Link from '@mui/material/Link';
 import { ResponsiveButton, ButtonIcon, ButtonSvg, TabButton, PostButton, ProfileButton, TopMenuButton } from "/src/components/buttons.jsx";
 import Moment from "moment";
-import { Endpoint, FormatAxiosError } from "/src/communication.js";
+import { Endpoint, FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
 import { UserData } from "/src/App.jsx";
 import { Error, Modals } from "/src/components/modals";
 import axios from 'axios';
@@ -292,13 +292,22 @@ function ReplyingTo(props) {
 
 function StyledNavlink(props) {
     return (
-        <NavLink to={props.to} style={{ textDecoration: "none", ...noOverflow }} onClick={(e) => { e.stopPropagation(9) }}>
+        <NavLink to={props.to} style={{ textDecoration: "none", ...noOverflow }} onClick={(e) => { e.stopPropagation() }}>
             <Typography variant={props.typography} sx={{ "&:hover": { textDecoration: "underline" } }} {...props}>
                 {props.children}
             </Typography>
         </NavLink>
     );
 }
+
+function InheritNavLink(props) {
+    return (
+        <NavLink to={props.to} style={{ textDecoration: "inherit", color: "inherit", fontFamily: "inherit" }} onClick={(e) => { e.stopPropagation() }}>
+            {props.children}
+        </NavLink>
+    );
+}
+
 
 function ToCorner(props) {
     const offset = "10px";
@@ -330,7 +339,7 @@ function FollowDialog(props) {
                 <Stack direction="row" spacing={1} sx={{ alignItems: "center", width: "100%" }}>
                     <Avatar />
                     <ProfileText user={props.user} />
-                    <FollowButton user_id={props.user.id} is_followed={props.user.is_followed} />
+                    <FollowButton user={props.user} />
                 </Stack>
             </ListItemButton>
         </ListItem>
@@ -338,31 +347,47 @@ function FollowDialog(props) {
 }
 
 function FollowButton(props) {
-    const [following, setFollowing] = useState(props.is_followed ? true : false);
+    const [following, setFollowing, toggleFollow] = ToggleFollow(props.user);
 
-    function toggleFollow() {
-        setFollowing((prev) => {
+    return (
+        <Fab onClick={toggleFollow} variant="extended" size="small" color="black" sx={{ flexShrink: 0 }}>{following ? "Following" : "Follow"}</Fab>
+    );
+}
+
+function ToggleFollow(user) {
+    return ToggleOnlineBool(user, "/member/general/follow_user", user.is_followed);
+}
+function ToggleBlock(user) {
+    return ToggleOnlineBool(user, "/member/general/block_user", user.is_blocked);
+}
+
+function ToggleOnlineBool(user, url, startingValue) {
+    const [get, set] = useState(Boolean(startingValue));
+
+    function toggle() {
+        set((prev) => {
             const newValue = !prev;
             async function update() {
                 try {
-                    await axios.post(Endpoint("/member/general/follow_user"),
+                    await axios.post(Endpoint(url),
                         {
-                            key: props.user_id,
+                            key: user.id,
                             value: newValue
                         }
-                    );
+                    )
                 }
-                catch { }
+                catch (err) {
+                    ThrowIfNotAxios(err);
+                }
             }
             update();
             return newValue;
         });
     }
 
-    return (
-        <Fab onClick={toggleFollow} variant="extended" size="small" color="black" sx={{ flexShrink: 0 }}>{following ? "Following" : "Follow"}</Fab>
-    );
+    return [get, set, toggle];
 }
+
 
 function GetProfilePicture(user, isUser) {
     return GetAnyProfileImage(user, config.profile_pics_url, isUser);
@@ -554,4 +579,4 @@ function formatNumber(number) {
     return number;
 }
 
-export { AboveBreakpoint, ResponsiveSelector, ChooseChild, ChooseChildBool, TopMenu, ProfileText, FadeLink, TabSwitcher, UserName, UserKey, noOverflow, BoldLink, UserLink, UserKeyLink, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, logo, creation, ToCorner, CenterLogo, default_profile, FollowDialog, GetProfilePicture, default_image, FollowButton, GetPostPictures, LinelessLink, OnlineList, Loading, SimplePopOver, formatNumber, TabSwitcherLinks, GetProfileBanner, GetProfileLink,ReplyingFrom }
+export { AboveBreakpoint, ResponsiveSelector, ChooseChild, ChooseChildBool, TopMenu, ProfileText, FadeLink, TabSwitcher, UserName, UserKey, noOverflow, BoldLink, UserLink, UserKeyLink, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, logo, creation, ToCorner, CenterLogo, default_profile, FollowDialog, GetProfilePicture, default_image, FollowButton, GetPostPictures, LinelessLink, OnlineList, Loading, SimplePopOver, formatNumber, TabSwitcherLinks, GetProfileBanner, GetProfileLink, ReplyingFrom, ToggleFollow, ToggleBlock, StyledNavlink,InheritNavLink }

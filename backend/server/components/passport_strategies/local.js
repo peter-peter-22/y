@@ -42,7 +42,7 @@ const router = express.Router();
     passport.use(
         "local",
         new Strategy(
-            { // or whatever you want to use
+            { 
                 usernameField: 'email',    // define the parameter in req.body that passport can use as username and password
                 passwordField: 'password'
             },

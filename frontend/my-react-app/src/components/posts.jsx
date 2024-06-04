@@ -9,7 +9,7 @@ import Fab from '@mui/material/Fab';
 import { Icon } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, GetProfilePicture, default_image, GetPostPictures, OnlineList, SimplePopOver, formatNumber, UserLink ,ReplyingFrom} from '/src/components/utilities';
+import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, GetProfilePicture, default_image, GetPostPictures, OnlineList, SimplePopOver, formatNumber, UserLink, ReplyingFrom, ToggleFollow, ToggleBlock, InheritNavLink } from '/src/components/utilities';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -31,7 +31,7 @@ import config from "/src/components/config.js";
 import axios from 'axios';
 import { Endpoint, FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
 import { Error, Modals, ShowImage } from "/src/components/modals";
-import { useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 const commentSections = {};
 
@@ -47,7 +47,7 @@ function RowWithPrefix(props) {
     return (
         <Stack direction="row">
             <Prefix>{props.prefix}</Prefix>
-            <div style={{ flexGrow: 1,overflow:"hidden" }}>
+            <div style={{ flexGrow: 1, overflow: "hidden" }}>
                 {props.contents}
             </div>
         </Stack>
@@ -72,14 +72,14 @@ function BorderlessPost(props) {
             <RowWithPrefix
                 prefix={<Avatar src={GetProfilePicture(overriden.publisher)} />}
                 contents={
-                    <Stack direction="column" spacing={1} sx={{mb:1, overflow: "hidden" }}>
+                    <Stack direction="column" spacing={1} sx={{ mb: 1, overflow: "hidden" }}>
 
                         <Stack direction="row" spacing={0.25} style={{ alignItems: "center" }}>
                             <UserLink user={overriden.publisher} />
                             <UserKey user={overriden.publisher} />
                             ·
                             <DateLink passed isoString={overriden.date} />
-                            <ManagePost />
+                            <ManagePost post={original} />
                         </Stack>
                         <ReplyingToPost post={overriden} />
                         <PostText post={overriden} />
@@ -138,6 +138,12 @@ function PostFocused(props) {
     const original = props.post;
     const overriden = OverrideWithRepost(original);
 
+    function SubscribeButton() {
+        // return(
+        //     <Fab variant="extended" size="small" color="black" style={{ flexShrink: 0 }}>Subscribe</Fab>
+        // );
+    }
+
     return (
         <ListBlock>
             <RepostedOrQuoted post={original} />
@@ -147,8 +153,8 @@ function PostFocused(props) {
                     <Stack direction="column" style={{ overflow: "hidden" }}>
                         <Stack direction="row" spacing={0.25} style={{ alignItems: "center" }}>
                             <ProfileText user={overriden.publisher} />
-                            <Fab variant="extended" size="small" color="black" style={{ flexShrink: 0 }}>Subscribe</Fab>
-                            <ManagePost />
+                            <SubscribeButton />
+                            <ManagePost post={original} />
                         </Stack>
                         <ReplyingToPost post={overriden} />
                     </Stack>
@@ -197,7 +203,7 @@ function WritePost() {
 function PostCreator(props) {
     const [isFocused, setIsFocused] = React.useState(false);
     const [getText, setText] = React.useState("");
-    const maxLetters = 280;
+    const maxLetters = UserData.getData.maxLetters;
     const keep = getText.substring(0, maxLetters);
     const overflow = getText.substring(maxLetters);
     const isComment = props.post !== undefined;
@@ -849,15 +855,90 @@ function PostMedia(props) {
 }
 function PostText(props) {
     return (
-        <Typography variant="small">
+        <Typography variant="small" style={{ wordWrap: "break-word" }}>
             {props.post.text}
         </Typography>
     );
 }
 
 function ManagePost(props) {
+    const { handleOpen, ShowPopover } = SimplePopOver();
+    const post = props.post;
+    const user = post.publisher;
+
+    function FollowRow() {
+        const [follow, setFollow, toggleFollow] = ToggleFollow(user);
+
+        return (
+            <Row onClick={toggleFollow}>
+                {follow ?
+                    <><Icon>person_remove</Icon><span>Unfollow</span></>
+                    :
+                    <><Icon>person_add_alt_1</Icon><span>Follow</span></>
+                }
+                <span>< GetUserKey user={post.publisher} /></span>
+            </Row>
+        );
+    }
+
+    function BlockRow() {
+        const [blocked, setBlock, toggleBlock] = ToggleBlock(user);
+
+        return (
+            <Row onClick={toggleBlock}>
+                {blocked ?
+                    <><Icon>do_disturb_on</Icon><span>Unblock</span></>
+                    :
+                    <><Icon>do_disturb</Icon><span>Block</span></>
+                }
+                <span>< GetUserKey user={post.publisher} /></span>
+            </Row>
+        );
+    }
+
+    function Row(props) {
+        return (
+            <ListItem disablePadding>
+                <ListItemButton onClick={props.onClick}>
+                    <TextRow>
+                        {props.children}
+                    </TextRow>
+                </ListItemButton>
+            </ListItem>
+        );
+    }
+
+    function PostOptions() {
+        return (
+            <ShowPopover>
+                <List sx={{ p: 0 }}>
+                    <Typography variant="medium_bold" sx={{ maxWidth: "70vw" }} style={noOverflow}>
+                        <FollowRow />
+                        <BlockRow />
+                        <InheritNavLink to={"/posts/"+post.id+"/likes"}>
+                            <Row>
+                                <Icon>align_vertical_bottom</Icon>
+                                <span>View post engagements</span>
+                            </Row>
+                        </InheritNavLink>
+                    </Typography>
+                </List>
+            </ShowPopover>
+        );
+    }
+
+    function Clicked(e) {
+        e.stopPropagation();
+        handleOpen(e);
+    }
+
     return (
-        <IconButton size="small" style={{ marginLeft: "auto" }}><Icon fontSize="small">more_horiz</Icon></IconButton>
+        <>
+            <IconButton size="small" style={{ marginLeft: "auto" }} onClick={Clicked}>
+                <Icon fontSize="small">more_horiz</Icon>
+            </IconButton>
+            <PostOptions />
+        </>
     );
 }
 

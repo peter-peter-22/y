@@ -24,12 +24,18 @@ import * as pp from "../../components/passport.js";
 import { username_exists, selectable_username } from "../user.js";
 import { Validator } from "node-input-validator";
 import { CheckV, CheckErr } from "../../components/validations.js";
+import  postQueryText,{is_followed,is_blocked } from "./post_query.js";
 
 const router = express.Router();
 
 router.post("/follow_user", async (req, res) => {
     await CountableToggleSimplified(req, res, "follows", "follow_unique", "follower", "followed");
 });
+
+router.post("/block_user", async (req, res) => {
+    await CountableToggleSimplified(req, res, "blocks", "unique_blocks", "blocker", "blocked");
+});
+
 
 router.post("/is_following_user", async (req, res) => {
     const v = new Validator(req.body, {
@@ -169,8 +175,19 @@ router.post("/repost", async (req, res) => {
     await CountableToggle(req, res, onAdd, onRemove);
 });
 
+
 async function user_query(req, before, after, additional_params, limit) {
-    const text = "SELECT * FROM ( SELECT ID, USERNAME, NAME, EXISTS (SELECT * FROM FOLLOWS WHERE FOLLOWER = :user_id AND FOLLOWED = ID) AS IS_FOLLOWED FROM USERS  ) as sq";
+    const text = `
+    SELECT * FROM 
+    (
+        SELECT
+        ID, 
+        USERNAME, 
+        NAME, 
+        ${is_followed("ID")} AS IS_FOLLOWED ,
+        ${is_blocked("ID")} AS IS_BLOCKED
+        FROM USERS
+    ) as sq`;
     if (limit === undefined)
         limit = config.users_per_request;
     if (after === undefined)
@@ -193,87 +210,6 @@ async function editable_query(text, before, after, params, additional_params) {
     return result.rows;
 }
 
-const like_count = `
-(SELECT COUNT(*)
-		FROM LIKES
-		WHERE LIKES.POST_ID = POST.ID)::INT AS LIKE_COUNT`;
-
-const liked_by_user = `
-EXISTS
-	(SELECT *
-		FROM LIKES
-		WHERE LIKES.POST_ID = POST.ID
-			AND USER_ID = :user_id) AS LIKED_BY_USER`;
-
-const repost_count = `
-(SELECT COUNT(*)
-		FROM POSTS REPOSTS
-		WHERE REPOSTS.REPOST = POST.ID)::INT AS REPOST_COUNT`;
-
-const reposted_by_user = `
-EXISTS
-	(SELECT *
-		FROM POSTS REPOSTS
-		WHERE REPOSTS.REPOST = POST.ID
-			AND REPOSTS.TEXT IS NULL
-			AND REPOSTS.PUBLISHER = :user_id) AS REPOSTED_BY_USER`;
-
-const bookmark_count = `
-(SELECT COUNT(*)
-		FROM BOOKMARKS BOOKMARK
-		WHERE BOOKMARK.POST_ID = POST.ID)::INT AS BOOKMARK_COUNT`;
-
-const bookmarked_by_user = `
-EXISTS
-	(SELECT *
-		FROM BOOKMARKS BOOKMARK
-		WHERE BOOKMARK.POST_ID = POST.ID
-			AND BOOKMARK.USER_ID = :user_id) AS BOOKMARKED_BY_USER`;
-
-const comment_count = `
-(SELECT COUNT(*)
-		FROM POSTS AS COMMENTS_TABLE
-		WHERE COMMENTS_TABLE.REPLYING_TO = POST.ID)::INT AS COMMENT_COUNT`;
-
-        const view_count = `
-(SELECT COUNT(*)
-		FROM VIEWS
-		WHERE VIEWS.POST_ID = POST.ID)::INT AS VIEWS`;
-
-const publisher = `
-JSONB_BUILD_OBJECT(
-	'id',POSTER.ID,
-	'name',POSTER.NAME,
-	'username',POSTER.USERNAME
-) AS PUBLISHER`;
-
-const columns = `
-    POST.TEXT,
-    POST.ID,
-	POST.IMAGE_COUNT,
-	POST.DATE,
-	POST.REPOST AS REPOSTED_ID,
-	POST.REPLYING_TO,
-    POST.REPLYING_TO_PUBLISHER,
-    ${view_count},
-	${like_count},
-	${liked_by_user},
-	${repost_count},
-	${reposted_by_user},
-	${bookmark_count},
-	${bookmarked_by_user},
-    ${publisher},
-    ${comment_count}`;
-
-const postQueryText = `
-SELECT 
-	${columns}
-FROM
-(SELECT *
-    FROM POSTS
-    ORDER BY POSTS.DATE DESC) POST
-LEFT JOIN USERS POSTER ON POST.PUBLISHER = POSTER.ID`;
-
 async function postQuery(req, before, after, additional_params, level = 0, limit, offset = 0) {
     //adding the input values to the default values if necessary
     const text = postQueryText;
@@ -282,7 +218,7 @@ async function postQuery(req, before, after, additional_params, level = 0, limit
     if (after === undefined)
         after = "";
     after += " OFFSET :offset LIMIT :limit"
-    const user_id=req.user.id;
+    const user_id = req.user.id;
     const params = { user_id: user_id, limit: limit, offset: offset };
 
     //getting the posts
@@ -330,7 +266,7 @@ async function postQuery(req, before, after, additional_params, level = 0, limit
         }
     }
 
-    await updateViews(posts,user_id);//the viewcount update is not awaited
+    await updateViews(posts, user_id);//the viewcount update is not awaited
 
     return posts;
 }
@@ -405,4 +341,4 @@ async function CountableToggle(req, res, onAdd, onRemove) {
 }
 
 export default router;
-export { postQuery, post_list, postQueryText, CountableToggle };
+export { postQuery, post_list, CountableToggle };

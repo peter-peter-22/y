@@ -69,6 +69,7 @@ function ReplyOrPost(post) {
 
 function Follow(props) {
     const data = props.data;
+    console.log(data);
     const link = "/profile/" + data.users[0].id;
     return (
         <ListBlockButton>

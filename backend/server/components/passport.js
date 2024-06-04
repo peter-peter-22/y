@@ -77,12 +77,13 @@ function universal_auth(req, res, err, user, info) {
             else
                 throw new Error("failed to get user");
         }
-
-        req.logIn(user, function (err) {
-            if (err) { throw err; }
-            remember_session(req, config.cookie_remember);
-            res.redirect(config.address_mode.client);
-        });
+        else {
+            req.logIn(user, function (err) {
+                if (err) { throw err; }
+                AddDataToSession(req);
+                res.redirect(config.address_mode.client);
+            });
+        }
     }
     catch (err) {
         console.log(err);
@@ -133,8 +134,8 @@ async function finish_registration(req, res, name, email, password_hash, birthda
         const user = result.rows[0];
         req.logIn(user, function (err) {
             if (err) { throw err; }
+            AddDataToSession(req);
             req.session.showStartMessage = true;
-            remember_session(req, config.cookie_remember);
             res.sendStatus(200);
         });
     }
@@ -171,5 +172,10 @@ async function unique_username(baseName) {//ha rövid nevet ír be akkor sok avo
     throw new Error("unique name cannot be created");
 }
 
-export { auth, remember_session, router, universal_auth, finish_registration,user_columns };
+function AddDataToSession(req) {
+    remember_session(req, config.cookie_remember);
+    req.session.maxLetters = 280;
+}
+
+export { auth, remember_session, router, universal_auth, finish_registration, user_columns };
 
