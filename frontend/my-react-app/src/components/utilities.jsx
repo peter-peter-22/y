@@ -30,6 +30,7 @@ import { NavLink } from "react-router-dom";
 import CircularProgress from '@mui/material/CircularProgress';
 import Popover from '@mui/material/Popover';
 import { ExampleUser } from "/src/components/posts";
+import Grid from '@mui/material/Grid';
 
 const noOverflow = {
     whiteSpace: 'nowrap',
@@ -336,11 +337,20 @@ function FollowDialog(props) {
     return (
         <ListItem disablePadding>
             <ListItemButton>
-                <Stack direction="row" spacing={1} sx={{ alignItems: "center", width: "100%" }}>
-                    <Avatar />
-                    <ProfileText user={props.user} />
-                    <FollowButton user={props.user} />
-                </Stack>
+                <Grid container spacing={1} sx={{ alignItems: "center", width: "100%" }}>
+                    <Grid item xs="auto">
+                        <Avatar />
+                    </Grid>
+                    <Grid item xs>
+                        <Stack direction="column" >
+                            <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+                                <ProfileText user={props.user} />
+                                <FollowButton user={props.user} />
+                            </Stack>
+                            {props.children}
+                        </Stack>
+                    </Grid>
+                </Grid>
             </ListItemButton>
         </ListItem>
     );
@@ -357,33 +367,44 @@ function FollowButton(props) {
 function ToggleFollow(user) {
     return ToggleOnlineBool(user, "/member/general/follow_user", user.is_followed);
 }
-function ToggleBlock(user) {
-    return ToggleOnlineBool(user, "/member/general/block_user", user.is_blocked);
+function ToggleBlock(user, onChange) {
+    return ToggleOnlineBool(user, "/member/general/block_user", user.is_blocked, onChange);
 }
 
-function ToggleOnlineBool(user, url, startingValue) {
+function ToggleOnlineBool(user, url, startingValue, onChange) {
     const [get, set] = useState(Boolean(startingValue));
+    const firstRef = useRef(true);
 
     function toggle() {
         set((prev) => {
             const newValue = !prev;
-            async function update() {
-                try {
-                    await axios.post(Endpoint(url),
-                        {
-                            key: user.id,
-                            value: newValue
-                        }
-                    )
-                }
-                catch (err) {
-                    ThrowIfNotAxios(err);
-                }
-            }
-            update();
+            update(newValue);
+            firstRef.current = false;
             return newValue;
         });
     }
+
+    async function update(newValue) {
+        try {
+            await axios.post(Endpoint(url),
+                {
+                    key: user.id,
+                    value: newValue
+                }
+            )
+        }
+        catch (err) {
+            ThrowIfNotAxios(err);
+        }
+    }
+
+    useEffect(() => {
+        //skip first update
+        if (!firstRef.current) {
+            if (onChange)
+                onChange(get);
+        }
+    }, [get]);
 
     return [get, set, toggle];
 }
@@ -579,4 +600,4 @@ function formatNumber(number) {
     return number;
 }
 
-export { AboveBreakpoint, ResponsiveSelector, ChooseChild, ChooseChildBool, TopMenu, ProfileText, FadeLink, TabSwitcher, UserName, UserKey, noOverflow, BoldLink, UserLink, UserKeyLink, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, logo, creation, ToCorner, CenterLogo, default_profile, FollowDialog, GetProfilePicture, default_image, FollowButton, GetPostPictures, LinelessLink, OnlineList, Loading, SimplePopOver, formatNumber, TabSwitcherLinks, GetProfileBanner, GetProfileLink, ReplyingFrom, ToggleFollow, ToggleBlock, StyledNavlink,InheritNavLink }
+export { AboveBreakpoint, ResponsiveSelector, ChooseChild, ChooseChildBool, TopMenu, ProfileText, FadeLink, TabSwitcher, UserName, UserKey, noOverflow, BoldLink, UserLink, UserKeyLink, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, logo, creation, ToCorner, CenterLogo, default_profile, FollowDialog, GetProfilePicture, default_image, FollowButton, GetPostPictures, LinelessLink, OnlineList, Loading, SimplePopOver, formatNumber, TabSwitcherLinks, GetProfileBanner, GetProfileLink, ReplyingFrom, ToggleFollow, ToggleBlock, StyledNavlink, InheritNavLink }

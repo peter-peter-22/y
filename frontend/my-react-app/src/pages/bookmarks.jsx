@@ -18,9 +18,13 @@ import { BoxList, BoxListOutlined, BlueTextButton } from '/src/components/contai
 import IconButton from '@mui/material/IconButton';
 import Link from '@mui/material/Link';
 import { ResponsiveButton, ButtonIcon, ButtonSvg, TabButton, PostButton, ProfileButton, TopMenuButton, CornerButton } from "/src/components/buttons.jsx";
-import { BookmarkList } from "/src/components/posts.jsx";
+import { SimplifiedPostList } from "/src/components/posts.jsx";
 import axios from "axios";
 import { Endpoint, FormatAxiosError } from "/src/communication.js";
+
+function BookmarkList() {
+    return <SimplifiedPostList endpoint="/member/general/get_bookmarks" />;
+}
 
 function Bookmarks() {
     return (

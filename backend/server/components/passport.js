@@ -174,7 +174,6 @@ async function unique_username(baseName) {//ha rövid nevet ír be akkor sok avo
 
 function AddDataToSession(req) {
     remember_session(req, config.cookie_remember);
-    req.session.maxLetters = 280;
 }
 
 export { auth, remember_session, router, universal_auth, finish_registration, user_columns };

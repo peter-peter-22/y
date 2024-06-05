@@ -15,10 +15,10 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import { BoxList, BoxListOutlined, BlueTextButton } from '/src/components/containers';
+import { BoxList, BoxListOutlined } from '/src/components/containers';
 import IconButton from '@mui/material/IconButton';
 import Link from '@mui/material/Link';
-import { ResponsiveButton, ButtonIcon, ButtonSvg, TabButton, PostButton, ProfileButton, TopMenuButton, CornerButton } from "/src/components/buttons.jsx";
+import { BlueTextButton, CornerButton } from "/src/components/buttons.jsx";
 import { Grid } from '@mui/material';
 import Divider from '@mui/material/Divider';
 import TextField from '@mui/material/TextField';
@@ -34,13 +34,15 @@ import { Error, Modals, ShowImage } from "/src/components/modals";
 import { useNavigate } from "react-router-dom";
 import { WhoToFollow } from "/src/components/footer";
 import Moment from "moment";
-import { PostsOfUser, CommentsOfUser, LikesOfUser, ClickableImage, ImageContext, PostModalFrame } from "/src/components/posts";
+import { SimplifiedPostList, ClickableImage, ImageContext, PostModalFrame } from "/src/components/posts";
 import { useParams } from "react-router-dom";
 import { ProfilePicEditor, ChangeablePicture, UserNameEditor, NameEditor, BirthDateEditor } from "/src/components/create_account";
+import { ManageProfile } from "/src/components/manage_content_button.jsx";
 
 function Profile() {
     const [user, setUser] = useState();
     const { id } = useParams();
+    const [localBlocked, setLocalBlocked] = useState();//undefined on start, set when block/unblock happens and overwrites the is_blocked bool 
 
     //download the selected user
     useEffect(() => {
@@ -68,6 +70,10 @@ function Profile() {
         const sideMargins = 1.5;
         const moment = Moment(new Date(user.registration_date));
         const baseUrl = "/profile/" + user.id;
+        if (localBlocked !== undefined)
+            user.is_blocked = localBlocked;
+
+        const is_me = user.id === UserData.getData.user.id;
 
         const following = user.follows;
         const followers = user.followers;
@@ -101,9 +107,15 @@ function Profile() {
                             <div>
                                 <Typography variant="big_bold"><GetUserName user={user} /></Typography>
                                 <UserKey user={user} />
-                                <Fab onClick={EditProfile} sx={{ border: 1, borderColor: "divider", position: "absolute", right: "0px", top: "0px" }} size="small" variant="extended" color="secondary_noBg">
-                                    Edit profile
-                                </Fab>
+                                <div style={{ position: "absolute", right: "0px", top: "0px" }}>
+                                    {is_me ?
+                                        <Fab onClick={EditProfile} sx={{ border: 1, borderColor: "divider" }} size="small" variant="extended" color="secondary_noBg">
+                                            Edit profile
+                                        </Fab>
+                                        :
+                                        <ManageProfile user={user} onBlock={setLocalBlocked} />
+                                    }
+                                </div>
                             </div>
                             <Typography variant="small_fade" >
                                 <TextRow>
@@ -146,38 +158,61 @@ function Profile() {
             );
         }
 
+        function Visible() {
+            return (
+                <>
+                    <WhoToFollow />
+
+                    <Stack direction="column" sx={{ mt: 1.5 }}>
+                        <TabSwitcherLinks tabs={[
+                            {
+                                text: "Posts",
+                                link: baseUrl
+                            },
+                            {
+                                text: "Replies",
+                                link: baseUrl + "/replies"
+                            },
+                            {
+                                text: "Media",
+                                link: baseUrl + "/media"
+                            },
+                            {
+                                text: "Likes",
+                                link: baseUrl + "/likes"
+                            }
+                        ]} />
+                        <Routes>
+                            <Route path="" element={<PostsOfUser user={user} />} />
+                            <Route path="/replies" element={<CommentsOfUser user={user} />} />
+                            <Route path="/media" element={<MediaOfUser user={user} />} />
+                            <Route path="/likes" element={<LikesOfUser user={user} />} />
+                        </Routes>
+                    </Stack>
+                </>
+            );
+        }
+
+        function NotVisible() {
+            return (
+                <Stack direction="column" sx={{ mx: sideMargins, my: 2, }}>
+                    <Typography variant="big_fade" sx={{ textAlign: "center" }}>
+                        You blocked this user.
+                    </Typography>
+                    <UnblockButton user={user} onUnblock={() => { setLocalBlocked(false) }} />
+                </Stack>
+            );
+        }
+
         return (
             <Stack direction="column">
                 <ProfileInfo />
 
-                <WhoToFollow />
-
-                <Stack direction="column" sx={{ mt: 1.5 }}>
-                    <TabSwitcherLinks tabs={[
-                        {
-                            text: "Posts",
-                            link: baseUrl
-                        },
-                        {
-                            text: "Replies",
-                            link: baseUrl + "/replies"
-                        },
-                        {
-                            text: "Media",
-                            link: baseUrl + "/media"
-                        },
-                        {
-                            text: "Likes",
-                            link: baseUrl + "/likes"
-                        }
-                    ]} />
-                    <Routes>
-                        <Route path="" element={<PostsOfUser user={user} />} />
-                        <Route path="/replies" element={<CommentsOfUser user={user} />} />
-                        <Route path="/media" element={<MediaOfUser user={user} />} />
-                        <Route path="/likes" element={<LikesOfUser user={user} />} />
-                    </Routes>
-                </Stack>
+                {user.is_blocked ?
+                    <NotVisible />
+                    :
+                    <Visible />
+                }
             </Stack>
         );
     }
@@ -186,6 +221,30 @@ function Profile() {
             <Loading />
         );
     }
+}
+
+function UnblockButton(props) {
+    const OnUnblock = props.onUnblock;
+    const user_id = props.user.id;
+
+    async function Unblock() {
+        try {
+            await axios.post(Endpoint("/member/general/block_user"), {
+                key: user_id,
+                value: false
+            });
+            OnUnblock();
+        }
+        catch (err) {
+            ThrowIfNotAxios(err);
+        }
+    }
+
+    return (
+        <BlueTextButton onClick={Unblock}>
+            Unblock
+        </BlueTextButton>
+    );
 }
 
 function MediaOfUser(props) {
@@ -341,4 +400,21 @@ function ProfileBanner(props) {
     );
 }
 
+function LikesOfUser(props) {
+    const user_id = props.user.id;
+    return <SimplifiedPostList endpoint="/member/general/likes_of_user" params={{ user_id: user_id }} />;
+}
+
+function PostsOfUser(props) {
+    const user_id = props.user.id;
+    return <SimplifiedPostList endpoint="/member/general/posts_of_user" params={{ user_id: user_id }} />;
+}
+
+function CommentsOfUser(props) {
+    const user_id = props.user.id;
+    return <SimplifiedPostList endpoint="/member/general/comments_of_user" params={{ user_id: user_id }} />;
+}
+
+
 export default Profile;
+export { UnblockButton };

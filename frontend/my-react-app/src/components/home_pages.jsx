@@ -19,9 +19,17 @@ import { BoxList, BoxListOutlined, BlueTextButton } from '/src/components/contai
 import IconButton from '@mui/material/IconButton';
 import Link from '@mui/material/Link';
 import { ResponsiveButton, ButtonIcon, ButtonSvg, TabButton, PostButton, ProfileButton, TopMenuButton, CornerButton } from "/src/components/buttons.jsx";
-import { FeedList, WritePost, FollowingFeedList } from "/src/components/posts.jsx";
+import { SimplifiedPostList, WritePost } from "/src/components/posts.jsx";
 import axios from "axios";
 import { Endpoint, FormatAxiosError } from "/src/communication.js";
+
+function FeedList() {
+    return <SimplifiedPostList endpoint="/member/feed/get_posts" />;
+}
+
+function FollowingFeedList() {
+    return <SimplifiedPostList endpoint="/member/feed/get_followed_posts" />;
+}
 
 function ForYou() {
     return (

@@ -8,8 +8,14 @@ router.get("/get_user", async (req, res) => {
         user: req.user,
         showStartMessage: req.session.showStartMessage,
         pending_registration: req.session.pending_registration,
-        maxLetters:req.session.maxLetters
+        maxLetters:GetMaxLetters(req.user)
     });
 });
 
+function GetMaxLetters(user)
+{
+    return 280;
+}
+
 export default router;
+export {GetMaxLetters};

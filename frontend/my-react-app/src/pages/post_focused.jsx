@@ -28,10 +28,10 @@ import { PlainTextField, PasswordFieldWithToggle, VisuallyHiddenInput } from "/s
 import { UserData } from "/src/App.jsx";
 import config from "/src/components/config.js";
 import axios from 'axios';
-import { Endpoint, FormatAxiosError,ThrowIfNotAxios } from "/src/communication.js";
+import { Endpoint, FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
 import { Error, Modals, ShowImage } from "/src/components/modals";
 import { useParams } from "react-router-dom";
-import { PostFocused, CommentList, OverrideWithRepost } from "/src/components/posts.jsx";
+import { PostFocused, SimplifiedPostList, OverrideWithRepost } from "/src/components/posts.jsx";
 
 export default () => {
     const [post, setPost] = useState();
@@ -46,7 +46,7 @@ export default () => {
             const main_post = result.data;
             setPost(main_post);
         }
-        catch (err) { 
+        catch (err) {
             ThrowIfNotAxios(err);
         }
     }
@@ -63,3 +63,8 @@ export default () => {
     else
         return <Loading />;
 };
+
+function CommentList(props) {
+    const id = props.post.id;
+    return <SimplifiedPostList endpoint="/member/general/get_comments" params={{ id: id }} key={id} />;
+}

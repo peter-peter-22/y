@@ -140,7 +140,7 @@ function ProfileButton() {
             <ResponsiveSelector breakpoint={smallerButtons}>
                 <Fab onClick={handleOpen} variant="extended" color="secondary_noBg" sx={{ height: size, borderRadius: size, width: "100%", p: 1 }}>
                     <Stack direction="row" spacing={1} sx={{ width: "100%", height: "100%", alignItems: "center" }}>
-                        <Avatar src={GetProfilePicture(UserData.getData.user,true)} />
+                        <Avatar src={GetProfilePicture(UserData.getData.user, true)} />
                         <ProfileText user={UserData.getData.user} />
                         <Icon fontSize="small">
                             more_horiz
@@ -149,7 +149,7 @@ function ProfileButton() {
                 </Fab>
 
                 <Fab onClick={handleOpen} color="secondary_noBg" sx={{ height: size, width: size, borderRadius: "100%", p: 0 }}>
-                    <Avatar src={GetProfilePicture(UserData.getData.user,true)} />
+                    <Avatar src={GetProfilePicture(UserData.getData.user, true)} />
                 </Fab>
             </ResponsiveSelector>
 
@@ -193,4 +193,12 @@ function WideButton(props) {
     );
 }
 
-export { TabButton, PostButton, ButtonSvg, ButtonIcon, ProfileButton, ResponsiveButton, SelectableButton, SelectableIcon, TopMenuButton, CornerButton, OutlinedButton, WideButton };
+function BlueTextButton(props) {
+    return (
+        <Typography variant="medium" color="primary" sx={{ textAlign: "center", cursor: "pointer", "&:hover": { textDecoration: "underline" } }} {...props}>
+            {props.children}
+        </Typography>
+    );
+}
+
+export { TabButton, PostButton, ButtonSvg, ButtonIcon, ProfileButton, ResponsiveButton, SelectableButton, SelectableIcon, TopMenuButton, CornerButton, OutlinedButton, WideButton,BlueTextButton };

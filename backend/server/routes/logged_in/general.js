@@ -24,7 +24,7 @@ import * as pp from "../../components/passport.js";
 import { username_exists, selectable_username } from "../user.js";
 import { Validator } from "node-input-validator";
 import { CheckV, CheckErr } from "../../components/validations.js";
-import  postQueryText,{is_followed,is_blocked } from "./post_query.js";
+import postQueryText, { is_followed, is_blocked, user_columns_basic, user_columns_extended } from "./post_query.js";
 
 const router = express.Router();
 
@@ -68,6 +68,14 @@ router.post("/posts_of_user", async (req, res) => {
     await post_list(req, res, { user_id: "required|integer" }, undefined, " WHERE post.publisher=:target_user_id AND post.replying_to IS NULL", { target_user_id: req.body.user_id });
 });
 
+router.post("/reposts_of_post", async (req, res) => {
+    await post_list(req, res, { post_id: "required|integer" }, undefined, " WHERE post.repost=:post_id AND TEXT IS NULL", { post_id: req.body.post_id });
+});
+
+router.post("/quotes_of_post", async (req, res) => {
+    await post_list(req, res, { post_id: "required|integer" }, undefined, " WHERE post.repost=:post_id AND TEXT IS NOT NULL", { post_id: req.body.post_id });
+});
+
 router.post("/comments_of_user", async (req, res) => {
     await post_list(req, res, { user_id: "required|integer" }, undefined, " WHERE post.publisher=:target_user_id AND post.replying_to IS NOT NULL", { target_user_id: req.body.user_id });
 });
@@ -87,7 +95,16 @@ router.post("/media_of_user", async (req, res) => {
     });
     await CheckV(v);
 
-    const q = await db.query(named("select id, image_count from posts where image_count != 0 and publisher=:target_user_id OFFSET :from LIMIT :limit")({ target_user_id: req.body.user_id, limit: config.posts_per_request, from: req.body.from }));
+    const q = await db.query(named(
+        `select id, image_count 
+         from posts
+         where image_count != 0 and publisher=:target_user_id 
+         OFFSET :from LIMIT :limit`
+    )({
+        target_user_id: req.body.user_id,
+        limit: config.posts_per_request,
+        from: req.body.from
+    }));
     res.send(q.rows);
 });
 
@@ -98,7 +115,20 @@ router.post("/user_profile", async (req, res) => {
     await CheckV(v);
 
     const { user_id } = req.body;
-    const q = await db.query(named("select name,username,id,registration_date,birthdate,bio, (select count(*) from follows where followed=id) as followers , (select count(*) from follows where follower=id) as follows from users where id=:user_id")({ user_id: user_id }));
+    const q = await db.query(named(`
+    select 
+    name,
+    username,
+    id,
+    registration_date,
+    birthdate,
+    bio, 
+    ${is_blocked} as is_blocked,
+    (select count(*) from follows where followed=id) as followers , 
+    (select count(*) from follows where follower=id) as follows 
+    from users 
+    where id=:target_user_id
+    `)({ target_user_id: user_id,user_id:req.user.id }));
     const user = q.rows[0];
     if (!user)
         CheckErr("this user does not exists");
@@ -119,18 +149,60 @@ async function post_list(req, res, add_validations, before, after, query_params)
 
 
 router.post("/follower_recommendations", async (req, res) => {
-    const v = new Validator(req.body, {
-        from: 'required|integer'
-    });
+    const v = new Validator(req.body, { from: "required|integer" });
     await CheckV(v);
     const { from } = req.body;
-    const users = await user_query(req, undefined, " WHERE IS_FOLLOWED=FALSE OFFSET :from", { from: from });
-    res.send(users);
+    const text = `SELECT ${user_columns_basic} from USERS WHERE NOT ${is_followed} LIMIT :limit OFFSET :offset`;
+    const users = await db.query(named(text)({
+        user_id: req.user.id,
+        offset: from,
+        limit: config.users_per_request
+    }));
+    res.send(users.rows);
 });
 
+router.post("/likers_of_post", async (req, res) => {
+    const v = new Validator(req.body, { from: "required|integer" });
+    await CheckV(v);
+    const { from, post_id } = req.body;
+
+    const user_liked_the_post = `
+    EXISTS(
+        SELECT * FROM LIKES
+        WHERE
+        USER_ID=USERS.ID
+        AND
+        POST_ID=:post_id
+    )`;
+
+    const text = `
+    SELECT 
+    ${user_columns_basic},
+    ${is_followed} AS IS_FOLLOWED,
+    USERS.BIO 
+    from USERS 
+    WHERE ${user_liked_the_post} 
+    LIMIT :limit OFFSET :offset`;
+
+    const users = await db.query(named(text)({
+        user_id: req.user.id,
+        offset: from,
+        limit: config.users_per_request,
+        post_id: post_id
+    }));
+
+    res.send(users.rows);
+});
+
+router.post("/viewers_of_post", async (req, res) => {
+    await user_list(req, res, undefined, undefined, " WHERE IS_FOLLOWED=FALSE");
+});
+
+
 router.get("/follower_recommendations_preview", async (req, res) => {
-    const users = await user_query(req, undefined, " WHERE IS_FOLLOWED=FALSE", undefined, 3);
-    res.send(users);
+    const text = `SELECT ${user_columns_basic} from USERS WHERE NOT ${is_followed} LIMIT 3`;
+    const users = await db.query(named(text)({ user_id: req.user.id }));
+    res.send(users.rows);
 });
 
 router.post("/repost", async (req, res) => {
@@ -176,27 +248,6 @@ router.post("/repost", async (req, res) => {
 });
 
 
-async function user_query(req, before, after, additional_params, limit) {
-    const text = `
-    SELECT * FROM 
-    (
-        SELECT
-        ID, 
-        USERNAME, 
-        NAME, 
-        ${is_followed("ID")} AS IS_FOLLOWED ,
-        ${is_blocked("ID")} AS IS_BLOCKED
-        FROM USERS
-    ) as sq`;
-    if (limit === undefined)
-        limit = config.users_per_request;
-    if (after === undefined)
-        after = "";
-    after += " LIMIT :limit"
-    const params = { user_id: req.user.id, limit: limit };
-    const users = await editable_query(text, before, after, params, additional_params);
-    return users;
-}
 
 async function editable_query(text, before, after, params, additional_params) {
     if (after !== undefined)

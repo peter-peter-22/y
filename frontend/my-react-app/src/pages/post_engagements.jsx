@@ -34,18 +34,36 @@ import { Error, Modals, ShowImage } from "/src/components/modals";
 import { useNavigate } from "react-router-dom";
 import { WhoToFollow } from "/src/components/footer";
 import Moment from "moment";
-import { PostsOfUser, CommentsOfUser, LikesOfUser, ClickableImage, ImageContext, PostModalFrame } from "/src/components/posts";
+import { SimplifiedPostList } from "/src/components/posts";
 import { useParams } from "react-router-dom";
 import { ProfilePicEditor, ChangeablePicture, UserNameEditor, NameEditor, BirthDateEditor } from "/src/components/create_account";
-
+import { UserListExtended } from "/src/pages/follow_people";
 
 function TabSelector() {
     const { id } = useParams();
     useEffect(() => { }, [id]);
 
-    const baseUrl = "/posts/"+id;
+    function Likes() {
+        const url = Endpoint("/member/general/likers_of_post");
+        return (
+            <UserListExtended url={url} params={{ post_id: id }} />
+        );
+    }
+
+    function Reposts() {
+        return <SimplifiedPostList endpoint="/member/general/reposts_of_post" params={{ post_id: id }} />;
+    }
+
+    function Quotes() {
+        return <SimplifiedPostList endpoint="/member/general/quotes_of_post" params={{ post_id: id }} />;
+    }
+
+    const baseUrl = "/posts/" + id;
     return (
-        <Stack direction="column" sx={{ mt: 1.5 }}>
+        <Stack direction="column" >
+            <Typography variant="big_bold" sx={{ my: 2, mx: 7 }}>
+                Post engagements
+            </Typography>
             <TabSwitcherLinks tabs={[
                 {
                     text: "Likes",
@@ -61,9 +79,9 @@ function TabSelector() {
                 }
             ]} />
             <Routes>
-                <Route path="/likes" element={"likes"} />
-                <Route path="/reposts" element={"comments"} />
-                <Route path="/quotes" element={"quotes"} />
+                <Route path="/likes" element={<Likes />} />
+                <Route path="/reposts" element={<Reposts />} />
+                <Route path="/quotes" element={<Quotes />} />
             </Routes>
         </Stack>
     );

@@ -25,6 +25,7 @@ import { username_exists, selectable_username } from "../user.js";
 import { Validator } from "node-input-validator";
 import { CheckV, CheckErr, validate_image } from "../../components/validations.js";
 import { postQuery } from "./general.js";
+import {GetMaxLetters} from "../general.js";
 
 const router = express.Router();
 
@@ -150,7 +151,7 @@ async function postAny(req, res, next, saveToDatabase) {
 
 async function getAndValidatePost(req) {
     const v = new Validator(req.body, {
-        text: "required|string|maxLength:"+req.session.maxLetters
+        text: "required|string|maxLength:"+GetMaxLetters(req.user)
     });
     await CheckV(v);
 

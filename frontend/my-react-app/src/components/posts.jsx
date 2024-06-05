@@ -15,10 +15,10 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import { BoxList, BoxListOutlined, BlueTextButton } from '/src/components/containers';
+import { BoxList, BoxListOutlined } from '/src/components/containers';
 import IconButton from '@mui/material/IconButton';
 import Link from '@mui/material/Link';
-import { ResponsiveButton, ButtonIcon, ButtonSvg, TabButton, PostButton, ProfileButton, TopMenuButton, CornerButton } from "/src/components/buttons.jsx";
+import { ResponsiveButton, ButtonIcon, ButtonSvg, TabButton, PostButton, ProfileButton, TopMenuButton, CornerButton, BlueTextButton } from "/src/components/buttons.jsx";
 import { Grid } from '@mui/material';
 import Divider from '@mui/material/Divider';
 import TextField from '@mui/material/TextField';
@@ -32,7 +32,8 @@ import axios from 'axios';
 import { Endpoint, FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
 import { Error, Modals, ShowImage } from "/src/components/modals";
 import { NavLink, useNavigate } from "react-router-dom";
-
+import { ManagePost } from "/src/components/manage_content_button.jsx";
+import { UnblockButton } from "/src/pages/profile";
 const commentSections = {};
 
 function Prefix(props) {
@@ -66,41 +67,56 @@ function BorderlessPost(props) {
     const original = props.post;
     const overriden = OverrideWithRepost(original);
 
-    return (
-        <OpenPostOnClick id={original.id}>
-            <RepostedOrQuoted post={original} />
-            <RowWithPrefix
-                prefix={<Avatar src={GetProfilePicture(overriden.publisher)} />}
-                contents={
-                    <Stack direction="column" spacing={1} sx={{ mb: 1, overflow: "hidden" }}>
+    return (<OpenPostOnClick id={original.id}>
+        <RepostedOrQuoted post={original} />
+        <RowWithPrefix
+            prefix={<Avatar src={GetProfilePicture(overriden.publisher)} />}
+            contents={
+                <Stack direction="column" spacing={1} sx={{ mb: 1, overflow: "hidden" }}>
 
-                        <Stack direction="row" spacing={0.25} style={{ alignItems: "center" }}>
-                            <UserLink user={overriden.publisher} />
-                            <UserKey user={overriden.publisher} />
-                            ·
-                            <DateLink passed isoString={overriden.date} />
-                            <ManagePost post={original} />
-                        </Stack>
-                        <ReplyingToPost post={overriden} />
-                        <PostText post={overriden} />
-                        <PostMedia images={overriden.images} />
+                    <Stack direction="row" spacing={0.25} style={{ alignItems: "center" }}>
+                        <UserLink user={overriden.publisher} />
+                        <UserKey user={overriden.publisher} />
+                        ·
+                        <DateLink passed isoString={overriden.date} />
+                        <ManagePost post={original} />
                     </Stack>
-                } />
-            <RowWithPrefix contents={
-                <Stack direction="column" spacing={1} style={{ overflow: "hidden" }}>
-                    {overriden.quote &&
-                        <Box sx={{ pt: 1 }}>
-                            <QuotedFrame>
-                                <BorderlessPost post={overriden.reposted_post} hideButtons={true} />
-                            </QuotedFrame>
-                        </Box>
-                    }
-                    {!props.hideButtons &&
-                        <PostButtonRow post={overriden} />
-                    }
+                    <ReplyingToPost post={overriden} />
+                    <PostText post={overriden} />
+                    <PostMedia images={overriden.images} />
                 </Stack>
             } />
-        </OpenPostOnClick>
+        <RowWithPrefix contents={
+            <Stack direction="column" spacing={1} style={{ overflow: "hidden" }}>
+                {overriden.quote &&
+                    <Box sx={{ pt: 1 }}>
+                        <QuotedFrame>
+                            <BorderlessPost post={overriden.reposted_post} hideButtons={true} />
+                        </QuotedFrame>
+                    </Box>
+                }
+                {!props.hideButtons &&
+                    <PostButtonRow post={overriden} />
+                }
+            </Stack>
+        } />
+    </OpenPostOnClick>
+    );
+}
+
+function BlockedComment(props) {
+    const unHide = props.unHide;
+
+    return (
+        <ListBlockButton>
+            <Typography variant="small_fade" style={{ textAlign: "center", width: "100%" }}>
+                This comment belongs to a user you blocked.
+            </Typography>
+
+            <BlueTextButton onClick={unHide}>
+                Show
+            </BlueTextButton>
+        </ListBlockButton>
     );
 }
 
@@ -359,7 +375,7 @@ function PostCreator(props) {
 }
 
 function AddPostToCommentSection(post) {
-    const mySection = commentSections.acctive;
+    const mySection = commentSections.active;
     if (mySection)
         mySection.addPost(post);
 }
@@ -587,7 +603,7 @@ function CommentButton(props) {
 
 function PostList(props) {
     const onlineListRef = useRef();
-    const key = props.post ? props.post.id : -1;
+    const [key, setKey] = useState(props.post ? props.post.id : -1);
 
     async function GetEntries(from) {
         try {
@@ -603,14 +619,20 @@ function PostList(props) {
     }
 
     function EntryMapper(props) {
-        return (<Post post={props.entry} />);
+        const post = props.entry;
+        const [hidden, setHidden] = useState(post.publisher.is_blocked)
+        if (!hidden)
+            return (<Post post={post} />);
+        else if (post.replying_to !== null)//comments are visible in an alternative way if the user is blocked
+            return (<BlockedComment unHide={() => { setHidden(false) }} />);
     }
 
     //make the comment section globally accessable
     useEffect(() => {
         const thisCommentSection = {};
         thisCommentSection.addPost = (newPost) => { onlineListRef.current.AddEntryToTop(newPost) };
-        commentSections.acctive = thisCommentSection;
+        thisCommentSection.update = () => { setKey((prev) => prev + 1) };
+        commentSections.active = thisCommentSection;
     }, []);
 
     return (
@@ -628,38 +650,6 @@ function SimplifiedPostList(props) {
         return response.data;
     }
     return <PostList getPosts={getPosts} post={props.post} />;
-}
-
-function FeedList() {
-    return <SimplifiedPostList endpoint="/member/feed/get_posts" />;
-}
-
-function PostsOfUser(props) {
-    const user_id = props.user.id;
-    return <SimplifiedPostList endpoint="/member/general/posts_of_user" params={{ user_id: user_id }} />;
-}
-
-function CommentsOfUser(props) {
-    const user_id = props.user.id;
-    return <SimplifiedPostList endpoint="/member/general/comments_of_user" params={{ user_id: user_id }} />;
-}
-
-function LikesOfUser(props) {
-    const user_id = props.user.id;
-    return <SimplifiedPostList endpoint="/member/general/likes_of_user" params={{ user_id: user_id }} />;
-}
-
-function FollowingFeedList() {
-    return <SimplifiedPostList endpoint="/member/feed/get_followed_posts" />;
-}
-
-function CommentList(props) {
-    const id = props.post.id;
-    return <SimplifiedPostList endpoint="/member/general/get_comments" params={{ id: id }} key={id} />;
-}
-
-function BookmarkList() {
-    return <SimplifiedPostList endpoint="/member/general/get_bookmarks" />;
 }
 
 function ExampleUser() {
@@ -861,87 +851,6 @@ function PostText(props) {
     );
 }
 
-function ManagePost(props) {
-    const { handleOpen, ShowPopover } = SimplePopOver();
-    const post = props.post;
-    const user = post.publisher;
-
-    function FollowRow() {
-        const [follow, setFollow, toggleFollow] = ToggleFollow(user);
-
-        return (
-            <Row onClick={toggleFollow}>
-                {follow ?
-                    <><Icon>person_remove</Icon><span>Unfollow</span></>
-                    :
-                    <><Icon>person_add_alt_1</Icon><span>Follow</span></>
-                }
-                <span>< GetUserKey user={post.publisher} /></span>
-            </Row>
-        );
-    }
-
-    function BlockRow() {
-        const [blocked, setBlock, toggleBlock] = ToggleBlock(user);
-
-        return (
-            <Row onClick={toggleBlock}>
-                {blocked ?
-                    <><Icon>do_disturb_on</Icon><span>Unblock</span></>
-                    :
-                    <><Icon>do_disturb</Icon><span>Block</span></>
-                }
-                <span>< GetUserKey user={post.publisher} /></span>
-            </Row>
-        );
-    }
-
-    function Row(props) {
-        return (
-            <ListItem disablePadding>
-                <ListItemButton onClick={props.onClick}>
-                    <TextRow>
-                        {props.children}
-                    </TextRow>
-                </ListItemButton>
-            </ListItem>
-        );
-    }
-
-    function PostOptions() {
-        return (
-            <ShowPopover>
-                <List sx={{ p: 0 }}>
-                    <Typography variant="medium_bold" sx={{ maxWidth: "70vw" }} style={noOverflow}>
-                        <FollowRow />
-                        <BlockRow />
-                        <InheritNavLink to={"/posts/"+post.id+"/likes"}>
-                            <Row>
-                                <Icon>align_vertical_bottom</Icon>
-                                <span>View post engagements</span>
-                            </Row>
-                        </InheritNavLink>
-                    </Typography>
-                </List>
-            </ShowPopover>
-        );
-    }
-
-    function Clicked(e) {
-        e.stopPropagation();
-        handleOpen(e);
-    }
-
-    return (
-        <>
-            <IconButton size="small" style={{ marginLeft: "auto" }} onClick={Clicked}>
-                <Icon fontSize="small">more_horiz</Icon>
-            </IconButton>
-            <PostOptions />
-        </>
-    );
-}
-
 function FromUser(props) {
     if (props.post.repost)
         return (
@@ -1019,4 +928,4 @@ function OverrideWithRepost(post) {
 }
 
 
-export { Post, PostList, PostFocused, ListBlockButton, ListBlock, RowWithPrefix, PostButtonRow, WritePost, CommentList, FeedList, BookmarkList, FollowingFeedList, OverrideWithRepost, PostsOfUser, CommentsOfUser, LikesOfUser, BlockImage, ImageContext, ClickableImage, PostModalFrame, ExampleUser, ExamplePost, ExampleReply, OpenPostOnClick, OpenOnClick };
+export { Post, PostList, PostFocused, ListBlockButton, ListBlock, RowWithPrefix, PostButtonRow, WritePost, OverrideWithRepost, BlockImage, ImageContext, ClickableImage, PostModalFrame, ExampleUser, ExamplePost, ExampleReply, OpenPostOnClick, OpenOnClick, SimplifiedPostList, commentSections };

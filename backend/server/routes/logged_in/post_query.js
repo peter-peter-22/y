@@ -1,3 +1,18 @@
+const is_followed = `EXISTS (SELECT * FROM FOLLOWS WHERE FOLLOWER = :user_id AND FOLLOWED = USERS.ID)`
+
+const is_blocked= `EXISTS (SELECT * FROM BLOCKS WHERE BLOCKER = :user_id AND BLOCKED = USERS.ID)`
+
+const user_columns_basic =`
+ID, 
+USERNAME, 
+NAME
+`
+const user_columns_extended =`
+${user_columns_basic},
+${is_blocked} AS IS_BLOCKED,
+${is_followed} AS IS_BLOCKED
+`
+
 const like_count = `
 (SELECT COUNT(*)
 		FROM LIKES
@@ -51,8 +66,8 @@ JSONB_BUILD_OBJECT(
 	'id',USERS.ID, 
 	'name',USERS.NAME, 
 	'username',USERS.USERNAME, 
-    'is_followed',${is_followed("USERS.ID")}, 
-	'is_blocked',${is_blocked("USERS.ID")}
+    'is_followed',${is_followed}, 
+	'is_blocked',${is_blocked}
 ) AS PUBLISHER
 FROM
 USERS WHERE USERS.ID=POST.PUBLISHER)`;
@@ -83,13 +98,5 @@ FROM
     FROM POSTS
     ORDER BY POSTS.DATE DESC) POST`;
 
-function is_followed(followed_id) {
-    return `EXISTS (SELECT * FROM FOLLOWS WHERE FOLLOWER = :user_id AND FOLLOWED = ${followed_id})`
-};
-
-function is_blocked(blocked_id) {
-    return `EXISTS (SELECT * FROM BLOCKS WHERE BLOCKER = :user_id AND BLOCKED = ${blocked_id})`
-};
-
 export default postQueryText;
-export {is_followed,is_blocked}
+export {is_followed,is_blocked,user_columns_basic,user_columns_extended}
