@@ -1,5 +1,4 @@
 import express from "express";
-import bodyParser from "body-parser";
 import pg from "pg";
 import bcrypt from "bcrypt";
 import passport from "passport";
@@ -31,7 +30,7 @@ const router = express.Router();
         "/login",
         (req, res, next) => {
             passport.authenticate('local', function (err, user, info, status) {
-                universal_auth(req, res, err, user, info);
+                universal_auth(req, res, err, user, info,true);
             })(req, res, next);
         }
     );
@@ -48,8 +47,8 @@ const router = express.Router();
             },
             async function verify(email, password, cb) {
                 try {
-                    const result = await db.query(`SELECT ${user_columns} FROM users WHERE email = $1 `, [
-                        email
+                    const result = await db.query(`SELECT ${user_columns},password_hash FROM users WHERE email = $1 `, [
+                        email.toLowerCase()
                     ]);
                     if (result.rows.length > 0) {
                         const user = result.rows[0];

@@ -1,5 +1,4 @@
 import express from "express";
-import bodyParser from "body-parser";
 import pg from "pg";
 import bcrypt from "bcrypt";
 import passport from "passport";
@@ -162,7 +161,10 @@ router.post("/follower_recommendations", async (req, res) => {
 });
 
 router.post("/likers_of_post", async (req, res) => {
-    const v = new Validator(req.body, { from: "required|integer" });
+    const v = new Validator(req.body, {
+         from: "required|integer",
+         post_id:"required|integer"
+         });
     await CheckV(v);
     const { from, post_id } = req.body;
 
@@ -193,6 +195,31 @@ router.post("/likers_of_post", async (req, res) => {
 
     res.send(users.rows);
 });
+
+router.post("/celebrities", async (req, res) => {
+    const v = new Validator(req.body, { 
+        from: "required|integer"
+     });
+    await CheckV(v);
+    const { from } = req.body;
+
+    const text = `
+    SELECT 
+    ${user_columns_basic},
+    USERS.BIO 
+    from USERS 
+    ORDER BY (select count(*) from follows where followed=:user_id) DESC
+    LIMIT :limit OFFSET :offset`;
+
+    const users = await db.query(named(text)({
+        user_id: req.user.id,
+        offset: from,
+        limit: config.users_per_request
+    }));
+
+    res.send(users.rows);
+});
+
 
 router.post("/viewers_of_post", async (req, res) => {
     await user_list(req, res, undefined, undefined, " WHERE IS_FOLLOWED=FALSE");

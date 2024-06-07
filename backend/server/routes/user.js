@@ -1,5 +1,4 @@
 import express from "express";
-import bodyParser from "body-parser";
 import pg from "pg";
 import bcrypt from "bcrypt";
 import passport from "passport";
@@ -23,35 +22,35 @@ import { Validator } from "node-input-validator";
 import { CheckV } from "../components/validations.js";
 import * as g from "../global.js";
 import * as pp from "../components/passport.js";
+import change_password from "./change_password.js";
 
 const router = express.Router();
 
-router.post('/exists/email', async (req, res) => {
-    try {
-        const v = new Validator(req.body, {
-            email: 'required|email',
-        });
-        const matched = await v.check();
-        if (!matched)
-            res.send(false);
+router.use("/change_password", change_password);
 
-        const { email } = req.body;
-        const result = await db.query(named("SELECT count(*) FROM users WHERE email=:email")({ email: email }));
-        res.send(result.rows[0].count > 0);
-    }
-    catch (err) {
-        res.sendStatus(500);
-        console.log(err);
-    }
+router.post('/exists/email', async (req, res) => {
+    const v = new Validator(req.body, {
+        email: 'required|email',
+    });
+        await CheckV(v);
+
+    const { email } = req.body;
+    const exists = await exists_email(email);
+    res.send(exists);
 });
+
+async function exists_email(email)
+{
+    const result = await db.query(named("SELECT count(*) FROM users WHERE email=:email")({ email: email.toLowerCase() }));
+    const exists = result.rows[0].count > 0;
+    return exists;
+}
 
 router.post('/exists/username', async (req, res) => {
     const v = new Validator(req.body, {
         username: 'required|email',
     });
-    const matched = await v.check();
-    if (!matched)
-        res.send(false);
+    await CheckV(v);
 
     const { username } = req.body;
     res.send(username_exists(username));
@@ -68,4 +67,4 @@ async function selectable_username(new_username, current_username) {
 }
 
 export default router;
-export { username_exists, selectable_username };
+export { username_exists, selectable_username,exists_email };

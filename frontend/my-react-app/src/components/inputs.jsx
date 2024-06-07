@@ -81,20 +81,10 @@ function PasswordFieldWithToggle(props) {
         setShowPassword((prevShowPassword) => !prevShowPassword);
     };
 
-    const handlePasswordChange = (event) => {
-        const value = event.target.value;
-        props.handlechange(value);
-    };
-
-    const propsWithoutHandleChange = { ...props };
-    propsWithoutHandleChange.handlechange = undefined;
-
     return (
         <TextField
             type={showPassword ? 'text' : 'password'}
-            value={props.value}
-            onChange={handlePasswordChange}
-            {...propsWithoutHandleChange}
+           {...props}
             InputProps={{
                 endAdornment: (
                     <InputAdornment position="end">

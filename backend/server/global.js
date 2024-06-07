@@ -1,5 +1,4 @@
 import express from "express";
-import bodyParser from "body-parser";
 import pg from "pg";
 import bcrypt from "bcrypt";
 import passport from "passport";
@@ -70,13 +69,6 @@ const pgPool = new pg.Pool({
 });
 
 async function initialize() {
-    //  const db = new pg.Client({
-    //      user: process.env.PG_USER,
-    //      host: config.address_mode.pg,
-    //      database: process.env.PG_DATABASE,
-    //      password: process.env.PG_PASSWORD,
-    //      port: process.env.PG_PORT,
-    //  });
     const db = pgPool;
     await db.connect();
     global.db = db;

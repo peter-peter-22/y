@@ -1,5 +1,4 @@
 import express from "express";
-import bodyParser from "body-parser";
 import pg from "pg";
 import bcrypt from "bcrypt";
 import passport from "passport";
@@ -23,6 +22,7 @@ import LocalRoutes from "./passport_strategies/local.js";
 import GoogleRoutes from "./passport_strategies/google.js";
 import GithubRoutes from "./passport_strategies/github.js";
 import { CheckV } from "./validations.js";
+import { ApplySqlToUser, UpdateUser } from "../routes/logged_in.js";
 const named = yesql.pg;
 
 const router = express.Router();
@@ -65,7 +65,7 @@ function auth(req, res)//checking if the user is admin
     }
 }
 
-function universal_auth(req, res, err, user, info) {
+function universal_auth(req, res, err, user, info, noRedirect) {
     try {
         if (err) { throw err; }
         if (!user) {
@@ -81,13 +81,15 @@ function universal_auth(req, res, err, user, info) {
             req.logIn(user, function (err) {
                 if (err) { throw err; }
                 AddDataToSession(req);
-                res.redirect(config.address_mode.client);
+                if (!noRedirect)
+                    res.redirect(config.address_mode.client);
+                else
+                    res.sendStatus(200);
             });
         }
     }
     catch (err) {
-        console.log(err);
-        return res.send(err.message);
+        return res.status(400).send(err);
     }
 }
 
@@ -123,9 +125,8 @@ async function finish_registration(req, res, name, email, password_hash, birthda
             RETURNING ${user_columns}`,)({
                 username: uniquefied_name,
                 name: name,
-                email: email,
+                email: email.toLowerCase(),
                 password_hash: password_hash,
-                password_hash: "",
                 birthdate: birthdate,
                 email_notifications: checkboxes.includes("emails")
             })

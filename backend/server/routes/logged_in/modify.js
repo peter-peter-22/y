@@ -1,5 +1,4 @@
 import express from "express";
-import bodyParser from "body-parser";
 import pg from "pg";
 import bcrypt from "bcrypt";
 import passport from "passport";
@@ -36,10 +35,10 @@ router.post("/update_profile_picture", async (req, res, next) => {
 });
 
 function update_profile_picture(req, next, file) {
-    update_profile_file(req, next,file, "profiles");
+    update_profile_file(req, next, file, "profiles");
 }
 function update_profile_banner(req, next, file) {
-    update_profile_file(req, next,file, "banners");
+    update_profile_file(req, next, file, "banners");
 }
 
 function update_profile_file(req, next, file, foldername) {
@@ -65,24 +64,19 @@ router.post("/change_username", async (req, res) => {
     await CheckV(v);
 
     const { username } = req.body;
-    await update_username(req, next, username);
+    await update_username(req, username);
 
     res.sendStatus(200);
 });
 
-async function update_username(req, next, username, skip_update = true) {
-    try {
-        const selectable = await selectable_username(username, req.user.username);
-        if (!selectable)
-            CheckErr("this username is not available");
+async function update_username(req, username, skip_update = false) {
+    const selectable = await selectable_username(username, req.user.username);
+    if (!selectable)
+        CheckErr("this username is not available");
 
-        const result = await db.query(named("UPDATE users SET username=:username WHERE id=:id RETURNING *")({ username: username, id: req.user.id }));
-        if (skip_update)
-            await ApplySqlToUser(result, req);
-    }
-    catch (e) {
-        next(e);
-    }
+    const result = await db.query(named("UPDATE users SET username=:username WHERE id=:id RETURNING *")({ username: username, id: req.user.id }));
+    if (!skip_update)
+        await ApplySqlToUser(result, req);
 }
 
 router.post('/ok_username', async (req, res) => {

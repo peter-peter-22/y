@@ -334,18 +334,19 @@ function CenterLogo() {
 
 
 function FollowDialog(props) {
+    const user = props.user;
     return (
         <ListItem disablePadding>
             <ListItemButton>
                 <Grid container spacing={1} sx={{ alignItems: "center", width: "100%" }}>
                     <Grid item xs="auto">
-                        <Avatar />
+                        <Avatar src={GetProfilePicture(user)} />
                     </Grid>
                     <Grid item xs>
                         <Stack direction="column" >
                             <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-                                <ProfileText user={props.user} />
-                                <FollowButton user={props.user} />
+                                <ProfileText user={user} />
+                                <FollowButton user={user} />
                             </Stack>
                             {props.children}
                         </Stack>

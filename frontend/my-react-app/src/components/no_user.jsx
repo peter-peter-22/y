@@ -47,8 +47,9 @@ import Login from "/src/components/login.jsx";
 import { Error, Modals } from "/src/components/modals";
 
 export default () => {
-    function showCreator() {
-        Modals[0].Show(<CreateAccount />);
+    function showCreator()//show local registration inputs
+    {
+        Modals[0].Show(<CreateAccount pages={[0, 1, 2, 3, 4]} key="local"/>);
     }
 
     function showLogin() {
@@ -102,12 +103,6 @@ export default () => {
     );
 }
 
-//constants
-
-
-const margin = 10;
-const bigmargin = 15;
-
 function AlternativeLogin(props) {
     return (
         <OutlinedButton onClick={props.onClick} size={props.size ? props.size : "medium"}>
@@ -153,12 +148,37 @@ function ByRegistering(props) {
 function BottomButtonWithBorder(props) {
     return (
         <Box borderTop={1} borderColor="divider">
-            <Box sx={{ mx: margin }}>
+            <ModalMargin>
                 <WideButton color="black" sx={{ my: 3, boxSizing: "border-box" }}
                     onClick={props.onClick}>{props.text}</WideButton>
-            </Box>
+            </ModalMargin>
         </Box>
     );
 }
 
-export { AlternativeLogin, GrowingLine, BigModal, Or, BottomButtonWithBorder, ByRegistering, margin, bigmargin }
+function ModalMargin(props) {
+    return (
+        <InheritAndMargin mx={10}>
+            {props.children}
+        </InheritAndMargin>
+    );
+}
+
+function BigModalMargin(props) {
+    return (
+        <InheritAndMargin mx={15}>
+            {props.children}
+        </InheritAndMargin>
+    );
+}
+
+function InheritAndMargin(props) {
+    return (
+        <Box sx={{ px: props.mx, boxSizing:"border-box", display: "inherit", flexDirection: "inherit", height: "inherit", justifyContent: "inherit", alignItems: "inherit",gap:"inherit" }}>
+            {props.children}
+        </Box>
+    );
+}
+
+
+export { AlternativeLogin, GrowingLine, BigModal, Or, BottomButtonWithBorder, ByRegistering, ModalMargin, BigModalMargin }

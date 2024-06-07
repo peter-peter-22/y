@@ -1,5 +1,5 @@
 //functions and resources
-import React, { useState,useRef } from "react";
+import React, { useState, useRef } from "react";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
@@ -13,13 +13,14 @@ import { Endpoint, ThrowIfNotAxios } from "/src/communication.js";
 import Dialog from '@mui/material/Dialog';
 import CreateAccount from "/src/components/create_account.jsx";
 import { Modals, CreateModals, Error } from "/src/components/modals";
+import SharedPages from "/src/components/shared_pages_router";
 
 //components
 import Main from "./components/logged_in.jsx";
 import NoUser from "./components/no_user.jsx";
 import Loading from "./components/loading.jsx";
 
-//globally accessable
+//globally accessible
 let UserData = {};
 
 function App() {
@@ -39,36 +40,36 @@ function App() {
       //get user and messages from server
       const response = await axios.get(Endpoint("/get_user"));
       const user = response.data.user;
-      if(user)user.last_update=new Date().getTime();
+      if (user) user.last_update = new Date().getTime();
       setData(response.data);
 
       //process the messages
 
-      //after register 
+      //after any register 
       if (response.data.showStartMessage) {
-        Modals[0].Show(<CreateAccount pages={[5, 6, 7, 8]} />, CloseStartMessage);
+        Modals[0].Show(<CreateAccount pages={[5, 6, 7, 8]} key="after" />, CloseStartMessage);
 
         async function CloseStartMessage() {
           try {
             await axios.get(Endpoint("/member/modify/close_starting_message"));
             UserData.update();
           }
-          catch (err){
+          catch (err) {
             ThrowIfNotAxios(err);
           }
         }
       }
 
-      //pending registration
+      //pending third party registration
       if (response.data.pending_registration) {
-        Modals[0].Show(<CreateAccount pages={[1, 9]} finish />, ExitRegistration);
+        Modals[0].Show(<CreateAccount pages={[1, 9]} finish key="external" />, ExitRegistration);
 
         async function ExitRegistration() {
           try {
             await axios.get(Endpoint("/exit_registration"));
             UserData.update();
           }
-          catch (err){
+          catch (err) {
             ThrowIfNotAxios(err);
           }
         }
@@ -81,16 +82,16 @@ function App() {
   }
 
   //choose page
-  let page;
+  let Page;
   if (getData === undefined) {
-    page = (<Loading />)
+    Page = Loading;
   }
   else {
     if (getData.user) {
-      page = (<Main />);
+      Page = Main;
     }
     else {
-      page = (<NoUser />);
+      Page = NoUser;
     }
   }
 
@@ -98,7 +99,9 @@ function App() {
     <Router>
       <CreateModals />
       <div style={{ position: "relative", zIndex: 0 }}>
-        {page}
+        <SharedPages>
+          <Page />
+        </SharedPages>
       </div>
     </Router>
   );

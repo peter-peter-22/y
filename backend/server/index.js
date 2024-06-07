@@ -1,6 +1,5 @@
 import express from "express";
 import "express-async-errors";
-import bodyParser from "body-parser";
 import pg from "pg";
 import bcrypt from "bcrypt";
 import passport from "passport";

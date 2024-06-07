@@ -1,5 +1,4 @@
 import express from "express";
-import bodyParser from "body-parser";
 import pg from "pg";
 import bcrypt from "bcrypt";
 import passport from "passport";
@@ -21,6 +20,7 @@ import axios from "axios";
 import nodemailer from "nodemailer";
 import { Validator } from "node-input-validator";
 import * as g from "../global.js";
+import bodyParser from "body-parser";
 const pgSession = ConnectPg(session);
 
 function initialize() {

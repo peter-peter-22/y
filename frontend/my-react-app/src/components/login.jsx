@@ -37,52 +37,52 @@ import FormControl from '@mui/material/FormControl';
 import FormLabel from '@mui/material/FormLabel';
 import ReCAPTCHA from 'react-google-recaptcha';
 import axios from 'axios';
-import { Endpoint, FormatAxiosError } from "/src/communication.js";
+import { Endpoint, FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
 import { styled } from '@mui/material/styles';
 import InputAdornment from '@mui/material/InputAdornment';
 import Dialog from '@mui/material/Dialog';
 import { UserData } from "/src/App.jsx";
 import { Error, Modals, ErrorText } from "/src/components/modals";
-import { AlternativeLogin, GrowingLine, BigModal, Or, BottomButtonWithBorder, ByRegistering, margin, bigmargin } from "/src/components/no_user";
+import { AlternativeLogin, GrowingLine, BigModal, Or, BottomButtonWithBorder, ByRegistering, ModalMargin, BigModalMargin } from "/src/components/no_user";
+import { RechaptaInput, validateEmail, EmailInput } from "/src/components/create_account";
 
 function Login(props) {
+    //shared data
+    const dataRef = useRef({});
+
     //pages
-    const pages = {
-        choose: 0,
-        password: 1
-    }
-    const [page, setPage] = useState(pages.choose);
+    const pages = [
+        ChooseMethod,
+        EnterPassword,
+        ForgotPassword
+    ]
+    const [page, setPage] = useState(0);
 
     function handleBack() {
-        if (page === pages.choose)
-            Modals[0].Close();
+        if (page === 0)
+            Close()
         else
-            setPage(pages.choose);
+            setPage(0);
     }
 
-    //email
-    const [email, setEmail] = useState("");
+    const CurrentPage = pages[page];
 
-    function handleEmail(e) {
-        setEmail(e.target.value);
-    }
-    async function submitEmail() {
-        try {
-            const res = await axios.post(Endpoint('/user/exists/email'),
-                {
-                    email: email
-                },
-            );
-            if (res.data)
-                setPage(pages.password);
-            else
-                ErrorText("No Y user belongs to this email");
-        } catch  { }
-    }
+    return (
+        <BigModal close={props.close} open={true}>
+            <CornerButton onClick={handleBack}>{page === pages.choose ? "close" : "arrow_back"}</CornerButton>
+            <CurrentPage dataRef={dataRef} setPage={setPage} />
+        </BigModal>
+    );
+}
+
+function EnterPassword(props) {
+    const dataRef = props.dataRef;
+    const email = dataRef.current.email;
 
     //password
     const [password, setPassword] = useState("");
-    function handlePassword(value) {
+    function handlePassword(e) {
+        const value = e.target.value;
         setPassword(value);
     }
     async function submitPassword() {
@@ -93,71 +93,147 @@ function Login(props) {
                     password: password
                 },
             );
-            UserData.update();
-            Modals[0].Close();
-        } catch  {}
-    }
-
-    //forgot
-    function handleForgot() {
-        console.log(email);
-    }
-
-    let currentPage;
-    switch (page) {
-        case pages.choose:
-            currentPage = (
-                <Stack direction="column" sx={{ mx: bigmargin, height: "100%" }}>
-                    <CenterLogo />
-                    <Typography variant="verybig_bold" sx={{ my: 4 }}>Sign-in to Y!</Typography>
-
-                    <Stack direction="column" spacing={2}>
-                        <a href={Endpoint("/auth/google")}><AlternativeLogin src="/svg/google.svg" text="Sign-in with Google" /></a>
-                        <a href={Endpoint("/auth/github")}><AlternativeLogin src="/svg/github.svg" text="Sign-in with Github" /></a>
-                        <Stack direction="row" sx={{ my: 0.5, alignItems: "center" }}>
-                            <Or />
-                        </Stack>
-                        <TextField autoComplete="email" variant="outlined" type="text" label="Email" onChange={handleEmail} value={email} />
-                        <WideButton onClick={submitEmail} size="small" color="black">Next</WideButton>
-                        <OutlinedButton onClick={handleForgot} size="small">Forgot password?</OutlinedButton>
-                        <Box sx={{ mt: 3 }}>
-                            <NoAccount close={props.close} />
-                        </Box>
-                    </Stack>
-
-                </Stack>
-            );
-            break;
-
-        case pages.password:
-            currentPage = (
-                <Stack direction="column" sx={{ mx: bigmargin, height: "100%" }}>
-                    <CenterLogo />
-                    <Typography variant="verybig_bold" sx={{ my: 4 }}>Enter your password!</Typography>
-                    <TextField variant="outlined" type="text" label="Email" value={email} disabled sx={{ mb: 3 }} />
-                    <PasswordFieldWithToggle variant="outlined" label="Password" sx={{ mb: 3 }}
-                        handlechange={handlePassword} value={password} />
-                    <Link>Forgot password?</Link>
-                    <WideButton onClick={submitPassword} size="medium" color="black" sx={{ mt: "auto", mb: 3 }}>Sign-in</WideButton>
-                    <Box sx={{ mb: 3 }}>
-                        <NoAccount close={props.close} />
-                    </Box>
-                </Stack>
-            );
-            break;
+            await UserData.update();
+            Close();
+        } catch (err) {
+            ThrowIfNotAxios(err);
+        }
     }
 
     return (
-        <BigModal close={props.close} open={true}>
-            <CornerButton onClick={handleBack}>{page === pages.choose ? "close" : "arrow_back"}</CornerButton>
-            {currentPage}
-        </BigModal>
+        <Stack direction="column" sx={{ height: "100%" }}>
+            <BigModalMargin>
+                <CenterLogo />
+                <Typography variant="verybig_bold" sx={{ my: 4 }}>Enter your password!</Typography>
+                <TextField variant="outlined" type="text" label="Email" value={email} disabled sx={{ mb: 3 }} />
+                <PasswordFieldWithToggle variant="outlined" label="Password" sx={{ mb: 3 }}
+                    onChange={handlePassword} value={password} />
+                <Link onClick={() => { props.setPage(2); }} style={{ cursor: "pointer" }}>Forgot password?</Link>
+                <WideButton onClick={submitPassword} size="medium" color="black" sx={{ mt: "auto", mb: 3 }}>Sign-in</WideButton>
+                <Box sx={{ mb: 3 }}>
+                    <NoAccount />
+                </Box>
+            </BigModalMargin>
+        </Stack>
     );
 }
 
-function NoAccount(props) {
+function Close() {
+    Modals[0].Close();
+}
+
+function ChooseMethod(props) {
+    const dataRef = props.dataRef;
+
+    //email
+    const [email, setEmail] = useState("");
+
+    function handleEmail(e) {
+        const value = e.target.value;
+        setEmail(value);
+        dataRef.current.email = value;
+    }
+    async function submitEmail() {
+        try {
+            const res = await axios.post(Endpoint('/user/exists/email'),
+                {
+                    email: email
+                },
+            );
+            if (res.data)
+                props.setPage(1);
+            else
+                ErrorText("No Y user belongs to this email");
+        } catch { }
+    }
+
     return (
-        <Typography variant="small_fade">You have no account? <Link onClick={props.close}>Register</Link></Typography>
+        <Stack direction="column" sx={{ height: "100%" }}>
+            <BigModalMargin>
+                <CenterLogo />
+                <Typography variant="verybig_bold" sx={{ my: 4 }}>Sign-in to Y!</Typography>
+
+                <Stack direction="column" spacing={2}>
+                    <a href={Endpoint("/auth/google")}><AlternativeLogin src="/svg/google.svg" text="Sign-in with Google" /></a>
+                    <a href={Endpoint("/auth/github")}><AlternativeLogin src="/svg/github.svg" text="Sign-in with Github" /></a>
+                    <Stack direction="row" sx={{ my: 0.5, alignItems: "center" }}>
+                        <Or />
+                    </Stack>
+                    <TextField autoComplete="email" variant="outlined" type="email" label="Email" onChange={handleEmail} value={email} />
+                    <WideButton onClick={submitEmail} size="small" color="black">Next</WideButton>
+                    <OutlinedButton onClick={() => { props.setPage(2); }} size="small">Forgot password?</OutlinedButton>
+                    <Box sx={{ mt: 3 }}>
+                        <NoAccount />
+                    </Box>
+                </Stack>
+
+            </BigModalMargin>
+        </Stack>
+    );
+}
+
+function ForgotPassword(props) {
+    const startingEmail = props.dataRef.current.email;
+    const [captchaValue, setCaptchaValue] = useState('');
+    const [email, setEmail] = useState(startingEmail ? startingEmail : "");
+    const [emailError, setEmailError] = useState('');
+
+    function handleCaptchaChange(value) {
+        setCaptchaValue(value);
+    };
+
+    function handleEmail(e) {
+        const value = e.target.value;
+        setEmail(value);
+        const valid = validateEmail(value);
+        if (!valid) {
+            setEmailError('Please enter a valid email address');
+        } else {
+            setEmailError('');
+        }
+    }
+
+    //submit rechapta
+    async function submitChapta() {
+        try {
+            await axios.post(Endpoint('/user/change_password/submit_chapta'),
+                {
+                    email: email,
+                    recaptchaToken: captchaValue
+                },
+            );
+            //rechapta ok, email sent, show modal
+            Modals[0].Show(
+                <Typography variant="big_bold">
+                    We sent you an email.
+                </Typography>
+            )
+        }
+        catch (err) {
+            ThrowIfNotAxios(err);
+        }
+    };
+
+    return (
+        <Stack direction="column" spacing={2} sx={{ height: "100%" }}>
+            <CenterLogo />
+            <BigModalMargin>
+                <EmailInput
+                    sx={{ mb: 4 }}
+                    onChange={handleEmail}
+                    error={Boolean(emailError)}
+                    helperText={emailError}
+                    value={email} />
+                <RechaptaInput onChange={handleCaptchaChange} />
+            </BigModalMargin>
+            <BottomButtonWithBorder onClick={submitChapta} text="Submit" />
+        </Stack>
+    );
+}
+
+function NoAccount() {
+    return (
+        <Typography variant="small_fade">You have no account? <Link style={{ cursor: "pointer" }} onClick={Close}>Register</Link></Typography>
     );
 }
 
