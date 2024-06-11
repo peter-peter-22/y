@@ -30,7 +30,7 @@ const router = express.Router();
         "/login",
         (req, res, next) => {
             passport.authenticate('local', function (err, user, info, status) {
-                universal_auth(req, res, err, user, info,true);
+                universal_auth(req, res, err, user, info, true);
             })(req, res, next);
         }
     );
@@ -41,7 +41,7 @@ const router = express.Router();
     passport.use(
         "local",
         new Strategy(
-            { 
+            {
                 usernameField: 'email',    // define the parameter in req.body that passport can use as username and password
                 passwordField: 'password'
             },
@@ -81,7 +81,7 @@ const router = express.Router();
 
 router.post("/submit_password", async (req, res) => {
     const v = new Validator(req.body, {
-        password: 'required|minLength:8',
+        password: 'required|password',
     });
     await CheckV(v);
 
@@ -95,17 +95,25 @@ router.post("/submit_password", async (req, res) => {
 
     try {
         const { password } = req.body;
-        bcrypt.hash(password, config.saltRounds, async (err, hash) => {
-            if (err) {
-                console.error("Error hashing password:", err);
-            } else {
-                await finish_registration(req, res, data.name, data.email, hash, data.birthdate, data.checkboxes);
-            }
-        });
+        const hash = await hashPasswordAsync(password);
+        await finish_registration(req, res, data.name, data.email, hash, data.birthdate, data.checkboxes);
     } catch (err) {
         console.log(err);
     }
 });
 
+function hashPasswordAsync(password) {
+    return new Promise(resolve => {
+        bcrypt.hash(password, config.saltRounds, async (err, hash) => {
+            if (err) {
+                throw (err);
+            } else {
+                await resolve(hash);
+            }
+        });
+    });
+}
+
 export default router;
+export { hashPasswordAsync };
 

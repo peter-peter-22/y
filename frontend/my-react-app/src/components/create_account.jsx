@@ -43,7 +43,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 import Dialog from '@mui/material/Dialog';
 import { UserData } from "/src/App.jsx";
 import { Error, Modals } from "/src/components/modals";
-import { AlternativeLogin, GrowingLine, BigModal, Or, BottomButtonWithBorder, ByRegistering,ModalMargin, BigModalMargin } from "/src/components/no_user";
+import { AlternativeLogin, GrowingLine, BigModal, Or, BottomButtonWithBorder, ByRegistering, ModalMargin, BigModalMargin } from "/src/components/no_user";
 import config from "/src/components/config.js";
 import Moment from "moment";
 import validator from "validator";
@@ -329,17 +329,7 @@ function Page4(props)//enter password, login
 {
     const [data, handleNext] = GetProps(props);
     const [password, setPassword] = useState('');
-    const [passwordError, setPasswordError] = useState();
-    const passwordOk = passwordError === undefined;
-
-    function handlePassword(e) {
-        const value = e.target.value;
-        setPassword(value);
-        if (value.length >= 8)
-            setPasswordError();
-        else
-            setPasswordError("Must be at least 8 characters");
-    };
+    const [passwordOk, setPasswordOk] = useState();
 
     async function submitPassword() {
         if (!passwordOk)
@@ -365,11 +355,7 @@ function Page4(props)//enter password, login
                 <CenterLogo />
                 <Typography variant="verybig_bold" sx={{ mt: 4 }}>You need a password</Typography>
                 <Typography variant="small_fade" sx={{ mt: 3 }}>At least 8 characters {data.current.email}</Typography>
-                <PasswordFieldWithToggle variant="outlined" label="Password" sx={{ my: 3 }}
-                    error={!passwordOk}
-                    helperText={passwordError}
-                    onChange={handlePassword}
-                    value={password} />
+                <PasswordInput onChangePassword={setPassword} onChangeOk={setPasswordOk} />
                 <ByRegistering variant="small_fade" sx={{ mt: "auto" }} />
                 <Typography variant="small_fade">Y can use your contact informations, including your email address and phone number according to the privacy policy. <Link href="#">See more</Link></Typography>
                 <WideButton color="black" sx={{ my: 3 }}
@@ -453,15 +439,15 @@ function Page6(props)//enter username
     }
 
     return (
-        <Stack direction="column" sx={{  height: "100%" }}>
+        <Stack direction="column" sx={{ height: "100%" }}>
             <ModalMargin>
-            <CenterLogo />
-            <Typography variant="verybig_bold" sx={{ mt: 4 }}>How should we call you?</Typography>
-            <Typography variant="small_fade" sx={{ mt: 3 }}>The @username is unique. You can modify it anytime.</Typography>
-            <UserNameEditor onChangeUserName={setUserName} onChangeOk={setUserNameOk} />
-            <WideButton color="black" sx={{ my: 3 }}
-                onClick={submitUsername} disabled={!usernameOk}>Next</WideButton>
-                </ModalMargin>
+                <CenterLogo />
+                <Typography variant="verybig_bold" sx={{ mt: 4 }}>How should we call you?</Typography>
+                <Typography variant="small_fade" sx={{ mt: 3 }}>The @username is unique. You can modify it anytime.</Typography>
+                <UserNameEditor onChangeUserName={setUserName} onChangeOk={setUserNameOk} />
+                <WideButton color="black" sx={{ my: 3 }}
+                    onClick={submitUsername} disabled={!usernameOk}>Next</WideButton>
+            </ModalMargin>
         </Stack>
     );
 }
@@ -479,12 +465,12 @@ function Page7(props)//notifications
     }
 
     return (
-        <Stack direction="column" sx={{  height: "100%", justifyContent: "center" }}>
+        <Stack direction="column" sx={{ height: "100%", justifyContent: "center" }}>
             <ModalMargin>
-            <Typography variant="verybig_bold">Enable notifications?</Typography>
-            <Typography variant="small_fade" sx={{ mt: 1, mb: 3 }}>Bring out the most of Y and stay up-to-date about the events.</Typography>
-            <WideButton color="black" sx={{ mb: 2, boxSizing: "border-box" }} onClick={() => { setNotifications(true) }}>Enable</WideButton>
-            <OutlinedButton onClick={() => { setNotifications(false) }}>Not now</OutlinedButton>
+                <Typography variant="verybig_bold">Enable notifications?</Typography>
+                <Typography variant="small_fade" sx={{ mt: 1, mb: 3 }}>Bring out the most of Y and stay up-to-date about the events.</Typography>
+                <WideButton color="black" sx={{ mb: 2, boxSizing: "border-box" }} onClick={() => { setNotifications(true) }}>Enable</WideButton>
+                <OutlinedButton onClick={() => { setNotifications(false) }}>Not now</OutlinedButton>
             </ModalMargin>
         </Stack>
     );
@@ -528,6 +514,33 @@ function Page9(props)//only date of birth
                     onClick={Submit}>Next</WideButton>
             </ModalMargin>
         </Stack>
+    );
+}
+
+function PasswordInput(props) {
+    const [password, setPassword] = useState(props.value?props.value:"");
+    const [passwordError, setPasswordError] = useState(false);
+    const onChangePassword = props.onChangePassword;
+    const onChangeOk = props.onChangeOk;
+
+    function handlePassword(e) {
+        const value = e.target.value;
+        setPassword(value);
+        const error = value.length >= 8 ? undefined : "Must be at least 8 characters";
+        setPasswordError(error);
+
+        if (onChangePassword)
+            onChangePassword(value);
+        if (onChangeOk)
+            onChangeOk(!Boolean(error));
+    };
+
+    return (
+        <PasswordFieldWithToggle variant="outlined" label="Password" sx={{ my: 3 }}
+            error={Boolean(passwordError)}
+            helperText={passwordError}
+            onChange={handlePassword}
+            value={password} />
     );
 }
 
@@ -778,4 +791,4 @@ function BirthDateEditor(props) {
 }
 
 export default CreateAccount;
-export { ProfilePicEditor, ChangeablePicture, UserNameEditor, NameEditor, BirthDateEditor, RechaptaInput, EmailInput, validateEmail }
+export { ProfilePicEditor, ChangeablePicture, UserNameEditor, NameEditor, BirthDateEditor, RechaptaInput, EmailInput, validateEmail,PasswordInput }

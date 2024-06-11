@@ -44,6 +44,10 @@ niv.extend('username', ({ value }) => {
   const length = value.length;
   return (length > 0 && length <= 50);
 });
+niv.extend('password', ({ value }) => {
+  const length = value.length;
+  return (length >= 8 && length <= 50);
+});
 niv.extend('mydate', ({ value }) => {
   return !isNaN(new Date(value));
 });
@@ -56,10 +60,10 @@ niv.extend('datepast', ({ value }) => {
 
 function validate_image(file) {
   const imagesType = ['image/png', 'image/jpeg', 'image/jpg'];
-  if(file===undefined)
+  if (file === undefined)
     CheckErr("failed to upload image");
   if (!imagesType.includes(file.mimetype))
     CheckErr("invalid image(s), only .jpg and .png images are accepted");
 }
 
-export { CheckV, CheckErr,validate_image };
+export { CheckV, CheckErr, validate_image };

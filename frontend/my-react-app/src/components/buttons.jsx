@@ -185,6 +185,14 @@ function OutlinedButton(props) {
     );
 }
 
+function OutlinedFab(props) {
+    return (
+        <Fab color="secondary_noBg" {...props} sx={{ border: 1, borderColor: "divider", ...props.sx }}>
+            {props.children}
+        </Fab>
+    );
+}
+
 function WideButton(props) {
     return (
         <Fab variant="extended" {...props} style={{ width: "100%" }}>
@@ -201,4 +209,4 @@ function BlueTextButton(props) {
     );
 }
 
-export { TabButton, PostButton, ButtonSvg, ButtonIcon, ProfileButton, ResponsiveButton, SelectableButton, SelectableIcon, TopMenuButton, CornerButton, OutlinedButton, WideButton,BlueTextButton };
+export { TabButton, PostButton, ButtonSvg, ButtonIcon, ProfileButton, ResponsiveButton, SelectableButton, SelectableIcon, TopMenuButton, CornerButton, OutlinedButton, WideButton,BlueTextButton,OutlinedFab };

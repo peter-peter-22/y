@@ -7,19 +7,11 @@ import * as pp from "../components/passport.js";
 import { CheckRechapta } from "./register.js";
 import { exists_email } from "./user.js";
 import { SendMailAsync } from "./register.js";
+import { change_password, create_secret, clear_user_request, expiration_minutes } from "./change_password_queries.js";
+import { hashPasswordAsync } from "../components/passport_strategies/local.js";
 const router = express.Router();
 
-const create_secret = `
-INSERT INTO PASSWORD_CHANGES (ID)
-VALUES($1) ON CONFLICT (ID) DO
-UPDATE
-SET CREATED = DEFAULT,
-	SECRET = DEFAULT
-returning secret`;
-
-const expireMinutes = 15;
-
-const skip=true;
+const skip = false;
 
 router.post("/submit_chapta", async (req, res) => {
     //get inputs
@@ -27,7 +19,7 @@ router.post("/submit_chapta", async (req, res) => {
         email: "required|email",
         recaptchaToken: "required"
     });
-    if(!skip) await CheckV(v);
+    if (!skip) await CheckV(v);
     const { email, recaptchaToken } = req.body;
 
     //get the user that belong to this email
@@ -37,7 +29,7 @@ router.post("/submit_chapta", async (req, res) => {
     const user_id = user_query.rows[0].id;
 
     //check rechapta solution
-     if(!skip) await CheckRechapta(recaptchaToken);
+    if (!skip) await CheckRechapta(recaptchaToken);
 
     //generate secret code
     const code_query = await (db.query(create_secret, [user_id]));
@@ -52,21 +44,39 @@ router.post("/submit_chapta", async (req, res) => {
         text: `
 Open the link below to change your password.
 ${link}
-Expires in ${expireMinutes} minutes!`
+Expires in ${expiration_minutes} minutes!`
     };
 
     await SendMailAsync(mailOptions);
     res.sendStatus(200);
 });
 
-router.post("/change_password", async (req, res) => {
+router.post("/change", async (req, res) => {
+    //get inputs
     const v = new Validator(req.body, {
         user_id: "required|integer",
-        secret:"required|integer"
+        secret: "required|integer",
+        password: "required|password"
     });
     await CheckV(v);
-    const { user_id, secret } = req.body;
+    const { user_id, secret, password } = req.body;
 
+    //get password hash
+    const hash = await hashPasswordAsync(password);
+
+    //change the password of the user if the secret and expiration is correct
+    const change = await db.query(named(change_password)({
+        user_id: user_id,
+        secret: secret,
+        password: hash
+    }));
+    if (change.rowCount === 0)
+        CheckErr("This password change request is expired or invalid. Request another password change email and click the new link.");
+
+    //delete the used change request
+    await db.query(named(clear_user_request)({ user_id: user_id }));
+
+    res.sendStatus(200);
 });
 
 export default router;

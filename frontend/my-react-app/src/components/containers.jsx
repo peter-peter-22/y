@@ -19,7 +19,7 @@ import Link from '@mui/material/Link';
 
 function BoxList(props) {
     return (
-        <Box sx={{ borderRadius: 2, overflow: "hidden", bgcolor: 'secondary_blue.main' }}>
+        <Box sx={{ borderRadius: 2, overflow: "hidden", bgcolor: 'secondary_blue.main' }} {...props}>
             <List sx={{ p: 0 }}>
                 {props.children}
             </List>

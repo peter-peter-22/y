@@ -123,17 +123,17 @@ function UserName(props) {
 
 function UserLink(props) {
     return (
-        <StyledNavlink typography="small_bold" to={GetProfileLink(props.user)} style={noOverflow} >
+        <StyledLink typography="small_bold" to={GetProfileLink(props.user)} style={noOverflow} >
             <GetUserName user={props.user} />
-        </StyledNavlink>
+        </StyledLink>
     );
 }
 
 function UserKeyLink(props) {
     return (
-        <StyledNavlink typography="small_fade" to={GetProfileLink(props.user)} style={noOverflow} >
+        <StyledLink typography="small_fade" to={GetProfileLink(props.user)} style={noOverflow} >
             <GetUserKey user={props.user} />
-        </StyledNavlink>
+        </StyledLink>
     );
 }
 
@@ -159,13 +159,13 @@ function UserKey(props) {
 
 function FadeLink(props) {
     return (
-        <StyledNavlink typography="small_fade" {...props}>{props.children}</StyledNavlink>
+        <StyledLink typography="small_fade" {...props}>{props.children}</StyledLink>
     );
 }
 
 function BoldLink(props) {
     return (
-        <StyledNavlink typography="small_bold" {...props}>{props.children}</StyledNavlink>
+        <StyledLink typography="small_bold" {...props}>{props.children}</StyledLink>
     );
 }
 
@@ -272,9 +272,9 @@ function ReplyingFrom(props) {
     return (
         <TextRow >
             <Typography variant="small_fade" style={{ flexShrink: 0, ...noOverflow, margin: 0 }}>Replying to</Typography>
-            <StyledNavlink to={"/posts/" + post.replying_to} typography="small_fade">
+            <StyledLink to={"/posts/" + post.replying_to} typography="small_fade">
                 <GetUserKey user={post.replied_user} />
-            </StyledNavlink>
+            </StyledLink>
         </TextRow>
     );
 }
@@ -284,28 +284,28 @@ function ReplyingTo(props) {
     return (
         <TextRow >
             <Typography variant="small_fade" style={{ flexShrink: 0, ...noOverflow, margin: 0 }}>Replying to</Typography>
-            <StyledNavlink to={"/posts/" + user.id} typography="small_fade">
+            <StyledLink to={"/posts/" + user.id} typography="small_fade">
                 <GetUserKey user={user} />
-            </StyledNavlink>
+            </StyledLink>
         </TextRow>
     );
 }
 
-function StyledNavlink(props) {
+function StyledLink(props) {
     return (
-        <NavLink to={props.to} style={{ textDecoration: "none", ...noOverflow }} onClick={(e) => { e.stopPropagation() }}>
+        <Link to={props.to} style={{ textDecoration: "none", ...noOverflow }} onClick={(e) => { e.stopPropagation() }}>
             <Typography variant={props.typography} sx={{ "&:hover": { textDecoration: "underline" } }} {...props}>
                 {props.children}
             </Typography>
-        </NavLink>
+        </Link>
     );
 }
 
-function InheritNavLink(props) {
+function InheritLink(props) {
     return (
-        <NavLink to={props.to} style={{ textDecoration: "inherit", color: "inherit", fontFamily: "inherit" }} onClick={(e) => { e.stopPropagation() }}>
+        <Link to={props.to} style={{ textDecoration: "inherit", color: "inherit", fontFamily: "inherit" }} onClick={(e) => { e.stopPropagation() }}>
             {props.children}
-        </NavLink>
+        </Link>
     );
 }
 
@@ -601,4 +601,4 @@ function formatNumber(number) {
     return number;
 }
 
-export { AboveBreakpoint, ResponsiveSelector, ChooseChild, ChooseChildBool, TopMenu, ProfileText, FadeLink, TabSwitcher, UserName, UserKey, noOverflow, BoldLink, UserLink, UserKeyLink, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, logo, creation, ToCorner, CenterLogo, default_profile, FollowDialog, GetProfilePicture, default_image, FollowButton, GetPostPictures, LinelessLink, OnlineList, Loading, SimplePopOver, formatNumber, TabSwitcherLinks, GetProfileBanner, GetProfileLink, ReplyingFrom, ToggleFollow, ToggleBlock, StyledNavlink, InheritNavLink }
+export { AboveBreakpoint, ResponsiveSelector, ChooseChild, ChooseChildBool, TopMenu, ProfileText, FadeLink, TabSwitcher, UserName, UserKey, noOverflow, BoldLink, UserLink, UserKeyLink, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, logo, creation, ToCorner, CenterLogo, default_profile, FollowDialog, GetProfilePicture, default_image, FollowButton, GetPostPictures, LinelessLink, OnlineList, Loading, SimplePopOver, formatNumber, TabSwitcherLinks, GetProfileBanner, GetProfileLink, ReplyingFrom, ToggleFollow, ToggleBlock, StyledLink, InheritLink }

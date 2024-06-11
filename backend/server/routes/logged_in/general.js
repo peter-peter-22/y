@@ -13,8 +13,6 @@ import *  as url from "url";
 import path from "path";
 import fileUpload from "express-fileupload";
 import fs from "fs";
-import yesql from 'yesql';
-const named = yesql.pg;
 import cors from "cors";
 import axios from "axios";
 import nodemailer from "nodemailer";

@@ -42,7 +42,11 @@ const black = {
 const colors = {
     like: "#F91880",
     share: "#00BA7C",
-}
+};
+
+const success={
+    main:"#00B515"
+};
 
 //fonts
 
@@ -121,7 +125,8 @@ const theme = createTheme({
         black: black,
         secondary_noBg: secondaryNoBackground,
         transparentBlack: transparentBlack,
-        colors
+        colors,
+        success:success
     },
 
     components: {

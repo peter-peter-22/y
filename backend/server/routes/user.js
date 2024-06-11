@@ -66,5 +66,19 @@ async function selectable_username(new_username, current_username) {
     return (!exists || new_username === current_username);
 }
 
+router.get("/get", async (req, res) => {
+    res.json({
+        user: req.user,
+        showStartMessage: req.session.showStartMessage,
+        pending_registration: req.session.pending_registration,
+        maxLetters:GetMaxLetters(req.user)
+    });
+});
+
+function GetMaxLetters(user)
+{
+    return 280;
+}
+
 export default router;
-export { username_exists, selectable_username,exists_email };
+export { username_exists, selectable_username,exists_email,GetMaxLetters };

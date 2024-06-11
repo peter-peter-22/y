@@ -77,4 +77,5 @@ async function initialize() {
 global.app = app;
 global.config = config;
 global.ISOToSQL = (iso)=>{return new Moment(iso).format()};
+global.named=named;
 export { transporter, pgPool, initialize };

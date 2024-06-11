@@ -16,8 +16,7 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import { BoxList, BoxListOutlined, BlueTextButton } from '/src/components/containers';
 import IconButton from '@mui/material/IconButton';
-import Link from '@mui/material/Link';
-import { ResponsiveButton, ButtonIcon, ButtonSvg, TabButton, PostButton, ProfileButton, TopMenuButton, CornerButton, WideButton, OutlinedButton } from "/src/components/buttons.jsx";
+import { ResponsiveButton, ButtonIcon, ButtonSvg, TabButton, PostButton, ProfileButton, TopMenuButton, CornerButton, WideButton, OutlinedButton, OutlinedFab } from "/src/components/buttons.jsx";
 import { Grid } from '@mui/material';
 import Divider from '@mui/material/Divider';
 import TextField from '@mui/material/TextField';
@@ -41,13 +40,67 @@ import { styled } from '@mui/material/styles';
 import InputAdornment from '@mui/material/InputAdornment';
 import Dialog from '@mui/material/Dialog';
 import { UserData } from "/src/App.jsx";
-import { Error, Modals, ErrorText } from "/src/components/modals";
+import { Error, Modals, ErrorText, SuccessModal } from "/src/components/modals";
 import { AlternativeLogin, GrowingLine, BigModal, Or, BottomButtonWithBorder, ByRegistering, ModalMargin, BigModalMargin } from "/src/components/no_user";
-import { RechaptaInput, validateEmail, EmailInput } from "/src/components/create_account";
-import { useParams } from "react-router-dom";
+import { RechaptaInput, validateEmail, EmailInput, PasswordInput } from "/src/components/create_account";
+import { Link, useParams, useNavigate } from "react-router-dom";
+import Container from '@mui/material/Container';
 
-
-export default ()=>{
+export default () => {
     const { user_id, secret } = useParams();
-    return(user_id + " " + secret);
+    const navigate = useNavigate();
+    const [password, setPassword] = useState('');
+    const [passwordOk, setPasswordOk] = useState(false);
+
+    async function Submit() {
+        try {
+            await axios.post(Endpoint("/user/change_password/change"), {
+                user_id: user_id,
+                secret: secret,
+                password: password
+            });
+            //success, show a modal and go back to the main page
+            Modals[0].Show(<SuccessModal
+                title="Password changed"
+                text="Now you can sign-in with your new password"
+            />);
+            navigate("/");
+        } catch (err) {
+            ThrowIfNotAxios(err);
+        }
+    }
+
+    return (
+        <Container maxWidth="md" sx={{ p: 1, boxSizing: "border-box", display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", width: "1000px", maxWidth: "100%", mx: "auto" }}>
+            <BoxList style={{ flexGrow: 1 }}>
+
+                <ListItem>
+                    <Typography variant="big_bold">
+                        Change password
+                    </Typography>
+                </ListItem>
+
+                <ListItem>
+                    <Typography variant="small">
+                        Enter your new password
+                    </Typography>
+                </ListItem>
+
+                <ListItem>
+                    <PasswordInput onChangePassword={setPassword} onChangeOk={setPasswordOk} />
+                </ListItem>
+
+                <ListItem >
+                    <Stack direction="row" spacing={1} style={{ marginLeft: "auto" }}>
+                        <Link to="/">
+                            <OutlinedFab variant="extended" size="small">
+                                Cancel
+                            </OutlinedFab>
+                        </Link>
+                        <Fab onClick={Submit} variant="extended" size="small" color="black" disabled={!passwordOk}>Change</Fab>
+                    </Stack>
+                </ListItem>
+            </BoxList>
+        </Container>
+    );
 };

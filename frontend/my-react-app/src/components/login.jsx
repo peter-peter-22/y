@@ -42,7 +42,7 @@ import { styled } from '@mui/material/styles';
 import InputAdornment from '@mui/material/InputAdornment';
 import Dialog from '@mui/material/Dialog';
 import { UserData } from "/src/App.jsx";
-import { Error, Modals, ErrorText } from "/src/components/modals";
+import { Error, Modals, ErrorText,SuccessModal } from "/src/components/modals";
 import { AlternativeLogin, GrowingLine, BigModal, Or, BottomButtonWithBorder, ByRegistering, ModalMargin, BigModalMargin } from "/src/components/no_user";
 import { RechaptaInput, validateEmail, EmailInput } from "/src/components/create_account";
 
@@ -204,9 +204,7 @@ function ForgotPassword(props) {
             );
             //rechapta ok, email sent, show modal
             Modals[0].Show(
-                <Typography variant="big_bold">
-                    We sent you an email.
-                </Typography>
+                <SuccessModal title={"We sent you an email."}/>
             )
         }
         catch (err) {

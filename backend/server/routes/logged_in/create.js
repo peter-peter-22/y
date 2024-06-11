@@ -24,7 +24,7 @@ import { username_exists, selectable_username } from "../user.js";
 import { Validator } from "node-input-validator";
 import { CheckV, CheckErr, validate_image } from "../../components/validations.js";
 import { postQuery } from "./general.js";
-import {GetMaxLetters} from "../general.js";
+import {GetMaxLetters} from "../user.js";
 
 const router = express.Router();
 

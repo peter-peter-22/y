@@ -28,9 +28,6 @@ initialize_app();
 import { router as passport_routes } from "./components/passport.js";
 
 //routes
-import general from "./routes/general.js";
-app.use('/', general);
-
 import register from "./routes/register.js";
 app.use('/', register);
 

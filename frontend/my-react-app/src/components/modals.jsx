@@ -100,15 +100,41 @@ function ErrorText(text) {
 
 function ErrorModal(props) {
     return (
+        <GenericModal
+            title={props.title ? props.title : "Error"}
+            text={props.text}
+            color="error"
+        />
+    );
+}
+
+function SuccessModal(props) {
+    return (
+        <GenericModal
+            title={props.title ? props.title : "Success"}
+            text={props.text}
+            color="success.main"
+        />
+    );
+}
+
+function GenericModal(props) {
+    const title = props.title;
+    const text = props.text;
+    return (
         <>
-            <DialogTitle color="error">
-                {props.title ? props.title : "Error"}
-            </DialogTitle>
-            <DialogContent>
-                <DialogContentText>
-                    {props.text}
-                </DialogContentText>
-            </DialogContent>
+            {title &&
+                <DialogTitle color={props.color}>
+                    {title}
+                </DialogTitle>
+            }
+            {text &&
+                <DialogContent>
+                    <DialogContentText>
+                        {text}
+                    </DialogContentText>
+                </DialogContent>
+            }
         </>
     );
 }
@@ -119,7 +145,7 @@ function ImagesModal(props) {
     const [open, setOpen] = useState(false);
     const [index, setIndex] = useState(0);
     const imagesRef = useRef(null);
-    const url = imagesRef.images?imagesRef.images[index]:"";
+    const url = imagesRef.images ? imagesRef.images[index] : "";
 
     ImagesDisplay.Show = (images, imageIndex) => {
         try {
@@ -192,4 +218,4 @@ function ShowImage(images, imageIndex) {
     ImagesDisplay.Show(images, imageIndex);
 }
 
-export { ErrorModal, Modals, ImagesDisplay, CreateModals, Error, ErrorText, ShowImage };
+export { ErrorModal, Modals, ImagesDisplay, CreateModals, Error, ErrorText, ShowImage,SuccessModal };
