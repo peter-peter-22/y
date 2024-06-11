@@ -58,12 +58,20 @@ niv.extend('datepast', ({ value }) => {
   return !moment.isAfter();
 });
 
+const imagesType = ['image/png', 'image/jpeg', 'image/jpg'];
 function validate_image(file) {
-  const imagesType = ['image/png', 'image/jpeg', 'image/jpg'];
   if (file === undefined)
     CheckErr("failed to upload image");
   if (!imagesType.includes(file.mimetype))
     CheckErr("invalid image(s), only .jpg and .png images are accepted");
 }
 
-export { CheckV, CheckErr, validate_image };
+const videosType = ['video/mp4'];
+function validate_video(file) {
+  if (file === undefined)
+    CheckErr("failed to upload video");
+  if (!videosType.includes(file.mimetype))
+    CheckErr("invalid video(s), only .mp4 videos are accepted");
+}
+
+export { CheckV, CheckErr, validate_image,validate_video,videosType,imagesType };

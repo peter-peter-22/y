@@ -29,8 +29,8 @@ import config from "/src/components/config.js";
 import { NavLink } from "react-router-dom";
 import CircularProgress from '@mui/material/CircularProgress';
 import Popover from '@mui/material/Popover';
-import { ExampleUser } from "/src/components/posts";
 import Grid from '@mui/material/Grid';
+import { Media, mediaTypes } from "/src/components/post_creator";
 
 const noOverflow = {
     whiteSpace: 'nowrap',
@@ -42,10 +42,6 @@ const noOverflow = {
 const logo = "/svg/y.svg";
 
 const creation = "© 2024 Y Corp.";
-
-const default_profile = "/images/default_profile.jpg";
-
-const default_image = "/images/example profile copy.jpg";
 
 function ResponsiveSelector(props) {
     let isBig = props.override === undefined ? AboveBreakpoint(props.breakpoint) : props.override;
@@ -338,11 +334,11 @@ function FollowDialog(props) {
     return (
         <ListItem disablePadding>
             <ListItemButton>
-                <Grid container spacing={1} sx={{ alignItems: "center", width: "100%" }}>
-                    <Grid item xs="auto">
+                <Stack direction="row" spacing={1} sx={{ alignItems: "center", width: "100%" }}>
+                    <div>
                         <Avatar src={GetProfilePicture(user)} />
-                    </Grid>
-                    <Grid item xs>
+                    </div>
+                    <div style={{ flexGrow: 1, overflow: "hidden" }}>
                         <Stack direction="column" >
                             <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
                                 <ProfileText user={user} />
@@ -350,8 +346,8 @@ function FollowDialog(props) {
                             </Stack>
                             {props.children}
                         </Stack>
-                    </Grid>
-                </Grid>
+                    </div>
+                </Stack>
             </ListItemButton>
         </ListItem>
     );
@@ -418,17 +414,28 @@ function GetProfileBanner(user, isUser) {
     return GetAnyProfileImage(user, config.profile_banner_url, isUser);
 }
 function GetAnyProfileImage(user, baseUrl, isUser) {
-    let url = user ? Endpoint(baseUrl + "/" + user.id + ".jpg") : default_image;//the default image is overridden by the onerror function of the image, this is just secondary
+    let url = Endpoint(baseUrl + "/" + user.id + ".jpg");
     if (isUser)
         url += "?" + UserData.getData.user.last_update;//updatecount grows by 1 each time the user is downloaded from the server, this updates the profile picture or banner when the user changes it
     return (url);
 }
 
-function GetPostPictures(post_id, image_count) {
-    const images = [];
-    for (let n = 0; n < image_count; n++)
-        images.push(Endpoint(config.post_pics_url + "/" + post_id + "_" + n + ".jpg"))
-    return images;
+function GetPostMedia(post) {
+    const medias = [];
+
+    //get video objects
+    for (let n = 0; n < post.video_count; n++) {
+        const url = Endpoint(config.post_videos_url + "/" + post.id + "_" + n + ".mp4");
+        medias.push(new Media(mediaTypes.video, url));
+    }
+
+    //get image objects
+    for (let n = 0; n < post.image_count; n++) {
+        const url = Endpoint(config.post_pics_url + "/" + post.id + "_" + n + ".jpg");
+        medias.push(new Media(mediaTypes.image, url));
+    }
+
+    return medias;
 }
 
 function LinelessLink(props) {
@@ -601,4 +608,4 @@ function formatNumber(number) {
     return number;
 }
 
-export { AboveBreakpoint, ResponsiveSelector, ChooseChild, ChooseChildBool, TopMenu, ProfileText, FadeLink, TabSwitcher, UserName, UserKey, noOverflow, BoldLink, UserLink, UserKeyLink, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, logo, creation, ToCorner, CenterLogo, default_profile, FollowDialog, GetProfilePicture, default_image, FollowButton, GetPostPictures, LinelessLink, OnlineList, Loading, SimplePopOver, formatNumber, TabSwitcherLinks, GetProfileBanner, GetProfileLink, ReplyingFrom, ToggleFollow, ToggleBlock, StyledLink, InheritLink }
+export { AboveBreakpoint, ResponsiveSelector, ChooseChild, ChooseChildBool, TopMenu, ProfileText, FadeLink, TabSwitcher, UserName, UserKey, noOverflow, BoldLink, UserLink, UserKeyLink, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, logo, creation, ToCorner, CenterLogo, FollowDialog, GetProfilePicture, FollowButton, GetPostMedia, LinelessLink, OnlineList, Loading, SimplePopOver, formatNumber, TabSwitcherLinks, GetProfileBanner, GetProfileLink, ReplyingFrom, ToggleFollow, ToggleBlock, StyledLink, InheritLink }

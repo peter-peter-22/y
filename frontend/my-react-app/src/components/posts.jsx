@@ -9,7 +9,7 @@ import Fab from '@mui/material/Fab';
 import { Icon } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, GetProfilePicture, default_image, GetPostPictures, OnlineList, SimplePopOver, formatNumber, UserLink, ReplyingFrom, ToggleFollow, ToggleBlock, InheritLink } from '/src/components/utilities';
+import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, GetProfilePicture, GetPostMedia, OnlineList, SimplePopOver, formatNumber, UserLink, ReplyingFrom, ToggleFollow, ToggleBlock, InheritLink } from '/src/components/utilities';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -34,6 +34,8 @@ import { Error, Modals, ShowImage } from "/src/components/modals";
 import { useNavigate } from "react-router-dom";
 import { ManagePost } from "/src/components/manage_content_button.jsx";
 import { UnblockButton } from "/src/pages/profile";
+import { ExamplePost, ExampleUser } from "/src/components/exampleData.js";
+import { PostCreator } from "/src/components/post_creator.jsx";
 const commentSections = {};
 
 function Prefix(props) {
@@ -83,7 +85,7 @@ function BorderlessPost(props) {
                     </Stack>
                     <ReplyingToPost post={overriden} />
                     <PostText post={overriden} />
-                    <PostMedia images={overriden.images} />
+                    <PostMedia medias={overriden.media} />
                 </Stack>
             } />
         <RowWithPrefix contents={
@@ -178,7 +180,7 @@ function PostFocused(props) {
 
             <Stack direction="column" sx={{ overflow: "hidden", mt: 1 }}>
                 <PostText post={overriden} />
-                <PostMedia images={overriden.images} />
+                <PostMedia medias={overriden.media} />
                 <Stack direction="row" spacing={0.5} sx={{ alignItems: "baseline", my: 1 }}>
                     <DateLink passed isoString={overriden.date} />
                     <Typography variant="small_fade">·</Typography>
@@ -215,171 +217,6 @@ function WritePost() {
         </ListBlock>
     );
 }
-
-function PostCreator(props) {
-    const [isFocused, setIsFocused] = React.useState(false);
-    const [getText, setText] = React.useState("");
-    const maxLetters = UserData.getData.maxLetters;
-    const keep = getText.substring(0, maxLetters);
-    const overflow = getText.substring(maxLetters);
-    const isComment = props.post !== undefined;
-    const isQuote = props.quoted !== undefined;
-    const onPost = props.onPost;
-
-    const handleFocus = () => {
-        setIsFocused(true);
-    };
-
-    function handleChange(e) {
-        setText(e.target.value);
-    }
-
-    const [files, setFiles] = useState([]);
-    const [urls, setUrls] = useState([]);
-    const inputRef = useRef(null);
-
-    function handleFile(e) {
-        const selected = e.target.files;
-        if (selected !== undefined) {
-            setFiles((prev) => [...prev, ...selected]);
-            for (let n = 0; n < selected.length; n++) {
-                const selectedUrl = URL.createObjectURL(selected[n]);
-                setUrls((prev) => [...prev, selectedUrl]);
-            }
-        }
-    }
-
-    function insertPhoto() {
-        inputRef.current.click();
-    }
-
-    async function submitPost() {
-        const formData = new FormData();
-        files.forEach(file => formData.append('images', file));
-        formData.append('text', getText);
-
-        let endpoint;
-        if (isComment) {
-            formData.append("replying_to", props.post.id);
-            endpoint = "/member/create/comment";
-        }
-        else if (isQuote) {
-            formData.append("quoted", props.quoted.id);
-            endpoint = "/member/create/quote";
-        }
-        else {
-            endpoint = "/member/create/post";
-        }
-
-        try {
-            const result = await axios.post(
-                Endpoint(endpoint),
-                formData,
-                {
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    }
-                }
-            );
-            setFiles([]);
-            setUrls([]);
-            setText("");
-
-            //update post list on client without refreshing the page
-            const post = result.data;
-            AddPostToCommentSection(post);
-            if (onPost)
-                onPost();
-        }
-        catch (err) {
-            ThrowIfNotAxios(err);
-        }
-    }
-
-    return (
-        <Stack direction="column" spacing={1}>
-            {isComment && isFocused &&
-                <Box sx={{ my: 1 }} >
-                    <RowWithPrefix contents={
-                        <ReplyingTo post={props.post} />
-                    } />
-                </Box>
-            }
-            <RowWithPrefix
-                prefix={
-                    <Avatar sx={{ my: 1 }} src={GetProfilePicture(UserData.getData.user)} />
-                }
-                contents={
-                    <Stack direction="column">
-                        <Stack direction={isFocused ? "column" : "row"}>
-                            <Box sx={{ pb: 1, pt: 2, display: "inline-flex", flexGrow: 1, position: "relative" }}>
-
-                                <Typography variant="body1"
-                                    style={{
-                                        position: "absolute",
-                                        height: "100%",
-                                        width: "100%",
-                                        overflow: "hidden",
-                                        whiteSpace: "pre",
-                                        lineHeight: "1.4375em",
-                                        overflowWrap: "break-word",
-                                        textWrap: "wrap",
-                                        color: "transparent"
-                                    }}
-                                >
-                                    {keep}
-                                    <mark style={{ background: "#FF000044" }}>{overflow}</mark>
-                                </Typography>
-
-                                <PlainTextField
-                                    placeholder={props.isComment ? "Post your reply" : "Write something"}
-                                    multiline
-                                    fullWidth
-                                    onFocus={handleFocus}
-                                    onChange={handleChange}
-                                    value={getText}
-                                />
-
-                            </Box>
-
-                            <Stack direction="row" alignItems="center" >
-                                {isFocused &&
-                                    <Stack direction="row" alignItems="center" justifyContent={"space-between"} style={{ flexGrow: 1 }}>
-                                        <Stack direction="row" spacing={0.5}>
-                                            <input ref={inputRef} type="file" accept={config.accepted_image_types} onChange={handleFile} multiple style={{ display: "none" }} />
-                                            <CommentButton onClick={insertPhoto}>insert_photo</CommentButton>
-                                            <CommentButton>gif_box</CommentButton>
-                                            <CommentButton>sentiment_satisfied_alt</CommentButton>
-                                            <CommentButton>location_on</CommentButton>
-                                        </Stack>
-
-                                        <LetterCounter maxvalue={maxLetters} letters={getText.length} />
-                                    </Stack>
-                                }
-                                <Fab disabled={getText.length === 0 || getText.length > maxLetters} variant="extended" size="small" color="primary" onClick={submitPost}>{isComment ? "Reply" : "Post"}</Fab>
-                            </Stack>
-
-                        </Stack>
-                        <PostMedia images={urls} />
-                    </Stack>
-                } />
-
-            {isQuote &&
-                <QuotedFrame>
-                    <BorderlessPost post={props.quoted} />
-                </QuotedFrame>
-            }
-
-        </Stack>
-    );
-}
-
-function AddPostToCommentSection(post) {
-    const mySection = commentSections.active;
-    if (mySection)
-        mySection.addPost(post);
-}
-
 
 function PostButtonRow(props) {
     let post = props.post;
@@ -530,77 +367,6 @@ function CountableButton(post, initial_count, initial_active, url) {
     }
 }
 
-function LetterCounter(props) {
-    const used = Math.min(props.letters / props.maxvalue * 100, 100);
-    const remaining = props.maxvalue - props.letters;
-    let warning = false;
-    const normalColor = theme.palette.primary.main;
-    const warningColor = "yellow";
-    const errorColor = "red";
-    let circleColor;
-    let letterColor;
-
-    if (remaining <= -10) {
-        circleColor = "transparent";
-        letterColor = errorColor;
-        warning = true;
-    }
-    else if (remaining <= 0) {
-        circleColor = errorColor;
-        letterColor = errorColor;
-        warning = true;
-    }
-    else if (remaining <= 20) {
-        circleColor = warningColor;
-        letterColor = "inherit";
-        warning = true;
-    }
-    else {
-        circleColor = normalColor;
-        letterColor = "inherit";
-    }
-
-    return (
-        <Box sx={{ position: 'relative', display: 'inline-flex' }}>
-            <CircularProgress variant="determinate"
-                sx={{
-                    "& .MuiCircularProgress-circle": {
-                        transition: "none"
-                    },
-                }}
-                value={used}
-                style={{ margin: "0px 10px", height: "25px", width: "25px", color: circleColor }}
-            />
-            <Box
-                sx={{
-                    top: 0,
-                    left: 0,
-                    bottom: 0,
-                    right: 0,
-                    position: 'absolute',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                }}
-            >
-                <Typography variant="caption" component="div" style={{ color: letterColor }}>
-                    {warning && remaining}
-                </Typography>
-            </Box>
-        </Box>
-    );
-}
-
-function CommentButton(props) {
-    return (
-        <IconButton color="primary" size="small" onClick={props.onClick}>
-            <Icon fontSize="small" baseClassName="material-icons-outlined">
-                {props.children}
-            </Icon>
-        </IconButton>
-    );
-}
-
 function PostList(props) {
     const onlineListRef = useRef();
     const [key, setKey] = useState(props.post ? props.post.id : -1);
@@ -652,84 +418,32 @@ function SimplifiedPostList(props) {
     return <PostList getPosts={getPosts} post={props.post} />;
 }
 
-function ExampleUser() {
-    return {
-        id: -1,
-        name: "name",
-        username: "username"
-    }
-}
+function BlockMedia(props) {
+    const media = props.media;
+    const url = media.url;
 
-function ExamplePost() {
-    return {
-        id: -1,
-        repost: false,
-        quote: false,
-        replying_to: null,
-        reposted_post: undefined,
-        publisher: ExampleUser(),
-        date: new Date("2024-01-01").toISOString(),
-        text: "post text",
-        images: [default_image],
-        views: 9999999,
-        repost_count: 353,
-        like_count: 4242,
-        comment_count: 1234423,
-        liked_by_user: false,
-        bookmark_count: 10,
-        bookmarked_by_user: false,
-    };
-}
+    let Displayer;
+    if (media.is_image())
+        Displayer = (
+            <img src={url} style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+            }} />
+        );
+    else if (media.is_video())
+        Displayer = (
+            <video
+            controls
+            style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+            }} >
+                <source src={url} type="video/mp4"/>
+            </video>
+        );
 
-function ExampleReply() {
-    const post = ExamplePost();
-    post.replying_to = post.id;
-    post.replied_user = ExampleUser();
-    return post;
-}
-
-function ExampleQuote() {
-    return {
-        id: -2,
-        repost: false,
-        quote: true,
-        reposted_post: ExamplePost(),
-        publisher: ExampleUser(),
-        date: new Date("2024-01-01").toISOString(),
-        text: undefined,
-        images: undefined,
-        views: 0,
-        repost_count: 0,
-        like_count: 0,
-        comment_count: 0,
-        liked_by_user: false,
-        bookmark_count: 10,
-        bookmarked_by_user: false,
-    };
-}
-
-function ExampleRepost() {
-    const reposted_post = ExamplePost();
-    return {
-        id: reposted_post.id,
-        repost: true,
-        quote: false,
-        reposted_post: ExamplePost(),
-        publisher: ExampleUser(),
-        date: new Date("2024-01-01").toISOString(),
-        text: undefined,
-        images: undefined,
-        views: 0,
-        repost_count: 0,
-        like_count: 0,
-        comment_count: 0,
-        liked_by_user: false,
-        bookmark_count: 10,
-        bookmarked_by_user: false,
-    };
-}
-
-function BlockImage(props) {
     return (
         <div style={{
             flex: 1,
@@ -739,11 +453,7 @@ function BlockImage(props) {
             cursor: "pointer"
         }}
             onClick={props.onClick}>
-            <img src={props.src} style={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-            }} />
+            {Displayer}
             {props.children}
         </div>
     )
@@ -760,27 +470,27 @@ function PostBottomIcon(props) {
 }
 
 function ClickableImage(props) {
-    const images = useContext(ImageContext);
+    const medias = useContext(MediaContext);
     function Show(index, e) {
         e.stopPropagation();
-        ShowImage(images, index);
+        ShowImage(medias, index);
     }
     return (
-        <BlockImage src={images[props.index]} onClick={(e) => { Show(props.index, e); }}>
+        <BlockMedia media={medias[props.index]} onClick={(e) => { Show(props.index, e); }}>
             {props.children}
-        </BlockImage>
+        </BlockMedia>
     );
 }
 
-const ImageContext = createContext([]);
+const MediaContext = createContext([]);
 
 function PostMedia(props) {
     const spacing = "2px";
-    const images = props.images;
+    const medias = props.medias;
 
-    if (images && images.length > 0) {
+    if (medias && medias.length > 0) {
         let imageElements;
-        const count = images.length;
+        const count = medias.length;
         if (count === 1) {
             imageElements = (
                 <ClickableImage index={0} />
@@ -834,11 +544,11 @@ function PostMedia(props) {
                 borderRadius: "10px",
                 boxSizing: "border-box"
             }}>
-                <ImageContext.Provider value={images}>
+                <MediaContext.Provider value={medias}>
                     <Stack direction="column" spacing={spacing}>
                         {imageElements}
                     </Stack>
-                </ImageContext.Provider>
+                </MediaContext.Provider>
             </Box>
         );
     }
@@ -914,7 +624,7 @@ function AddDataToPost(post) {
         AddDataToPost(post.reposted_post);
     }
 
-    post.images = GetPostPictures(post.id, post.image_count);
+    post.media = GetPostMedia(post);
 }
 
 //if this is a repost, the data of the reposted post will be displayed instead of the original post
@@ -928,4 +638,4 @@ function OverrideWithRepost(post) {
 }
 
 
-export { Post, PostList, PostFocused, ListBlockButton, ListBlock, RowWithPrefix, PostButtonRow, WritePost, OverrideWithRepost, BlockImage, ImageContext, ClickableImage, PostModalFrame, ExampleUser, ExamplePost, ExampleReply, OpenPostOnClick, OpenOnClick, SimplifiedPostList, commentSections };
+export { Post, PostList, PostFocused, ListBlockButton, ListBlock, RowWithPrefix, PostButtonRow, WritePost, OverrideWithRepost, BlockMedia, MediaContext, ClickableImage, PostModalFrame, OpenPostOnClick, OpenOnClick, SimplifiedPostList, commentSections, BorderlessPost, PostMedia };

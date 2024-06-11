@@ -26,7 +26,7 @@ import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import { theme } from "/src/styles/mui/my_theme";
 import { PlainTextField } from "/src/components/inputs";
-import { Post, PostList, PostFocused, ListBlockButton, ListBlock, RowWithPrefix, PostButtonRow, ExampleUser, ExamplePost, ExampleReply, OpenPostOnClick, OpenOnClick } from "/src/components/posts";
+import { Post, PostList, PostFocused, ListBlockButton, ListBlock, RowWithPrefix, PostButtonRow, OpenPostOnClick, OpenOnClick } from "/src/components/posts";
 import { Endpoint, FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
 import axios from 'axios';
 import { UserData } from "/src/App.jsx";
@@ -168,68 +168,6 @@ const notificationTypes = {
     follow: 4
 }
 
-function ExampleNotifications() {
-    return [
-        //like, 1 user
-        {
-            type: 0,
-            users: [ExampleUser()],
-            user_count: 1,
-            post: ExamplePost()
-        },
-        //like, multiple users
-        {
-            type: 0,
-            users: [ExampleUser(), ExampleUser(), ExampleUser()],
-            user_count: 10,
-            post: ExamplePost()
-        },
-        //like, reply, multiple users
-        {
-            type: 0,
-            users: [ExampleUser(), ExampleUser(), ExampleUser()],
-            user_count: 10,
-            post: ExampleReply()
-        },
-        //follow, 1 user
-        {
-            type: 4,
-            users: [ExampleUser()],
-            user_count: 1,
-        },
-        //follow, multiple users
-        {
-            type: 4,
-            users: [ExampleUser(), ExampleUser(), ExampleUser()],
-            user_count: 10,
-        },
-        //reply
-        {
-            type: 1,
-            post: ExampleReply(),
-        },
-        //repost, 1 user
-        {
-            type: 2,
-            users: [ExampleUser()],
-            post: ExamplePost(),
-        },
-        //repost, multiple users
-        {
-            type: 2,
-            users: [ExampleUser(), ExampleUser(), ExampleUser()],
-            user_count: 10,
-            post: ExamplePost(),
-        },
-        //repost, reply, multiple users
-        {
-            type: 2,
-            users: [ExampleUser(), ExampleUser(), ExampleUser()],
-            user_count: 10,
-            post: ExampleReply(),
-        },
-    ];
-}
 
 function NotificationList(props) {
     async function download(from) {

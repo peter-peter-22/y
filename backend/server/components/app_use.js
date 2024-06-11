@@ -58,7 +58,7 @@ function initialize() {
     app.use(
         fileUpload({
             limits: {
-                fileSize: 10000000, // Around 10MB
+                fileSize: 100000000, // Around 100MB
             },
             abortOnLimit: true,
         })

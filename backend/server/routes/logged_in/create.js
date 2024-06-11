@@ -22,20 +22,20 @@ import * as g from "../../global.js";
 import * as pp from "../../components/passport.js";
 import { username_exists, selectable_username } from "../user.js";
 import { Validator } from "node-input-validator";
-import { CheckV, CheckErr, validate_image } from "../../components/validations.js";
+import { CheckV, CheckErr, validate_image, validate_video, videosType, imagesType } from "../../components/validations.js";
 import { postQuery } from "./general.js";
-import {GetMaxLetters} from "../user.js";
+import { GetMaxLetters } from "../user.js";
 
 const router = express.Router();
 
 router.post("/post", async (req, res, next) => {
     //db
-    async function postToDatabase(user_id, text, image_count) {
-        const result = await db.query(named("INSERT INTO posts (publisher,text,image_count) VALUES (:user_id, :text,:image_count) RETURNING id")(
+    async function postToDatabase(user_id, text, media) {
+        const result = await db.query(named("INSERT INTO posts (publisher,text,image_count,video_count) VALUES (:user_id, :text,:image_count,:video_count) RETURNING id")(
             {
                 user_id: user_id,
                 text: text,
-                image_count: image_count,
+                ...media
             }
         ));
         return result;
@@ -53,19 +53,19 @@ router.post("/comment", async (req, res, next) => {
     const { replying_to } = req.body;
 
     //db
-    async function commentToDatabase(user_id, text, image_count) {
+    async function commentToDatabase(user_id, text, media) {
         try {
             const getRepliedPublisher = "(SELECT publisher FROM POSTS WHERE id=:replying_to)";
             const result = await db.query(named(`
             INSERT INTO posts 
-            (publisher,text,image_count,replying_to,replying_to_publisher) 
-            VALUES (:user_id, :text,:image_count,:replying_to,${getRepliedPublisher}) 
+            (publisher,text,image_count,video_count,replying_to,replying_to_publisher) 
+            VALUES (:user_id, :text,:image_count,:video_count,:replying_to,${getRepliedPublisher}) 
             RETURNING id`)
                 (
                     {
                         user_id: user_id,
                         text: text,
-                        image_count: image_count,
+                        ...media,
                         replying_to: replying_to
                     }
                 ));
@@ -96,22 +96,22 @@ router.post("/quote", async (req, res, next) => {
         CheckErr("a repost cannot be quoted");
 
     //db
-    async function commentToDatabase(user_id, text, image_count) {
+    async function quoteToDatabase(user_id, text, media) {
         try {
-            const getQuotedUser=`(SELECT publisher FROM POSTS WHERE id=:quoted)`;
+            const getQuotedUser = `(SELECT publisher FROM POSTS WHERE id=:quoted)`;
             const result = await db.query(named(`
             INSERT INTO posts 
-            (publisher,text,image_count,repost,reposted_from_user) 
-            VALUES (:user_id, :text,:image_count,:quoted,${getQuotedUser}) 
+            (publisher,text,image_count,video_count,repost,reposted_from_user) 
+            VALUES (:user_id, :text,:image_count,:video_count,:quoted,${getQuotedUser}) 
             RETURNING id`)
-            (
-                {
-                    user_id: user_id,
-                    text: text,
-                    image_count: image_count,
-                    quoted: quoted
-                }
-            ));
+                (
+                    {
+                        user_id: user_id,
+                        text: text,
+                        ...media,
+                        quoted: quoted
+                    }
+                ));
             return result;
         }
         catch (err) {
@@ -121,7 +121,7 @@ router.post("/quote", async (req, res, next) => {
         }
     }
 
-    await postAny(req, res, next, commentToDatabase);
+    await postAny(req, res, next, quoteToDatabase);
 });
 
 
@@ -132,7 +132,8 @@ async function postAny(req, res, next, saveToDatabase) {
 
         //upload to database
         const { text } = req.body;
-        const result = await saveToDatabase(req.user.id, text, files ? files.length : 0);//must return the id of the published post
+        const media_count = countMedia(files);
+        const result = await saveToDatabase(req.user.id, text, media_count);//must return the id of the published post
         const post_id = result.rows[0].id;
 
         //upload files
@@ -147,10 +148,18 @@ async function postAny(req, res, next, saveToDatabase) {
     }
 }
 
+function countMedia(mediaGroups) {
+    const media_count = {
+        image_count: mediaGroups.images.length,
+        video_count: mediaGroups.videos.length
+    };
+    return media_count;
+}
+
 
 async function getAndValidatePost(req) {
     const v = new Validator(req.body, {
-        text: "required|string|maxLength:"+GetMaxLetters(req.user)
+        text: "required|string|maxLength:" + GetMaxLetters(req.user)
     });
     await CheckV(v);
 
@@ -158,23 +167,47 @@ async function getAndValidatePost(req) {
     return files;
 }
 
-function uploadPostFiles(files, post_id) {
-    if (files !== undefined)
-        files.forEach((file, index) => {
-            file.mv(config.__dirname + "/public/images/posts/" + post_id + "_" + index + ".jpg");
-        });
+function uploadPostFiles(mediaGroups, post_id) {
+
+    const fileTypes = {
+        images: "jpg",
+        videos: "mp4"
+    }
+
+    for (const [type, files] of Object.entries(mediaGroups)) {
+        if (files !== undefined)
+            files.forEach((file, index) => {
+                const myType = fileTypes[type];
+                file.mv(config.__dirname + `/public/${type}/posts/${post_id}_${index}.${myType}`);
+            });
+    }
 }
 
 function getAndValidateFiles(req) {
-    const files = tryGetFiles(req, "images");
-    if (files !== undefined)
-        files.forEach(file => {
-            validate_image(file);
-        });
-    return files;
+    //both images and videos
+    const medias = tryGetFiles(req, "medias");
+    const images = [];
+    const videos = [];
+    medias.forEach(media => {
+        if (videosType.includes(media.mimetype)) {
+            validate_video(media);
+            videos.push(media);
+        }
+        else if (imagesType.includes(media.mimetype)) {
+            validate_image(media);
+            images.push(media);
+        }
+        else
+            CheckErr("invalid media type");
+    });
+
+    return {
+        images: images,
+        videos: videos
+    };
 }
 
-
+//convert the files to array even if there is only one
 function tryGetFiles(req, fileName) {
     if (req.files) {
         const target = req.files[fileName];

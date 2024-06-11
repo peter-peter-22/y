@@ -9,7 +9,7 @@ import Fab from '@mui/material/Fab';
 import { Icon } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, GetProfilePicture, default_image, GetPostPictures, OnlineList, SimplePopOver, formatNumber, TabSwitcherLinks, Loading, GetProfileBanner } from '/src/components/utilities';
+import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, GetProfilePicture,  GetPostMedia, OnlineList, SimplePopOver, formatNumber, TabSwitcherLinks, Loading, GetProfileBanner } from '/src/components/utilities';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -34,7 +34,7 @@ import { Error, Modals, ShowImage } from "/src/components/modals";
 import { useNavigate } from "react-router-dom";
 import { WhoToFollow } from "/src/components/footer";
 import Moment from "moment";
-import { SimplifiedPostList, ClickableImage, ImageContext, PostModalFrame } from "/src/components/posts";
+import { SimplifiedPostList, ClickableImage, MediaContext, PostModalFrame } from "/src/components/posts";
 import { useParams } from "react-router-dom";
 import { ProfilePicEditor, ChangeablePicture, UserNameEditor, NameEditor, BirthDateEditor } from "/src/components/create_account";
 import { ManageProfile } from "/src/components/manage_content_button.jsx";
@@ -264,20 +264,20 @@ function MediaOfUser(props) {
 
     function Container(props) {
         const posts = props.entries;
-        let urls = []
+        let medias = []
         posts.forEach(post => {
-            urls = urls.concat(GetPostPictures(post.id, post.image_count));
+            medias = medias.concat(GetPostMedia(post));
         });
         return (
-            <ImageContext.Provider value={urls}>
+            <MediaContext.Provider value={medias}>
                 <Grid container spacing={1} columns={{ xs: 1, sm: 2, md: 3 }}>
-                    {urls.map((url, index) =>
+                    {medias.map((media, index) =>
                         <Grid item xs={1} key={index}>
                             <ClickableImage index={index} />
                         </Grid>
                     )}
                 </Grid>
-            </ImageContext.Provider>
+            </MediaContext.Provider>
         );
     }
 
@@ -390,10 +390,10 @@ function BannerChanger(props) {
 function ProfileBanner(props) {
     return (
         <Box style={{ width: "100%", height: "144px", position: "relative" }}>
-            <img src={props.url ? props.url : default_image} style={{ height: "100%", width: "100%", objectFit: "cover" }}
+            <img src={props.url} style={{ height: "100%", width: "100%", objectFit: "cover" }}
                 onError={({ currentTarget }) => {
                     currentTarget.onerror = null; // prevents looping
-                    currentTarget.src = default_image;
+                    currentTarget.style.display = "none";
                 }} />
             {props.children}
         </Box>
