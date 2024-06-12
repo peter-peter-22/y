@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, forwardRef, createContext, useContext } from "react";
+import React, { useState, useRef, useEffect, forwardRef, createContext, useContext, useImperativeHandle } from "react";
 import Stack from '@mui/material/Stack';
 import SideMenu, { Inside } from "./side_menus.jsx";
 import { TopMenu } from '/src/components/utilities';
@@ -37,6 +37,7 @@ import { UnblockButton } from "/src/pages/profile";
 import { ExamplePost, ExampleUser } from "/src/components/exampleData.js";
 import { PostCreator } from "/src/components/post_creator.jsx";
 const commentSections = {};
+let playingVideo;
 
 function Prefix(props) {
     return (
@@ -419,12 +420,38 @@ function SimplifiedPostList(props) {
 }
 
 function BlockMedia(props) {
-    const media = props.media;
-    const url = media.url;
+    return (
+        <div
+            style={{
+                flex: 1,
+                aspectRatio: "1 / 1",
+                overflow: "hidden",
+                position: "relative",
+                cursor: "pointer"
+            }}
+            onClick={props.onClick}>
+            <MediaDisplayer media={props.media} />
+            {props.children}
+        </div>
+    )
+}
 
-    let Displayer;
+function MediaDisplayer(props) {
+    const media = props.media;
+    if(!media)
+        return "undefined";
+
+    const url = media.url;
+    const videoRef = useRef();
+
+    function handlePlay() {
+        if (playingVideo && playingVideo.current && playingVideo !== videoRef)
+            playingVideo.current.pause();
+        playingVideo = videoRef;
+    }
+
     if (media.is_image())
-        Displayer = (
+        return (
             <img src={url} style={{
                 width: "100%",
                 height: "100%",
@@ -432,31 +459,19 @@ function BlockMedia(props) {
             }} />
         );
     else if (media.is_video())
-        Displayer = (
+        return (
             <video
-            controls
-            style={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-            }} >
-                <source src={url} type="video/mp4"/>
+                onPlay={handlePlay}
+                ref={videoRef}
+                controls
+                style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                }} >
+                <source src={url} type="video/mp4" />
             </video>
         );
-
-    return (
-        <div style={{
-            flex: 1,
-            aspectRatio: "1 / 1",
-            overflow: "hidden",
-            position: "relative",
-            cursor: "pointer"
-        }}
-            onClick={props.onClick}>
-            {Displayer}
-            {props.children}
-        </div>
-    )
 }
 
 function PostBottomIcon(props) {
@@ -471,12 +486,14 @@ function PostBottomIcon(props) {
 
 function ClickableImage(props) {
     const medias = useContext(MediaContext);
-    function Show(index, e) {
+    const media = medias[props.index];
+
+    function Clicked(index, e) {
         e.stopPropagation();
         ShowImage(medias, index);
     }
     return (
-        <BlockMedia media={medias[props.index]} onClick={(e) => { Show(props.index, e); }}>
+        <BlockMedia media={media} onClick={(e) => { Clicked(props.index, e); }}>
             {props.children}
         </BlockMedia>
     );
@@ -526,7 +543,7 @@ function PostMedia(props) {
                     </Stack>
                     <Stack direction="row" spacing={spacing}>
                         <ClickableImage index={2} />
-                        <ClickableImage index={3}>
+                        <ClickableImage index={3} >
                             {count > 4 &&
                                 <Box sx={{ backgroundColor: "transparentBlack.main", }} style={{ position: "absolute", width: "100%", height: "100%", top: "0", left: "0", display: "flex", alignItems: "center", justifyContent: "center" }}>
                                     <Typography variant="medium_bold" color="primary.contrastText">+{count - 4}</Typography>
@@ -638,4 +655,4 @@ function OverrideWithRepost(post) {
 }
 
 
-export { Post, PostList, PostFocused, ListBlockButton, ListBlock, RowWithPrefix, PostButtonRow, WritePost, OverrideWithRepost, BlockMedia, MediaContext, ClickableImage, PostModalFrame, OpenPostOnClick, OpenOnClick, SimplifiedPostList, commentSections, BorderlessPost, PostMedia };
+export { Post, PostList, PostFocused, ListBlockButton, ListBlock, RowWithPrefix, PostButtonRow, WritePost, OverrideWithRepost, BlockMedia, MediaContext, ClickableImage, PostModalFrame, OpenPostOnClick, OpenOnClick, SimplifiedPostList, commentSections, BorderlessPost, PostMedia,MediaDisplayer };

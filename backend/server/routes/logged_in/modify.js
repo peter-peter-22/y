@@ -120,7 +120,7 @@ router.post("/update_profile", async (req, res, next) => {
     const user_id = req.user.id;
     const { username, birthdate, name, bio } = req.body;
     if (username !== undefined)
-        await update_username(req, next, username, true);
+        await update_username(req, username, true);
     if (birthdate !== undefined)
         await db.query(named("UPDATE users SET birthdate=:birthdate where id=:user_id")({ user_id: user_id, birthdate: ISOToSQL(birthdate) }));
     if (name !== undefined)
