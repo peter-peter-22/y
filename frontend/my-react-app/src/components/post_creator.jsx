@@ -35,25 +35,7 @@ import { useNavigate } from "react-router-dom";
 import { ManagePost } from "/src/components/manage_content_button.jsx";
 import { UnblockButton } from "/src/pages/profile";
 import { commentSections, BorderlessPost, RowWithPrefix, PostMedia } from "/src/components/posts.jsx";
-
-const mediaTypes = {
-    image: 0,
-    video: 1
-}
-
-function Media(type, url) {
-    this.type = type;
-    this.url = url;
-    this.is_video=()=>type===mediaTypes.video;
-    this.is_image=()=>type===mediaTypes.image;
-}
-
-function fileToMedia(file) {
-    const url = URL.createObjectURL(file);
-    const is_video = file.type.startsWith("video");
-    const type = is_video ? mediaTypes.video : mediaTypes.image;
-    return new Media(type, url);
-}
+import { fileToMedia } from "/src/components/media.jsx";
 
 function PostCreator(props) {
     const [isFocused, setIsFocused] = React.useState(false);
@@ -305,4 +287,4 @@ function AddPostToCommentSection(post) {
 }
 
 
-export { PostCreator,Media,mediaTypes }
+export { PostCreator }

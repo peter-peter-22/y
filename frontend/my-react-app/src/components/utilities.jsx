@@ -30,7 +30,7 @@ import { NavLink } from "react-router-dom";
 import CircularProgress from '@mui/material/CircularProgress';
 import Popover from '@mui/material/Popover';
 import Grid from '@mui/material/Grid';
-import { Media, mediaTypes } from "/src/components/post_creator";
+import { Media, mediaTypes } from "/src/components/media.jsx";
 
 const noOverflow = {
     whiteSpace: 'nowrap',
@@ -425,14 +425,14 @@ function GetPostMedia(post) {
 
     //get video objects
     for (let n = 0; n < post.video_count; n++) {
-        const url = Endpoint(config.post_videos_url + "/" + post.id + "_" + n + ".mp4");
-        medias.push(new Media(mediaTypes.video, url));
+        const public_id = `${config.post_videos_path}/${post.id}_${n}`;
+        medias.push(new Media(mediaTypes.video, undefined,public_id));
     }
 
     //get image objects
     for (let n = 0; n < post.image_count; n++) {
-        const url = Endpoint(config.post_pics_url + "/" + post.id + "_" + n + ".jpg");
-        medias.push(new Media(mediaTypes.image, url));
+        const public_id = `${config.post_pics_path}/${post.id}_${n}`;
+        medias.push(new Media(mediaTypes.image, undefined,public_id));
     }
 
     return medias;

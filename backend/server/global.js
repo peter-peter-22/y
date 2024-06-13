@@ -39,7 +39,7 @@ const address_modes = {
 const all_clients = Object.values(address_modes).map((mode) => mode.client);
 
 const config = {
-    port:3000,
+    port: 3000,
     saltRounds: 10,
     __dirname: dirname(fileURLToPath(import.meta.url)),
     google_rechapta_secret_key: process.env.GOOGLE_RECHAPTA_SECRET,
@@ -47,9 +47,10 @@ const config = {
     cookie_registering: 1000 * 60 * 60 * 2,//2 hours. the email, name, ect. the user sends at the start of the registration must be finalized within 2 hour
     all_clients: all_clients,
     address_mode: address_modes.localhost,
-    posts_per_request:5,
-    users_per_request:10,
-    notifications_per_request:10
+    posts_per_request: 5,
+    users_per_request: 10,
+    notifications_per_request: 10,
+    uploadLimitMB: 100
 }
 
 const transporter = nodemailer.createTransport({
@@ -76,6 +77,6 @@ async function initialize() {
 
 global.app = app;
 global.config = config;
-global.ISOToSQL = (iso)=>{return new Moment(iso).format()};
-global.named=named;
+global.ISOToSQL = (iso) => { return new Moment(iso).format() };
+global.named = named;
 export { transporter, pgPool, initialize };

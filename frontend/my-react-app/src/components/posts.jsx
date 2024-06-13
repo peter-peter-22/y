@@ -36,8 +36,9 @@ import { ManagePost } from "/src/components/manage_content_button.jsx";
 import { UnblockButton } from "/src/pages/profile";
 import { ExamplePost, ExampleUser } from "/src/components/exampleData.js";
 import { PostCreator } from "/src/components/post_creator.jsx";
+import { BlockMedia } from "/src/components/media.jsx";
+
 const commentSections = {};
-let playingVideo;
 
 function Prefix(props) {
     return (
@@ -419,61 +420,6 @@ function SimplifiedPostList(props) {
     return <PostList getPosts={getPosts} post={props.post} />;
 }
 
-function BlockMedia(props) {
-    return (
-        <div
-            style={{
-                flex: 1,
-                aspectRatio: "1 / 1",
-                overflow: "hidden",
-                position: "relative",
-                cursor: "pointer"
-            }}
-            onClick={props.onClick}>
-            <MediaDisplayer media={props.media} />
-            {props.children}
-        </div>
-    )
-}
-
-function MediaDisplayer(props) {
-    const media = props.media;
-    if(!media)
-        return "undefined";
-
-    const url = media.url;
-    const videoRef = useRef();
-
-    function handlePlay() {
-        if (playingVideo && playingVideo.current && playingVideo !== videoRef)
-            playingVideo.current.pause();
-        playingVideo = videoRef;
-    }
-
-    if (media.is_image())
-        return (
-            <img src={url} style={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-            }} />
-        );
-    else if (media.is_video())
-        return (
-            <video
-                onPlay={handlePlay}
-                ref={videoRef}
-                controls
-                style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                }} >
-                <source src={url} type="video/mp4" />
-            </video>
-        );
-}
-
 function PostBottomIcon(props) {
     return (
         <IconButton size="small" onClick={(e) => { e.stopPropagation(); if (props.onClick) props.onClick(e); }}>
@@ -655,4 +601,4 @@ function OverrideWithRepost(post) {
 }
 
 
-export { Post, PostList, PostFocused, ListBlockButton, ListBlock, RowWithPrefix, PostButtonRow, WritePost, OverrideWithRepost, BlockMedia, MediaContext, ClickableImage, PostModalFrame, OpenPostOnClick, OpenOnClick, SimplifiedPostList, commentSections, BorderlessPost, PostMedia,MediaDisplayer };
+export { Post, PostList, PostFocused, ListBlockButton, ListBlock, RowWithPrefix, PostButtonRow, WritePost, OverrideWithRepost, MediaContext, ClickableImage, PostModalFrame, OpenPostOnClick, OpenOnClick, SimplifiedPostList, commentSections, BorderlessPost, PostMedia };

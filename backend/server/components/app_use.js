@@ -57,11 +57,14 @@ function initialize() {
     app.use(bodyParser.urlencoded({ extended: true }));
     app.use(
         fileUpload({
+            useTempFiles: true,
+            tempFileDir: '/tmp/',
             limits: {
-                fileSize: 100000000, // Around 100MB
+                fileSize: config.uploadLimitMB*1024*1024, 
             },
-            abortOnLimit: true,
-        })
+            abortOnLimit:true,
+            limitHandler:(req,res,next)=>{res.status(400).send(`Upload limit exceeded. The limit is ${config.uploadLimitMB}MB`);}
+            })
     );
 
 

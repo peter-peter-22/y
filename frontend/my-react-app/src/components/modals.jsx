@@ -45,7 +45,8 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Dialog from '@mui/material/Dialog';
-import { MediaDisplayer } from "/src/components/posts";
+import { MediaDisplayer } from "/src/components/media.jsx";
+
 
 //creating modal data
 let Modals = [];
@@ -146,7 +147,7 @@ function ImagesModal(props) {
     const [open, setOpen] = useState(false);
     const [index, setIndex] = useState(0);
     const imagesRef = useRef(null);
-    const media = imagesRef.current?imagesRef.current[index]:undefined;
+    const media = imagesRef.current ? imagesRef.current[index] : undefined;
 
     ImagesDisplay.Show = (medias, index) => {
         try {
@@ -180,19 +181,31 @@ function ImagesModal(props) {
     //     <div style={{ flexGrow: 1, height: "100%", width: "100%", backgroundImage: "url(" + url + ")", backgroundRepeat: "no-repeat", backgroundPosition: "center", backgroundSize: "contain" }} />
     // );
 
+    const DisplayedMedia = (
+        <MediaDisplayer
+            media={media}
+            style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "contain",
+                backgroundColor:"black"
+            }}
+            onClick={(e)=>{e.stopPropagation()}}
+        />
+    );
 
     return (
         <Backdrop open={open} onClick={Close} style={{ zIndex: 1 }}>
             <ResponsiveSelector breakpoint="md">
                 <Stack direction="row" style={{ height: "80%", width: "80%", alignItems: "center", justifyContent: "center" }}>
                     <StepButton icon="arrow_left" tall={true} onClick={(e) => { Step(-1, e); }} />
-                    <MediaDisplayer media={media}/>
+                    {DisplayedMedia}
                     <StepButton icon="arrow_right" tall={true} onClick={(e) => { Step(1, e); }} />
                 </Stack>
 
                 <Stack direction="column" style={{ height: "80%", width: "95%", alignItems: "center", justifyContent: "center" }}>
-                <MediaDisplayer media={media}/>
-                <Stack direction="row" style={{ width: "100%" }}>
+                    {DisplayedMedia}
+                    <Stack direction="row" style={{ width: "100%" }}>
                         <StepButton icon="arrow_left" onClick={(e) => { Step(-1, e); }} />
                         <StepButton icon="arrow_right" onClick={(e) => { Step(1, e); }} />
                     </Stack>

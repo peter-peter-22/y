@@ -15,8 +15,8 @@ const config = {
     accepted_media_types: [...accepted_image_types, ...accepted_video_types].join(", "),
     profile_pics_url: "/images/profiles",
     profile_banner_url: "/images/banners",
-    post_pics_url: "/images/posts",
-    post_videos_url: "/videos/posts",
+    post_pics_path: "/images/posts",
+    post_videos_path: "/videos/posts",
     address_mode: address_modes.localhost,
 }
 
