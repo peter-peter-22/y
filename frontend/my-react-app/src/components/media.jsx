@@ -98,7 +98,7 @@ function VideoDisplayer(props) {
                 {...props}
                 cldVid={vid}
                 onPlay={handlePlay}
-                ref={videoRef}
+                innerRef={videoRef}
                 controls
                 plugins={[
                     lazyload(),

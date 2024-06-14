@@ -19,8 +19,8 @@ const named = yesql.pg;
 import cors from "cors";
 import axios from "axios";
 import nodemailer from "nodemailer";
-import * as g from "./global.js";
-await g.initialize();
+import * as c from "./config.js";
+await c.initialize();
 import "./components/validations.js";
 
 import initialize_app from "./components/app_use.js";

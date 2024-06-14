@@ -9,7 +9,7 @@ import Fab from '@mui/material/Fab';
 import { Icon } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, GetProfilePicture, GetPostMedia, OnlineList, SimplePopOver, formatNumber, UserLink, ReplyingFrom, ToggleFollow, ToggleBlock, InheritLink } from '/src/components/utilities';
+import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, GetProfilePicture, GetPostMedia, OnlineList, SimplePopOver, formatNumber, UserLink, ReplyingFrom, ToggleFollow, ToggleBlock, InheritLink,ProfilePic } from '/src/components/utilities';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -74,7 +74,7 @@ function BorderlessPost(props) {
     return (<OpenPostOnClick id={original.id}>
         <RepostedOrQuoted post={original} />
         <RowWithPrefix
-            prefix={<Avatar src={GetProfilePicture(overriden.publisher)} />}
+            prefix={<ProfilePic user={overriden.publisher} />}
             contents={
                 <Stack direction="column" spacing={1} sx={{ mb: 1, overflow: "hidden" }}>
 
@@ -168,7 +168,7 @@ function PostFocused(props) {
         <ListBlock>
             <RepostedOrQuoted post={original} />
             <RowWithPrefix
-                prefix={<Avatar src={GetProfilePicture(overriden.publisher)} />}
+                prefix={<ProfilePic user={overriden.publisher} />}
                 contents={
                     <Stack direction="column" style={{ overflow: "hidden" }}>
                         <Stack direction="row" spacing={0.25} style={{ alignItems: "center" }}>

@@ -18,13 +18,14 @@ const named = yesql.pg;
 import cors from "cors";
 import axios from "axios";
 import nodemailer from "nodemailer";
-import * as g from "../../global.js";
+import * as g from "../../config.js";
 import * as pp from "../../components/passport.js";
 import { username_exists, selectable_username } from "../user.js";
 import { Validator } from "node-input-validator";
 import { CheckV, CheckErr, validate_image } from "../../components/validations.js";
 import { ApplySqlToUser, UpdateUser, UpdateUserAfterChange } from "../logged_in.js";
 import Moment from "moment";
+import { uploadImage } from "../../components/cloudinary_handler.js";
 
 const router = express.Router();
 
@@ -34,17 +35,18 @@ router.post("/update_profile_picture", async (req, res, next) => {
     res.sendStatus(200);
 });
 
-function update_profile_picture(req, next, file) {
-    update_profile_file(req, next, file, "profiles");
+async function update_profile_picture(req, file) {
+    await update_profile_file(req, file, config.profile_pics_path);
 }
-function update_profile_banner(req, next, file) {
-    update_profile_file(req, next, file, "banners");
+async function update_profile_banner(req, file) {
+    await update_profile_file(req, file, config.profile_banner_path);
 }
 
-function update_profile_file(req, next, file, foldername) {
+async function update_profile_file(req, file, foldername) {
     try {
         validate_image(file);
-        file.mv(config.__dirname + "/public/images/" + foldername + "/" + req.user.id + ".jpg");
+        const user_id = req.user.id;
+        await uploadImage(file, user_id, foldername);
     }
     catch (err) {
         next(err);
@@ -132,9 +134,9 @@ router.post("/update_profile", async (req, res, next) => {
         //update pics
         const { profile_pic, banner_pic } = req.files;
         if (profile_pic !== undefined)
-            await update_profile_picture(req, next, profile_pic);
+            await update_profile_picture(req, profile_pic);
         if (banner_pic !== undefined)
-            await update_profile_banner(req, next, banner_pic);
+            await update_profile_banner(req, banner_pic);
     }
 
     //apply changes to logged in user

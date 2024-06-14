@@ -18,7 +18,7 @@ const named = yesql.pg;
 import cors from "cors";
 import axios from "axios";
 import nodemailer from "nodemailer";
-import * as g from "../global.js";
+import * as g from "../config.js";
 import * as pp from "../components/passport.js";
 import { username_exists, selectable_username } from "./user.js";
 import { Validator } from "node-input-validator";

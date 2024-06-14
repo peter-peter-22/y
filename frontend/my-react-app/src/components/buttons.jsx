@@ -6,7 +6,7 @@ import Avatar from '@mui/material/Avatar';
 import Stack from '@mui/material/Stack';
 import { Typography } from '@mui/material';
 import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ChooseChildBool, ProfileText, ToCorner, GetUserKey, noOverflow, GetProfilePicture, SimplePopOver } from '/src/components/utilities';
+import { ResponsiveSelector, ChooseChildBool, ProfileText, ToCorner, GetUserKey, noOverflow, GetProfilePicture, SimplePopOver ,AvatarImageDisplayer,ProfilePic} from '/src/components/utilities';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
@@ -18,6 +18,7 @@ import ListItemText from '@mui/material/ListItemText';
 import axios from "axios";
 import { Endpoint } from "/src/communication.js";
 import { UserData } from '/src/App';
+import { ImageDisplayer } from "/src/components/media.jsx";
 
 const smallerButtons = "leftMenu";
 const iconSize = "30px";
@@ -125,6 +126,7 @@ function PostButton() {
 
 function ProfileButton() {
     const size = "60px";
+    const user = UserData.getData.user;
 
     const { handleOpen, ShowPopover } = SimplePopOver();
 
@@ -140,8 +142,8 @@ function ProfileButton() {
             <ResponsiveSelector breakpoint={smallerButtons}>
                 <Fab onClick={handleOpen} variant="extended" color="secondary_noBg" sx={{ height: size, borderRadius: size, width: "100%", p: 1 }}>
                     <Stack direction="row" spacing={1} sx={{ width: "100%", height: "100%", alignItems: "center" }}>
-                        <Avatar src={GetProfilePicture(UserData.getData.user, true)} />
-                        <ProfileText user={UserData.getData.user} />
+                        <ProfilePic user={user} />
+                        <ProfileText user={user} />
                         <Icon fontSize="small">
                             more_horiz
                         </Icon>
@@ -149,7 +151,7 @@ function ProfileButton() {
                 </Fab>
 
                 <Fab onClick={handleOpen} color="secondary_noBg" sx={{ height: size, width: size, borderRadius: "100%", p: 0 }}>
-                    <Avatar src={GetProfilePicture(UserData.getData.user, true)} />
+                <ProfilePic user={user} />
                 </Fab>
             </ResponsiveSelector>
 
@@ -158,7 +160,7 @@ function ProfileButton() {
                     <ListItem disablePadding>
                         <ListItemButton onClick={handleLogout}>
                             <Typography variant="medium_bold" sx={{ maxWidth: "70vw" }} style={noOverflow}>
-                                Logout <GetUserKey />
+                                Logout <GetUserKey user={user}/>
                             </Typography>
                         </ListItemButton>
                     </ListItem>
@@ -209,4 +211,4 @@ function BlueTextButton(props) {
     );
 }
 
-export { TabButton, PostButton, ButtonSvg, ButtonIcon, ProfileButton, ResponsiveButton, SelectableButton, SelectableIcon, TopMenuButton, CornerButton, OutlinedButton, WideButton,BlueTextButton,OutlinedFab };
+export { TabButton, PostButton, ButtonSvg, ButtonIcon, ProfileButton, ResponsiveButton, SelectableButton, SelectableIcon, TopMenuButton, CornerButton, OutlinedButton, WideButton, BlueTextButton, OutlinedFab };

@@ -13,8 +13,8 @@ const accepted_video_types = ["video/mp4"];
 const config = {
     accepted_image_types: accepted_image_types.join(", "),
     accepted_media_types: [...accepted_image_types, ...accepted_video_types].join(", "),
-    profile_pics_url: "/images/profiles",
-    profile_banner_url: "/images/banners",
+    profile_pics_path: "/images/profiles",
+    profile_banner_path: "/images/banners",
     post_pics_path: "/images/posts",
     post_videos_path: "/videos/posts",
     address_mode: address_modes.localhost,

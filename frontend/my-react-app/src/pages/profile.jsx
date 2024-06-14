@@ -9,7 +9,7 @@ import Fab from '@mui/material/Fab';
 import { Icon } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, GetProfilePicture,  GetPostMedia, OnlineList, SimplePopOver, formatNumber, TabSwitcherLinks, Loading, GetProfileBanner } from '/src/components/utilities';
+import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, GetProfilePicture,  GetPostMedia, OnlineList, SimplePopOver, formatNumber, TabSwitcherLinks, Loading, GetProfileBanner,ProfilePic } from '/src/components/utilities';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -38,6 +38,8 @@ import { SimplifiedPostList, ClickableImage, MediaContext, PostModalFrame } from
 import { useParams } from "react-router-dom";
 import { ProfilePicEditor, ChangeablePicture, UserNameEditor, NameEditor, BirthDateEditor } from "/src/components/create_account";
 import { ManageProfile } from "/src/components/manage_content_button.jsx";
+import { Media,mediaTypes } from "/src/components/media";
+import { ImageDisplayer } from "/src/components/media";
 
 function Profile() {
     const [user, setUser] = useState();
@@ -87,8 +89,8 @@ function Profile() {
                         borderBottom: 1,
                         borderColor: "divider"
                     }}>
-                        <ProfileBanner url={GetProfileBanner(user, true)} />
-                        <Avatar src={GetProfilePicture(user, true)} sx={{
+                        <ProfileBanner public_id={GetProfileBanner(user)} />
+                        <ProfilePic user={user} sx={{
                             position: "absolute",
                             transform: "translateY(-50%)",
                             top: "100%",
@@ -336,8 +338,8 @@ function ProfileEditor(props) {
                         Save
                     </Fab>
                 </Stack>
-                <BannerChanger onUploadFile={(v) => { updateValue("banner_pic", v) }} current={GetProfileBanner(user, true)} />
-                <ProfilePicEditor size="100px" onUploadFile={(v) => { updateValue("profile_pic", v) }} current={GetProfilePicture(user, true)} />
+                <BannerChanger onUploadFile={(v) => { updateValue("banner_pic", v) }} current={new Media(mediaTypes.image,undefined, GetProfileBanner(user))} />
+                <ProfilePicEditor size="100px" onUploadFile={(v) => { updateValue("profile_pic", v) }} current={new Media(mediaTypes.image,undefined, GetProfilePicture(user))} />
                 <UserNameEditor onChangeUserName={(v) => { updateValue("username", v) }} onChangeOk={(v) => { updateValue("username_ok", v) }} />
                 <NameEditor onChangeName={(v) => { updateValue("name", v) }} onChangeOk={(v) => { updateValue("name_ok", v) }} current={user.name} />
                 <BioEditor onChange={(v) => { updateValue("bio", v) }} current={user.bio} />
@@ -372,11 +374,12 @@ function BioEditor(props) {
 }
 
 function BannerChanger(props) {
-    function Displayer(props) {
+    function Displayer({media,button}) {
+        const formats = media?{...media.get_formats()}:{};
         return (
             <Box sx={{ border: 1, borderColor: "divider" }}>
-                <ProfileBanner url={props.url}>
-                    {props.button}
+                <ProfileBanner {...formats}>
+                    {button}
                 </ProfileBanner>
             </Box>
         );
@@ -390,7 +393,7 @@ function BannerChanger(props) {
 function ProfileBanner(props) {
     return (
         <Box style={{ width: "100%", height: "144px", position: "relative" }}>
-            <img src={props.url} style={{ height: "100%", width: "100%", objectFit: "cover" }}
+            <ImageDisplayer url={props.url} public_id={props.public_id} style={{ height: "100%", width: "100%", objectFit: "cover" }}
                 onError={({ currentTarget }) => {
                     currentTarget.onerror = null; // prevents looping
                     currentTarget.style.display = "none";

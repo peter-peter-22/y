@@ -30,7 +30,7 @@ import { NavLink } from "react-router-dom";
 import CircularProgress from '@mui/material/CircularProgress';
 import Popover from '@mui/material/Popover';
 import Grid from '@mui/material/Grid';
-import { Media, mediaTypes } from "/src/components/media.jsx";
+import { ImageDisplayer, Media, MediaDisplayer, mediaTypes } from "/src/components/media.jsx";
 
 const noOverflow = {
     whiteSpace: 'nowrap',
@@ -336,7 +336,7 @@ function FollowDialog(props) {
             <ListItemButton>
                 <Stack direction="row" spacing={1} sx={{ alignItems: "center", width: "100%" }}>
                     <div>
-                        <Avatar src={GetProfilePicture(user)} />
+                        <ProfilePic user={user} />
                     </div>
                     <div style={{ flexGrow: 1, overflow: "hidden" }}>
                         <Stack direction="column" >
@@ -407,18 +407,37 @@ function ToggleOnlineBool(user, url, startingValue, onChange) {
 }
 
 
-function GetProfilePicture(user, isUser) {
-    return GetAnyProfileImage(user, config.profile_pics_url, isUser);
+function GetProfilePicture(user) {
+    return `${config.profile_pics_path}/${user.id}`;
 }
-function GetProfileBanner(user, isUser) {
-    return GetAnyProfileImage(user, config.profile_banner_url, isUser);
+function GetProfileBanner(user) {
+    return `${config.profile_banner_path}/${user.id}`;
 }
-function GetAnyProfileImage(user, baseUrl, isUser) {
-    let url = Endpoint(baseUrl + "/" + user.id + ".jpg");
-    if (isUser)
-        url += "?" + UserData.getData.user.last_update;//updatecount grows by 1 each time the user is downloaded from the server, this updates the profile picture or banner when the user changes it
-    return (url);
+function ProfilePic({ user, ...props }) {
+    return (
+        <AvatarImageDisplayer public_id={GetProfilePicture(user)} {...props} />
+    );
 }
+function AvatarImageDisplayer({ url, public_id, ...props }) {
+    return (
+        <Avatar {...props}>
+            <ImageDisplayer
+                url={url}
+                public_id={public_id}
+                style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover"
+                }}
+                onError={({ currentTarget }) => {
+                    currentTarget.onerror = null; // prevents looping
+                    currentTarget.src = "/images/default_image.jpg";
+                }}
+            />
+        </Avatar>
+    );
+}
+
 
 function GetPostMedia(post) {
     const medias = [];
@@ -426,13 +445,13 @@ function GetPostMedia(post) {
     //get video objects
     for (let n = 0; n < post.video_count; n++) {
         const public_id = `${config.post_videos_path}/${post.id}_${n}`;
-        medias.push(new Media(mediaTypes.video, undefined,public_id));
+        medias.push(new Media(mediaTypes.video, undefined, public_id));
     }
 
     //get image objects
     for (let n = 0; n < post.image_count; n++) {
         const public_id = `${config.post_pics_path}/${post.id}_${n}`;
-        medias.push(new Media(mediaTypes.image, undefined,public_id));
+        medias.push(new Media(mediaTypes.image, undefined, public_id));
     }
 
     return medias;
@@ -608,4 +627,4 @@ function formatNumber(number) {
     return number;
 }
 
-export { AboveBreakpoint, ResponsiveSelector, ChooseChild, ChooseChildBool, TopMenu, ProfileText, FadeLink, TabSwitcher, UserName, UserKey, noOverflow, BoldLink, UserLink, UserKeyLink, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, logo, creation, ToCorner, CenterLogo, FollowDialog, GetProfilePicture, FollowButton, GetPostMedia, LinelessLink, OnlineList, Loading, SimplePopOver, formatNumber, TabSwitcherLinks, GetProfileBanner, GetProfileLink, ReplyingFrom, ToggleFollow, ToggleBlock, StyledLink, InheritLink }
+export { AboveBreakpoint, ResponsiveSelector, ChooseChild, ChooseChildBool, TopMenu, ProfileText, FadeLink, TabSwitcher, UserName, UserKey, noOverflow, BoldLink, UserLink, UserKeyLink, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, logo, creation, ToCorner, CenterLogo, FollowDialog, GetProfilePicture, FollowButton, GetPostMedia, LinelessLink, OnlineList, Loading, SimplePopOver, formatNumber, TabSwitcherLinks, GetProfileBanner, GetProfileLink, ReplyingFrom, ToggleFollow, ToggleBlock, StyledLink, InheritLink, AvatarImageDisplayer, ProfilePic }

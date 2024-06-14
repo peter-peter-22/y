@@ -12,7 +12,8 @@ async function uploadImage(file,public_id,folder)
     const options = {
         public_id: public_id,
         folder: folder,
-        resource_type: "image"
+        resource_type: "image",
+        invalidate:true
     };
 
     await cloudinary.uploader.upload(
@@ -26,7 +27,8 @@ async function uploadVideo(file,public_id,folder)
     const options = {
         public_id: public_id,
         folder: folder,
-        resource_type: "video"
+        resource_type: "video",
+        invalidate:true
     };
 
    await cloudinary.uploader.upload_large(

@@ -19,7 +19,7 @@ import cors from "cors";
 import axios from "axios";
 import nodemailer from "nodemailer";
 import niv from "node-input-validator";
-import * as g from "../global.js";
+import * as g from "../config.js";
 import * as pp from "../components/passport.js";
 import Moment from "moment";
 

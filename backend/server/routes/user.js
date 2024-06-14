@@ -20,7 +20,7 @@ import axios from "axios";
 import nodemailer from "nodemailer";
 import { Validator } from "node-input-validator";
 import { CheckV } from "../components/validations.js";
-import * as g from "../global.js";
+import * as g from "../config.js";
 import * as pp from "../components/passport.js";
 import change_password from "./change_password.js";
 

@@ -2,7 +2,7 @@ import express from "express";
 import nodemailer from "nodemailer";
 import { CheckV, CheckErr } from "../components/validations.js";
 import { Validator } from "node-input-validator";
-import * as g from "../global.js";
+import * as g from "../config.js";
 import * as pp from "../components/passport.js";
 import { CheckRechapta } from "./register.js";
 import { exists_email } from "./user.js";

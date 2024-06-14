@@ -9,7 +9,7 @@ import Fab from '@mui/material/Fab';
 import { Icon } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, logo, creation, CenterLogo, FollowDialog } from '/src/components/utilities';
+import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, logo, creation, CenterLogo, FollowDialog,AvatarImageDisplayer } from '/src/components/utilities';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -48,6 +48,7 @@ import config from "/src/components/config.js";
 import Moment from "moment";
 import validator from "validator";
 import { UserListExtended } from "/src/pages/follow_people";
+import { mediaTypes, Media } from '/src/components/media';
 
 function CreateAccount(props) {
     //only the selected pages are rendered
@@ -518,7 +519,7 @@ function Page9(props)//only date of birth
 }
 
 function PasswordInput(props) {
-    const [password, setPassword] = useState(props.value?props.value:"");
+    const [password, setPassword] = useState(props.value ? props.value : "");
     const [passwordError, setPasswordError] = useState(false);
     const onChangePassword = props.onChangePassword;
     const onChangeOk = props.onChangeOk;
@@ -600,12 +601,12 @@ function WaitAfterChange(cb, timerRef) {
 function ProfilePicEditor(props) {
     const size = props.size ? props.size : "100px";
 
-    function ProfileDisplayer(props) {
-        const url = props.url;
+    function ProfileDisplayer({media,button}) {
+        const formats = media?{...media.get_formats()}:{};
         return (
             <div style={{ position: "relative", width: "fit-content" }}>
-                <Avatar src={url} style={{ height: size, width: size }} />
-                {props.button}
+                <AvatarImageDisplayer {...formats} style={{ height: size, width: size }} />
+                {button}
             </div>
         );
     }
@@ -617,8 +618,8 @@ function ProfilePicEditor(props) {
 
 function ChangeablePicture(props) {
     const [file, setFile] = useState();
-    const imageUrlRef = useRef(props.current);
-    const fileUrl = imageUrlRef.current;
+    const mediaRef = useRef(props.current);
+    const media = mediaRef.current;
     const onUploadFile = props.onUploadFile;//only runs when the user uploads a new image, it does nothing in start, unlike the other similar onchange functions
 
     useEffect(() => {
@@ -630,17 +631,18 @@ function ChangeablePicture(props) {
         const selected = e.target.files[0];
         setFile(selected);
         if (selected === undefined)
-            imageUrlRef.current = undefined;
+            mediaRef.current = undefined;
         else {
             const selectedUrl = URL.createObjectURL(selected);
-            imageUrlRef.current = selectedUrl;
+            const myMedia = new Media(mediaTypes.image, selectedUrl);
+            mediaRef.current = myMedia;
         }
     }
 
 
     const Displayer = props.displayer;
 
-    function ChangeButton(props) {
+    function ChangeButton() {
         return (
             <Fab size="small" color="transparentBlack" sx={{ border: 1, borderColor: "divider", position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}>
                 <VisuallyHiddenInput type="file" accept={config.accepted_image_types} onChange={handleFile} />
@@ -654,7 +656,7 @@ function ChangeablePicture(props) {
     return (
         <Displayer
             button={<ChangeButton />}
-            url={fileUrl} />
+            media={media} />
     );
 }
 
@@ -791,4 +793,4 @@ function BirthDateEditor(props) {
 }
 
 export default CreateAccount;
-export { ProfilePicEditor, ChangeablePicture, UserNameEditor, NameEditor, BirthDateEditor, RechaptaInput, EmailInput, validateEmail,PasswordInput }
+export { ProfilePicEditor, ChangeablePicture, UserNameEditor, NameEditor, BirthDateEditor, RechaptaInput, EmailInput, validateEmail, PasswordInput }
