@@ -23,6 +23,8 @@ import Moment from "moment";
 
 const app = express();
 
+//addresses
+
 const address_modes = {
     localhost: {
         server: process.env.SERVER_URL_LOCALHOST,
@@ -38,6 +40,14 @@ const address_modes = {
 
 const all_clients = Object.values(address_modes).map((mode) => mode.client);
 
+//media types
+
+const types = {
+    accepted_image_types: ["image/png", "image/jpeg", "image/jpg"],
+    accepted_video_types: ["video/mp4"]
+};
+types.accepted_media_types = [...types.accepted_image_types, ...types.accepted_video_types];
+
 const config = {
     port: 3000,
     saltRounds: 10,
@@ -51,6 +61,7 @@ const config = {
     users_per_request: 10,
     notifications_per_request: 10,
     uploadLimitMB: 100,
+    ...types
 }
 
 const transporter = nodemailer.createTransport({

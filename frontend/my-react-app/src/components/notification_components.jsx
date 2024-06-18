@@ -9,7 +9,7 @@ import Fab from '@mui/material/Fab';
 import { Icon } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink, UserName, UserKey, noOverflow, BoldLink, UserLink, DateLink, TextRow, GetUserName, GetUserKey, ReplyingTo, GetProfilePicture,OnlineList } from '/src/components/utilities';
+import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink, UserName, UserKey, noOverflow, BoldLink, UserLink, DateLink, TextRow, GetUserName, GetUserKey, ReplyingTo, GetProfilePicture,OnlineList,AvatarImageDisplayer } from '/src/components/utilities';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -108,7 +108,7 @@ function UserCounter(props) {
 function UserBalls(props) {
     return (
         <Stack direction="row" spacing={1}>
-            {props.users.map((user, i) => <SmallAvatar src={GetProfilePicture(user)} key={i} />)}
+            {props.users.map((user, i) => <SmallAvatar media={GetProfilePicture(user)} key={i} />)}
         </Stack>
     );
 }
@@ -155,9 +155,9 @@ function Comment(props) {
     );
 }
 
-function SmallAvatar(props) {
+function SmallAvatar({media}) {
     return (
-        <Avatar sx={{ width: "30px", height: "30px" }} src={props.src} />
+        <AvatarImageDisplayer sx={{ width: "30px", height: "30px" }} media={media} />
     );
 }
 

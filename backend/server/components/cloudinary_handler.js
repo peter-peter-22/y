@@ -12,6 +12,7 @@ async function uploadMedia(file, public_id, folder) {
         public_id: public_id,
         folder: folder,
         invalidate: true,
+        resource_type:"auto"
     };
 
     const uploadMethod = getUploadMethod(file);

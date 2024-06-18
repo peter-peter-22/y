@@ -33,8 +33,8 @@ router.post("/get", async (req, res) => {
 	});
 	await CheckV(v);
 	const { from } = req.body;
-	const other_notifications = await db.query(named(notifications_query)({ user_id: req.user.id, from: from }));
-	res.send(other_notifications.rows);
+	const notifs = await db.query(named(notifications_query)({ user_id: req.user.id, from: from }));
+	res.send(notifs.rows);
 });
 
 export default router;

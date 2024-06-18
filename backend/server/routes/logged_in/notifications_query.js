@@ -1,13 +1,19 @@
 import postQueryText from "./post_query.js";
 
 const users_column = `
-(SELECT JSONB_AGG(JSONB_BUILD_OBJECT('id',
-
-							USERS.ID,
-							'name',
-							USERS.NAME))
-		FROM USERS
-		WHERE USERS.ID = ANY(USER_IDS))AS USERS`;
+(
+	SELECT JSONB_AGG(
+						JSONB_BUILD_OBJECT
+						(
+							'id', USERS.ID,
+							'name', USERS.NAME,
+							'picture', USERS.PICTURE
+						)
+					)
+	FROM USERS
+	WHERE USERS.ID = ANY(USER_IDS)
+)
+AS USERS`;
 
 const posts_column = `
 (SELECT JSONB_BUILD_OBJECT('id',

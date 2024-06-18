@@ -100,4 +100,4 @@ FROM
     ORDER BY POSTS.DATE DESC) POST`;
 
 export default postQueryText;
-export { is_followed, is_blocked, user_columns, user_columns_extended }
+export { is_followed, is_blocked, user_columns, user_columns_extended,columns }

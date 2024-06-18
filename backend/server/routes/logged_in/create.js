@@ -22,30 +22,29 @@ import * as g from "../../config.js";
 import * as pp from "../../components/passport.js";
 import { username_exists, selectable_username } from "../user.js";
 import { Validator } from "node-input-validator";
-import { CheckV, CheckErr, validate_image, validate_video, videosType, imagesType } from "../../components/validations.js";
+import { CheckV, CheckErr, validate_image, validate_video, validate_media } from "../../components/validations.js";
 import { postQuery } from "./general.js";
 import { GetMaxLetters } from "../user.js";
 import { uploadMedia } from "../../components/cloudinary_handler.js";
 
 const router = express.Router();
 
-router.post("/post", async (req, res, next) => {
+router.post("/post", async (req, res) => {
     //db
-    async function postToDatabase(user_id, text, media) {
-        const result = await db.query(named("INSERT INTO posts (publisher,text,image_count,video_count) VALUES (:user_id, :text,:image_count,:video_count) RETURNING id")(
+    async function postToDatabase(user_id, text) {
+        const result = await db.query(named("INSERT INTO posts (publisher,text) VALUES (:user_id, :text) RETURNING id")(
             {
                 user_id: user_id,
-                text: text,
-                ...media
+                text: text
             }
         ));
         return result;
     }
 
-    await postAny(req, res, next, postToDatabase);
+    await postAny(req, res, postToDatabase);
 });
 
-router.post("/comment", async (req, res, next) => {
+router.post("/comment", async (req, res) => {
     //additional validations
     const v = new Validator(req.body, {
         replying_to: "required|integer"
@@ -59,14 +58,13 @@ router.post("/comment", async (req, res, next) => {
             const getRepliedPublisher = "(SELECT publisher FROM POSTS WHERE id=:replying_to)";
             const result = await db.query(named(`
             INSERT INTO posts 
-            (publisher,text,image_count,video_count,replying_to,replying_to_publisher) 
-            VALUES (:user_id, :text,:image_count,:video_count,:replying_to,${getRepliedPublisher}) 
+            (publisher,text,replying_to,replying_to_publisher) 
+            VALUES (:user_id, :text,:replying_to,${getRepliedPublisher}) 
             RETURNING id`)
                 (
                     {
                         user_id: user_id,
                         text: text,
-                        ...media,
                         replying_to: replying_to
                     }
                 ));
@@ -79,10 +77,10 @@ router.post("/comment", async (req, res, next) => {
         }
     }
 
-    await postAny(req, res, next, commentToDatabase);
+    await postAny(req, res, commentToDatabase);
 });
 
-router.post("/quote", async (req, res, next) => {
+router.post("/quote", async (req, res) => {
     //additional validations
     const v = new Validator(req.body, {
         quoted: "required|integer"
@@ -92,7 +90,19 @@ router.post("/quote", async (req, res, next) => {
 
     //check if the selected post can be quoted
     //if the quoted post does not exists, the constraint will throw an error in the next query so it can be ignored here
-    const quote_query = await db.query(named("select exists(select * from posts where id=:post_id and repost is not null and text is null) as contains_repost")({ post_id: quoted }));
+    const quote_query = await db.query(named(`
+        select exists
+        (
+            select * from posts 
+            where id=:post_id 
+            and 
+            repost is not null 
+            and 
+            text is null
+        ) 
+        as contains_repost`)
+        ({ post_id: quoted }));
+
     if (quote_query.rowCount !== 0 && quote_query.rows[0].contains_repost)
         CheckErr("a repost cannot be quoted");
 
@@ -102,8 +112,8 @@ router.post("/quote", async (req, res, next) => {
             const getQuotedUser = `(SELECT publisher FROM POSTS WHERE id=:quoted)`;
             const result = await db.query(named(`
             INSERT INTO posts 
-            (publisher,text,image_count,video_count,repost,reposted_from_user) 
-            VALUES (:user_id, :text,:image_count,:video_count,:quoted,${getQuotedUser}) 
+            (publisher,text,media,repost,reposted_from_user) 
+            VALUES (:user_id, :text,:media,:quoted,${getQuotedUser}) 
             RETURNING id`)
                 (
                     {
@@ -122,41 +132,36 @@ router.post("/quote", async (req, res, next) => {
         }
     }
 
-    await postAny(req, res, next, quoteToDatabase);
+    await postAny(req, res, quoteToDatabase);
 });
 
 
-async function postAny(req, res, next, saveToDatabase) {
-    try {
-        //get files and validate inputs
-        const files = await getAndValidatePost(req);
+async function postAny(req, res, saveToDatabase) {
+    //get files and validate inputs
+    const files = await getAndValidatePost(req);
 
-        //upload to database
-        const { text } = req.body;
-        const media_count = countMedia(files);
-        const result = await saveToDatabase(req.user.id, text, media_count);//must return the id of the published post
-        const post_id = result.rows[0].id;
+    //upload to database
+    const { text } = req.body;
+    const result = await saveToDatabase(req.user.id, text);//must return the id of the published post
+    const post_id = result.rows[0].id;
 
-        //upload files
-        uploadPostFiles(files, post_id);
+    //upload files and return the post
+    const filedatas = await uploadPostFiles(files, post_id);
+    await db.query(named(`
+            UPDATE posts 
+            SET media=:media 
+            WHERE id=:post_id`
+    )
+        ({
+            post_id: post_id,
+            media: filedatas
+        })
+    );
 
-        //return the created post to client
-        const recentlyAddedPost = await postQuery(req, undefined, " WHERE post.id=:post_id", { post_id: post_id }, undefined, 1);
-        res.send(recentlyAddedPost[0]);
-    }
-    catch (err) {
-        next(err);
-    }
+    //return the created post to client
+    const recentlyAddedPost = await postQuery(req, undefined, " WHERE post.id=:post_id", { post_id: post_id }, undefined, 1);
+    res.send(recentlyAddedPost[0]);
 }
-
-function countMedia(mediaGroups) {
-    const media_count = {
-        image_count: mediaGroups.images.length,
-        video_count: mediaGroups.videos.length
-    };
-    return media_count;
-}
-
 
 async function getAndValidatePost(req) {
     const v = new Validator(req.body, {
@@ -169,34 +174,27 @@ async function getAndValidatePost(req) {
 }
 
 async function uploadPostFiles(files, post_id) {
-    files.forEach(async (file, index) => {
-        const path = `posts/${post_id}/${index}`;
-        await uploadMedia(file, path);
-    });
+    const fileDatas = [];
+    for (let n = 0; n < files.length; n++) {
+        const folder = `posts/${post_id}`;
+        const fileName = n;
+        const file = files[n];
+        const fileData = await uploadMedia(file, fileName, folder);
+        fileDatas.push(fileData);
+    }
+    return fileDatas;
 }
 
 function getAndValidateFiles(req) {
     //both images and videos
     const medias = tryGetFiles(req, "medias");
-    const images = [];
-    const videos = [];
+    if (!medias)
+        return;
+    
     medias.forEach(media => {
-        if (videosType.includes(media.mimetype)) {
-            validate_video(media);
-            videos.push(media);
-        }
-        else if (imagesType.includes(media.mimetype)) {
-            validate_image(media);
-            images.push(media);
-        }
-        else
-            CheckErr("invalid media type");
+        validate_media(media);
     });
-
-    return {
-        images: images,
-        videos: videos
-    };
+    return medias;
 }
 
 //convert the files to array even if there is only one

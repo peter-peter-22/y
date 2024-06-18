@@ -87,7 +87,7 @@ function BorderlessPost(props) {
                     </Stack>
                     <ReplyingToPost post={overriden} />
                     <PostText post={overriden} />
-                    <PostMedia medias={overriden.media} />
+                    <PostMedia medias={overriden.mediaObjects} />
                 </Stack>
             } />
         <RowWithPrefix contents={
@@ -182,7 +182,7 @@ function PostFocused(props) {
 
             <Stack direction="column" sx={{ overflow: "hidden", mt: 1 }}>
                 <PostText post={overriden} />
-                <PostMedia medias={overriden.media} />
+                <PostMedia medias={overriden.mediaObjects} />
                 <Stack direction="row" spacing={0.5} sx={{ alignItems: "baseline", my: 1 }}>
                     <DateLink passed isoString={overriden.date} />
                     <Typography variant="small_fade">·</Typography>
@@ -587,7 +587,7 @@ function AddDataToPost(post) {
         AddDataToPost(post.reposted_post);
     }
 
-    post.media = GetPostMedia(post);
+    post.mediaObjects = GetPostMedia(post);
 }
 
 //if this is a repost, the data of the reposted post will be displayed instead of the original post
