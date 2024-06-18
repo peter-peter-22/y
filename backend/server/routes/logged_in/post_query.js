@@ -1,14 +1,15 @@
 const is_followed = `EXISTS (SELECT * FROM FOLLOWS WHERE FOLLOWER = :user_id AND FOLLOWED = USERS.ID)`
 
-const is_blocked= `EXISTS (SELECT * FROM BLOCKS WHERE BLOCKER = :user_id AND BLOCKED = USERS.ID)`
+const is_blocked = `EXISTS (SELECT * FROM BLOCKS WHERE BLOCKER = :user_id AND BLOCKED = USERS.ID)`
 
-const user_columns_basic =`
-ID, 
-USERNAME, 
-NAME
-`
-const user_columns_extended =`
-${user_columns_basic},
+const user_columns = `
+id,
+username,
+name,
+picture`;
+
+const user_columns_extended = `
+${user_columns},
 ${is_blocked} AS IS_BLOCKED,
 ${is_followed} AS IS_BLOCKED
 `
@@ -75,8 +76,7 @@ USERS WHERE USERS.ID=POST.PUBLISHER)`;
 const columns = `
     POST.TEXT,
     POST.ID,
-	POST.IMAGE_COUNT,
-	POST.VIDEO_COUNT,
+	POST.MEDIA,
 	POST.DATE,
 	POST.REPOST AS REPOSTED_ID,
 	POST.REPLYING_TO,
@@ -100,4 +100,4 @@ FROM
     ORDER BY POSTS.DATE DESC) POST`;
 
 export default postQueryText;
-export {is_followed,is_blocked,user_columns_basic,user_columns_extended}
+export { is_followed, is_blocked, user_columns, user_columns_extended }

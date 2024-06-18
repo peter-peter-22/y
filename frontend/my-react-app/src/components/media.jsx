@@ -1,4 +1,4 @@
-import React, { useRef } from 'react'
+import React, { useRef, useState } from 'react'
 import { Cloudinary } from '@cloudinary/url-gen';
 import { auto } from '@cloudinary/url-gen/actions/resize';
 import { autoGravity } from '@cloudinary/url-gen/qualifiers/gravity';
@@ -18,13 +18,20 @@ const mediaTypes = {
 //a media object can contain both normal urls and cloud images
 //the displayers can display both formats and prioritize cloud
 //this is necessary to display the local images before uploading
-function Media(type, url, public_id) {
+function Media(type, url, filedata) {
     this.type = type;
     this.url = url;
-    this.public_id = public_id;
+    this.filedata = filedata;
     this.is_video = () => type === mediaTypes.video;
     this.is_image = () => type === mediaTypes.image;
-    this.get_formats = () => { return { url: url, public_id: public_id } };
+    this.get_formats = () => { return { url: url, filedata: filedata } };
+}
+
+function MediaFromFileData(filedata) {
+    if (!filedata)
+        return new Media();
+    const type = filedata.type === "image" ? mediaTypes.image : mediaTypes.video;
+    return new Media(type, undefined, filedata);
 }
 
 function fileToMedia(file) {
@@ -58,22 +65,26 @@ function BlockMedia(props) {
     )
 }
 
-function MediaDisplayer(props) {
-    const media = props.media;
+function MediaDisplayer({ media, onEmpty, ...props }) {
     if (!media)
         return;
 
-    if (media.is_image())
+    //overwrite the provided media with onEmpty if it's type is undefined
+    let media_ = media;
+    if (media.type === undefined && onEmpty)
+        media_ = onEmpty;
+
+    if (media_.is_image())
         return (
             <ImageDisplayer
-                {...media.get_formats()}
+                {...media_.get_formats()}
                 {...props}
             />
         );
-    else if (media.is_video())
+    else if (media_.is_video())
         return (
             <VideoDisplayer
-                {...media.get_formats()}
+                {...media_.get_formats()}
                 {...props}
             />
         );
@@ -91,8 +102,10 @@ function VideoDisplayer(props) {
     }
 
     //choosing the right displayer depending on the available format
-    if (props.public_id !== undefined) {
-        const vid = cld.video(props.public_id);
+    const filedata = props.filedata;
+    if (filedata !== undefined) {
+        const vid = cld.video(filedata.public_id);
+        vid.setVersion(filedata.version);
         return (
             <AdvancedVideo
                 {...props}
@@ -107,7 +120,7 @@ function VideoDisplayer(props) {
             />
         );
     }
-    else if (props.url) {
+    else if (props.url !== undefined) {
         return (
             <video
                 {...props}
@@ -123,8 +136,10 @@ function VideoDisplayer(props) {
 
 function ImageDisplayer(props) {
     //choosing the right displayer depending on the available format
-    if (props.public_id !== undefined) {
-        const img = cld.image(props.public_id);
+    const filedata = props.filedata;
+    if (filedata !== undefined) {
+        const img = cld.image(filedata.public_id);
+        img.setVersion(filedata.version);
         return (
             <AdvancedImage
                 {...props}
@@ -137,7 +152,7 @@ function ImageDisplayer(props) {
             />
         );
     }
-    else if (props.url) {
+    else if (props.url !== undefined) {
         return (<img
             {...props}
             src={props.url}
@@ -145,4 +160,4 @@ function ImageDisplayer(props) {
     }
 }
 
-export { fileToMedia, mediaTypes, Media, ImageDisplayer, VideoDisplayer, MediaDisplayer, BlockMedia };
+export { fileToMedia, mediaTypes, Media, ImageDisplayer, VideoDisplayer, MediaDisplayer, BlockMedia, MediaFromFileData };

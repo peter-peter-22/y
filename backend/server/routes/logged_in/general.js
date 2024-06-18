@@ -21,7 +21,7 @@ import * as pp from "../../components/passport.js";
 import { username_exists, selectable_username } from "../user.js";
 import { Validator } from "node-input-validator";
 import { CheckV, CheckErr } from "../../components/validations.js";
-import postQueryText, { is_followed, is_blocked, user_columns_basic, user_columns_extended } from "./post_query.js";
+import postQueryText, { is_followed, is_blocked, user_columns, user_columns_extended } from "./post_query.js";
 
 const router = express.Router();
 
@@ -114,9 +114,8 @@ router.post("/user_profile", async (req, res) => {
     const { user_id } = req.body;
     const q = await db.query(named(`
     select 
-    name,
-    username,
-    id,
+    ${user_columns},
+    banner,
     registration_date,
     birthdate,
     bio, 
@@ -140,8 +139,8 @@ async function post_list(req, res, add_validations, before, after, query_params)
     await CheckV(v);
 
     const { from } = req.body;
-    const comments = await postQuery(req, before, after, query_params, undefined, undefined, from);
-    res.send(comments);
+    const posts = await postQuery(req, before, after, query_params, undefined, undefined, from);
+    res.send(posts);
 }
 
 
@@ -149,7 +148,7 @@ router.post("/follower_recommendations", async (req, res) => {
     const v = new Validator(req.body, { from: "required|integer" });
     await CheckV(v);
     const { from } = req.body;
-    const text = `SELECT ${user_columns_basic} from USERS WHERE NOT ${is_followed} LIMIT :limit OFFSET :offset`;
+    const text = `SELECT ${user_columns} from USERS WHERE NOT ${is_followed} LIMIT :limit OFFSET :offset`;
     const users = await db.query(named(text)({
         user_id: req.user.id,
         offset: from,
@@ -166,7 +165,7 @@ router.post("/likers_of_post", async (req, res) => {
     await CheckV(v);
     const { from, post_id } = req.body;
 
-    const user_liked_the_post = `
+    const user_liked_this_post = `
     EXISTS(
         SELECT * FROM LIKES
         WHERE
@@ -177,11 +176,11 @@ router.post("/likers_of_post", async (req, res) => {
 
     const text = `
     SELECT 
-    ${user_columns_basic},
+    ${user_columns},
     ${is_followed} AS IS_FOLLOWED,
     USERS.BIO 
     from USERS 
-    WHERE ${user_liked_the_post} 
+    WHERE ${user_liked_this_post} 
     LIMIT :limit OFFSET :offset`;
 
     const users = await db.query(named(text)({
@@ -203,7 +202,7 @@ router.post("/celebrities", async (req, res) => {
 
     const text = `
     SELECT 
-    ${user_columns_basic},
+    ${user_columns},
     USERS.BIO 
     from USERS 
     ORDER BY (select count(*) from follows where followed=:user_id) DESC
@@ -225,7 +224,7 @@ router.post("/viewers_of_post", async (req, res) => {
 
 
 router.get("/follower_recommendations_preview", async (req, res) => {
-    const text = `SELECT ${user_columns_basic} from USERS WHERE NOT ${is_followed} LIMIT 3`;
+    const text = `SELECT ${user_columns} from USERS WHERE NOT ${is_followed} LIMIT 3`;
     const users = await db.query(named(text)({ user_id: req.user.id }));
     res.send(users.rows);
 });

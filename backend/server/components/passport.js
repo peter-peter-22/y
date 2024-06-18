@@ -23,6 +23,7 @@ import GoogleRoutes from "./passport_strategies/google.js";
 import GithubRoutes from "./passport_strategies/github.js";
 import { CheckV } from "./validations.js";
 import { ApplySqlToUser, UpdateUser } from "../routes/logged_in.js";
+import { user_columns } from "../routes/logged_in/post_query.js";
 const named = yesql.pg;
 
 const router = express.Router();
@@ -112,8 +113,6 @@ router.post("/finish_registration", async (req, res) => {
     await finish_registration(req, res, name, email, "", birthdate, checkboxes);
 });
 
-const user_columns = "id,username,name";
-
 async function finish_registration(req, res, name, email, password_hash, birthdate, checkboxes) {
     try {
 
@@ -177,5 +176,5 @@ function AddDataToSession(req) {
     remember_session(req, config.cookie_remember);
 }
 
-export { auth, remember_session, router, universal_auth, finish_registration, user_columns };
+export { auth, remember_session, router, universal_auth, finish_registration };
 

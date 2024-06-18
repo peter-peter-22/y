@@ -39,7 +39,7 @@ import { useParams } from "react-router-dom";
 import { ProfilePicEditor, ChangeablePicture, UserNameEditor, NameEditor, BirthDateEditor } from "/src/components/create_account";
 import { ManageProfile } from "/src/components/manage_content_button.jsx";
 import { Media,mediaTypes } from "/src/components/media";
-import { ImageDisplayer } from "/src/components/media";
+import { ImageDisplayer,MediaDisplayer } from "/src/components/media";
 
 function Profile() {
     const [user, setUser] = useState();
@@ -89,7 +89,7 @@ function Profile() {
                         borderBottom: 1,
                         borderColor: "divider"
                     }}>
-                        <ProfileBanner public_id={GetProfileBanner(user)} />
+                        <ProfileBanner media={GetProfileBanner(user)} />
                         <ProfilePic user={user} sx={{
                             position: "absolute",
                             transform: "translateY(-50%)",
@@ -315,7 +315,7 @@ function ProfileEditor(props) {
                 }
             );
             UserData.update();
-            Close();
+            window.location.reload();
         }
         catch (err) {
             ThrowIfNotAxios(err);
@@ -338,8 +338,8 @@ function ProfileEditor(props) {
                         Save
                     </Fab>
                 </Stack>
-                <BannerChanger onUploadFile={(v) => { updateValue("banner_pic", v) }} current={new Media(mediaTypes.image,undefined, GetProfileBanner(user))} />
-                <ProfilePicEditor size="100px" onUploadFile={(v) => { updateValue("profile_pic", v) }} current={new Media(mediaTypes.image,undefined, GetProfilePicture(user))} />
+                <BannerChanger onUploadFile={(v) => { updateValue("banner_pic", v) }} current={GetProfileBanner(user)} />
+                <ProfilePicEditor size="100px" onUploadFile={(v) => { updateValue("profile_pic", v) }} current={ GetProfilePicture(user)} />
                 <UserNameEditor onChangeUserName={(v) => { updateValue("username", v) }} onChangeOk={(v) => { updateValue("username_ok", v) }} />
                 <NameEditor onChangeName={(v) => { updateValue("name", v) }} onChangeOk={(v) => { updateValue("name_ok", v) }} current={user.name} />
                 <BioEditor onChange={(v) => { updateValue("bio", v) }} current={user.bio} />
@@ -375,10 +375,9 @@ function BioEditor(props) {
 
 function BannerChanger(props) {
     function Displayer({media,button}) {
-        const formats = media?{...media.get_formats()}:{};
         return (
             <Box sx={{ border: 1, borderColor: "divider" }}>
-                <ProfileBanner {...formats}>
+                <ProfileBanner media={media}>
                     {button}
                 </ProfileBanner>
             </Box>
@@ -390,10 +389,10 @@ function BannerChanger(props) {
     );
 }
 
-function ProfileBanner(props) {
+function ProfileBanner({media,...props}) {
     return (
         <Box style={{ width: "100%", height: "144px", position: "relative" }}>
-            <ImageDisplayer url={props.url} public_id={props.public_id} style={{ height: "100%", width: "100%", objectFit: "cover" }}
+            <MediaDisplayer media={media} style={{ height: "100%", width: "100%", objectFit: "cover" }}
                 onError={({ currentTarget }) => {
                     currentTarget.onerror = null; // prevents looping
                     currentTarget.style.display = "none";

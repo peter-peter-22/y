@@ -9,7 +9,7 @@ import Fab from '@mui/material/Fab';
 import { Icon } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, logo, creation, CenterLogo, FollowDialog,AvatarImageDisplayer } from '/src/components/utilities';
+import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, logo, creation, CenterLogo, FollowDialog, AvatarImageDisplayer } from '/src/components/utilities';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -48,7 +48,7 @@ import config from "/src/components/config.js";
 import Moment from "moment";
 import validator from "validator";
 import { UserListExtended } from "/src/pages/follow_people";
-import { mediaTypes, Media } from '/src/components/media';
+import { mediaTypes, Media, fileToMedia } from '/src/components/media';
 
 function CreateAccount(props) {
     //only the selected pages are rendered
@@ -601,11 +601,10 @@ function WaitAfterChange(cb, timerRef) {
 function ProfilePicEditor(props) {
     const size = props.size ? props.size : "100px";
 
-    function ProfileDisplayer({media,button}) {
-        const formats = media?{...media.get_formats()}:{};
+    function ProfileDisplayer({ media, button }) {
         return (
             <div style={{ position: "relative", width: "fit-content" }}>
-                <AvatarImageDisplayer {...formats} style={{ height: size, width: size }} />
+                <AvatarImageDisplayer media={media} style={{ height: size, width: size }} />
                 {button}
             </div>
         );
@@ -629,14 +628,13 @@ function ChangeablePicture(props) {
 
     function handleFile(e) {
         const selected = e.target.files[0];
-        setFile(selected);
         if (selected === undefined)
             mediaRef.current = undefined;
         else {
-            const selectedUrl = URL.createObjectURL(selected);
-            const myMedia = new Media(mediaTypes.image, selectedUrl);
+            const myMedia = fileToMedia(selected);
             mediaRef.current = myMedia;
         }
+        setFile(selected);
     }
 
 

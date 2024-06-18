@@ -7,34 +7,48 @@ cloudinary.config({
     api_secret: "LK1MPl5HzmJB4ACHlS38BFIZsVo" // Click 'View Credentials' below to copy your API secret
 });
 
-async function uploadImage(file,public_id,folder)
-{
+async function uploadMedia(file, public_id, folder) {
     const options = {
         public_id: public_id,
         folder: folder,
-        resource_type: "image",
-        invalidate:true
+        invalidate: true,
     };
 
-    await cloudinary.uploader.upload(
+    const uploadMethod = getUploadMethod(file);
+
+    const res = await uploadMethod(
         file.tempFilePath,
         options
     );
+
+    const data = new FileData(res);
+    return data;
 }
 
-async function uploadVideo(file,public_id,folder)
+function getUploadMethod(file) {
+    const bytes = file.size;
+    const megabytes = bytes / 1024 / 1024;
+    if (megabytes >= 100)
+        return cloudinary.uploader.upload_large;
+    else
+        return cloudinary.uploader.upload;
+}
+
+function FileData(upload_response) {
+    this.version = upload_response.version;
+    this.type = upload_response.resource_type;
+    this.public_id=upload_response.public_id;
+}
+
+function postsFolder(post_id)
 {
-    const options = {
-        public_id: public_id,
-        folder: folder,
-        resource_type: "video",
-        invalidate:true
-    };
-
-   await cloudinary.uploader.upload_large(
-        file.tempFilePath,
-        options
-    );
+    return `posts/${post_id}`;
 }
+function profileFolder(user_id)
+{
+    return `users/${user_id}/`;
+}
+const profileId="profile";
+const bannerId="banner";
 
-export {uploadImage,uploadVideo};
+export { uploadMedia,FileData ,postsFolder,profileFolder,profileId,bannerId};

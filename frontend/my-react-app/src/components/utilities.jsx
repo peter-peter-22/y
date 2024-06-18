@@ -30,7 +30,7 @@ import { NavLink } from "react-router-dom";
 import CircularProgress from '@mui/material/CircularProgress';
 import Popover from '@mui/material/Popover';
 import Grid from '@mui/material/Grid';
-import { ImageDisplayer, Media, MediaDisplayer, mediaTypes } from "/src/components/media.jsx";
+import { ImageDisplayer, Media, MediaDisplayer, mediaTypes, MediaFromFileData } from "/src/components/media.jsx";
 
 const noOverflow = {
     whiteSpace: 'nowrap',
@@ -408,50 +408,48 @@ function ToggleOnlineBool(user, url, startingValue, onChange) {
 
 
 function GetProfilePicture(user) {
-    return `${config.profile_pics_path}/${user.id}`;
+    return new MediaFromFileData(user.picture);
 }
 function GetProfileBanner(user) {
-    return `${config.profile_banner_path}/${user.id}`;
+    return new MediaFromFileData(user.banner);
 }
 function ProfilePic({ user, ...props }) {
     return (
-        <AvatarImageDisplayer public_id={GetProfilePicture(user)} {...props} />
+        <AvatarImageDisplayer media={GetProfilePicture(user)} {...props} />
     );
 }
-function AvatarImageDisplayer({ url, public_id, ...props }) {
+function AvatarImageDisplayer({ media, ...props }) {
+    const defa = "/images/default_image.jpg";
     return (
         <Avatar {...props}>
-            <ImageDisplayer
-                url={url}
-                public_id={public_id}
+            <MediaDisplayer
+                media={media}
                 style={{
                     width: "100%",
                     height: "100%",
                     objectFit: "cover"
                 }}
                 onError={({ currentTarget }) => {
-                    currentTarget.onerror = null; // prevents looping
-                    currentTarget.src = "/images/default_image.jpg";
+                    currentTarget.onerror = null;
+                    currentTarget.src = defa;
                 }}
+                onEmpty={new Media(mediaTypes.image, defa)}
             />
         </Avatar>
     );
 }
 
 
+//get media jsons from post and convert them to client media object
 function GetPostMedia(post) {
+    if (!post.media)//media can be null in sql
+        return;
+
     const medias = [];
 
-    //get video objects
-    for (let n = 0; n < post.video_count; n++) {
-        const public_id = `${config.post_videos_path}/${post.id}_${n}`;
-        medias.push(new Media(mediaTypes.video, undefined, public_id));
-    }
-
-    //get image objects
-    for (let n = 0; n < post.image_count; n++) {
-        const public_id = `${config.post_pics_path}/${post.id}_${n}`;
-        medias.push(new Media(mediaTypes.image, undefined, public_id));
+    for (let n = 0; n < post.media.length; n++) {
+        const filedata = post.media[n];
+        medias.push(new MediaFromFileData(filedata));
     }
 
     return medias;

@@ -25,7 +25,7 @@ import { Validator } from "node-input-validator";
 import { CheckV, CheckErr, validate_image, validate_video, videosType, imagesType } from "../../components/validations.js";
 import { postQuery } from "./general.js";
 import { GetMaxLetters } from "../user.js";
-import { uploadImage, uploadVideo } from "../../components/cloudinary_handler.js";
+import { uploadMedia } from "../../components/cloudinary_handler.js";
 
 const router = express.Router();
 
@@ -168,22 +168,11 @@ async function getAndValidatePost(req) {
     return files;
 }
 
-async function uploadPostFiles(mediaGroups, post_id) {
-    const fileHandlers = {
-        images: uploadImage,
-        videos: uploadVideo
-    }
-
-    for (const [type, files] of Object.entries(mediaGroups)) {
-        if (files !== undefined) {
-            const fileHandler = fileHandlers[type];
-            files.forEach(async (file, index) => {
-                const folder = `${type}/posts`;
-                const public_id = `${post_id}_${index}`;
-                await fileHandler(file, public_id, folder);
-            });
-        }
-    }
+async function uploadPostFiles(files, post_id) {
+    files.forEach(async (file, index) => {
+        const path = `posts/${post_id}/${index}`;
+        await uploadMedia(file, path);
+    });
 }
 
 function getAndValidateFiles(req) {

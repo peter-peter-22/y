@@ -25,32 +25,39 @@ import { Validator } from "node-input-validator";
 import { CheckV, CheckErr, validate_image } from "../../components/validations.js";
 import { ApplySqlToUser, UpdateUser, UpdateUserAfterChange } from "../logged_in.js";
 import Moment from "moment";
-import { uploadImage } from "../../components/cloudinary_handler.js";
+import { uploadMedia, profileFolder, profileId, bannerId } from "../../components/cloudinary_handler.js";
+import { user_columns } from "./post_query.js";
 
 const router = express.Router();
 
-router.post("/update_profile_picture", async (req, res, next) => {
+router.post("/update_profile_picture", async (req, res) => {
     const file = req.files.image;
-    update_profile_picture(req, next, file);
+    await update_profile_picture(req, file);
     res.sendStatus(200);
 });
 
 async function update_profile_picture(req, file) {
-    await update_profile_file(req, file, config.profile_pics_path);
+    await update_profile_file(req, file, profileId, "picture");
 }
 async function update_profile_banner(req, file) {
-    await update_profile_file(req, file, config.profile_banner_path);
+    await update_profile_file(req, file, bannerId, "banner");
 }
 
-async function update_profile_file(req, file, foldername) {
-    try {
-        validate_image(file);
-        const user_id = req.user.id;
-        await uploadImage(file, user_id, foldername);
-    }
-    catch (err) {
-        next(err);
-    }
+async function update_profile_file(req, file, fileName, update_column) {
+    validate_image(file);
+    const user_id = req.user.id;
+    const fileData = await uploadMedia(file, fileName, profileFolder(user_id));
+    const q = await db.query(named(`
+        UPDATE users 
+        SET ${update_column} = :file 
+        WHERE id=:user_id 
+        returning ${user_columns}`
+    )
+    ({
+        user_id: user_id,
+        file: fileData
+    }));
+    await ApplySqlToUser(q,req);
 }
 
 
@@ -76,7 +83,13 @@ async function update_username(req, username, skip_update = false) {
     if (!selectable)
         CheckErr("this username is not available");
 
-    const result = await db.query(named("UPDATE users SET username=:username WHERE id=:id RETURNING *")({ username: username, id: req.user.id }));
+    const result = await db.query(named(`
+        UPDATE users 
+        SET username=:username 
+        WHERE id=:id 
+        RETURNING ${user_columns}`
+    )
+    ({ username: username, id: req.user.id }));
     if (!skip_update)
         await ApplySqlToUser(result, req);
 }
@@ -103,12 +116,18 @@ router.post("/change_browser_notifications", async (req, res) => {
     });
     await CheckV(v);
 
-    const result = await db.query(named("UPDATE users SET browser_notifications=:enabled WHERE id=:id RETURNING *")({ enabled: req.body.enabled, id: req.user.id }));
+    const result = await db.query(named(`
+        UPDATE users 
+        SET browser_notifications=:enabled 
+        WHERE id=:id 
+        RETURNING ${user_columns}`
+    )
+    ({ enabled: req.body.enabled, id: req.user.id }));
     await ApplySqlToUser(result, req);
     res.sendStatus(200);
 });
 
-router.post("/update_profile", async (req, res, next) => {
+router.post("/update_profile", async (req, res) => {
     //valdiate user data
     const v = new Validator(req.body, {
         username: 'username',

@@ -51,10 +51,6 @@ const config = {
     users_per_request: 10,
     notifications_per_request: 10,
     uploadLimitMB: 100,
-    profile_pics_path: "/images/profiles",
-    profile_banner_path: "/images/banners",
-    post_pics_path: "/images/posts",
-    post_videos_path: "/videos/posts",
 }
 
 const transporter = nodemailer.createTransport({

@@ -28,6 +28,7 @@ import create from "./logged_in/create.js";
 import general from "./logged_in/general.js";
 import feed from "./logged_in/feed.js";
 import notifications from "./logged_in/notifications.js";
+import { user_columns } from "./logged_in/post_query.js";
 
 const router = express.Router();
 
@@ -53,11 +54,12 @@ async function UpdateUser(newUser, req) {
 }
 
 async function ApplySqlToUser(query_result, req) {
-    await UpdateUser(query_result.rows[0], req);
+    const user = query_result.rows[0];
+    await UpdateUser(user, req);
 }
 
 async function UpdateUserAfterChange( req) {
-    const q =await db.query(named("select * from users where id=:id")({id:req.user.id}));
+    const q =await db.query(named(`select ${user_columns} from users where id=:id`)({id:req.user.id}));
     await ApplySqlToUser(q, req);
 }
 
