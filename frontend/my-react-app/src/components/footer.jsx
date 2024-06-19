@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Stack from '@mui/material/Stack';
-import SideMenu, { Inside } from "./side_menus.jsx";
+import { Inside } from "./side_menus.jsx";
 import { TopMenu } from '/src/components/utilities';
 import { SearchField } from "/src/components/inputs.jsx";
 import { Box } from '@mui/material';
@@ -9,7 +9,7 @@ import Fab from '@mui/material/Fab';
 import { Icon } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink, creation, FollowDialog, LinelessLink, Loading } from '/src/components/utilities';
+import { ResponsiveSelector, ProfileText, FadeLink, creation, FollowDialog, LinelessLink, Loading, AboveBreakpoint } from '/src/components/utilities';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -25,10 +25,13 @@ import { Endpoint, FormatAxiosError } from "/src/communication.js";
 import axios from 'axios';
 
 function Footer() {
+    const wide = AboveBreakpoint("rightMenuSmaller");
+    const visible = AboveBreakpoint("hideRightMenu");
+    const width = wide ? "300px" : "220px";
     return (
         <div>
-            <SideMenu border="borderLeft">
-                <Box sx={{ pl: 4, width: "300px" }}>
+            {visible &&
+                <Box sx={{ pl: 4, width: width }}>
                     <TopMenu>
                         <SearchField />
                     </TopMenu>
@@ -112,7 +115,7 @@ function Footer() {
 
                     </Stack>
                 </Box>
-            </SideMenu>
+            }
         </div>
     );
 }
@@ -142,7 +145,7 @@ function WhoToFollow() {
 
             {users ? users.map((user, index) => <FollowDialog user={user} key={index} />) : <Loading />}
 
-            <LinelessLink href="/add_followers">
+            <LinelessLink to="/add_followers">
                 <BlueTextButton>
                     Show more
                 </BlueTextButton>

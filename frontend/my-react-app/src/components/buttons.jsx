@@ -6,7 +6,7 @@ import Avatar from '@mui/material/Avatar';
 import Stack from '@mui/material/Stack';
 import { Typography } from '@mui/material';
 import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ChooseChildBool, ProfileText, ToCorner, GetUserKey, noOverflow, GetProfilePicture, SimplePopOver ,AvatarImageDisplayer,ProfilePic} from '/src/components/utilities';
+import { ResponsiveSelector, ProfileText, ToCorner, GetUserKey, noOverflow, GetProfilePicture, SimplePopOver, AvatarImageDisplayer, ProfilePic } from '/src/components/utilities';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
@@ -20,32 +20,44 @@ import { Endpoint } from "/src/communication.js";
 import { UserData } from '/src/App';
 import { ImageDisplayer } from "/src/components/media.jsx";
 
-const smallerButtons = "leftMenu";
+const smallerButtons = "leftMenuIcons";
 const iconSize = "30px";
 
 function TabButton(props) {
     return (
         <NavLink to={props.to}>
             {({ isActive }) => (
-                <ResponsiveButton selected={isActive} override={props.override} text={props.text}>{props.children}</ResponsiveButton>
+                <ResponsiveButton selected={isActive} {...props}>{props.children}</ResponsiveButton>
             )}
         </NavLink>
     );
 }
 
-function SelectableButton(props) {
+function BottomTabButton(props) {
+    return (
+        <NavLink to={props.to}>
+            {({ isActive }) => (
+                <SelectableIcon selected={isActive} size={"small"} {...props} />
+            )}
+        </NavLink>
+    );
+}
+
+function SelectableButton({ selected, active_icon, inactive_icon, children }) {
     return (
         <Fab variant="extended" color="secondary_noBg" sx={{
             paddingLeft: "8px",
             paddingRight: "25px"
         }}>
-            <ChooseChildBool first={!props.selected}>
-                {props.children}
-            </ChooseChildBool>
+            {selected ?
+                active_icon
+                :
+                inactive_icon
+            }
             <span style={{
                 marginLeft: "10px"
             }} >
-                <Typography variant="big" fontWeight={props.selected ? "bold" : "normal"}>{props.text}</Typography>
+                <Typography variant="big" fontWeight={selected ? "bold" : "normal"}>{children}</Typography>
             </span>
         </Fab>
     );
@@ -72,22 +84,28 @@ function TopMenuButton(props) {
     );
 }
 
-function SelectableIcon(props) {
+function SelectableIcon({ size = "medium", active_icon, inactive_icon, selected }) {
     return (
-        <Fab size="medium" color="secondary_noBg" >
-            <ChooseChildBool first={!props.selected}>
-                {props.children}
-            </ChooseChildBool>
+        <Fab size={size} color="secondary_noBg" >
+            {selected ?
+                active_icon :
+                inactive_icon
+            }
         </Fab>
     );
 }
 
-function ResponsiveButton(props) {
-    return (
-        <ResponsiveSelector override={props.override} breakpoint={smallerButtons}>
-            <SelectableButton selected={props.selected} text={props.text} >{props.children}</SelectableButton>
-            <SelectableIcon selected={props.selected} >{props.children}</SelectableIcon>
-        </ResponsiveSelector>);
+function ResponsiveButton({ children, ...props }) {
+    if (children !== undefined)//if no children(text) then always return only the icon
+        return (
+            <ResponsiveSelector breakpoint={smallerButtons}
+                above={<SelectableButton {...props}>{children}</SelectableButton>}
+                below={<SelectableIcon  {...props}>{children}</SelectableIcon>}
+            />);
+    else
+        return (
+            <SelectableIcon  {...props}>{children}</SelectableIcon>
+        );
 }
 
 function ButtonIcon(props) {
@@ -110,16 +128,20 @@ function ButtonSvg(props) {
 }
 
 
-function PostButton() {
+function PostButton(props) {
     return (
-        <ResponsiveSelector breakpoint={smallerButtons}>
-            <WideButton color="primary">
-                <Typography variant="big_bold" color="primary.contrastText">Post</Typography>
-            </WideButton>
-            <Fab size="medium" color="primary">
-                <ButtonIcon icon="create" filled="true" />
-            </Fab>
-        </ResponsiveSelector>
+        <ResponsiveSelector breakpoint={smallerButtons}
+            above={
+                <WideButton color="primary" {...props}>
+                    <Typography variant="big_bold" color="primary.contrastText">Post</Typography>
+                </WideButton>
+            }
+            below={
+                <Fab size="medium" color="primary" {...props}>
+                    <ButtonIcon icon="create" filled="true" />
+                </Fab>
+            }
+        />
     );
 }
 
@@ -139,28 +161,31 @@ function ProfileButton() {
 
     return (
         <>
-            <ResponsiveSelector breakpoint={smallerButtons}>
-                <Fab onClick={handleOpen} variant="extended" color="secondary_noBg" sx={{ height: size, borderRadius: size, width: "100%", p: 1 }}>
-                    <Stack direction="row" spacing={1} sx={{ width: "100%", height: "100%", alignItems: "center" }}>
+            <ResponsiveSelector breakpoint={smallerButtons}
+                above={
+                    <Fab onClick={handleOpen} variant="extended" color="secondary_noBg" sx={{ height: size, borderRadius: size, width: "100%", p: 1 }}>
+                        <Stack direction="row" spacing={1} sx={{ width: "100%", height: "100%", alignItems: "center" }}>
+                            <ProfilePic user={user} />
+                            <ProfileText user={user} />
+                            <Icon fontSize="small">
+                                more_horiz
+                            </Icon>
+                        </Stack>
+                    </Fab>
+                }
+                below={
+                    <Fab onClick={handleOpen} color="secondary_noBg" sx={{ height: size, width: size, borderRadius: "100%", p: 0 }}>
                         <ProfilePic user={user} />
-                        <ProfileText user={user} />
-                        <Icon fontSize="small">
-                            more_horiz
-                        </Icon>
-                    </Stack>
-                </Fab>
-
-                <Fab onClick={handleOpen} color="secondary_noBg" sx={{ height: size, width: size, borderRadius: "100%", p: 0 }}>
-                <ProfilePic user={user} />
-                </Fab>
-            </ResponsiveSelector>
+                    </Fab>
+                }
+            />
 
             <ShowPopover>
                 <List>
                     <ListItem disablePadding>
                         <ListItemButton onClick={handleLogout}>
                             <Typography variant="medium_bold" sx={{ maxWidth: "70vw" }} style={noOverflow}>
-                                Logout <GetUserKey user={user}/>
+                                Logout <GetUserKey user={user} />
                             </Typography>
                         </ListItemButton>
                     </ListItem>
@@ -211,4 +236,4 @@ function BlueTextButton(props) {
     );
 }
 
-export { TabButton, PostButton, ButtonSvg, ButtonIcon, ProfileButton, ResponsiveButton, SelectableButton, SelectableIcon, TopMenuButton, CornerButton, OutlinedButton, WideButton, BlueTextButton, OutlinedFab };
+export { TabButton, PostButton, ButtonSvg, ButtonIcon, ProfileButton, ResponsiveButton, SelectableButton, SelectableIcon, TopMenuButton, CornerButton, OutlinedButton, WideButton, BlueTextButton, OutlinedFab, BottomTabButton };

@@ -44,8 +44,8 @@ const colors = {
     share: "#00BA7C",
 };
 
-const success={
-    main:"#00B515"
+const success = {
+    main: "#00B515"
 };
 
 //fonts
@@ -126,7 +126,7 @@ const theme = createTheme({
         secondary_noBg: secondaryNoBackground,
         transparentBlack: transparentBlack,
         colors,
-        success:success
+        success: success
     },
 
     components: {
@@ -205,7 +205,11 @@ const theme = createTheme({
             md: 900,
             lg: 1200,
             xl: 1536,
-            leftMenu: 900
+            leftMenuIcons: 1300,
+            rightMenuSmaller: 1000,
+            hideRightMenu:870,
+            smallIconMargins:600,
+            bottomTabs:500
         },
     },
 });

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, forwardRef, createContext, useContext, useImperativeHandle } from "react";
 import Stack from '@mui/material/Stack';
-import SideMenu, { Inside } from "./side_menus.jsx";
+import  { Inside } from "./side_menus.jsx";
 import { TopMenu } from '/src/components/utilities';
 import { SearchField } from "/src/components/inputs.jsx";
 import { Box, Hidden } from '@mui/material';
@@ -9,7 +9,7 @@ import Fab from '@mui/material/Fab';
 import { Icon } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, GetProfilePicture, GetPostMedia, OnlineList, SimplePopOver, formatNumber, UserLink, ReplyingFrom, ToggleFollow, ToggleBlock, InheritLink,ProfilePic } from '/src/components/utilities';
+import { ResponsiveSelector, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, GetProfilePicture, GetPostMedia, OnlineList, SimplePopOver, formatNumber, UserLink, ReplyingFrom, ToggleFollow, ToggleBlock, InheritLink, ProfilePic } from '/src/components/utilities';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -30,7 +30,7 @@ import { UserData } from "/src/App.jsx";
 import config from "/src/components/config.js";
 import axios from 'axios';
 import { Endpoint, FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
-import { Error, Modals, ShowImage } from "/src/components/modals";
+import { Error, Modals, ShowImage, ShowSingleImage } from "/src/components/modals";
 import { useNavigate } from "react-router-dom";
 import { ManagePost } from "/src/components/manage_content_button.jsx";
 import { UnblockButton } from "/src/pages/profile";
@@ -140,7 +140,7 @@ function OpenOnClick(props) {
         navigate(props.link);
     }
     return (
-        <div onClick={Clicked}>
+        <div onClick={Clicked} {...props}>
             {props.children}
         </div>
     );
@@ -158,12 +158,6 @@ function PostFocused(props) {
     const original = props.post;
     const overriden = OverrideWithRepost(original);
 
-    function SubscribeButton() {
-        // return(
-        //     <Fab variant="extended" size="small" color="black" style={{ flexShrink: 0 }}>Subscribe</Fab>
-        // );
-    }
-
     return (
         <ListBlock>
             <RepostedOrQuoted post={original} />
@@ -172,8 +166,7 @@ function PostFocused(props) {
                 contents={
                     <Stack direction="column" style={{ overflow: "hidden" }}>
                         <Stack direction="row" spacing={0.25} style={{ alignItems: "center" }}>
-                            <ProfileText user={overriden.publisher} />
-                            <SubscribeButton />
+                            <ProfileText user={overriden.publisher} link />
                             <ManagePost post={original} />
                         </Stack>
                         <ReplyingToPost post={overriden} />
@@ -430,18 +423,31 @@ function PostBottomIcon(props) {
         </IconButton>);
 }
 
-function ClickableImage(props) {
+function ClickableImage({ index, children }) {
     const medias = useContext(MediaContext);
-    const media = medias[props.index];
+    const media = medias[index];
 
     function Clicked(index, e) {
         e.stopPropagation();
         ShowImage(medias, index);
     }
     return (
-        <BlockMedia media={media} onClick={(e) => { Clicked(props.index, e); }}>
-            {props.children}
+        <BlockMedia media={media} onClick={(e) => { Clicked(index, e); }}>
+            {children}
         </BlockMedia>
+    );
+}
+
+function ClickableSingleImageContainer({ media, children,style }) {
+    function Clicked(e) {
+        e.stopPropagation();
+        if (media.type!==undefined)
+            ShowSingleImage(media);
+    }
+    return (
+        <div onClick={Clicked} style={{...style,cursor:"pointer"}}>
+            {children}
+        </div>
     );
 }
 
@@ -601,4 +607,4 @@ function OverrideWithRepost(post) {
 }
 
 
-export { Post, PostList, PostFocused, ListBlockButton, ListBlock, RowWithPrefix, PostButtonRow, WritePost, OverrideWithRepost, MediaContext, ClickableImage, PostModalFrame, OpenPostOnClick, OpenOnClick, SimplifiedPostList, commentSections, BorderlessPost, PostMedia };
+export { Post, PostList, PostFocused, ListBlockButton, ListBlock, RowWithPrefix, PostButtonRow, WritePost, OverrideWithRepost, MediaContext, ClickableImage, PostModalFrame, OpenPostOnClick, OpenOnClick, SimplifiedPostList, commentSections, BorderlessPost, PostMedia, ClickableSingleImageContainer };

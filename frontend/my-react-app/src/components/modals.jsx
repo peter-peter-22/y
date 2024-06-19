@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import Stack from '@mui/material/Stack';
-import SideMenu, { Inside } from "./side_menus.jsx";
+import  { Inside } from "./side_menus.jsx";
 import { TopMenu } from '/src/components/utilities';
 import { SearchField } from "/src/components/inputs.jsx";
 import { Backdrop, Box } from '@mui/material';
@@ -9,7 +9,7 @@ import Fab from '@mui/material/Fab';
 import { Icon } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, logo, creation, CenterLogo, FollowDialog } from '/src/components/utilities';
+import { ResponsiveSelector, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, logo, creation, CenterLogo, FollowDialog } from '/src/components/utilities';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -143,7 +143,7 @@ function GenericModal(props) {
 
 //image
 const ImagesDisplay = {};
-function ImagesModal(props) {
+function ImagesModal() {
     const [open, setOpen] = useState(false);
     const [index, setIndex] = useState(0);
     const imagesRef = useRef(null);
@@ -152,8 +152,19 @@ function ImagesModal(props) {
     ImagesDisplay.Show = (medias, index) => {
         try {
             imagesRef.current = medias;
-            setOpen(true);
             setIndex(index);
+            setOpen(true);
+        }
+        catch (err) {
+            Error(err);
+        }
+    };
+
+    ImagesDisplay.ShowSingle = (media) => {
+        try {
+            imagesRef.current = [media];
+            setIndex(0);
+            setOpen(true);
         }
         catch (err) {
             Error(err);
@@ -188,29 +199,32 @@ function ImagesModal(props) {
                 width: "100%",
                 height: "100%",
                 objectFit: "contain",
-                backgroundColor:"black"
+                backgroundColor: "black"
             }}
-            onClick={(e)=>{e.stopPropagation()}}
+            onClick={(e) => { e.stopPropagation() }}
         />
     );
 
     return (
         <Backdrop open={open} onClick={Close} style={{ zIndex: 1 }}>
-            <ResponsiveSelector breakpoint="md">
-                <Stack direction="row" style={{ height: "80%", width: "80%", alignItems: "center", justifyContent: "center" }}>
-                    <StepButton icon="arrow_left" tall={true} onClick={(e) => { Step(-1, e); }} />
-                    {DisplayedMedia}
-                    <StepButton icon="arrow_right" tall={true} onClick={(e) => { Step(1, e); }} />
-                </Stack>
-
-                <Stack direction="column" style={{ height: "80%", width: "95%", alignItems: "center", justifyContent: "center" }}>
-                    {DisplayedMedia}
-                    <Stack direction="row" style={{ width: "100%" }}>
-                        <StepButton icon="arrow_left" onClick={(e) => { Step(-1, e); }} />
-                        <StepButton icon="arrow_right" onClick={(e) => { Step(1, e); }} />
+            <ResponsiveSelector breakpoint="md"
+                above={
+                    <Stack direction="row" style={{ height: "80%", width: "80%", alignItems: "center", justifyContent: "center" }}>
+                        <StepButton icon="arrow_left" tall={true} onClick={(e) => { Step(-1, e); }} />
+                        {DisplayedMedia}
+                        <StepButton icon="arrow_right" tall={true} onClick={(e) => { Step(1, e); }} />
                     </Stack>
-                </Stack>
-            </ResponsiveSelector>
+                }
+                below={
+                    <Stack direction="column" style={{ height: "80%", width: "95%", alignItems: "center", justifyContent: "center" }}>
+                        {DisplayedMedia}
+                        <Stack direction="row" style={{ width: "100%" }}>
+                            <StepButton icon="arrow_left" onClick={(e) => { Step(-1, e); }} />
+                            <StepButton icon="arrow_right" onClick={(e) => { Step(1, e); }} />
+                        </Stack>
+                    </Stack>
+                }
+            />
         </Backdrop>
     );
 }
@@ -233,4 +247,8 @@ function ShowImage(images, imageIndex) {
     ImagesDisplay.Show(images, imageIndex);
 }
 
-export { ErrorModal, Modals, ImagesDisplay, CreateModals, Error, ErrorText, ShowImage, SuccessModal };
+function ShowSingleImage(media) {
+    ImagesDisplay.ShowSingle(media);
+}
+
+export { ErrorModal, Modals, ImagesDisplay, CreateModals, Error, ErrorText, ShowImage, SuccessModal,ShowSingleImage };

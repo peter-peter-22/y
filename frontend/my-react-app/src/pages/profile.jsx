@@ -9,7 +9,7 @@ import Fab from '@mui/material/Fab';
 import { Icon } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, GetProfilePicture,  GetPostMedia, OnlineList, SimplePopOver, formatNumber, TabSwitcherLinks, Loading, GetProfileBanner,ProfilePic } from '/src/components/utilities';
+import { ResponsiveSelector, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, GetProfilePicture, GetPostMedia, OnlineList, SimplePopOver, formatNumber, TabSwitcherLinks, Loading, GetProfileBanner, ProfilePic } from '/src/components/utilities';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -38,8 +38,9 @@ import { SimplifiedPostList, ClickableImage, MediaContext, PostModalFrame } from
 import { useParams } from "react-router-dom";
 import { ProfilePicEditor, ChangeablePicture, UserNameEditor, NameEditor, BirthDateEditor } from "/src/components/create_account";
 import { ManageProfile } from "/src/components/manage_content_button.jsx";
-import { Media,mediaTypes } from "/src/components/media";
-import { ImageDisplayer,MediaDisplayer } from "/src/components/media";
+import { Media, mediaTypes } from "/src/components/media";
+import { ImageDisplayer, MediaDisplayer } from "/src/components/media";
+import { ClickableSingleImageContainer } from "/src/components/posts";
 
 function Profile() {
     const [user, setUser] = useState();
@@ -339,7 +340,7 @@ function ProfileEditor(props) {
                     </Fab>
                 </Stack>
                 <BannerChanger onUploadFile={(v) => { updateValue("banner_pic", v) }} current={GetProfileBanner(user)} />
-                <ProfilePicEditor size="100px" onUploadFile={(v) => { updateValue("profile_pic", v) }} current={ GetProfilePicture(user)} />
+                <ProfilePicEditor size="100px" onUploadFile={(v) => { updateValue("profile_pic", v) }} current={GetProfilePicture(user)} />
                 <UserNameEditor onChangeUserName={(v) => { updateValue("username", v) }} onChangeOk={(v) => { updateValue("username_ok", v) }} />
                 <NameEditor onChangeName={(v) => { updateValue("name", v) }} onChangeOk={(v) => { updateValue("name_ok", v) }} current={user.name} />
                 <BioEditor onChange={(v) => { updateValue("bio", v) }} current={user.bio} />
@@ -374,7 +375,7 @@ function BioEditor(props) {
 }
 
 function BannerChanger(props) {
-    function Displayer({media,button}) {
+    function Displayer({ media, button }) {
         return (
             <Box sx={{ border: 1, borderColor: "divider" }}>
                 <ProfileBanner media={media}>
@@ -389,15 +390,17 @@ function BannerChanger(props) {
     );
 }
 
-function ProfileBanner({media,...props}) {
+function ProfileBanner({ media, ...props }) {
     return (
         <Box style={{ width: "100%", height: "144px", position: "relative" }}>
-            <MediaDisplayer media={media} style={{ height: "100%", width: "100%", objectFit: "cover" }}
-                onError={({ currentTarget }) => {
-                    currentTarget.onerror = null; // prevents looping
-                    currentTarget.style.display = "none";
-                }} />
-            {props.children}
+            <ClickableSingleImageContainer media={media} style={{width:"100%",height:"100%"}}>
+                <MediaDisplayer media={media} style={{ height: "100%", width: "100%", objectFit: "cover" }}
+                    onError={({ currentTarget }) => {
+                        currentTarget.onerror = null;
+                        currentTarget.style.display = "none";
+                    }} />
+                {props.children}
+            </ClickableSingleImageContainer>
         </Box>
     );
 }

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, forwardRef, createContext, useContext } from "react";
 import Stack from '@mui/material/Stack';
-import SideMenu, { Inside } from "./side_menus.jsx";
+import  { Inside } from "./side_menus.jsx";
 import { TopMenu } from '/src/components/utilities';
 import { SearchField } from "/src/components/inputs.jsx";
 import { Box, Hidden } from '@mui/material';
@@ -9,7 +9,7 @@ import Fab from '@mui/material/Fab';
 import { Icon } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, GetProfilePicture, OnlineList, SimplePopOver, formatNumber, UserLink, ReplyingFrom, ToggleFollow, ToggleBlock, InheritLink ,ProfilePic} from '/src/components/utilities';
+import { ResponsiveSelector, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, GetProfilePicture, OnlineList, SimplePopOver, formatNumber, UserLink, ReplyingFrom, ToggleFollow, ToggleBlock, InheritLink, ProfilePic, Loading } from '/src/components/utilities';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -47,6 +47,7 @@ function PostCreator(props) {
     const [files, setFiles] = useState([]);
     const [medias, setMedias] = useState([]);
     const inputRef = useRef(null);
+    const [uploading, setUploading] = useState(false);
 
     const handleFocus = () => {
         setIsFocused(true);
@@ -72,10 +73,17 @@ function PostCreator(props) {
         inputRef.current.click();
     }
 
+    function Clear() {
+        setFiles([]);
+        setMedias([]);
+        setText("");
+    }
+
     async function submitPost() {
         const formData = new FormData();
         files.forEach(file => {
-            formData.append('medias', file)}
+            formData.append('medias', file)
+        }
         );
         formData.append('text', getText);
 
@@ -93,6 +101,10 @@ function PostCreator(props) {
         }
 
         try {
+            //hide the post creator when uploading
+            setUploading(true);
+
+            //request
             const result = await axios.post(
                 Endpoint(endpoint),
                 formData,
@@ -102,19 +114,26 @@ function PostCreator(props) {
                     }
                 }
             );
-            setFiles([]);
-            setMedias([]);
-            setText("");
+
+            //back to default state
+            Clear();
+            setUploading(false);
 
             //update post list on client without refreshing the page
             const post = result.data;
             AddPostToCommentSection(post);
+
+            //call function if defined
             if (onPost)
                 onPost();
         }
         catch (err) {
             ThrowIfNotAxios(err);
         }
+    }
+
+    if (uploading) {
+        return <Loading />;
     }
 
     return (

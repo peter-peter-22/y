@@ -5,6 +5,7 @@ import { Endpoint } from "/src/communication.js";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import Header from "/src/components/header";
 import Footer from "/src/components/footer";
+import { Box } from '@mui/material';
 
 //pages
 import Home from "/src/pages/home";
@@ -17,26 +18,23 @@ import Profile from "/src/pages/profile";
 import PostEngagements from "/src/pages/post_engagements";
 
 export default () => {
-  const isBig = AboveBreakpoint("sm");
   return (
-      <div style={{ display: "flex", flexDirection: "column", alignItems: isBig ? "center" : "stretch", overflowY: "hidden" }}>
-        <div style={{ display: "flex", flexDirection: "row", padding: isBig ? "revert-layer" : 0 }}>
-          <Header />
-          <div style={isBig ? { width: "500px" } : { flexGrow: 1 }}>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/notifications" element={<Notifications />} />
-              <Route path="/posts/:id" element={<PostFocused />} />
-              <Route path="/posts/:id/*" element={<PostEngagements />} />
-              <Route path="/bookmarks" element={<Bookmarks />} />
-              <Route path="/add_followers" element={<AddFollowers />} />
-              <Route path="/add_followers" element={<AddFollowers />} />
-              <Route path="/profile/:id/*" element={<Profile />} />
-              <Route path="*" element={<Error />} />
-            </Routes>
-          </div>
-          <Footer />
-        </div>
-      </div>
+    <div style={{ display: "flex", flexDirection: "row", padding: 0, overflowY: "hidden", justifyContent: "center" }}>
+      <Header />
+      <Box sx={{ maxWidth: "500px", flexGrow: 1, overflow: "hidden", borderLeft: 1, borderRight: 1, borderColor: "divider", boxSizing: "border-box",minHeight:"100vh" }}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/notifications" element={<Notifications />} />
+          <Route path="/posts/:id" element={<PostFocused />} />
+          <Route path="/posts/:id/*" element={<PostEngagements />} />
+          <Route path="/bookmarks" element={<Bookmarks />} />
+          <Route path="/add_followers" element={<AddFollowers />} />
+          <Route path="/add_followers" element={<AddFollowers />} />
+          <Route path="/profile/:id/*" element={<Profile />} />
+          <Route path="*" element={<Error />} />
+        </Routes>
+      </Box>
+      <Footer />
+    </div>
   );
 }

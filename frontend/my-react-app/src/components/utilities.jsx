@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useImperativeHandle, forwardRef } f
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { theme } from '/src/styles/mui/my_theme.jsx';
 import Stack from '@mui/material/Stack';
-import SideMenu, { Inside } from "/src/components/side_menus.jsx";
+import { Inside } from "/src/components/side_menus.jsx";
 import { SearchField } from "/src/components/inputs.jsx";
 import { Box } from '@mui/material';
 import { Typography } from '@mui/material';
@@ -17,7 +17,6 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import { BoxList, BoxListOutlined, BlueTextButton } from '/src/components/containers';
 import IconButton from '@mui/material/IconButton';
-import Link from '@mui/material/Link';
 import { ResponsiveButton, ButtonIcon, ButtonSvg, TabButton, PostButton, ProfileButton, TopMenuButton } from "/src/components/buttons.jsx";
 import Moment from "moment";
 import { Endpoint, FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
@@ -26,11 +25,12 @@ import { Error, Modals } from "/src/components/modals";
 import axios from 'axios';
 import Tooltip from '@mui/material/Tooltip';
 import config from "/src/components/config.js";
-import { NavLink } from "react-router-dom";
+import { NavLink, Link } from "react-router-dom";
 import CircularProgress from '@mui/material/CircularProgress';
 import Popover from '@mui/material/Popover';
 import Grid from '@mui/material/Grid';
 import { ImageDisplayer, Media, MediaDisplayer, mediaTypes, MediaFromFileData } from "/src/components/media.jsx";
+import { OpenOnClick, ClickableSingleImageContainer } from "/src/components/posts";
 
 const noOverflow = {
     whiteSpace: 'nowrap',
@@ -44,18 +44,30 @@ const logo = "/svg/y.svg";
 const creation = "© 2024 Y Corp.";
 
 function ResponsiveSelector(props) {
-    let isBig = props.override === undefined ? AboveBreakpoint(props.breakpoint) : props.override;
-    return (<ChooseChildBool first={isBig}>{props.children}</ChooseChildBool>);
+    let isAbove = AboveBreakpoint(props.breakpoint);
+    if (isAbove)
+        return props.above;
+    else
+        return props.below;
 }
 
 function AboveBreakpoint(breakpoint) {
-    const [screenWidth, setScreenWidth] = useState(window.innerWidth);
+    const myValue = theme.breakpoints.values[breakpoint];
+    return AboveValue(myValue);
+}
+function AboveValue(value) {
+    const [isAbove, setAbove] = useState(calAbove());
+
+    function calAbove() {
+        const width = window.innerWidth;
+        return width > value;
+    }
+
+    function handleResize() {
+        setAbove(calAbove());
+    }
 
     useEffect(() => {
-        const handleResize = () => {
-            setScreenWidth(window.innerWidth);
-        };
-
         window.addEventListener('resize', handleResize);
 
         // Cleanup function to remove event listener
@@ -64,19 +76,9 @@ function AboveBreakpoint(breakpoint) {
         };
     }, []);
 
-    return screenWidth > theme.breakpoints.values[breakpoint];
+    return isAbove;
 }
 
-
-function ChooseChild(props) {
-    if (props.children.length !== undefined) {
-        let chosenChild = props.children.length > props.index ? props.index : 0;
-        return props.children[chosenChild];
-    }
-    else {
-        return props.children;
-    }
-}
 
 function TopMenu(props) {
     return (
@@ -87,22 +89,23 @@ function TopMenu(props) {
         </div>);
 }
 
-function NavMenu(props) {
+function NavMenu({ children, style }) {
     return (
-        <div style={{ height: "40px" }}>
-            {props.children}
-        </div>);
-}
-
-function ChooseChildBool(props) {
-    return (<ChooseChild index={props.first ? 0 : 1}>{props.children}</ChooseChild>);
+        <div style={{ height: "40px", ...style }}>
+            {children}
+        </div>
+    );
 }
 
 function ProfileText(props) {
     return (
         <div style={{ flexGrow: 1, overflow: "hidden" }}>
             <Stack direction={props.row ? "row" : "column"} spacing={props.row ? 0.5 : 0}>
-                {props.link ? <UserLink user={props.user} /> : <UserName user={props.user} />}
+                {props.link ?
+                    <UserLink user={props.user} />
+                    :
+                    <UserName user={props.user} />
+                }
                 <UserKey user={props.user} />
             </Stack>
         </div>
@@ -299,7 +302,7 @@ function StyledLink(props) {
 
 function InheritLink(props) {
     return (
-        <Link to={props.to} style={{ textDecoration: "inherit", color: "inherit", fontFamily: "inherit" }} onClick={(e) => { e.stopPropagation() }}>
+        <Link to={props.to} style={{ textDecoration: "inherit", color: "inherit", fontFamily: "inherit", ...props.style }} onClick={(e) => { e.stopPropagation() }}>
             {props.children}
         </Link>
     );
@@ -329,26 +332,27 @@ function CenterLogo() {
 }
 
 
-function FollowDialog(props) {
-    const user = props.user;
+function FollowDialog({ user, children }) {
     return (
         <ListItem disablePadding>
-            <ListItemButton>
-                <Stack direction="row" spacing={1} sx={{ alignItems: "center", width: "100%" }}>
-                    <div>
-                        <ProfilePic user={user} />
-                    </div>
-                    <div style={{ flexGrow: 1, overflow: "hidden" }}>
-                        <Stack direction="column" >
-                            <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-                                <ProfileText user={user} />
-                                <FollowButton user={user} />
+            <OpenOnClick link={GetProfileLink(user)} style={{ width: "100%" }}>
+                <ListItemButton>
+                    <Stack direction="row" spacing={1} sx={{ alignItems: "center", width: "100%" }}>
+                        <div>
+                            <ProfilePic user={user} />
+                        </div>
+                        <div style={{ flexGrow: 1, overflow: "hidden" }}>
+                            <Stack direction="column" >
+                                <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+                                    <ProfileText user={user} />
+                                    <FollowButton user={user} />
+                                </Stack>
+                                {children}
                             </Stack>
-                            {props.children}
-                        </Stack>
-                    </div>
-                </Stack>
-            </ListItemButton>
+                        </div>
+                    </Stack>
+                </ListItemButton>
+            </OpenOnClick>
         </ListItem>
     );
 }
@@ -357,7 +361,7 @@ function FollowButton(props) {
     const [following, setFollowing, toggleFollow] = ToggleFollow(props.user);
 
     return (
-        <Fab onClick={toggleFollow} variant="extended" size="small" color="black" sx={{ flexShrink: 0 }}>{following ? "Following" : "Follow"}</Fab>
+        <Fab onClick={(e) => { e.stopPropagation(); toggleFollow(); }} variant="extended" size="small" color="black" sx={{ flexShrink: 0 }}>{following ? "Following" : "Follow"}</Fab>
     );
 }
 
@@ -372,7 +376,7 @@ function ToggleOnlineBool(user, url, startingValue, onChange) {
     const [get, set] = useState(Boolean(startingValue));
     const firstRef = useRef(true);
 
-    function toggle() {
+    function toggle(e) {
         set((prev) => {
             const newValue = !prev;
             update(newValue);
@@ -422,19 +426,26 @@ function AvatarImageDisplayer({ media, ...props }) {
     const defa = "/images/default_image.jpg";
     return (
         <Avatar {...props}>
-            <MediaDisplayer
+            <ClickableSingleImageContainer
                 media={media}
                 style={{
                     width: "100%",
                     height: "100%",
-                    objectFit: "cover"
-                }}
-                onError={({ currentTarget }) => {
-                    currentTarget.onerror = null;
-                    currentTarget.src = defa;
-                }}
-                onEmpty={new Media(mediaTypes.image, defa)}
-            />
+                }}>
+                <MediaDisplayer
+                    media={media}
+                    style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover"
+                    }}
+                    onError={({ currentTarget }) => {
+                        currentTarget.onerror = null;
+                        currentTarget.src = defa;
+                    }}
+                    onEmpty={new Media(mediaTypes.image, defa)}
+                />
+            </ClickableSingleImageContainer>
         </Avatar>
     );
 }
@@ -455,10 +466,10 @@ function GetPostMedia(post) {
     return medias;
 }
 
-function LinelessLink(props) {
+function LinelessLink({ to, children }) {
     return (
-        <Link href={props.href} style={{ textDecoration: "none" }}>
-            {props.children}
+        <Link to={to} style={{ textDecoration: "none" }}>
+            {children}
         </Link>
     );
 }
@@ -625,4 +636,4 @@ function formatNumber(number) {
     return number;
 }
 
-export { AboveBreakpoint, ResponsiveSelector, ChooseChild, ChooseChildBool, TopMenu, ProfileText, FadeLink, TabSwitcher, UserName, UserKey, noOverflow, BoldLink, UserLink, UserKeyLink, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, logo, creation, ToCorner, CenterLogo, FollowDialog, GetProfilePicture, FollowButton, GetPostMedia, LinelessLink, OnlineList, Loading, SimplePopOver, formatNumber, TabSwitcherLinks, GetProfileBanner, GetProfileLink, ReplyingFrom, ToggleFollow, ToggleBlock, StyledLink, InheritLink, AvatarImageDisplayer, ProfilePic }
+export { AboveBreakpoint, ResponsiveSelector, TopMenu, ProfileText, FadeLink, TabSwitcher, UserName, UserKey, noOverflow, BoldLink, UserLink, UserKeyLink, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, logo, creation, ToCorner, CenterLogo, FollowDialog, GetProfilePicture, FollowButton, GetPostMedia, LinelessLink, OnlineList, Loading, SimplePopOver, formatNumber, TabSwitcherLinks, GetProfileBanner, GetProfileLink, ReplyingFrom, ToggleFollow, ToggleBlock, StyledLink, InheritLink, AvatarImageDisplayer, ProfilePic,NavMenu }

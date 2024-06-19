@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Stack from '@mui/material/Stack';
-import SideMenu, { Inside } from "./side_menus.jsx";
+import  { Inside } from "./side_menus.jsx";
 import { TopMenu } from '/src/components/utilities';
 import { SearchField } from "/src/components/inputs.jsx";
 import { Box } from '@mui/material';
@@ -9,7 +9,7 @@ import Fab from '@mui/material/Fab';
 import { Icon } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ChooseChildBool, ProfileText, FadeLink, UserName, UserKey, noOverflow, BoldLink, UserLink, DateLink, TextRow, GetUserName, GetUserKey, ReplyingTo, GetProfilePicture,OnlineList,AvatarImageDisplayer } from '/src/components/utilities';
+import { ResponsiveSelector, ProfileText, FadeLink, UserName, UserKey, noOverflow, BoldLink, UserLink, DateLink, TextRow, GetUserName, GetUserKey, ReplyingTo, GetProfilePicture, OnlineList, AvatarImageDisplayer } from '/src/components/utilities';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -56,7 +56,8 @@ function Like(props) {
                         }
                     />
                 </Stack>
-            </OpenPostOnClick>        </ListBlockButton>
+            </OpenPostOnClick>
+        </ListBlockButton>
     );
 }
 
@@ -69,7 +70,6 @@ function ReplyOrPost(post) {
 
 function Follow(props) {
     const data = props.data;
-    console.log(data);
     const link = "/profile/" + data.users[0].id;
     return (
         <ListBlockButton>
@@ -155,7 +155,7 @@ function Comment(props) {
     );
 }
 
-function SmallAvatar({media}) {
+function SmallAvatar({ media }) {
     return (
         <AvatarImageDisplayer sx={{ width: "30px", height: "30px" }} media={media} />
     );
