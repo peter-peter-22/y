@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, forwardRef, createContext, useContext, useImperativeHandle } from "react";
 import Stack from '@mui/material/Stack';
-import  { Inside } from "./side_menus.jsx";
+import { Inside } from "./side_menus.jsx";
 import { TopMenu } from '/src/components/utilities';
 import { SearchField } from "/src/components/inputs.jsx";
 import { Box, Hidden } from '@mui/material';
@@ -147,8 +147,7 @@ function OpenOnClick(props) {
 }
 
 
-function ReplyingToPost(props) {
-    const post = props.post;
+function ReplyingToPost({post}) {
     if (post.replied_user) {
         return (<ReplyingFrom post={post} />);
     }
@@ -222,7 +221,7 @@ function PostButtonRow(props) {
     const { count: repost_count, active: reposted, pressed: handleRepost } = CountableButton(post, post.repost_count, post.reposted_by_user, "/member/general/repost");
     const [comment_count, set_comment_count] = useState(post.comment_count);
 
-    async function handleComment() {
+    function handleComment() {
         Modals[0].Show(
             <PostModalFrame>
                 <PostCreator post={post} onPost={commented} />
@@ -235,7 +234,7 @@ function PostButtonRow(props) {
         closeModal();
     }
 
-    async function handleQuote() {
+    function handleQuote() {
         Modals[0].Show(
             <PostModalFrame>
                 <PostCreator quoted={post} onPost={closeModal} />
@@ -321,7 +320,7 @@ function QuotedFrame(props) {
 
 function PostModalFrame(props) {
     return (
-        <div style={{ width: "500px", margin: "20px" }}>
+        <div style={{ width: "500px", padding: "20px",maxWidth:"100%",boxSizing:"border-box" }}>
             {props.children}
         </div>
     );
@@ -362,15 +361,13 @@ function CountableButton(post, initial_count, initial_active, url) {
     }
 }
 
-function PostList(props) {
+function PostList({ post, ...props }) {
     const onlineListRef = useRef();
-    const [key, setKey] = useState(props.post ? props.post.id : -1);
+    const [key, setKey] = useState(post ? post.id : -1);
 
     async function GetEntries(from) {
         try {
             const new_posts = await props.getPosts(from);
-            new_posts.forEach((post) => {
-            });
             return new_posts;
         }
         catch (err) {
@@ -393,6 +390,7 @@ function PostList(props) {
         const thisCommentSection = {};
         thisCommentSection.addPost = (newPost) => { onlineListRef.current.AddEntryToTop(newPost) };
         thisCommentSection.update = () => { setKey((prev) => prev + 1) };
+        thisCommentSection.post = post ? post.id : null;//what post belongs to this comment section? null if this is the main feed
         commentSections.active = thisCommentSection;
     }, []);
 
@@ -438,14 +436,14 @@ function ClickableImage({ index, children }) {
     );
 }
 
-function ClickableSingleImageContainer({ media, children,style }) {
+function ClickableSingleImageContainer({ media, children, style }) {
     function Clicked(e) {
         e.stopPropagation();
-        if (media.type!==undefined)
+        if (media.type !== undefined)
             ShowSingleImage(media);
     }
     return (
-        <div onClick={Clicked} style={{...style,cursor:"pointer"}}>
+        <div onClick={Clicked} style={{ ...style, cursor: "pointer" }}>
             {children}
         </div>
     );

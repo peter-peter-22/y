@@ -64,7 +64,7 @@ export default () => {
         return <Loading />;
 };
 
-function CommentList(props) {
-    const id = props.post.id;
-    return <SimplifiedPostList endpoint="/member/general/get_comments" params={{ id: id }} key={id} />;
+function CommentList({post}) {
+    const id = post.id;
+    return <SimplifiedPostList endpoint="/member/general/get_comments" params={{ id: id }} key={id} post={post}/>;
 }

@@ -145,19 +145,20 @@ async function postAny(req, res, saveToDatabase) {
     const result = await saveToDatabase(req.user.id, text);//must return the id of the published post
     const post_id = result.rows[0].id;
 
-    //upload files and return the post
-    const filedatas = await uploadPostFiles(files, post_id);
-    await db.query(named(`
+    if (files) {
+        //upload files and return the post
+        const filedatas = await uploadPostFiles(files, post_id);
+        await db.query(named(`
             UPDATE posts 
             SET media=:media 
             WHERE id=:post_id`
-    )
-        ({
-            post_id: post_id,
-            media: filedatas
-        })
-    );
-
+        )
+            ({
+                post_id: post_id,
+                media: filedatas
+            })
+        );
+    }
     //return the created post to client
     const recentlyAddedPost = await postQuery(req, undefined, " WHERE post.id=:post_id", { post_id: post_id }, undefined, 1);
     res.send(recentlyAddedPost[0]);
@@ -190,7 +191,7 @@ function getAndValidateFiles(req) {
     const medias = tryGetFiles(req, "medias");
     if (!medias)
         return;
-    
+
     medias.forEach(media => {
         validate_media(media);
     });

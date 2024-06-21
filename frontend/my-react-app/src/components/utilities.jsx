@@ -283,7 +283,7 @@ function ReplyingTo(props) {
     return (
         <TextRow >
             <Typography variant="small_fade" style={{ flexShrink: 0, ...noOverflow, margin: 0 }}>Replying to</Typography>
-            <StyledLink to={"/posts/" + user.id} typography="small_fade">
+            <StyledLink to={GetProfileLink(user)} typography="small_fade">
                 <GetUserKey user={user} />
             </StyledLink>
         </TextRow>
@@ -300,10 +300,15 @@ function StyledLink(props) {
     );
 }
 
-function InheritLink(props) {
+function InheritLink({ to, style, children, onClick, ...props }) {
     return (
-        <Link to={props.to} style={{ textDecoration: "inherit", color: "inherit", fontFamily: "inherit", ...props.style }} onClick={(e) => { e.stopPropagation() }}>
-            {props.children}
+        <Link to={to} style={{ textDecoration: "inherit", color: "inherit", fontFamily: "inherit", ...style }}
+            onClick={(e) => {
+                e.stopPropagation();
+                if (onClick)
+                    onClick(e)
+            }}>
+            {children}
         </Link>
     );
 }
@@ -636,4 +641,4 @@ function formatNumber(number) {
     return number;
 }
 
-export { AboveBreakpoint, ResponsiveSelector, TopMenu, ProfileText, FadeLink, TabSwitcher, UserName, UserKey, noOverflow, BoldLink, UserLink, UserKeyLink, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, logo, creation, ToCorner, CenterLogo, FollowDialog, GetProfilePicture, FollowButton, GetPostMedia, LinelessLink, OnlineList, Loading, SimplePopOver, formatNumber, TabSwitcherLinks, GetProfileBanner, GetProfileLink, ReplyingFrom, ToggleFollow, ToggleBlock, StyledLink, InheritLink, AvatarImageDisplayer, ProfilePic,NavMenu }
+export { AboveBreakpoint, ResponsiveSelector, TopMenu, ProfileText, FadeLink, TabSwitcher, UserName, UserKey, noOverflow, BoldLink, UserLink, UserKeyLink, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, logo, creation, ToCorner, CenterLogo, FollowDialog, GetProfilePicture, FollowButton, GetPostMedia, LinelessLink, OnlineList, Loading, SimplePopOver, formatNumber, TabSwitcherLinks, GetProfileBanner, GetProfileLink, ReplyingFrom, ToggleFollow, ToggleBlock, StyledLink, InheritLink, AvatarImageDisplayer, ProfilePic, NavMenu }

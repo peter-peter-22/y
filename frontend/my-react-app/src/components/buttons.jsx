@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 import { NavLink } from "react-router-dom";
 import Fab from '@mui/material/Fab';
 import { Icon } from '@mui/material';
@@ -19,19 +19,22 @@ import axios from "axios";
 import { Endpoint } from "/src/communication.js";
 import { UserData } from '/src/App';
 import { ImageDisplayer } from "/src/components/media.jsx";
+import {  Modals } from "/src/components/modals";
+import {PostModalFrame} from "/src/components/posts";
+import { PostCreator } from '/src/components/post_creator';
 
 const smallerButtons = "leftMenuIcons";
 const iconSize = "30px";
 
-function TabButton(props) {
+const TabButton = forwardRef((props, ref) => {
     return (
-        <NavLink to={props.to}>
+        <NavLink to={props.to} ref={ref} >
             {({ isActive }) => (
                 <ResponsiveButton selected={isActive} {...props}>{props.children}</ResponsiveButton>
             )}
         </NavLink>
     );
-}
+});
 
 function BottomTabButton(props) {
     return (
@@ -43,12 +46,14 @@ function BottomTabButton(props) {
     );
 }
 
-function SelectableButton({ selected, active_icon, inactive_icon, children }) {
+function SelectableButton({ selected, active_icon, inactive_icon, children,onClick }) {
     return (
         <Fab variant="extended" color="secondary_noBg" sx={{
             paddingLeft: "8px",
             paddingRight: "25px"
-        }}>
+        }}
+        onClick={onClick}
+        >
             {selected ?
                 active_icon
                 :
@@ -84,9 +89,9 @@ function TopMenuButton(props) {
     );
 }
 
-function SelectableIcon({ size = "medium", active_icon, inactive_icon, selected }) {
+function SelectableIcon({ size = "medium", active_icon, inactive_icon, selected ,onClick}) {
     return (
-        <Fab size={size} color="secondary_noBg" >
+        <Fab size={size} color="secondary_noBg"  onClick={onClick}>
             {selected ?
                 active_icon :
                 inactive_icon
@@ -96,16 +101,17 @@ function SelectableIcon({ size = "medium", active_icon, inactive_icon, selected 
 }
 
 function ResponsiveButton({ children, ...props }) {
+    const full = <SelectableButton {...props}>{children}</SelectableButton>;
+    const iconOnly = <SelectableIcon  {...props}>{children}</SelectableIcon>;
+
     if (children !== undefined)//if no children(text) then always return only the icon
         return (
             <ResponsiveSelector breakpoint={smallerButtons}
-                above={<SelectableButton {...props}>{children}</SelectableButton>}
-                below={<SelectableIcon  {...props}>{children}</SelectableIcon>}
+                above={full}
+                below={iconOnly}
             />);
     else
-        return (
-            <SelectableIcon  {...props}>{children}</SelectableIcon>
-        );
+        return iconOnly;
 }
 
 function ButtonIcon(props) {
@@ -129,15 +135,25 @@ function ButtonSvg(props) {
 
 
 function PostButton(props) {
+    function handlePost() {
+        Modals[0].Show(
+            <PostModalFrame>
+                <PostCreator onPost={posted}/>
+            </PostModalFrame>
+        );
+    }
+    function posted() {
+        Modals[0].Close();
+    }
     return (
         <ResponsiveSelector breakpoint={smallerButtons}
             above={
-                <WideButton color="primary" {...props}>
+                <WideButton color="primary" style={{ flexShrink: 0 }} {...props} onClick={handlePost}>
                     <Typography variant="big_bold" color="primary.contrastText">Post</Typography>
                 </WideButton>
             }
             below={
-                <Fab size="medium" color="primary" {...props}>
+                <Fab size="medium" color="primary" style={{ flexShrink: 0 }} {...props} onClick={handlePost}>
                     <ButtonIcon icon="create" filled="true" />
                 </Fab>
             }
@@ -163,7 +179,7 @@ function ProfileButton() {
         <>
             <ResponsiveSelector breakpoint={smallerButtons}
                 above={
-                    <Fab onClick={handleOpen} variant="extended" color="secondary_noBg" sx={{ height: size, borderRadius: size, width: "100%", p: 1 }}>
+                    <Fab onClick={handleOpen} variant="extended" color="secondary_noBg" sx={{ height: size, borderRadius: size, width: "100%", p: 1, flexShrink: 0 }}>
                         <Stack direction="row" spacing={1} sx={{ width: "100%", height: "100%", alignItems: "center" }}>
                             <ProfilePic user={user} />
                             <ProfileText user={user} />
@@ -174,7 +190,7 @@ function ProfileButton() {
                     </Fab>
                 }
                 below={
-                    <Fab onClick={handleOpen} color="secondary_noBg" sx={{ height: size, width: size, borderRadius: "100%", p: 0 }}>
+                    <Fab onClick={handleOpen} color="secondary_noBg" sx={{ height: size, width: size, borderRadius: "100%", p: 0, flexShrink: 0 }}>
                         <ProfilePic user={user} />
                     </Fab>
                 }
@@ -220,9 +236,9 @@ function OutlinedFab(props) {
     );
 }
 
-function WideButton(props) {
+function WideButton({ style, ...props }) {
     return (
-        <Fab variant="extended" {...props} style={{ width: "100%" }}>
+        <Fab variant="extended" {...props} style={{ width: "100%", ...style }}>
             {props.children}
         </Fab>
     );

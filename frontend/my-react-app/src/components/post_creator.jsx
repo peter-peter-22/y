@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, forwardRef, createContext, useContext } from "react";
 import Stack from '@mui/material/Stack';
-import  { Inside } from "./side_menus.jsx";
+import { Inside } from "./side_menus.jsx";
 import { TopMenu } from '/src/components/utilities';
 import { SearchField } from "/src/components/inputs.jsx";
 import { Box, Hidden } from '@mui/material';
@@ -37,13 +37,12 @@ import { UnblockButton } from "/src/pages/profile";
 import { commentSections, BorderlessPost, RowWithPrefix, PostMedia } from "/src/components/posts.jsx";
 import { fileToMedia } from "/src/components/media.jsx";
 
-function PostCreator(props) {
+function PostCreator({ post, quoted, onPost, ...props }) {
     const [isFocused, setIsFocused] = React.useState(false);
     const [getText, setText] = React.useState("");
     const maxLetters = UserData.getData.maxLetters;
-    const isComment = props.post !== undefined;
-    const isQuote = props.quoted !== undefined;
-    const onPost = props.onPost;
+    const isComment = post !== undefined;
+    const isQuote = quoted !== undefined;
     const [files, setFiles] = useState([]);
     const [medias, setMedias] = useState([]);
     const inputRef = useRef(null);
@@ -89,7 +88,7 @@ function PostCreator(props) {
 
         let endpoint;
         if (isComment) {
-            formData.append("replying_to", props.post.id);
+            formData.append("replying_to", post.id);
             endpoint = "/member/create/comment";
         }
         else if (isQuote) {
@@ -141,7 +140,7 @@ function PostCreator(props) {
             {isComment && isFocused &&
                 <Box sx={{ my: 1 }} >
                     <RowWithPrefix contents={
-                        <ReplyingTo post={props.post} />
+                        <ReplyingTo post={post} />
                     } />
                 </Box>
             }
@@ -300,9 +299,16 @@ function LetterCounter(props) {
 }
 
 function AddPostToCommentSection(post) {
-    const mySection = commentSections.active;
-    if (mySection)
-        mySection.addPost(post);
+    const section = commentSections.active;
+    if (!section)
+        return;
+
+    const myCommentSection = post.replying_to === section.post;
+    console.log(post.replying_to + " " + section.post);
+    if (!myCommentSection)
+        return;
+
+    section.addPost(post);
 }
 
 
