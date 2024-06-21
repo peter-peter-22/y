@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, forwardRef, createContext, useContext, useImperativeHandle } from "react";
+import React, { useState, useRef, useEffect, forwardRef, createContext, useContext, useImperativeHandle, memo } from "react";
 import Stack from '@mui/material/Stack';
 import { Inside } from "./side_menus.jsx";
 import { TopMenu } from '/src/components/utilities';
@@ -59,10 +59,10 @@ function RowWithPrefix(props) {
     );
 }
 
-function Post(props) {
+function Post({post}) {
     return (
         <ListBlockButton>
-            <BorderlessPost post={props.post} />
+            <BorderlessPost post={post} />
         </ListBlockButton>
     );
 }
@@ -147,7 +147,7 @@ function OpenOnClick(props) {
 }
 
 
-function ReplyingToPost({post}) {
+function ReplyingToPost({ post }) {
     if (post.replied_user) {
         return (<ReplyingFrom post={post} />);
     }
@@ -320,7 +320,7 @@ function QuotedFrame(props) {
 
 function PostModalFrame(props) {
     return (
-        <div style={{ width: "500px", padding: "20px",maxWidth:"100%",boxSizing:"border-box" }}>
+        <div style={{ width: "500px", padding: "20px", maxWidth: "100%", boxSizing: "border-box" }}>
             {props.children}
         </div>
     );
@@ -361,6 +361,15 @@ function CountableButton(post, initial_count, initial_active, url) {
     }
 }
 
+const HideablePostMemo=memo((props)=> {
+    const post = props.entry;
+    const [hidden, setHidden] = useState(post.publisher.is_blocked)
+    if (!hidden)
+        return (<Post post={post} />);
+    else if (post.replying_to !== null)//comments are visible in an alternative way if the user is blocked
+        return (<BlockedComment unHide={() => { setHidden(false) }} />);
+});
+
 function PostList({ post, ...props }) {
     const onlineListRef = useRef();
     const [key, setKey] = useState(post ? post.id : -1);
@@ -376,15 +385,6 @@ function PostList({ post, ...props }) {
         }
     }
 
-    function EntryMapper(props) {
-        const post = props.entry;
-        const [hidden, setHidden] = useState(post.publisher.is_blocked)
-        if (!hidden)
-            return (<Post post={post} />);
-        else if (post.replying_to !== null)//comments are visible in an alternative way if the user is blocked
-            return (<BlockedComment unHide={() => { setHidden(false) }} />);
-    }
-
     //make the comment section globally accessable
     useEffect(() => {
         const thisCommentSection = {};
@@ -395,7 +395,7 @@ function PostList({ post, ...props }) {
     }, []);
 
     return (
-        <OnlineList getEntries={GetEntries} entryMapper={EntryMapper} ref={onlineListRef} key={key} />
+        <OnlineList getEntries={GetEntries} entryMapper={HideablePostMemo} ref={onlineListRef} key={key} />
     );
 }
 

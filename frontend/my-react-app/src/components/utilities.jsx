@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
+import React, { useState, useEffect, useRef, useImperativeHandle, forwardRef, memo } from 'react';
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { theme } from '/src/styles/mui/my_theme.jsx';
 import Stack from '@mui/material/Stack';
@@ -479,7 +479,7 @@ function LinelessLink({ to, children }) {
     );
 }
 
-const OnlineList = forwardRef((props, ref) => {
+const OnlineList = forwardRef(({ entryMapper, getEntries, overrideEntryMapController, ...props }, ref) => {
     const [entries, setEntries] = useState([]);
     const listRef = useRef(null);
     const savedScrollRef = useRef(0);
@@ -548,30 +548,21 @@ const OnlineList = forwardRef((props, ref) => {
         return () => { window.removeEventListener("scroll", Scrolling) };
     }, [])
 
-    //getting functions from props
-    function EntryMapper(entryprops) {
-        return props.entryMapper(entryprops);
-    }
 
     async function GetEntries(from) {
-        return await props.getEntries(from);
+        return await getEntries(from);
     }
 
-    function defaultEntryMapController(props) {
-        return (
-            <List sx={{ p: 0 }}>
-                {props.entries.map((entry, index) => <EntryMapper key={index} entry={entry} />)}
-            </List>
-        );
-    }
-    const overrideEntryMapController = props.entryMapController;
-    const EntryMapController = overrideEntryMapController ? overrideEntryMapController : defaultEntryMapController;
+    const EntryMapper = entryMapper;
+
 
     return (
-        <div ref={listRef}>
-            <EntryMapController entries={entries} />
+        <>
+            <List sx={{ p: 0 }} ref={listRef}>
+                {entries.map((entry, index) => <EntryMapper key={index} entry={entry} />)}
+            </List>
             {!end && <Loading />}
-        </div>
+        </>
     );
 });
 

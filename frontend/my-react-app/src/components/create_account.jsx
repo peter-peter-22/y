@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
+import React, { useState, useEffect, useRef, useImperativeHandle, forwardRef,memo } from 'react';
 import Stack from '@mui/material/Stack';
 import  { Inside } from "./side_menus.jsx";
 import { TopMenu } from '/src/components/utilities';
@@ -9,7 +9,7 @@ import Fab from '@mui/material/Fab';
 import { Icon } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, logo, creation, CenterLogo, FollowDialog, AvatarImageDisplayer } from '/src/components/utilities';
+import { ResponsiveSelector, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, logo, creation, CenterLogo, FollowDialog, AvatarImageDisplayer ,GetProfilePicture} from '/src/components/utilities';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -598,8 +598,9 @@ function WaitAfterChange(cb, timerRef) {
     }, 300);
 }
 
-function ProfilePicEditor(props) {
-    const size = props.size ? props.size : "100px";
+const ProfilePicEditor = memo(({user,size : overwriteSize,onUploadFile})=> {
+    const size = overwriteSize ? overwriteSize : "100px";
+    const current=user?GetProfilePicture(user):undefined;
 
     function ProfileDisplayer({ media, button }) {
         return (
@@ -611,9 +612,10 @@ function ProfilePicEditor(props) {
     }
 
     return (
-        <ChangeablePicture displayer={ProfileDisplayer} {...props} />
+        <ChangeablePicture displayer={ProfileDisplayer} current={current} onUploadFile={onUploadFile} />
     );
-}
+},
+(prev,now)=>prev.user===now.user);
 
 function ChangeablePicture(props) {
     const [file, setFile] = useState();
@@ -643,7 +645,7 @@ function ChangeablePicture(props) {
     function ChangeButton() {
         return (
             <Fab size="small" color="transparentBlack" sx={{ border: 1, borderColor: "divider", position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}>
-                <VisuallyHiddenInput type="file" accept={config.accepted_image_types} onChange={handleFile} />
+                <VisuallyHiddenInput type="file" accept={config.accepted_image_types} onChange={handleFile} onClick={(e)=>e.stopPropagation()}/>
                 <Icon baseClassName="material-icons-outlined">
                     add_a_photo
                 </Icon>

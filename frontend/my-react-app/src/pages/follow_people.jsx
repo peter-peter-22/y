@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,memo } from "react";
 import Stack from '@mui/material/Stack';
 import { TopMenu } from '/src/components/utilities';
 import { SearchField } from "/src/components/inputs.jsx";
@@ -19,7 +19,7 @@ import IconButton from '@mui/material/IconButton';
 import Link from '@mui/material/Link';
 import { ResponsiveButton, ButtonIcon, ButtonSvg, TabButton, PostButton, ProfileButton, TopMenuButton, CornerButton } from "/src/components/buttons.jsx";
 import axios from "axios";
-import { Endpoint, FormatAxiosError } from "/src/communication.js";
+import { Endpoint, FormatAxiosError,ThrowIfNotAxios } from "/src/communication.js";
 
 function FollowableList(props) {
     async function GetEntries(from) {
@@ -45,35 +45,35 @@ function FollowableList(props) {
     );
 }
 
-function UserListExtended(props) {
+const FollowDialogExtended=memo(({entry:user})=> {
+    return (
+        <FollowDialog user={user} >
+            <Typography variant="small" sx={{mt:1}}>
+                {user.bio}
+            </Typography>
+        </FollowDialog>
+    );
+});
+
+//extended because this additionally displays the user bio, and accepts more url parameters
+function UserListExtended({url,params:additionalParams}) {
     async function GetEntries(from) {
         try {
             let params = { from: from };
-            const additional = props.params;
-            if (additional) params = { ...params, ...additional };
+            if (additionalParams) params = { ...params, ...additionalParams };
 
-            const response = await axios.post(props.url, params);
+            const response = await axios.post(url, params);
             return response.data;
         }
         catch (err) {
-            console.error(err);
+            ThrowIfNotAxios(err);
             return [];
         }
     }
 
-    function EntryMapper(props) {
-        const user = props.entry;
-        return (
-            <FollowDialog user={user} >
-                <Typography variant="small" sx={{mt:1}}>
-                    {user.bio}
-                </Typography>
-            </FollowDialog>
-        );
-    }
     return (
         <List sx={{ p: 0 }}>
-            <OnlineList getEntries={GetEntries} entryMapper={EntryMapper} />
+            <OnlineList getEntries={GetEntries} entryMapper={FollowDialogExtended} />
         </List>
     );
 }

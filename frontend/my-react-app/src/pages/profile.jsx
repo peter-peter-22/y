@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, forwardRef } from "react";
+import React, { useState, useRef, useEffect, forwardRef, memo } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Stack from '@mui/material/Stack';
 import { TopMenu } from '/src/components/utilities';
@@ -293,6 +293,7 @@ function ProfileEditor(props) {
     const user = props.user;
     const [ok, setOk] = useState(false);
     const valuesRef = useRef({});
+    const [uploading, setUploading] = useState(false);
 
     function updateValue(name, value) {
         valuesRef.current[name] = value;
@@ -303,6 +304,7 @@ function ProfileEditor(props) {
 
     async function submit() {
         try {
+            setUploading(true);
             const form_values = valuesRef.current;
             if (form_values.birthdate)
                 form_values.birthdate = new Moment(form_values.birthdate).toISOString();
@@ -316,6 +318,7 @@ function ProfileEditor(props) {
                 }
             );
             UserData.update();
+            Close();
             window.location.reload();
         }
         catch (err) {
@@ -329,23 +332,29 @@ function ProfileEditor(props) {
 
     return (
         <PostModalFrame>
-            <CornerButton onClick={Close}>close</CornerButton>
-            <Stack direction="column" spacing={1.5}>
-                <Stack direction="row" style={{ justifyContent: "space-between" }}>
-                    <Typography variant="big_bold" style={{ marginLeft: "30px" }}>
-                        Edit profile
-                    </Typography>
-                    <Fab variant="extended" size="small" color="black" disabled={!ok} onClick={submit}>
-                        Save
-                    </Fab>
-                </Stack>
-                <BannerChanger onUploadFile={(v) => { updateValue("banner_pic", v) }} current={GetProfileBanner(user)} />
-                <ProfilePicEditor size="100px" onUploadFile={(v) => { updateValue("profile_pic", v) }} current={GetProfilePicture(user)} />
-                <UserNameEditor onChangeUserName={(v) => { updateValue("username", v) }} onChangeOk={(v) => { updateValue("username_ok", v) }} />
-                <NameEditor onChangeName={(v) => { updateValue("name", v) }} onChangeOk={(v) => { updateValue("name_ok", v) }} current={user.name} />
-                <BioEditor onChange={(v) => { updateValue("bio", v) }} current={user.bio} />
-                <BirthDateEditor onChangeDate={(v) => { updateValue("birthdate", v) }} onChangeOk={(v) => { updateValue("date_ok", v) }} current={user.birthdate} />
-            </Stack>
+            {uploading ?
+                <Loading />
+                :
+                <>
+                    <CornerButton onClick={Close}>close</CornerButton>
+                    <Stack direction="column" spacing={1.5}>
+                        <Stack direction="row" style={{ justifyContent: "space-between" }}>
+                            <Typography variant="big_bold" style={{ marginLeft: "30px" }}>
+                                Edit profile
+                            </Typography>
+                            <Fab variant="extended" size="small" color="black" disabled={!ok} onClick={submit}>
+                                Save
+                            </Fab>
+                        </Stack>
+                        <BannerChangerMemo onUploadFile={(v) => { updateValue("banner_pic", v) }} user={user} />
+                        <ProfilePicEditor size="100px" onUploadFile={(v) => { updateValue("profile_pic", v) }} user={user} />
+                        <UserNameEditor onChangeUserName={(v) => { updateValue("username", v) }} onChangeOk={(v) => { updateValue("username_ok", v) }} />
+                        <NameEditor onChangeName={(v) => { updateValue("name", v) }} onChangeOk={(v) => { updateValue("name_ok", v) }} current={user.name} />
+                        <BioEditor onChange={(v) => { updateValue("bio", v) }} current={user.bio} />
+                        <BirthDateEditor onChangeDate={(v) => { updateValue("birthdate", v) }} onChangeOk={(v) => { updateValue("date_ok", v) }} current={user.birthdate} />
+                    </Stack>
+                </>
+            }
         </PostModalFrame>
     );
 }
@@ -374,7 +383,7 @@ function BioEditor(props) {
     );
 }
 
-function BannerChanger(props) {
+const BannerChangerMemo = memo(({ user, onUploadFile }) => {
     function Displayer({ media, button }) {
         return (
             <Box sx={{ border: 1, borderColor: "divider" }}>
@@ -386,14 +395,15 @@ function BannerChanger(props) {
     }
 
     return (
-        <ChangeablePicture displayer={Displayer} {...props} />
+        <ChangeablePicture displayer={Displayer} onUploadFile={onUploadFile} current={GetProfileBanner(user)} />
     );
-}
+},
+    (prev, now) => prev.user === now.user);
 
 function ProfileBanner({ media, ...props }) {
     return (
         <Box style={{ width: "100%", height: "144px", position: "relative" }}>
-            <ClickableSingleImageContainer media={media} style={{width:"100%",height:"100%"}}>
+            <ClickableSingleImageContainer media={media} style={{ width: "100%", height: "100%" }}>
                 <MediaDisplayer media={media} style={{ height: "100%", width: "100%", objectFit: "cover" }}
                     onError={({ currentTarget }) => {
                         currentTarget.onerror = null;
