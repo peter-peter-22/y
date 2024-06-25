@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import Stack from '@mui/material/Stack';
-import  { Inside } from "./side_menus.jsx";
+import { Inside } from "./side_menus.jsx";
 import { TopMenu } from '/src/components/utilities';
 import { SearchField } from "/src/components/inputs.jsx";
 import { Box } from '@mui/material';
@@ -45,11 +45,12 @@ import { UserData } from "/src/App.jsx";
 import CreateAccount from "/src/components/create_account.jsx";
 import Login from "/src/components/login.jsx";
 import { Error, Modals } from "/src/components/modals";
+import links from "/src/components/footer_links";
 
 export default () => {
     function showCreator()//show local registration inputs
     {
-        Modals[0].Show(<CreateAccount pages={[0, 1, 2, 3, 4]} key="local"/>);
+        Modals[0].Show(<CreateAccount pages={[0, 1, 2, 3, 4]} key="local" />);
     }
 
     function showLogin() {
@@ -87,16 +88,10 @@ export default () => {
                     </Stack>
                 </Stack>
                 <Stack direction="row" spacing={1} sx={{ my: 2, mx: 5, justifyContent: "center" }}>
-                    <FadeLink to="#">test</FadeLink>
-                    <FadeLink to="#">test</FadeLink>
-                    <FadeLink to="#">test</FadeLink>
-                    <FadeLink to="#">test</FadeLink>
-                    <FadeLink to="#">test</FadeLink>
-                    <FadeLink to="#">test</FadeLink>
-                    <FadeLink to="#">test</FadeLink>
-                    <FadeLink to="#">test</FadeLink>
-                    <FadeLink to="#">test</FadeLink>
-                    <Typography variant="small_fade">{creation}</Typography>
+                    {links.map((link, i) => <link.GetElement key={i} />)}
+                    <div>
+                        <Typography variant="small_fade">{creation}</Typography>
+                    </div>
                 </Stack>
             </Stack>
         </div>
@@ -174,7 +169,7 @@ function BigModalMargin(props) {
 
 function InheritAndMargin(props) {
     return (
-        <Box sx={{ px: props.mx, boxSizing:"border-box", display: "inherit", flexDirection: "inherit", height: "inherit", justifyContent: "inherit", alignItems: "inherit",gap:"inherit" }}>
+        <Box sx={{ px: props.mx, boxSizing: "border-box", display: "inherit", flexDirection: "inherit", height: "inherit", justifyContent: "inherit", alignItems: "inherit", gap: "inherit" }}>
             {props.children}
         </Box>
     );

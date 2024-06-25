@@ -42,7 +42,7 @@ const commentSections = {};
 
 function Prefix(props) {
     return (
-        <div style={{ width: "30px", display: "flex", justifyContent: "end", padding: "0px 10px", flexShrink: 0 }}>
+        <div style={{  display: "flex", justifyContent: "end", padding: "0px 10px", flexShrink: 0 }}>
             {props.children}
         </div>
     )

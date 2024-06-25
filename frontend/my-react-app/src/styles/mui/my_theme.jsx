@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
 
 //colors
 
@@ -207,9 +208,9 @@ const theme = createTheme({
             xl: 1536,
             leftMenuIcons: 1300,
             rightMenuSmaller: 1000,
-            hideRightMenu:870,
-            smallIconMargins:600,
-            bottomTabs:500
+            hideRightMenu: 870,
+            smallIconMargins: 600,
+            bottomTabs: 500
         },
     },
 });
@@ -217,7 +218,9 @@ const theme = createTheme({
 export default function MyTheme(props) {
     return (
         <ThemeProvider theme={theme}>
-            {props.children}
+            <CssBaseline>
+                {props.children}
+            </CssBaseline>
         </ThemeProvider>
     );
 }

@@ -9,7 +9,7 @@ import Fab from '@mui/material/Fab';
 import { Icon } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ProfileText, FadeLink, creation, FollowDialog, LinelessLink, Loading, AboveBreakpoint, InheritLink } from '/src/components/utilities';
+import { ResponsiveSelector, ProfileText, FadeLink, creation, FollowDialog, LinelessLink, Loading, AboveBreakpoint, InheritLink,SimplePopOver } from '/src/components/utilities';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -23,6 +23,7 @@ import { UserData } from "/src/App.jsx";
 import { NavLink } from "react-router-dom";
 import { Endpoint, FormatAxiosError } from "/src/communication.js";
 import axios from 'axios';
+import links from "/src/components/footer_links";
 
 function Footer() {
     const wide = AboveBreakpoint("rightMenuSmaller");
@@ -55,18 +56,30 @@ function Footer() {
 }
 
 function Links() {
+    const linkCount = 4;
+    const visibleLinks = links.slice(0, linkCount);
+    const hiddenLinks = links.slice(linkCount, links.length);
+
+    const { handleOpen, handleClose, ShowPopover } = SimplePopOver();
     return (
-        <ListItem>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "0px 10px" }}>
-                <FadeLink>Terms of Service</FadeLink>
-                <FadeLink>Privacy Policy</FadeLink>
-                <FadeLink>Cookie Policy</FadeLink>
-                <FadeLink>Accessibility</FadeLink>
-                <FadeLink>Ads Info</FadeLink>
-                <FadeLink>More···</FadeLink>
-                <Typography variant="small_fade">{creation}</Typography>
-            </div>
-        </ListItem>
+        <>
+            <ListItem>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "0px 10px" }}>
+                    {visibleLinks.map((link, i) => <link.GetElement key={i} />)}
+                    <FadeLink onClick={handleOpen}>More ···</FadeLink>
+                    <Typography variant="small_fade">{creation}</Typography>
+                </div>
+            </ListItem>
+            <ShowPopover>
+                <List>
+                    {hiddenLinks.map((link, i) =>
+                        <ListItem key={i}>
+                            <link.GetElement />
+                        </ListItem>
+                    )}
+                </List>
+            </ShowPopover>
+        </>
     );
 }
 

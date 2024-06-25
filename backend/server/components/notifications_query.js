@@ -110,7 +110,6 @@ UNION ALL ${comment_query}
     ) AS NOTIFICATIONS
 ORDER BY timestamp DESC
 OFFSET :from LIMIT ${config.notifications_per_request}`;
-//WHERE LIKES_FOLLOWS_REPOSTS.USER_IDS IS NOT NULL is necessary because the likes, reposts, and follows are grouped, and they return an empty group if there are 0 entries
-//this row filters out the empty groups
+//"WHERE LIKES_FOLLOWS_REPOSTS.USER_IDS IS NOT NULL" is necessary because the likes, reposts, and follows are grouped, and they return an empty group if there are 0 entries. this row filters out the empty groups
 
 export default notifications_query;
