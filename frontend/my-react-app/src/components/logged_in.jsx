@@ -16,10 +16,11 @@ import Bookmarks from "/src/pages/bookmarks";
 import AddFollowers from "/src/pages/follow_people";
 import Profile from "/src/pages/profile";
 import PostEngagements from "/src/pages/post_engagements";
+import NotImplemented from "/src/pages/not_implemented";
 
 export default () => {
   return (
-    <div style={{ display: "flex", flexDirection: "row", padding: 0, overflowY: "hidden", justifyContent: "center" }}>
+    <div style={{ display: "flex", flexDirection: "row", padding: 0, overflowY: "scroll", justifyContent: "center" }}>
       <Header />
       <Box sx={{ maxWidth: "500px", flexGrow: 1, overflow: "hidden", borderLeft: 1, borderRight: 1, borderColor: "divider", boxSizing: "border-box",minHeight:"100vh" }}>
         <Routes>
@@ -31,6 +32,12 @@ export default () => {
           <Route path="/add_followers" element={<AddFollowers />} />
           <Route path="/add_followers" element={<AddFollowers />} />
           <Route path="/profile/:id/*" element={<Profile />} />
+          <Route path="/lists" element={<NotImplemented />} />
+          <Route path="/communities" element={<NotImplemented />} />
+          <Route path="/explore" element={<NotImplemented />} />
+          <Route path="/messages" element={<NotImplemented />} />
+          <Route path="/premium" element={<NotImplemented />} />
+          <Route path="/settings" element={<NotImplemented />} />
           <Route path="*" element={<Error />} />
         </Routes>
       </Box>

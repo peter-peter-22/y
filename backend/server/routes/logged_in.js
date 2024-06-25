@@ -28,7 +28,7 @@ import create from "./logged_in/create.js";
 import general from "./logged_in/general.js";
 import feed from "./logged_in/feed.js";
 import notifications from "./logged_in/notifications.js";
-import { user_columns } from "./logged_in/post_query.js";
+import { user_columns } from "../components/post_query.js";
 
 const router = express.Router();
 

@@ -19,7 +19,7 @@ import axios from "axios";
 import nodemailer from "nodemailer";
 import { Validator } from "node-input-validator";
 import { universal_auth } from "../passport.js";
-import { user_columns } from "../../routes/logged_in/post_query.js";
+import { user_columns } from "../post_query.js";
 
 const named = yesql.pg;
 

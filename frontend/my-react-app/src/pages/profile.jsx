@@ -41,6 +41,7 @@ import { ManageProfile } from "/src/components/manage_content_button.jsx";
 import { Media, mediaTypes } from "/src/components/media";
 import { ImageDisplayer, MediaDisplayer } from "/src/components/media";
 import { ClickableSingleImageContainer } from "/src/components/posts";
+import { UserListExtended } from "/src/pages/follow_people.jsx";
 
 function Profile() {
     const [user, setUser] = useState();
@@ -134,7 +135,7 @@ function Profile() {
                             }
 
                             <Stack direction="row" spacing={1}>
-                                <FadeLink href="#">
+                                <FadeLink to={baseUrl + "/followers"}>
                                     <TextRow>
                                         <Typography variant="small_bold">
                                             {formatNumber(followers)}
@@ -144,7 +145,7 @@ function Profile() {
                                         </Typography>
                                     </TextRow>
                                 </FadeLink>
-                                <FadeLink href="#">
+                                <FadeLink to={baseUrl + "/following"}>
                                     <TextRow>
                                         <Typography variant="small_bold">
                                             {formatNumber(following)}
@@ -207,16 +208,26 @@ function Profile() {
             );
         }
 
-        return (
-            <Stack direction="column">
-                <ProfileInfo />
+        function Main() {
+            return (
+                <Stack direction="column">
+                    <ProfileInfo />
 
-                {user.is_blocked ?
-                    <NotVisible />
-                    :
-                    <Visible />
-                }
-            </Stack>
+                    {user.is_blocked ?
+                        <NotVisible />
+                        :
+                        <Visible />
+                    }
+                </Stack>
+            );
+        }
+
+        return (
+            <Routes>
+                <Route path="/followers" element={<Followers user={user} />} />
+                <Route path="/following" element={<Following user={user} />} />
+                <Route path="*" element={<Main />} />
+            </Routes>
         );
     }
     else {
@@ -224,6 +235,28 @@ function Profile() {
             <Loading />
         );
     }
+}
+
+function Followers({ user }) {
+    return (
+        <Stack direction="column">
+            <ListItem>
+                <Typography variant="big_bold">Followers of <GetUserName user={user} /></Typography>
+            </ListItem>
+            <UserListExtended url={Endpoint("/member/general/followers_of_user")} params={{ id: user.id }} />
+        </Stack>
+    );
+}
+
+function Following({user}) {
+    return (
+        <Stack direction="column">
+            <ListItem>
+                <Typography variant="big_bold">Followed by <GetUserName user={user} /></Typography>
+            </ListItem>
+            <UserListExtended url={Endpoint("/member/general/followed_by_user")} params={{ id: user.id }} />
+        </Stack>
+    );
 }
 
 function UnblockButton(props) {

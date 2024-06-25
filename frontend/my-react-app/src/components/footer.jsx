@@ -9,7 +9,7 @@ import Fab from '@mui/material/Fab';
 import { Icon } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ProfileText, FadeLink, creation, FollowDialog, LinelessLink, Loading, AboveBreakpoint } from '/src/components/utilities';
+import { ResponsiveSelector, ProfileText, FadeLink, creation, FollowDialog, LinelessLink, Loading, AboveBreakpoint, InheritLink } from '/src/components/utilities';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -37,86 +37,106 @@ function Footer() {
                     </TopMenu>
                     <Stack direction="column" spacing={2} sx={{ my: 2 }} >
 
-                        <BoxList>
-
-                            <ListItem>
-                                <Typography variant="big_bold">
-                                    Subscribe to Premium
-                                </Typography>
-                            </ListItem>
-
-                            <ListItem>
-                                <Typography variant="small">
-                                    Subscribe to unlock new features and if eligible, receive a share of ads revenue.
-                                </Typography>
-                            </ListItem>
-
-                            <ListItem >
-                                <Fab variant="extended" size="small" color="black">Subscribe</Fab>
-                            </ListItem>
-
-                        </BoxList>
+                        <Premium />
 
                         <BoxList>
                             <WhoToFollow />
                         </BoxList>
 
-                        <BoxList>
+                        <Trends />
 
-                            <ListItem>
-                                <ListItemText>
-                                    <Typography variant="big_bold">
-                                        Hungary trends
-                                    </Typography>
-                                </ListItemText>
-                            </ListItem>
-
-                            <ListItem disablePadding>
-                                <ListItemButton>
-                                    <ListItemText>
-                                        <Typography variant="small_fade">
-                                            <div>
-                                                <span>1</span><span style={{ margin: "0px 4px" }}>·</span><span>Trending</span>
-                                            </div>
-                                        </Typography>
-                                        <Typography variant="small_bold">
-                                            <div>
-                                                #Hungary
-                                            </div>
-                                        </Typography>
-                                        <Typography variant="small_fade">
-                                            <div>
-                                                999K posts
-                                            </div>
-                                        </Typography>
-
-                                        <CornerButton right>more_horiz</CornerButton>
-                                    </ListItemText>
-                                </ListItemButton>
-                            </ListItem>
-
-                            <BlueTextButton>
-                                Show more
-                            </BlueTextButton>
-
-                        </BoxList>
-
-                        <ListItem>
-                            <div style={{ display: "flex", flexWrap: "wrap", gap: "0px 10px" }}>
-                                <FadeLink>Terms of Service</FadeLink>
-                                <FadeLink>Privacy Policy</FadeLink>
-                                <FadeLink>Cookie Policy</FadeLink>
-                                <FadeLink>Accessibility</FadeLink>
-                                <FadeLink>Ads Info</FadeLink>
-                                <FadeLink>More···</FadeLink>
-                                <Typography variant="small_fade">{creation}</Typography>
-                            </div>
-                        </ListItem>
+                        <Links />
 
                     </Stack>
                 </Box>
             }
         </div>
+    );
+}
+
+function Links() {
+    return (
+        <ListItem>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "0px 10px" }}>
+                <FadeLink>Terms of Service</FadeLink>
+                <FadeLink>Privacy Policy</FadeLink>
+                <FadeLink>Cookie Policy</FadeLink>
+                <FadeLink>Accessibility</FadeLink>
+                <FadeLink>Ads Info</FadeLink>
+                <FadeLink>More···</FadeLink>
+                <Typography variant="small_fade">{creation}</Typography>
+            </div>
+        </ListItem>
+    );
+}
+
+function Trends() {
+    return (
+        <BoxList>
+
+            <ListItem>
+                <ListItemText>
+                    <Typography variant="big_bold">
+                        Hungary trends
+                    </Typography>
+                </ListItemText>
+            </ListItem>
+
+            <ListItem disablePadding>
+                <ListItemButton>
+                    <ListItemText>
+                        <Typography variant="small_fade">
+                            <div>
+                                <span>1</span><span style={{ margin: "0px 4px" }}>·</span><span>Trending</span>
+                            </div>
+                        </Typography>
+                        <Typography variant="small_bold">
+                            <div>
+                                #Hungary
+                            </div>
+                        </Typography>
+                        <Typography variant="small_fade">
+                            <div>
+                                999K posts
+                            </div>
+                        </Typography>
+
+                        <CornerButton right>more_horiz</CornerButton>
+                    </ListItemText>
+                </ListItemButton>
+            </ListItem>
+
+            <BlueTextButton>
+                Show more
+            </BlueTextButton>
+
+        </BoxList>
+    );
+}
+
+function Premium() {
+    return (
+        <BoxList>
+
+            <ListItem>
+                <Typography variant="big_bold">
+                    Subscribe to Premium
+                </Typography>
+            </ListItem>
+
+            <ListItem>
+                <Typography variant="small">
+                    Subscribe to unlock new features and if eligible, receive a share of ads revenue.
+                </Typography>
+            </ListItem>
+
+            <ListItem >
+                <InheritLink to="/premium">
+                    <Fab variant="extended" size="small" color="black">Subscribe</Fab>
+                </InheritLink>
+            </ListItem>
+
+        </BoxList>
     );
 }
 

@@ -78,6 +78,14 @@ function Header() {
             <ButtonIcon icon="person" filled={false} />
         )
     };
+    const alwaysHiddenTabs=[
+         new Tab(
+            "settings",
+            "/settings",
+            <ButtonIcon icon="settings" filled={true} />,
+            <ButtonIcon icon="settings" filled={false} />
+        )
+    ]
 
     const wideButtons = AboveBreakpoint("leftMenuIcons");
     const bigMargins = AboveBreakpoint("smallIconMargins");
@@ -159,7 +167,10 @@ function Header() {
 
         //split the tabs into 2 groups based on the tabcount
         const visibleTabs = tabsArray.slice(0, tabCount);
-        const invisibleTabs = tabsArray.slice(tabCount, tabsArray.length );
+        let invisibleTabs = tabsArray.slice(tabCount, tabsArray.length );
+
+        //add the always hidden tabs
+        invisibleTabs=[...invisibleTabs,...alwaysHiddenTabs];
 
         return (
             <div style={{ width: width, height: "100vh", flexShrink: 0 }}>

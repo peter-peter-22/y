@@ -20,7 +20,7 @@ import nodemailer from "nodemailer";
 import { Validator } from "node-input-validator";
 import { universal_auth, finish_registration } from "../passport.js";
 import { CheckV } from "../validations.js";
-import { user_columns } from "../../routes/logged_in/post_query.js";
+import { user_columns } from "../post_query.js";
 const named = yesql.pg;
 
 const router = express.Router();

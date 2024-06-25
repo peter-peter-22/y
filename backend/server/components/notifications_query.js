@@ -1,27 +1,28 @@
-import postQueryText from "./post_query.js";
+import postQueryText,{user_json} from "./post_query.js";
 
 const users_column = `
 (
-	SELECT JSONB_AGG(
-						JSONB_BUILD_OBJECT
-						(
-							'id', USERS.ID,
-							'name', USERS.NAME,
-							'picture', USERS.PICTURE
-						)
-					)
+	SELECT ARRAY_AGG
+	(
+		${user_json}
+	)
 	FROM USERS
 	WHERE USERS.ID = ANY(USER_IDS)
 )
 AS USERS`;
 
 const posts_column = `
-(SELECT JSONB_BUILD_OBJECT('id',
-POSTS.ID,
-'text',
-POSTS.TEXT)
-FROM POSTS
-WHERE POSTS.ID = POST_ID)AS POST`;
+(
+	SELECT JSONB_BUILD_OBJECT(
+		'id',
+		POSTS.ID,
+		'text',
+		POSTS.TEXT
+	)
+	FROM POSTS
+	WHERE POSTS.ID = POST_ID
+)
+AS POST`;
 
 const repost_query = `
 SELECT 2 AS TYPE,

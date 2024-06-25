@@ -26,7 +26,7 @@ import { CheckV, CheckErr, validate_image } from "../../components/validations.j
 import { ApplySqlToUser, UpdateUser, UpdateUserAfterChange } from "../logged_in.js";
 import Moment from "moment";
 import { uploadMedia, profileFolder, profileId, bannerId } from "../../components/cloudinary_handler.js";
-import { user_columns } from "./post_query.js";
+import { user_columns } from "../../components/post_query.js";
 
 const router = express.Router();
 

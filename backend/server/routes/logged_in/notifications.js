@@ -23,8 +23,7 @@ import * as pp from "../../components/passport.js";
 import { username_exists, selectable_username } from "../user.js";
 import { Validator } from "node-input-validator";
 import { CheckV, CheckErr, validate_image } from "../../components/validations.js";
-import { postQuery, post_list } from "./general.js";
-import  notifications_query from "./notifications_query.js";
+import  notifications_query from "../../components/notifications_query.js";
 
 const router = express.Router();
 router.post("/get", async (req, res) => {

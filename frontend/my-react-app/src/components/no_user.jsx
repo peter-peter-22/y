@@ -87,15 +87,15 @@ export default () => {
                     </Stack>
                 </Stack>
                 <Stack direction="row" spacing={1} sx={{ my: 2, mx: 5, justifyContent: "center" }}>
-                    <FadeLink href="#">test</FadeLink>
-                    <FadeLink href="#">test</FadeLink>
-                    <FadeLink href="#">test</FadeLink>
-                    <FadeLink href="#">test</FadeLink>
-                    <FadeLink href="#">test</FadeLink>
-                    <FadeLink href="#">test</FadeLink>
-                    <FadeLink href="#">test</FadeLink>
-                    <FadeLink href="#">test</FadeLink>
-                    <FadeLink href="#">test</FadeLink>
+                    <FadeLink to="#">test</FadeLink>
+                    <FadeLink to="#">test</FadeLink>
+                    <FadeLink to="#">test</FadeLink>
+                    <FadeLink to="#">test</FadeLink>
+                    <FadeLink to="#">test</FadeLink>
+                    <FadeLink to="#">test</FadeLink>
+                    <FadeLink to="#">test</FadeLink>
+                    <FadeLink to="#">test</FadeLink>
+                    <FadeLink to="#">test</FadeLink>
                     <Typography variant="small_fade">{creation}</Typography>
                 </Stack>
             </Stack>

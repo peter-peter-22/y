@@ -1,4 +1,15 @@
+const user_json=`
+JSONB_BUILD_OBJECT
+(
+	'id',USERS.ID,
+	'username',USERS.USERNAME,
+	'name',USERS.NAME,
+	'picture',USERS.PICTURE
+)`;
+
 const is_followed = `EXISTS (SELECT * FROM FOLLOWS WHERE FOLLOWER = :user_id AND FOLLOWED = USERS.ID)`
+
+const is_following = `EXISTS (SELECT * FROM FOLLOWS WHERE FOLLOWED = :user_id AND FOLLOWER = USERS.ID)`
 
 const is_blocked = `EXISTS (SELECT * FROM BLOCKS WHERE BLOCKER = :user_id AND BLOCKED = USERS.ID)`
 
@@ -11,7 +22,7 @@ picture`;
 const user_columns_extended = `
 ${user_columns},
 ${is_blocked} AS IS_BLOCKED,
-${is_followed} AS IS_BLOCKED
+${is_followed} AS IS_FOLLOWED
 `
 
 const like_count = `
@@ -62,16 +73,12 @@ const view_count = `
 		WHERE VIEWS.POST_ID = POST.ID)::INT AS VIEWS`;
 
 const publisher = `
-(SELECT
-JSONB_BUILD_OBJECT(
-	'id',USERS.ID, 
-	'name',USERS.NAME, 
-	'username',USERS.USERNAME, 
-    'is_followed',${is_followed}, 
-	'is_blocked',${is_blocked}
-) AS PUBLISHER
-FROM
-USERS WHERE USERS.ID=POST.PUBLISHER)`;
+(
+	SELECT
+		${user_json} AS PUBLISHER
+	FROM
+		USERS WHERE USERS.ID=POST.PUBLISHER
+)`;
 
 const columns = `
     POST.TEXT,
@@ -100,4 +107,4 @@ FROM
     ORDER BY POSTS.DATE DESC) POST`;
 
 export default postQueryText;
-export { is_followed, is_blocked, user_columns, user_columns_extended,columns }
+export { is_followed, is_blocked, user_columns, user_columns_extended,columns,is_following,user_json}

@@ -23,7 +23,7 @@ import GoogleRoutes from "./passport_strategies/google.js";
 import GithubRoutes from "./passport_strategies/github.js";
 import { CheckV } from "./validations.js";
 import { ApplySqlToUser, UpdateUser } from "../routes/logged_in.js";
-import { user_columns } from "../routes/logged_in/post_query.js";
+import { user_columns } from "./post_query.js";
 const named = yesql.pg;
 
 const router = express.Router();
