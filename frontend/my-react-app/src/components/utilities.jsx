@@ -422,11 +422,11 @@ function GetProfilePicture(user) {
 function GetProfileBanner(user) {
     return new MediaFromFileData(user.banner);
 }
-function ProfilePic({ user, ...props }) {
+const ProfilePic = memo(({ user, ...props }) => {
     return (
         <AvatarImageDisplayer media={GetProfilePicture(user)} {...props} />
     );
-}
+},(prevProps,nextProps)=>prevProps.user===nextProps.user);
 function AvatarImageDisplayer({ media, ...props }) {
     const defa = "/images/default_image.jpg";
     return (

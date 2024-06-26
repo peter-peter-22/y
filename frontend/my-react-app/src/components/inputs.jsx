@@ -65,10 +65,12 @@ const PlainTextField = React.forwardRef((props, ref) => {
             sx={{
                 "& .MuiInputBase-root": {
                     p: 0,
+                    ...props.input_sx
                 },
                 '& fieldset': {
                     border: 'none',
                 },
+                ...props.sx
             }}
         />
     );

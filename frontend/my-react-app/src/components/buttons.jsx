@@ -22,6 +22,7 @@ import { ImageDisplayer } from "/src/components/media.jsx";
 import {  Modals } from "/src/components/modals";
 import {PostModalFrame} from "/src/components/posts";
 import { PostCreator } from '/src/components/post_creator';
+import {  ThrowIfNotAxios } from "/src/communication.js";
 
 const smallerButtons = "leftMenuIcons";
 const iconSize = "30px";
@@ -172,7 +173,9 @@ function ProfileButton() {
         try {
             await axios.get(Endpoint("/logout"));
             UserData.update();
-        } catch { }
+        }  catch (err) {
+                ThrowIfNotAxios(err);
+            }
     }
 
     return (

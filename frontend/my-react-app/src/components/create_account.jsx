@@ -462,7 +462,9 @@ function Page7(props)//notifications
                 enabled: enabled
             });
             handleNext();
-        } catch { }
+        }  catch (err) {
+                ThrowIfNotAxios(err);
+            }
     }
 
     return (
@@ -689,7 +691,9 @@ function UserNameEditor(props) {
                     });
                     setUserNameOk(res.data);
                 }
-                catch { }
+                 catch (err) {
+                ThrowIfNotAxios(err);
+            }
             }
         }, timerRef);
     }

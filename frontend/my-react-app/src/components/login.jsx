@@ -144,7 +144,9 @@ function ChooseMethod(props) {
                 props.setPage(1);
             else
                 ErrorText("No Y user belongs to this email");
-        } catch { }
+        }  catch (err) {
+                ThrowIfNotAxios(err);
+            }
     }
 
     return (

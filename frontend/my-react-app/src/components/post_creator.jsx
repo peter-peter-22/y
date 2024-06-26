@@ -36,6 +36,7 @@ import { ManagePost } from "/src/components/manage_content_button.jsx";
 import { UnblockButton } from "/src/pages/profile";
 import { commentSections, BorderlessPost, RowWithPrefix, PostMedia } from "/src/components/posts.jsx";
 import { fileToMedia } from "/src/components/media.jsx";
+import ContentEditable from 'react-contenteditable'
 
 function PostCreator({ post, quoted, onPost, ...props }) {
     const [isFocused, setIsFocused] = React.useState(false);
@@ -47,13 +48,14 @@ function PostCreator({ post, quoted, onPost, ...props }) {
     const [medias, setMedias] = useState([]);
     const inputRef = useRef(null);
     const [uploading, setUploading] = useState(false);
+    const hashTagsRef=useRef([]);
 
     const handleFocus = () => {
         setIsFocused(true);
     };
 
-    function handleChange(e) {
-        setText(e.target.value);
+    function handleChange(text) {
+        setText(text);
     }
 
     function handleFile(e) {
@@ -151,12 +153,13 @@ function PostCreator({ post, quoted, onPost, ...props }) {
                 contents={
                     <Stack direction="column">
                         <Stack direction={isFocused ? "column" : "row"}>
-                            <Box sx={{ pb: 1, pt: 2, display: "inline-flex", flexGrow: 1, position: "relative" }}>
+                            <Box sx={{ pb: 1, pt: 2, display: "inline-flex", flexGrow: 1, position: "relative", overflow: "hidden" }}>
                                 <ColorLetters
-                                    placeholder={props.isComment ? "Post your reply" : "Write something"}
+                                    isComment={props.isComment}
                                     onFocus={handleFocus}
-                                    onChange={handleChange}
+                                    onChangeRaw={handleChange}
                                     value={getText}
+                                    onChangeHashtags={(val)=>{hashTagsRef.current=val}}
                                     max_letters={maxLetters}
                                 />
                             </Box>
@@ -193,37 +196,58 @@ function PostCreator({ post, quoted, onPost, ...props }) {
     );
 }
 
-function ColorLetters(props) {
-    const maxLetters = props.max_letters;
-    const value = props.value;
-    const keep = value.substring(0, maxLetters);
-    const overflow = value.substring(maxLetters);
+function ColorLetters({ onChangeRaw, value, isComment, onFocus, max_letters,onChangeHashtags }) {
+    let keep = value.substring(0, max_letters);
+    let overflow = value.substring(max_letters);
+    const [focused, setFocused] = useState(false);
+
+    //color overflow
+    overflow = `<mark style="background: #FF000044">${overflow}</mark>`
+
+    //color hashtags
+    const hashtags = [];
+    keep = keep.replace(/(\#\w+)/g, (found) => {
+        hashtags.push(found.substring(1, found.length));
+        return '<span style="color:blue">' + found + '</span>'
+    });
+    if(onChangeHashtags)
+        onChangeHashtags(hashtags);
+
+    function updateRaw(e) {
+        const text = e.target.value;
+        const raw = text.replace(/<[^>]*>?/gm, '');
+        if (onChangeRaw)
+            onChangeRaw(raw);
+    }
+
+    function focus() {
+        setFocused(true);
+        if (onFocus)
+            onFocus();
+    }
+
+    function focusOut() {
+        setFocused(false);
+    }
+
+    function GetText() {
+        if (focused || keep.length > 0)
+            return keep + overflow;
+        else
+            return `<span style="opacity:0.5">${isComment ? "Post your reply" : "Write something"}</span>`;
+    }    
 
     return (
-        <>
-            <Typography variant="body1"
-                style={{
-                    position: "absolute",
-                    height: "100%",
-                    width: "100%",
-                    overflow: "hidden",
-                    whiteSpace: "pre",
-                    lineHeight: "1.4375em",
-                    overflowWrap: "break-word",
-                    textWrap: "wrap",
-                    color: "transparent"
-                }}
-            >
-                {keep}
-                <mark style={{ background: "#FF000044" }}>{overflow}</mark>
-            </Typography>
-
-            <PlainTextField
-                multiline
-                fullWidth
-                {...props}
-            />
-        </>
+        <ContentEditable
+            html={GetText()}
+            onChange={updateRaw} // handle innerHTML change
+            onFocus={focus}
+            onBlur={focusOut}
+            style={{
+                outline: "none",
+                width: "100%",
+            }}
+        />
     );
 }
 

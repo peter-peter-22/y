@@ -9,7 +9,7 @@ import Fab from '@mui/material/Fab';
 import { Icon } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ProfileText, FadeLink, creation, FollowDialog, LinelessLink, Loading, AboveBreakpoint, InheritLink,SimplePopOver } from '/src/components/utilities';
+import { ResponsiveSelector, ProfileText, FadeLink, creation, FollowDialog, LinelessLink, Loading, AboveBreakpoint, InheritLink, SimplePopOver } from '/src/components/utilities';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -21,8 +21,8 @@ import Link from '@mui/material/Link';
 import { ResponsiveButton, ButtonIcon, ButtonSvg, TabButton, PostButton, ProfileButton, TopMenuButton, CornerButton } from "/src/components/buttons.jsx";
 import { UserData } from "/src/App.jsx";
 import { NavLink } from "react-router-dom";
-import { Endpoint, FormatAxiosError } from "/src/communication.js";
-import axios from 'axios';
+import { Endpoint, FormatAxiosError ,ThrowIfNotAxios} from "/src/communication.js";
+import axios, { AxiosError } from 'axios';
 import links from "/src/components/footer_links";
 
 function Footer() {
@@ -161,7 +161,9 @@ function WhoToFollow() {
                 const res = await axios.get(Endpoint("/member/general/follower_recommendations_preview"));
                 setUsers(res.data);
             }
-            catch { }
+            catch (err) {
+                ThrowIfNotAxios(err);
+            }
         }
         getFollowRecommendations();
     }, []);
