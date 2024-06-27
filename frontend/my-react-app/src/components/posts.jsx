@@ -35,7 +35,7 @@ import { useNavigate } from "react-router-dom";
 import { ManagePost } from "/src/components/manage_content_button.jsx";
 import { UnblockButton } from "/src/pages/profile";
 import { ExamplePost, ExampleUser } from "/src/components/exampleData.js";
-import { PostCreator } from "/src/components/post_creator.jsx";
+import { PostCreator,findAndColorHashtags } from "/src/components/post_creator.jsx";
 import { BlockMedia } from "/src/components/media.jsx";
 
 const commentSections = {};
@@ -522,9 +522,7 @@ function PostMedia(props) {
 }
 function PostText(props) {
     return (
-        <Typography variant="small" style={{ wordWrap: "break-word" }}>
-            {props.post.text}
-        </Typography>
+        <Typography variant="small" style={{ wordWrap: "break-word" }}  dangerouslySetInnerHTML={{__html: findAndColorHashtags(props.post.text)}}/>
     );
 }
 

@@ -48,7 +48,7 @@ function PostCreator({ post, quoted, onPost, ...props }) {
     const [medias, setMedias] = useState([]);
     const inputRef = useRef(null);
     const [uploading, setUploading] = useState(false);
-    const hashTagsRef=useRef([]);
+    const hashTagsRef = useRef([]);
 
     const handleFocus = () => {
         setIsFocused(true);
@@ -87,6 +87,9 @@ function PostCreator({ post, quoted, onPost, ...props }) {
         }
         );
         formData.append('text', getText);
+        hashTagsRef.current.forEach((hashtag) => {
+            formData.append('hashtags', hashtag);
+        });
 
         let endpoint;
         if (isComment) {
@@ -159,7 +162,7 @@ function PostCreator({ post, quoted, onPost, ...props }) {
                                     onFocus={handleFocus}
                                     onChangeRaw={handleChange}
                                     value={getText}
-                                    onChangeHashtags={(val)=>{hashTagsRef.current=val}}
+                                    onChangeHashtags={(val) => { hashTagsRef.current = val }}
                                     max_letters={maxLetters}
                                 />
                             </Box>
@@ -196,7 +199,19 @@ function PostCreator({ post, quoted, onPost, ...props }) {
     );
 }
 
-function ColorLetters({ onChangeRaw, value, isComment, onFocus, max_letters,onChangeHashtags }) {
+const findHashtags = /(\#\w+)/g;
+
+function ColorHashtag(hashtagString) {
+    return '<span style="color:blue">' + hashtagString + '</span>';
+}
+
+function findAndColorHashtags(postTest) {
+    return postTest.replace(/(\#\w+)/g, (found) => {
+        return ColorHashtag(found);
+    });
+}
+
+function ColorLetters({ onChangeRaw, value, isComment, onFocus, max_letters, onChangeHashtags }) {
     let keep = value.substring(0, max_letters);
     let overflow = value.substring(max_letters);
     const [focused, setFocused] = useState(false);
@@ -208,16 +223,20 @@ function ColorLetters({ onChangeRaw, value, isComment, onFocus, max_letters,onCh
     const hashtags = [];
     keep = keep.replace(/(\#\w+)/g, (found) => {
         hashtags.push(found.substring(1, found.length));
-        return '<span style="color:blue">' + found + '</span>'
+        return ColorHashtag(found);
     });
-    if(onChangeHashtags)
+    if (onChangeHashtags)
         onChangeHashtags(hashtags);
 
     function updateRaw(e) {
-        const text = e.target.value;
-        const raw = text.replace(/<[^>]*>?/gm, '');
+        let text = e.target.value;
+        //remove html 
+        text = text.replace(/<[^>]*>?/gm, '');
+        //fix nbsp
+        text = text.replace(/&nbsp;/g, ' ');
+
         if (onChangeRaw)
-            onChangeRaw(raw);
+            onChangeRaw(text);
     }
 
     function focus() {
@@ -235,7 +254,7 @@ function ColorLetters({ onChangeRaw, value, isComment, onFocus, max_letters,onCh
             return keep + overflow;
         else
             return `<span style="opacity:0.5">${isComment ? "Post your reply" : "Write something"}</span>`;
-    }    
+    }
 
     return (
         <ContentEditable
@@ -328,7 +347,6 @@ function AddPostToCommentSection(post) {
         return;
 
     const myCommentSection = post.replying_to === section.post;
-    console.log(post.replying_to + " " + section.post);
     if (!myCommentSection)
         return;
 
@@ -336,4 +354,4 @@ function AddPostToCommentSection(post) {
 }
 
 
-export { PostCreator }
+export { PostCreator,findAndColorHashtags }

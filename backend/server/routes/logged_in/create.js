@@ -23,7 +23,7 @@ import * as pp from "../../components/passport.js";
 import { username_exists, selectable_username } from "../user.js";
 import { Validator } from "node-input-validator";
 import { CheckV, CheckErr, validate_image, validate_video, validate_media } from "../../components/validations.js";
-import  {postQuery} from "../../components/general_components.js";
+import { postQuery } from "../../components/general_components.js";
 import { GetMaxLetters } from "../user.js";
 import { uploadMedia } from "../../components/cloudinary_handler.js";
 
@@ -141,7 +141,10 @@ async function postAny(req, res, saveToDatabase) {
     const files = await getAndValidatePost(req);
 
     //upload to database
-    const { text } = req.body;
+    let { text, hashtags } = req.body;
+    //remove html from text 
+    text = text.replace(/<[^>]*>?/gm, '');
+    console.log(hashtags);
     const result = await saveToDatabase(req.user.id, text);//must return the id of the published post
     const post_id = result.rows[0].id;
 
@@ -165,8 +168,13 @@ async function postAny(req, res, saveToDatabase) {
 }
 
 async function getAndValidatePost(req) {
+    if (!Array.isArray(req.body.hashtags))
+        req.body.hashtags = [req.body.hashtags];
+
     const v = new Validator(req.body, {
-        text: "required|string|maxLength:" + GetMaxLetters(req.user)
+        text: "required|string|maxLength:" + GetMaxLetters(req.user),
+        'hashtags': 'array',
+        'hashtags.*': 'string'
     });
     await CheckV(v);
 
