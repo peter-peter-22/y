@@ -26,17 +26,15 @@ import { CheckV, CheckErr, validate_image, validate_video, validate_media } from
 import { postQuery } from "../../components/general_components.js";
 import { GetMaxLetters } from "../user.js";
 import { uploadMedia } from "../../components/cloudinary_handler.js";
+import { findHashtags, findHtml } from "../../components/sync.js";
 
 const router = express.Router();
 
 router.post("/post", async (req, res) => {
     //db
-    async function postToDatabase(user_id, text) {
-        const result = await db.query(named("INSERT INTO posts (publisher,text) VALUES (:user_id, :text) RETURNING id")(
-            {
-                user_id: user_id,
-                text: text
-            }
+    async function postToDatabase(baseCols, baseRefs, baseVals) {
+        const result = await db.query(named(`INSERT INTO posts (${baseCols}) VALUES (${baseRefs}) RETURNING id`)(
+            baseVals
         ));
         return result;
     }
@@ -53,18 +51,17 @@ router.post("/comment", async (req, res) => {
     const { replying_to } = req.body;
 
     //db
-    async function commentToDatabase(user_id, text, media) {
+    async function commentToDatabase(baseCols, baseRefs, baseVals) {
         try {
             const getRepliedPublisher = "(SELECT publisher FROM POSTS WHERE id=:replying_to)";
             const result = await db.query(named(`
             INSERT INTO posts 
-            (publisher,text,replying_to,replying_to_publisher) 
-            VALUES (:user_id, :text,:replying_to,${getRepliedPublisher}) 
+            (${baseCols},replying_to,replying_to_publisher) 
+            VALUES (${baseRefs},:replying_to,${getRepliedPublisher}) 
             RETURNING id`)
                 (
                     {
-                        user_id: user_id,
-                        text: text,
+                        ...baseVals,
                         replying_to: replying_to
                     }
                 ));
@@ -90,7 +87,7 @@ router.post("/quote", async (req, res) => {
 
     //check if the selected post can be quoted
     //if the quoted post does not exists, the constraint will throw an error in the next query so it can be ignored here
-    const quote_query = await db.query(named(`
+    const quoted_post = await db.query(named(`
         select exists
         (
             select * from posts 
@@ -103,23 +100,21 @@ router.post("/quote", async (req, res) => {
         as contains_repost`)
         ({ post_id: quoted }));
 
-    if (quote_query.rowCount !== 0 && quote_query.rows[0].contains_repost)
+    if (quoted_post.rowCount !== 0 && quoted_post.rows[0].contains_repost)
         CheckErr("a repost cannot be quoted");
 
     //db
-    async function quoteToDatabase(user_id, text, media) {
+    async function quoteToDatabase(baseCols, baseRefs, baseVals) {
         try {
             const getQuotedUser = `(SELECT publisher FROM POSTS WHERE id=:quoted)`;
             const result = await db.query(named(`
             INSERT INTO posts 
-            (publisher,text,media,repost,reposted_from_user) 
-            VALUES (:user_id, :text,:media,:quoted,${getQuotedUser}) 
+            (${baseCols},repost,reposted_from_user) 
+            VALUES (${baseRefs},:quoted,${getQuotedUser}) 
             RETURNING id`)
                 (
                     {
-                        user_id: user_id,
-                        text: text,
-                        ...media,
+                        ...baseVals,
                         quoted: quoted
                     }
                 ));
@@ -141,12 +136,24 @@ async function postAny(req, res, saveToDatabase) {
     const files = await getAndValidatePost(req);
 
     //upload to database
-    let { text, hashtags } = req.body;
+    let { text } = req.body;
+
     //remove html from text 
-    text = text.replace(/<[^>]*>?/gm, '');
-    console.log(hashtags);
-    const result = await saveToDatabase(req.user.id, text);//must return the id of the published post
+    text = CleanText(text);
+
+
+    //the values those are sent to all kinds of posts
+    const baseCols = "PUBLISHER, TEXT";
+    const baseRefs = ":user_id, :text";
+    const baseVals = { user_id: req.user.id, text: text };
+
+    const result = await saveToDatabase(baseCols, baseRefs, baseVals);//must return the id of the published post
     const post_id = result.rows[0].id;
+
+    //find hashtags in text
+    const hashtags = FindHashtags(text);
+    //upload hashtags to their table
+    await UploadHashtags(post_id, hashtags);
 
     if (files) {
         //upload files and return the post
@@ -155,11 +162,10 @@ async function postAny(req, res, saveToDatabase) {
             UPDATE posts 
             SET media=:media 
             WHERE id=:post_id`
-        )
-            ({
-                post_id: post_id,
-                media: filedatas
-            })
+        )({
+            post_id: post_id,
+            media: filedatas
+        })
         );
     }
     //return the created post to client
@@ -167,14 +173,39 @@ async function postAny(req, res, saveToDatabase) {
     res.send(recentlyAddedPost[0]);
 }
 
+async function UploadHashtags(post_id, hashtags) {
+    if (hashtags.length === 0)
+        return;
+
+    await db.query(named(`
+    INSERT INTO hashtags
+    (post_id, hashtag)
+    SELECT :post_id, UNNEST(:hashtags::VARCHAR[]) 
+    ON CONFLICT ON CONSTRAINT hashtag_unique DO NOTHING
+    `)({
+        post_id: post_id,
+        hashtags: hashtags
+    }));
+}
+
+function CleanText(text) {
+    return text.replace(findHtml, '');
+}
+
+function FindHashtags(text) {
+    const hashtags = [];
+    text.replace(findHashtags, (found) => {
+        hashtags.push(found.substring(1, found.length));
+    });
+    return hashtags;
+}
+
 async function getAndValidatePost(req) {
     if (!Array.isArray(req.body.hashtags))
         req.body.hashtags = [req.body.hashtags];
 
     const v = new Validator(req.body, {
-        text: "required|string|maxLength:" + GetMaxLetters(req.user),
-        'hashtags': 'array',
-        'hashtags.*': 'string'
+        text: "required|string|maxLength:" + GetMaxLetters(req.user)
     });
     await CheckV(v);
 

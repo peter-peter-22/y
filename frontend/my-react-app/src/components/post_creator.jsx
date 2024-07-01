@@ -30,13 +30,14 @@ import { UserData } from "/src/App.jsx";
 import config from "/src/components/config.js";
 import axios from 'axios';
 import { Endpoint, FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
-import { Error, Modals, ShowImage } from "/src/components/modals";
+import { ErrorText, Modals, ShowImage } from "/src/components/modals";
 import { useNavigate } from "react-router-dom";
 import { ManagePost } from "/src/components/manage_content_button.jsx";
 import { UnblockButton } from "/src/pages/profile";
 import { commentSections, BorderlessPost, RowWithPrefix, PostMedia } from "/src/components/posts.jsx";
 import { fileToMedia } from "/src/components/media.jsx";
 import ContentEditable from 'react-contenteditable'
+import { findHashtags,findHtml } from "/src/components/sync.js";
 
 function PostCreator({ post, quoted, onPost, ...props }) {
     const [isFocused, setIsFocused] = React.useState(false);
@@ -48,7 +49,6 @@ function PostCreator({ post, quoted, onPost, ...props }) {
     const [medias, setMedias] = useState([]);
     const inputRef = useRef(null);
     const [uploading, setUploading] = useState(false);
-    const hashTagsRef = useRef([]);
 
     const handleFocus = () => {
         setIsFocused(true);
@@ -74,6 +74,11 @@ function PostCreator({ post, quoted, onPost, ...props }) {
         inputRef.current.click();
     }
 
+    function notImplemented()
+    {
+        ErrorText("Not implemented");
+    }
+
     function Clear() {
         setFiles([]);
         setMedias([]);
@@ -87,9 +92,6 @@ function PostCreator({ post, quoted, onPost, ...props }) {
         }
         );
         formData.append('text', getText);
-        hashTagsRef.current.forEach((hashtag) => {
-            formData.append('hashtags', hashtag);
-        });
 
         let endpoint;
         if (isComment) {
@@ -132,6 +134,7 @@ function PostCreator({ post, quoted, onPost, ...props }) {
                 onPost();
         }
         catch (err) {
+            setUploading(false);
             ThrowIfNotAxios(err);
         }
     }
@@ -158,11 +161,10 @@ function PostCreator({ post, quoted, onPost, ...props }) {
                         <Stack direction={isFocused ? "column" : "row"}>
                             <Box sx={{ pb: 1, pt: 2, display: "inline-flex", flexGrow: 1, position: "relative", overflow: "hidden" }}>
                                 <ColorLetters
-                                    isComment={props.isComment}
+                                    isComment={isComment}
                                     onFocus={handleFocus}
                                     onChangeRaw={handleChange}
                                     value={getText}
-                                    onChangeHashtags={(val) => { hashTagsRef.current = val }}
                                     max_letters={maxLetters}
                                 />
                             </Box>
@@ -173,9 +175,9 @@ function PostCreator({ post, quoted, onPost, ...props }) {
                                         <Stack direction="row" spacing={0.5}>
                                             <input ref={inputRef} type="file" accept={config.accepted_media_types} onChange={handleFile} multiple style={{ display: "none" }} />
                                             <CommentButton onClick={insertPhoto}>insert_photo</CommentButton>
-                                            <CommentButton>gif_box</CommentButton>
-                                            <CommentButton>sentiment_satisfied_alt</CommentButton>
-                                            <CommentButton>location_on</CommentButton>
+                                            <CommentButton onClick={notImplemented}>gif_box</CommentButton>
+                                            <CommentButton onClick={notImplemented}>sentiment_satisfied_alt</CommentButton>
+                                            <CommentButton onClick={notImplemented}>location_on</CommentButton>
                                         </Stack>
 
                                         <LetterCounter maxvalue={maxLetters} letters={getText.length} />
@@ -199,19 +201,17 @@ function PostCreator({ post, quoted, onPost, ...props }) {
     );
 }
 
-const findHashtags = /(\#\w+)/g;
-
 function ColorHashtag(hashtagString) {
     return '<span style="color:blue">' + hashtagString + '</span>';
 }
 
-function findAndColorHashtags(postTest) {
-    return postTest.replace(/(\#\w+)/g, (found) => {
+function findAndColorHashtags(postText) {
+    return postText.replace(findHashtags, (found) => {
         return ColorHashtag(found);
     });
 }
 
-function ColorLetters({ onChangeRaw, value, isComment, onFocus, max_letters, onChangeHashtags }) {
+function ColorLetters({ onChangeRaw, value, isComment, onFocus, max_letters }) {
     let keep = value.substring(0, max_letters);
     let overflow = value.substring(max_letters);
     const [focused, setFocused] = useState(false);
@@ -220,18 +220,14 @@ function ColorLetters({ onChangeRaw, value, isComment, onFocus, max_letters, onC
     overflow = `<mark style="background: #FF000044">${overflow}</mark>`
 
     //color hashtags
-    const hashtags = [];
-    keep = keep.replace(/(\#\w+)/g, (found) => {
-        hashtags.push(found.substring(1, found.length));
+    keep = keep.replace(findHashtags, (found) => {
         return ColorHashtag(found);
     });
-    if (onChangeHashtags)
-        onChangeHashtags(hashtags);
 
     function updateRaw(e) {
         let text = e.target.value;
         //remove html 
-        text = text.replace(/<[^>]*>?/gm, '');
+        text = text.replace(findHtml, '');
         //fix nbsp
         text = text.replace(/&nbsp;/g, ' ');
 

@@ -260,30 +260,29 @@ function DateLink(props) {
 
 function TextRow(props) {
     return (
-        <Stack direction="row" spacing={0.5} style={{ overflow: "hidden", alignItems: "center", margin: 0 }}>
+        <Stack direction="row" spacing={0.5} style={{ overflow: "hidden", alignItems: "baseline", margin: 0 }}>
             {props.children}
         </Stack>
     );
 }
 
-function ReplyingFrom(props) {
-    const post = props.post;
+function ReplyingFromPost({ post }) {
     return (
-        <TextRow >
-            <Typography variant="small_fade" style={{ flexShrink: 0, ...noOverflow, margin: 0 }}>Replying to</Typography>
-            <StyledLink to={"/posts/" + post.replying_to} typography="small_fade">
-                <GetUserKey user={post.replied_user} />
-            </StyledLink>
-        </TextRow>
+        <ReplyingTo user={post.replied_user} link={"/posts/" + post.replying_to} />
     );
 }
 
-function ReplyingTo(props) {
-    const user = props.post.publisher;
+function ReplyingToUser({ user }) {
+    return (
+        <ReplyingTo user={user} link={GetProfileLink(user)} />
+    );
+}
+
+function ReplyingTo({ user, link }) {
     return (
         <TextRow >
             <Typography variant="small_fade" style={{ flexShrink: 0, ...noOverflow, margin: 0 }}>Replying to</Typography>
-            <StyledLink to={GetProfileLink(user)} typography="small_fade">
+            <StyledLink to={link} typography="small_fade">
                 <GetUserKey user={user} />
             </StyledLink>
         </TextRow>
@@ -426,7 +425,7 @@ const ProfilePic = memo(({ user, ...props }) => {
     return (
         <AvatarImageDisplayer media={GetProfilePicture(user)} {...props} />
     );
-},(prevProps,nextProps)=>prevProps.user===nextProps.user);
+}, (prevProps, nextProps) => prevProps.user === nextProps.user);
 function AvatarImageDisplayer({ media, ...props }) {
     const defa = "/images/default_image.jpg";
     return (
@@ -632,4 +631,4 @@ function formatNumber(number) {
     return number;
 }
 
-export { AboveBreakpoint, ResponsiveSelector, TopMenu, ProfileText, FadeLink, TabSwitcher, UserName, UserKey, noOverflow, BoldLink, UserLink, UserKeyLink, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, logo, creation, ToCorner, CenterLogo, FollowDialog, GetProfilePicture, FollowButton, GetPostMedia, LinelessLink, OnlineList, Loading, SimplePopOver, formatNumber, TabSwitcherLinks, GetProfileBanner, GetProfileLink, ReplyingFrom, ToggleFollow, ToggleBlock, StyledLink, InheritLink, AvatarImageDisplayer, ProfilePic, NavMenu }
+export { AboveBreakpoint, ResponsiveSelector, TopMenu, ProfileText, FadeLink, TabSwitcher, UserName, UserKey, noOverflow, BoldLink, UserLink, UserKeyLink, DateLink, TextRow, ReplyingToUser as ReplyingTo, GetUserName, GetUserKey, logo, creation, ToCorner, CenterLogo, FollowDialog, GetProfilePicture, FollowButton, GetPostMedia, LinelessLink, OnlineList, Loading, SimplePopOver, formatNumber, TabSwitcherLinks, GetProfileBanner, GetProfileLink, ReplyingFromPost as ReplyingFrom, ToggleFollow, ToggleBlock, StyledLink, InheritLink, AvatarImageDisplayer, ProfilePic, NavMenu }
