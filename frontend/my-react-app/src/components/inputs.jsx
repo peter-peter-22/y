@@ -4,10 +4,14 @@ import { Icon } from '@mui/material';
 import React, { useState } from "react";
 import { IconButton } from '@mui/material';
 import { styled } from '@mui/material/styles';
+import { Endpoint, FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
+import axios from 'axios';
+import { useNavigate } from "react-router-dom";
 
 function SearchField() {
     const [isFocused, setIsFocused] = React.useState(false);
     const [getText, setText] = React.useState("");
+    const navigate = useNavigate();
 
     const handleFocus = () => {
         setIsFocused(true);
@@ -19,6 +23,16 @@ function SearchField() {
 
     function handleChange(e) {
         setText(e.target.value);
+    }
+
+    function handleKey(e) {
+        if (e.keyCode == 13) {
+            submit();
+        }
+    }
+
+    async function submit() {
+        navigate("/search?q="+getText);
     }
 
     return (<TextField
@@ -37,6 +51,7 @@ function SearchField() {
         onFocus={handleFocus}
         onBlur={handleBlur}
         onChange={handleChange}
+        onKeyDown={handleKey}
         placeholder="Search"
         InputProps={{
             sx: { borderRadius: '999px', height: "100%" },
@@ -60,7 +75,7 @@ function SearchField() {
 const PlainTextField = React.forwardRef((props, ref) => {
     return (
         <TextField
-        inputRef={ref}
+            inputRef={ref}
             {...props}
             sx={{
                 "& .MuiInputBase-root": {
@@ -86,7 +101,7 @@ function PasswordFieldWithToggle(props) {
     return (
         <TextField
             type={showPassword ? 'text' : 'password'}
-           {...props}
+            {...props}
             InputProps={{
                 endAdornment: (
                     <InputAdornment position="end">

@@ -18,6 +18,7 @@ import Profile from "/src/pages/profile";
 import PostEngagements from "/src/pages/post_engagements";
 import NotImplemented from "/src/pages/not_implemented";
 import Trends from "/src/pages/trendlist";
+import Search from "/src/pages/search";
 
 export default () => {
   return (
@@ -39,6 +40,7 @@ export default () => {
           <Route path="/messages" element={<NotImplemented />} />
           <Route path="/premium" element={<NotImplemented />} />
           <Route path="/settings" element={<NotImplemented />} />
+          <Route path="/search" element={<Search />} />
           <Route path="*" element={<Error />} />
         </Routes>
       </Box>
