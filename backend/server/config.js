@@ -53,12 +53,13 @@ const config = {
     saltRounds: 10,
     __dirname: dirname(fileURLToPath(import.meta.url)),
     google_rechapta_secret_key: process.env.GOOGLE_RECHAPTA_SECRET,
-    cookie_remember: 1000 * 60 * 60 * 24 * 30,//1 month. the user most log in at least once within a month to prevent logout
-    cookie_registering: 1000 * 60 * 60 * 2,//2 hours. the email, name, ect. the user sends at the start of the registration must be finalized within 2 hour
+    cookie_remember: 1000 * 60 * 60 * 24 * 30,//1 month. 
+    cookie_registering: 1000 * 60 * 60 * 2,//2 hours. the email, name, ect. the user sends at the start of the registration must be finalized within this time
     all_clients: all_clients,
     address_mode: address_modes.localhost,
     posts_per_request: 5,
     users_per_request: 10,
+    trends_per_request:10,
     notifications_per_request: 10,
     uploadLimitMB: 100,
     ...types

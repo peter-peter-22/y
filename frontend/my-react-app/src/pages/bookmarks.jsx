@@ -8,7 +8,7 @@ import Fab from '@mui/material/Fab';
 import { Icon } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ProfileText, FadeLink } from '/src/components/utilities';
+import { ResponsiveSelector, ProfileText, FadeLink, ListTitle } from '/src/components/utilities';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -28,7 +28,12 @@ function BookmarkList() {
 
 function Bookmarks() {
     return (
-        <BookmarkList />
+        <Stack direction="column">
+            <ListTitle>
+                Bookmarks
+            </ListTitle>
+            <BookmarkList />
+        </Stack>
     )
 }
 

@@ -17,6 +17,7 @@ import AddFollowers from "/src/pages/follow_people";
 import Profile from "/src/pages/profile";
 import PostEngagements from "/src/pages/post_engagements";
 import NotImplemented from "/src/pages/not_implemented";
+import Trends from "/src/pages/trendlist";
 
 export default () => {
   return (
@@ -30,8 +31,8 @@ export default () => {
           <Route path="/posts/:id/*" element={<PostEngagements />} />
           <Route path="/bookmarks" element={<Bookmarks />} />
           <Route path="/add_followers" element={<AddFollowers />} />
-          <Route path="/add_followers" element={<AddFollowers />} />
           <Route path="/profile/:id/*" element={<Profile />} />
+          <Route path="/trends" element={<Trends />} />
           <Route path="/lists" element={<NotImplemented />} />
           <Route path="/communities" element={<NotImplemented />} />
           <Route path="/explore" element={<NotImplemented />} />

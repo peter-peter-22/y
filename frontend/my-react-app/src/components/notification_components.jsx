@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,memo } from "react";
 import Stack from '@mui/material/Stack';
-import  { Inside } from "./side_menus.jsx";
+import { Inside } from "./side_menus.jsx";
 import { TopMenu } from '/src/components/utilities';
 import { SearchField } from "/src/components/inputs.jsx";
 import { Box } from '@mui/material';
@@ -9,7 +9,7 @@ import Fab from '@mui/material/Fab';
 import { Icon } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ProfileText, FadeLink, UserName, UserKey, noOverflow, BoldLink, UserLink, DateLink, TextRow, GetUserName, GetUserKey, ReplyingTo, GetProfilePicture, OnlineList, AvatarImageDisplayer } from '/src/components/utilities';
+import { ResponsiveSelector, ProfileText, FadeLink, UserName, UserKey, noOverflow, BoldLink, UserLink, DateLink, TextRow, GetUserName, GetUserKey, ReplyingTo, GetProfilePicture, OnlineList, AvatarImageDisplayer, ListTitle, ProfilePic } from '/src/components/utilities';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -108,7 +108,7 @@ function UserCounter(props) {
 function UserBalls(props) {
     return (
         <Stack direction="row" spacing={1}>
-            {props.users.map((user, i) => <SmallAvatar media={GetProfilePicture(user)} key={i} />)}
+            {props.users.map((user, i) => <SmallAvatar user={user} key={i} />)}
         </Stack>
     );
 }
@@ -155,9 +155,9 @@ function Comment(props) {
     );
 }
 
-function SmallAvatar({ media }) {
+function SmallAvatar({ user }) {
     return (
-        <AvatarImageDisplayer sx={{ width: "30px", height: "30px" }} media={media} />
+        <ProfilePic sx={{ width: "30px", height: "30px" }} user={user} />
     );
 }
 
@@ -168,8 +168,23 @@ const notificationTypes = {
     follow: 4
 }
 
+const Notification = memo(({entry:data})=> {
+    const type = data.type;
+    switch (type) {
+        case notificationTypes.like:
+            return <Like data={data} />;
+        case notificationTypes.reply:
+            return <Comment data={data} />
+        case notificationTypes.repost:
+            return <Repost data={data} />
+        case notificationTypes.follow:
+            return <Follow data={data} />;
+        default:
+            return "invalid notification type";
+    }
+});
 
-function NotificationList(props) {
+function NotificationList() {
     async function download(from) {
         try {
             const res = await axios.post(Endpoint("/member/notifications/get"), { from: from });
@@ -181,22 +196,6 @@ function NotificationList(props) {
         }
     }
 
-    function Notification(props) {
-        const data = props.entry;
-        const type = data.type;
-        switch (type) {
-            case notificationTypes.like:
-                return <Like data={data} />;
-            case notificationTypes.reply:
-                return <Comment data={data} />
-            case notificationTypes.repost:
-                return <Repost data={data} />
-            case notificationTypes.follow:
-                return <Follow data={data} />;
-            default:
-                return "invalid notification type";
-        }
-    }
     return (
         <OnlineList getEntries={download} entryMapper={Notification} />
     );

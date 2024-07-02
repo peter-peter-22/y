@@ -558,7 +558,7 @@ const OnlineList = forwardRef(({ entryMapper, getEntries, overrideEntryMapContro
     return (
         <>
             <List sx={{ p: 0 }} ref={listRef}>
-                {entries.map((entry, index) => <EntryMapper key={index} entry={entry} />)}
+                {entries.map((entry, index) => <EntryMapper key={index} index={index} entry={entry} />)}
             </List>
             {!end && <Loading />}
         </>
@@ -631,4 +631,12 @@ function formatNumber(number) {
     return number;
 }
 
-export { AboveBreakpoint, ResponsiveSelector, TopMenu, ProfileText, FadeLink, TabSwitcher, UserName, UserKey, noOverflow, BoldLink, UserLink, UserKeyLink, DateLink, TextRow, ReplyingToUser as ReplyingTo, GetUserName, GetUserKey, logo, creation, ToCorner, CenterLogo, FollowDialog, GetProfilePicture, FollowButton, GetPostMedia, LinelessLink, OnlineList, Loading, SimplePopOver, formatNumber, TabSwitcherLinks, GetProfileBanner, GetProfileLink, ReplyingFromPost as ReplyingFrom, ToggleFollow, ToggleBlock, StyledLink, InheritLink, AvatarImageDisplayer, ProfilePic, NavMenu }
+function ListTitle(props) {
+    return (
+        <Typography variant="big_bold" sx={{ my: 2, mx: 7 }}>
+            {props.children}
+        </Typography>
+    );
+}
+
+export { AboveBreakpoint, ResponsiveSelector, TopMenu, ProfileText, FadeLink, TabSwitcher, UserName, UserKey, noOverflow, BoldLink, UserLink, UserKeyLink, DateLink, TextRow, ReplyingToUser as ReplyingTo, GetUserName, GetUserKey, logo, creation, ToCorner, CenterLogo, FollowDialog, GetProfilePicture, FollowButton, GetPostMedia, LinelessLink, OnlineList, Loading, SimplePopOver, formatNumber, TabSwitcherLinks, GetProfileBanner, GetProfileLink, ReplyingFromPost as ReplyingFrom, ToggleFollow, ToggleBlock, StyledLink, InheritLink, AvatarImageDisplayer, ProfilePic, NavMenu,ListTitle }

@@ -9,7 +9,7 @@ import Fab from '@mui/material/Fab';
 import { Icon } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, GetProfilePicture, OnlineList, SimplePopOver, formatNumber, TabSwitcherLinks, Loading, GetProfileBanner } from '/src/components/utilities';
+import { ResponsiveSelector, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, GetProfilePicture, OnlineList, SimplePopOver, formatNumber, TabSwitcherLinks, Loading, GetProfileBanner,ListTitle } from '/src/components/utilities';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -61,9 +61,9 @@ function TabSelector() {
     const baseUrl = "/posts/" + id;
     return (
         <Stack direction="column" >
-            <Typography variant="big_bold" sx={{ my: 2, mx: 7 }}>
+            <ListTitle>
                 Post engagements
-            </Typography>
+            </ListTitle>
             <TabSwitcherLinks tabs={[
                 {
                     text: "Likes",

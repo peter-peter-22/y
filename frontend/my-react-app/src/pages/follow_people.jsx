@@ -1,4 +1,4 @@
-import React, { useState, useEffect,memo } from "react";
+import React, { useState, useEffect, memo } from "react";
 import Stack from '@mui/material/Stack';
 import { TopMenu } from '/src/components/utilities';
 import { SearchField } from "/src/components/inputs.jsx";
@@ -8,7 +8,7 @@ import Fab from '@mui/material/Fab';
 import { Icon } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, GetProfilePicture, OnlineList, FollowDialog } from '/src/components/utilities';
+import { ResponsiveSelector, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, GetProfilePicture, OnlineList, FollowDialog, ListTitle } from '/src/components/utilities';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -19,9 +19,9 @@ import IconButton from '@mui/material/IconButton';
 import Link from '@mui/material/Link';
 import { ResponsiveButton, ButtonIcon, ButtonSvg, TabButton, PostButton, ProfileButton, TopMenuButton, CornerButton } from "/src/components/buttons.jsx";
 import axios from "axios";
-import { Endpoint, FormatAxiosError,ThrowIfNotAxios } from "/src/communication.js";
+import { Endpoint, FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
 
-function FollowableList(props) {
+function FollowableList() {
     async function GetEntries(from) {
         try {
             const response = await axios.post(Endpoint("/member/general/follower_recommendations"), {
@@ -39,16 +39,19 @@ function FollowableList(props) {
         return (<FollowDialog user={props.entry} />);
     }
     return (
-        <List sx={{ p: 0 }}>
+        <Stack direction="column">
+            <ListTitle>
+                Who to follow
+            </ListTitle>
             <OnlineList getEntries={GetEntries} entryMapper={EntryMapper} />
-        </List>
+        </Stack>
     );
 }
 
-const FollowDialogExtended=memo(({entry:user})=> {
+const FollowDialogExtended = memo(({ entry: user }) => {
     return (
         <FollowDialog user={user} >
-            <Typography variant="small" sx={{mt:1}}>
+            <Typography variant="small" sx={{ mt: 1 }}>
                 {user.bio}
             </Typography>
         </FollowDialog>
@@ -56,7 +59,7 @@ const FollowDialogExtended=memo(({entry:user})=> {
 });
 
 //extended because this additionally displays the user bio, and accepts more url parameters
-function UserListExtended({url,params:additionalParams}) {
+function UserListExtended({ url, params: additionalParams }) {
     async function GetEntries(from) {
         try {
             let params = { from: from };
@@ -72,9 +75,7 @@ function UserListExtended({url,params:additionalParams}) {
     }
 
     return (
-        <List sx={{ p: 0 }}>
-            <OnlineList getEntries={GetEntries} entryMapper={FollowDialogExtended} />
-        </List>
+        <OnlineList getEntries={GetEntries} entryMapper={FollowDialogExtended} />
     );
 }
 

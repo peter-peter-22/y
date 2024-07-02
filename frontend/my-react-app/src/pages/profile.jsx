@@ -9,7 +9,7 @@ import Fab from '@mui/material/Fab';
 import { Icon } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, GetProfilePicture, GetPostMedia, OnlineList, SimplePopOver, formatNumber, TabSwitcherLinks, Loading, GetProfileBanner, ProfilePic } from '/src/components/utilities';
+import { ResponsiveSelector, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, GetProfilePicture, GetPostMedia, OnlineList, SimplePopOver, formatNumber, TabSwitcherLinks, Loading, GetProfileBanner, ProfilePic, ListTitle } from '/src/components/utilities';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -240,20 +240,20 @@ function Profile() {
 function Followers({ user }) {
     return (
         <Stack direction="column">
-            <ListItem>
-                <Typography variant="big_bold">Followers of <GetUserName user={user} /></Typography>
-            </ListItem>
+            <ListTitle>
+                Followers of <GetUserName user={user} />
+            </ListTitle>
             <UserListExtended url={Endpoint("/member/general/followers_of_user")} params={{ id: user.id }} />
         </Stack>
     );
 }
 
-function Following({user}) {
+function Following({ user }) {
     return (
         <Stack direction="column">
-            <ListItem>
-                <Typography variant="big_bold">Followed by <GetUserName user={user} /></Typography>
-            </ListItem>
+            <ListTitle>
+                Followed by <GetUserName user={user} />
+            </ListTitle>
             <UserListExtended url={Endpoint("/member/general/followed_by_user")} params={{ id: user.id }} />
         </Stack>
     );

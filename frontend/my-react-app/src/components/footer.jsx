@@ -24,6 +24,7 @@ import { NavLink } from "react-router-dom";
 import { Endpoint, FormatAxiosError ,ThrowIfNotAxios} from "/src/communication.js";
 import axios, { AxiosError } from 'axios';
 import links from "/src/components/footer_links";
+import Trends from "/src/components/trends";
 
 function Footer() {
     const wide = AboveBreakpoint("rightMenuSmaller");
@@ -80,50 +81,6 @@ function Links() {
                 </List>
             </ShowPopover>
         </>
-    );
-}
-
-function Trends() {
-    return (
-        <BoxList>
-
-            <ListItem>
-                <ListItemText>
-                    <Typography variant="big_bold">
-                        Hungary trends
-                    </Typography>
-                </ListItemText>
-            </ListItem>
-
-            <ListItem disablePadding>
-                <ListItemButton>
-                    <ListItemText>
-                        <Typography variant="small_fade">
-                            <div>
-                                <span>1</span><span style={{ margin: "0px 4px" }}>·</span><span>Trending</span>
-                            </div>
-                        </Typography>
-                        <Typography variant="small_bold">
-                            <div>
-                                #Hungary
-                            </div>
-                        </Typography>
-                        <Typography variant="small_fade">
-                            <div>
-                                999K posts
-                            </div>
-                        </Typography>
-
-                        <CornerButton right>more_horiz</CornerButton>
-                    </ListItemText>
-                </ListItemButton>
-            </ListItem>
-
-            <BlueTextButton>
-                Show more
-            </BlueTextButton>
-
-        </BoxList>
     );
 }
 
