@@ -62,7 +62,7 @@ async function ApplySqlToUser(query_result, req) {
 }
 
 async function UpdateUserAfterChange( req) {
-    const q =await db.query(named(`select ${user_columns} from users where id=:id`)({id:req.user.id}));
+    const q =await db.query(named(`select ${user_columns} from users where id=:id`)({id:UserId(req)}));
     await ApplySqlToUser(q, req);
 }
 

@@ -43,7 +43,7 @@ function FollowableList() {
             <ListTitle>
                 Who to follow
             </ListTitle>
-            <OnlineList getEntries={GetEntries} entryMapper={EntryMapper} />
+            <OnlineList getEntries={GetEntries} EntryMapper={EntryMapper} />
         </Stack>
     );
 }
@@ -75,7 +75,7 @@ function UserListExtended({ url, params: additionalParams }) {
     }
 
     return (
-        <OnlineList getEntries={GetEntries} entryMapper={FollowDialogExtended} />
+        <OnlineList getEntries={GetEntries} EntryMapper={FollowDialogExtended} />
     );
 }
 

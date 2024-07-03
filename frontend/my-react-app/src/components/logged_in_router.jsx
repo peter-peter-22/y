@@ -14,7 +14,7 @@ import Error from "/src/pages/error";
 import PostFocused from "/src/pages/post_focused";
 import Bookmarks from "/src/pages/bookmarks";
 import AddFollowers from "/src/pages/follow_people";
-import Profile from "/src/pages/profile";
+import Profile from "/src/pages/profile_main";
 import PostEngagements from "/src/pages/post_engagements";
 import NotImplemented from "/src/pages/not_implemented";
 import Trends from "/src/pages/trendlist";

@@ -45,7 +45,7 @@ async function update_profile_banner(req, file) {
 
 async function update_profile_file(req, file, fileName, update_column) {
     validate_image(file);
-    const user_id = req.user.id;
+    const user_id = UserId(req);
     const fileData = await uploadMedia(file, fileName, profileFolder(user_id));
     const q = await db.query(named(`
         UPDATE users 
@@ -89,7 +89,7 @@ async function update_username(req, username, skip_update = false) {
         WHERE id=:id 
         RETURNING ${user_columns}`
     )
-    ({ username: username, id: req.user.id }));
+    ({ username: username, id: UserId(req) }));
     if (!skip_update)
         await ApplySqlToUser(result, req);
 }
@@ -122,7 +122,7 @@ router.post("/change_browser_notifications", async (req, res) => {
         WHERE id=:id 
         RETURNING ${user_columns}`
     )
-    ({ enabled: req.body.enabled, id: req.user.id }));
+    ({ enabled: req.body.enabled, id: UserId(req) }));
     await ApplySqlToUser(result, req);
     res.sendStatus(200);
 });
@@ -138,7 +138,7 @@ router.post("/update_profile", async (req, res) => {
     await CheckV(v);
 
     //update user data
-    const user_id = req.user.id;
+    const user_id = UserId(req);
     const { username, birthdate, name, bio } = req.body;
     if (username !== undefined)
         await update_username(req, username, true);

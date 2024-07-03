@@ -18,7 +18,7 @@ import axios from "axios";
 import nodemailer from "nodemailer";
 import { Validator } from "node-input-validator";
 import { CheckV, CheckErr } from "./validations.js";
-import postQueryText, { is_followed, is_blocked, user_columns, user_columns_extended } from "./post_query.js";
+import { postQuery, is_followed, is_blocked, user_columns, user_columns_extended } from "./post_query.js";
 
 
 async function CountableToggleSimplified(req, res, table, unique_constraint_name, first_column_name = "user_id", second_column_name = "post_id") {
@@ -40,7 +40,7 @@ async function CountableToggle(req, res, onAdd, onRemove) {
     });
     await CheckV(v);
     const { key, value } = req.body;
-    const user_id = req.user.id;
+    const user_id = UserId(req);
     try {
         if (value) {
             await onAdd(key, user_id);
@@ -54,36 +54,38 @@ async function CountableToggle(req, res, onAdd, onRemove) {
     }
 }
 
-async function postQuery(req, before, after, additional_params, level = 0, limit, offset = 0) {
-    //adding the input values to the default values if necessary
-    const text = postQueryText;
-    if (limit === undefined)
-        limit = config.posts_per_request;
-    if (after === undefined)
-        after = "";
-    after += " OFFSET :offset LIMIT :limit"
-    const user_id = req.user.id;
-    const params = { user_id: user_id, limit: limit, offset: offset };
+async function GetPosts(user_id, where, where_params, limit, offset = 0, posts_query, level) {
+    const params = { user_id: user_id, ...where_params };
 
     //getting the posts
-    const posts = await editable_query(text, before, after, params, additional_params);
+    const text = postQuery(where, offset, limit, posts_query);
+    const posts_q = await db.query(named(text)(params));
+    const posts = posts_q.rows;
 
+    //add other data
+    await add_data_to_posts(posts, user_id, level);
+
+    return posts;
+}
+
+//adds the necessary data about the replied, reposted and quoted posts and counts the views
+async function add_data_to_posts(posts, user_id, level = 0) {
     //for each comment, getting the name of the replied user
-    const comments = posts.filter(post => post.replying_to !== null);
-    if (comments.length !== 0) {
-        const replied_ids = [];
-        comments.forEach(comment => {
-            const replied_id = comment.replying_to;
-            if (!replied_ids.includes(replied_id))
-                replied_ids.push(replied_id);
-        });
-        const replied_query = await db.query(named("SELECT POST.ID as post_id, POSTER.ID, POSTER.USERNAME, POSTER.NAME FROM POSTS POST LEFT JOIN USERS POSTER ON POSTER.ID = POST.PUBLISHER WHERE POST.ID = ANY(:ids)")({ ids: replied_ids }));
-        const replied_users = replied_query.rows;
-        comments.forEach(comment => {
-            const myUser = replied_users.find(user => user.post_id === comment.replying_to);
-            comment.replied_user = myUser;
-        });
-    }
+    ///  const comments = posts.filter(post => post.replying_to !== null);
+    ///  if (comments.length !== 0) {
+    ///      const replied_ids = [];
+    ///      comments.forEach(comment => {
+    ///          const replied_id = comment.replying_to;
+    ///          if (!replied_ids.includes(replied_id))
+    ///              replied_ids.push(replied_id);
+    ///      });
+    ///      const replied_query = await db.query(named("SELECT POST.ID as post_id, POSTER.ID, POSTER.USERNAME, POSTER.NAME FROM POSTS POST LEFT JOIN USERS POSTER ON POSTER.ID = POST.PUBLISHER WHERE POST.ID = ANY(:ids)")({ ids: replied_ids }));
+    ///      const replied_users = replied_query.rows;
+    ///      comments.forEach(comment => {
+    ///          const myUser = replied_users.find(user => user.post_id === comment.replying_to);
+    ///          comment.replied_user = myUser;
+    ///      });
+    ///  }
 
     //adding the referenced post to each repost or quote
     //level means how much parent posts are above this post
@@ -97,7 +99,7 @@ async function postQuery(req, before, after, additional_params, level = 0, limit
         });
         if (reposted_ids.length !== 0) {
             //downloading the reposted posts and assigning them to their reposter
-            const reposted_posts = await postQuery(req, undefined, " WHERE post.id=ANY(:reposted_ids)", { reposted_ids: reposted_ids }, level + 1);
+            const reposted_posts = await GetPosts(user_id, " WHERE post.id=ANY(:reposted_ids)", { reposted_ids: reposted_ids }, 1, undefined, undefined, level);
 
             posts.forEach(post => {
                 if (post.reposted_id !== null) {
@@ -111,8 +113,6 @@ async function postQuery(req, before, after, additional_params, level = 0, limit
     }
 
     await updateViews(posts, user_id);//the viewcount update is not awaited
-
-    return posts;
 }
 
 
@@ -146,7 +146,7 @@ async function updateViews(posts, user_id) {
     }
 }
 
-async function post_list(req, res, add_validations, before, after, query_params) {
+async function post_list(req, res, add_validations, where, where_params, posts_query) {
     let validations = { from: "required|integer" };
     if (add_validations)
         validations = { ...validations, ...add_validations };
@@ -154,8 +154,8 @@ async function post_list(req, res, add_validations, before, after, query_params)
     await CheckV(v);
 
     const { from } = req.body;
-    const posts = await postQuery(req, before, after, query_params, undefined, undefined, from);
+    const posts = await GetPosts(UserId(req), where, where_params, undefined, from, posts_query);
     res.send(posts);
 }
 
-export {CountableToggleSimplified,CountableToggle,postQuery,editable_query,updateViews,post_list};
+export { CountableToggleSimplified, CountableToggle, GetPosts, editable_query, updateViews, post_list };

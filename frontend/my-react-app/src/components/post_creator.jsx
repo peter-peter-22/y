@@ -33,8 +33,7 @@ import { Endpoint, FormatAxiosError, ThrowIfNotAxios } from "/src/communication.
 import { ErrorText, Modals, ShowImage } from "/src/components/modals";
 import { useNavigate } from "react-router-dom";
 import { ManagePost } from "/src/components/manage_content_button.jsx";
-import { UnblockButton } from "/src/pages/profile";
-import { commentSections, BorderlessPost, RowWithPrefix, PostMedia } from "/src/components/posts.jsx";
+import { commentSections, BorderlessPost, RowWithPrefix, PostMedia ,QuotedFrame} from "/src/components/posts.jsx";
 import { fileToMedia } from "/src/components/media.jsx";
 import ContentEditable from 'react-contenteditable'
 import { findHashtags,findHtml } from "/src/components/sync.js";

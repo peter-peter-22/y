@@ -90,5 +90,6 @@ async function initialize() {
 global.app = app;
 global.config = config;
 global.ISOToSQL = (iso) => { return new Moment(iso).format() };
+global.UserId=(req)=> req.user.id;
 global.named = named;
 export { transporter, pgPool, initialize };

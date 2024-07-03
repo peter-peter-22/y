@@ -23,7 +23,7 @@ import * as pp from "../../components/passport.js";
 import { username_exists, selectable_username } from "../user.js";
 import { Validator } from "node-input-validator";
 import { CheckV, CheckErr, validate_image, validate_video, validate_media } from "../../components/validations.js";
-import { postQuery } from "../../components/general_components.js";
+import { GetPosts } from "../../components/general_components.js";
 import { GetMaxLetters } from "../user.js";
 import { uploadMedia } from "../../components/cloudinary_handler.js";
 import { findHashtags, findHtml } from "../../components/sync.js";
@@ -143,9 +143,10 @@ async function postAny(req, res, saveToDatabase) {
 
 
     //the values those are sent to all kinds of posts
+    const user_id=UserId(req);
     const baseCols = "PUBLISHER, TEXT";
     const baseRefs = ":user_id, :text";
-    const baseVals = { user_id: req.user.id, text: text };
+    const baseVals = { user_id: user_id, text: text };
 
     const result = await saveToDatabase(baseCols, baseRefs, baseVals);//must return the id of the published post
     const post_id = result.rows[0].id;
@@ -169,7 +170,7 @@ async function postAny(req, res, saveToDatabase) {
         );
     }
     //return the created post to client
-    const recentlyAddedPost = await postQuery(req, undefined, " WHERE post.id=:post_id", { post_id: post_id }, undefined, 1);
+    const recentlyAddedPost = await GetPosts(user_id, "WHERE post.id=:post_id", { post_id: post_id }, 1);
     res.send(recentlyAddedPost[0]);
 }
 

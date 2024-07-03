@@ -32,7 +32,7 @@ router.post("/get", async (req, res) => {
 	});
 	await CheckV(v);
 	const { from } = req.body;
-	const notifs = await db.query(named(notifications_query)({ user_id: req.user.id, from: from }));
+	const notifs = await db.query(named(notifications_query)({ user_id: UserId(req), from: from }));
 	res.send(notifs.rows);
 });
 

@@ -33,7 +33,6 @@ import { Endpoint, FormatAxiosError, ThrowIfNotAxios } from "/src/communication.
 import { Error, Modals, ShowImage, ShowSingleImage } from "/src/components/modals";
 import { useNavigate } from "react-router-dom";
 import { ManagePost } from "/src/components/manage_content_button.jsx";
-import { UnblockButton } from "/src/pages/profile";
 import { ExamplePost, ExampleUser } from "/src/components/exampleData.js";
 import { PostCreator,findAndColorHashtags } from "/src/components/post_creator.jsx";
 import { BlockMedia } from "/src/components/media.jsx";
@@ -395,7 +394,7 @@ function PostList({ post, ...props }) {
     }, []);
 
     return (
-        <OnlineList getEntries={GetEntries} entryMapper={HideablePostMemo} ref={onlineListRef} key={key} />
+        <OnlineList getEntries={GetEntries} EntryMapper={HideablePostMemo} ref={onlineListRef} key={key} />
     );
 }
 
@@ -435,6 +434,7 @@ function ClickableImage({ index, children }) {
         </BlockMedia>
     );
 }
+
 
 function ClickableSingleImageContainer({ media, children, style }) {
     function Clicked(e) {
@@ -603,4 +603,4 @@ function OverrideWithRepost(post) {
 }
 
 
-export { Post, PostList, PostFocused, ListBlockButton, ListBlock, RowWithPrefix, PostButtonRow, WritePost, OverrideWithRepost, MediaContext, ClickableImage, PostModalFrame, OpenPostOnClick, OpenOnClick, SimplifiedPostList, commentSections, BorderlessPost, PostMedia, ClickableSingleImageContainer };
+export { Post, PostList, PostFocused, ListBlockButton, ListBlock, RowWithPrefix, PostButtonRow, WritePost, OverrideWithRepost, MediaContext, ClickableImage, PostModalFrame, OpenPostOnClick, OpenOnClick, SimplifiedPostList, commentSections, BorderlessPost, PostMedia, ClickableSingleImageContainer,QuotedFrame };

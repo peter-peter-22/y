@@ -197,7 +197,7 @@ function NotificationList() {
     }
 
     return (
-        <OnlineList getEntries={download} entryMapper={Notification} />
+        <OnlineList getEntries={download} EntryMapper={Notification} />
     );
 }
 

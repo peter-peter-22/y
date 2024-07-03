@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react'
+import React, { useRef, useState, memo } from 'react'
 import { Cloudinary } from '@cloudinary/url-gen';
 import { auto } from '@cloudinary/url-gen/actions/resize';
 import { autoGravity } from '@cloudinary/url-gen/qualifiers/gravity';
@@ -41,7 +41,7 @@ function fileToMedia(file) {
     return new Media(type, url);
 }
 
-function BlockMedia(props) {
+const BlockMedia = memo(({ media, onClick, children }) => {
     return (
         <div
             style={{
@@ -51,19 +51,26 @@ function BlockMedia(props) {
                 position: "relative",
                 cursor: "pointer"
             }}
-            onClick={props.onClick}>
+            onClick={onClick}>
             <MediaDisplayer
-                media={props.media}
+                media={media}
                 style={{
                     width: "100%",
                     height: "100%",
                     objectFit: "cover",
                 }}
             />
-            {props.children}
+            {children}
         </div>
     )
-}
+},
+    (prev, next) => {
+        const prevFile = prev.media.filedata;
+        const nextFile = next.media.filedata;
+        if (prevFile && nextFile)
+            return prevFile.public_id === nextFile.public_id;
+    }
+);
 
 function MediaDisplayer({ media, onEmpty, ...props }) {
     if (!media)

@@ -16,7 +16,7 @@ import { Modals, CreateModals, Error } from "/src/components/modals";
 import SharedPages from "/src/components/shared_pages_router";
 
 //components
-import Main from "./components/logged_in.jsx";
+import Main from "./components/logged_in_router.jsx";
 import NoUser from "./components/no_user.jsx";
 import Loading from "./components/loading.jsx";
 

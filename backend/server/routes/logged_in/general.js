@@ -5,8 +5,8 @@ import * as pp from "../../components/passport.js";
 import { username_exists, selectable_username } from "../user.js";
 import { Validator } from "node-input-validator";
 import { CheckV, CheckErr } from "../../components/validations.js";
-import postQueryText, { is_followed, is_blocked, user_columns, user_columns_extended,is_following } from "../../components/post_query.js";
-import {CountableToggleSimplified,CountableToggle,postQuery,editable_query,updateViews,post_list} from "../../components/general_components.js";
+import { is_followed, is_blocked, user_columns, user_columns_extended, is_following, bookmarked_by_user } from "../../components/post_query.js";
+import { CountableToggleSimplified, CountableToggle, GetPosts, editable_query, updateViews, post_list } from "../../components/general_components.js";
 
 const router = express.Router();
 
@@ -25,7 +25,7 @@ router.post("/is_following_user", async (req, res) => {
     });
     await CheckV(v);
     const { id } = req.body;
-    const result = await db.query(named("SELECT count(*) FROM follows WHERE follower=:me AND followed=:id")({ me: req.user.id, followed: id }));
+    const result = await db.query(named("SELECT count(*) FROM follows WHERE follower=:me AND followed=:id")({ me: UserId(req), followed: id }));
     res.send(result.rows[0].count > 0)
 });
 
@@ -35,7 +35,7 @@ router.post("/get_post", async (req, res) => {
     });
     await CheckV(v);
     const { id } = req.body;
-    const posts = await postQuery(req, undefined, " WHERE post.id=:id", { id: id }, undefined, 1);
+    const posts = await GetPosts(req, "WHERE post.id=:id", { id: id }, 1);
     const post = posts[0];
     if (post === undefined)
         CheckErr("this post does not exists");
@@ -43,31 +43,31 @@ router.post("/get_post", async (req, res) => {
 });
 
 router.post("/get_comments", async (req, res) => {
-    await post_list(req, res, { id: 'required|integer' }, undefined, " WHERE replying_to=:id", { id: req.body.id });
+    await post_list(req, res, { id: 'required|integer' }, "WHERE replying_to=:id", { id: req.body.id });
 });
 
 router.post("/posts_of_user", async (req, res) => {
-    await post_list(req, res, { user_id: "required|integer" }, undefined, " WHERE post.publisher=:target_user_id AND post.replying_to IS NULL", { target_user_id: req.body.user_id });
+    await post_list(req, res, { user_id: "required|integer" }, "WHERE post.publisher=:target_user_id AND post.replying_to IS NULL", { target_user_id: req.body.user_id });
 });
 
 router.post("/reposts_of_post", async (req, res) => {
-    await post_list(req, res, { post_id: "required|integer" }, undefined, " WHERE post.repost=:post_id AND TEXT IS NULL", { post_id: req.body.post_id });
+    await post_list(req, res, { post_id: "required|integer" }, "WHERE post.repost=:post_id AND TEXT IS NULL", { post_id: req.body.post_id });
 });
 
 router.post("/quotes_of_post", async (req, res) => {
-    await post_list(req, res, { post_id: "required|integer" }, undefined, " WHERE post.repost=:post_id AND TEXT IS NOT NULL", { post_id: req.body.post_id });
+    await post_list(req, res, { post_id: "required|integer" }, "WHERE post.repost=:post_id AND TEXT IS NOT NULL", { post_id: req.body.post_id });
 });
 
 router.post("/comments_of_user", async (req, res) => {
-    await post_list(req, res, { user_id: "required|integer" }, undefined, " WHERE post.publisher=:target_user_id AND post.replying_to IS NOT NULL", { target_user_id: req.body.user_id });
+    await post_list(req, res, { user_id: "required|integer" }, "WHERE post.publisher=:target_user_id AND post.replying_to IS NOT NULL", { target_user_id: req.body.user_id });
 });
 
 router.post("/likes_of_user", async (req, res) => {
-    await post_list(req, res, { user_id: "required|integer" }, undefined, " WHERE EXISTS(select * from likes WHERE likes.post_id=post.id AND post.publisher=:target_user_id)", { target_user_id: req.body.user_id });
+    await post_list(req, res, { user_id: "required|integer" }, "WHERE EXISTS(select * from likes WHERE likes.post_id=post.id AND post.publisher=:target_user_id)", { target_user_id: req.body.user_id });
 });
 
 router.post("/get_bookmarks", async (req, res) => {
-    await post_list(req, res, undefined, "SELECT * FROM (", ") as subquery WHERE bookmarked_by_user=TRUE");
+    await post_list(req, res, undefined, `WHERE ${bookmarked_by_user}=TRUE`);
 });
 
 router.post("/media_of_user", async (req, res) => {
@@ -78,9 +78,11 @@ router.post("/media_of_user", async (req, res) => {
     await CheckV(v);
 
     const q = await db.query(named(
-        `select id, image_count 
+        `select id, media 
          from posts
-         where image_count != 0 and publisher=:target_user_id 
+         where media is not null
+         and 
+         publisher=:target_user_id 
          OFFSET :from LIMIT :limit`
     )({
         target_user_id: req.body.user_id,
@@ -108,7 +110,7 @@ router.post("/user_profile", async (req, res) => {
     (select count(*) from follows where follower=id) as follows 
     from users 
     where id=:target_user_id
-    `)({ target_user_id: user_id,user_id:req.user.id }));
+    `)({ target_user_id: user_id, user_id: UserId(req) }));
     const user = q.rows[0];
     if (!user)
         CheckErr("this user does not exists");
@@ -123,7 +125,7 @@ router.post("/follower_recommendations", async (req, res) => {
     const { from } = req.body;
     const text = `SELECT ${user_columns} from USERS WHERE NOT ${is_followed} LIMIT :limit OFFSET :offset`;
     const users = await db.query(named(text)({
-        user_id: req.user.id,
+        user_id: UserId(req),
         offset: from,
         limit: config.users_per_request
     }));
@@ -131,29 +133,29 @@ router.post("/follower_recommendations", async (req, res) => {
 });
 
 router.post("/followed_by_user", async (req, res) => {
-    const v = new Validator(req.body, { 
+    const v = new Validator(req.body, {
         from: "required|integer",
-        id:"required|integer"
-     });
+        id: "required|integer"
+    });
     await CheckV(v);
-    const { from,id } = req.body;
+    const { from, id } = req.body;
     const text = `SELECT ${user_columns},TRUE as is_followed from USERS WHERE ${is_followed} LIMIT :limit OFFSET :offset`;
     const users = await db.query(named(text)({
-        user_id: req.user.id,
+        user_id: UserId(req),
         offset: from,
         limit: config.users_per_request,
-        target_id:id
+        target_id: id
     }));
     res.send(users.rows);
 });
 
 router.post("/followers_of_user", async (req, res) => {
-    const v = new Validator(req.body, { 
+    const v = new Validator(req.body, {
         from: "required|integer",
-        id:"required|integer"
-     });
+        id: "required|integer"
+    });
     await CheckV(v);
-    const { from,id } = req.body;
+    const { from, id } = req.body;
     const text = `
     SELECT 
         ${user_columns},
@@ -163,10 +165,10 @@ router.post("/followers_of_user", async (req, res) => {
         LIMIT :limit 
         OFFSET :offset`;
     const users = await db.query(named(text)({
-        user_id: req.user.id,
+        user_id: UserId(req),
         offset: from,
         limit: config.users_per_request,
-        target_id:id
+        target_id: id
     }));
     res.send(users.rows);
 });
@@ -174,9 +176,9 @@ router.post("/followers_of_user", async (req, res) => {
 
 router.post("/likers_of_post", async (req, res) => {
     const v = new Validator(req.body, {
-         from: "required|integer",
-         post_id:"required|integer"
-         });
+        from: "required|integer",
+        post_id: "required|integer"
+    });
     await CheckV(v);
     const { from, post_id } = req.body;
 
@@ -199,7 +201,7 @@ router.post("/likers_of_post", async (req, res) => {
     LIMIT :limit OFFSET :offset`;
 
     const users = await db.query(named(text)({
-        user_id: req.user.id,
+        user_id: UserId(req),
         offset: from,
         limit: config.users_per_request,
         post_id: post_id
@@ -209,9 +211,9 @@ router.post("/likers_of_post", async (req, res) => {
 });
 
 router.post("/celebrities", async (req, res) => {
-    const v = new Validator(req.body, { 
+    const v = new Validator(req.body, {
         from: "required|integer"
-     });
+    });
     await CheckV(v);
     const { from } = req.body;
 
@@ -224,7 +226,7 @@ router.post("/celebrities", async (req, res) => {
     LIMIT :limit OFFSET :offset`;
 
     const users = await db.query(named(text)({
-        user_id: req.user.id,
+        user_id: UserId(req),
         offset: from,
         limit: config.users_per_request
     }));
@@ -240,7 +242,7 @@ router.post("/viewers_of_post", async (req, res) => {
 
 router.get("/follower_recommendations_preview", async (req, res) => {
     const text = `SELECT ${user_columns} from USERS WHERE NOT ${is_followed} LIMIT 3`;
-    const users = await db.query(named(text)({ user_id: req.user.id }));
+    const users = await db.query(named(text)({ user_id: UserId(req) }));
     res.send(users.rows);
 });
 

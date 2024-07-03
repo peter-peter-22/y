@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, forwardRef, createContext, useContext } from "react";
 import Stack from '@mui/material/Stack';
-import  { Inside } from "./side_menus.jsx";
+import { Inside } from "./side_menus.jsx";
 import { TopMenu } from '/src/components/utilities';
 import { SearchField } from "/src/components/inputs.jsx";
 import { Box, Hidden } from '@mui/material';
@@ -32,7 +32,7 @@ import axios from 'axios';
 import { Endpoint, FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
 import { Error, Modals, ShowImage } from "/src/components/modals";
 import { NavLink, useNavigate } from "react-router-dom";
-import {commentSections} from "/src/components/posts";
+import { commentSections } from "/src/components/posts";
 
 
 
@@ -84,28 +84,20 @@ function FollowRow(props) {
 
     return (
         <Row onClick={toggleFollow}>
-            {follow ?
-                <><Icon>person_remove</Icon><span>Unfollow</span></>
-                :
-                <><Icon>person_add_alt_1</Icon><span>Follow</span></>
-            }
-            <span>< GetUserKey user={user} /></span>
+            <Icon>{follow ? "person_remove" : "person_add_alt_1"}</Icon>
+            <span>{follow ? "Unfollow" : "Follow"} < GetUserKey user={user} /></span>
         </Row>
     );
 }
 
 function BlockRow(props) {
     const user = props.user;
-    const [blocked, setBlock, toggleBlock] = ToggleBlock(user,props.onChange);
+    const [blocked, setBlock, toggleBlock] = ToggleBlock(user, props.onChange);
 
     return (
         <Row onClick={toggleBlock}>
-            {blocked ?
-                <><Icon>do_disturb_on</Icon><span>Unblock</span></>
-                :
-                <><Icon>do_disturb</Icon><span>Block</span></>
-            }
-            <span>< GetUserKey user={user} /></span>
+            <Icon>{blocked ? "do_disturb_on" : "do_disturb"}</Icon>
+            <span>{blocked ? "Unblock" : "Block"} < GetUserKey user={user} /></span>
         </Row>
     );
 }
@@ -114,9 +106,9 @@ function Row(props) {
     return (
         <ListItem disablePadding>
             <ListItemButton onClick={props.onClick}>
-                <TextRow>
+                <Stack direction="row" spacing={1}>
                     {props.children}
-                </TextRow>
+                </Stack>
             </ListItemButton>
         </ListItem>
     );
@@ -127,8 +119,7 @@ function ManagePost(props) {
     const post = props.post;
     const user = post.publisher;
     const is_me = post.publisher.id === UserData.getData.user.id;
-    function onBlock()
-    {
+    function onBlock() {
         commentSections.active.update();
     }
 
@@ -137,7 +128,7 @@ function ManagePost(props) {
             {!is_me &&
                 <>
                     <FollowRow user={user} />
-                    <BlockRow user={user} onChange={onBlock}/>
+                    <BlockRow user={user} onChange={onBlock} />
                 </>
             }
             <EngagementsRow post={post} />
@@ -151,7 +142,7 @@ function ManageProfile(props) {
     return (
         <ManageContent>
             <FollowRow user={user} />
-            <BlockRow user={user} onChange={props.onBlock}/>
+            <BlockRow user={user} onChange={props.onBlock} />
         </ManageContent>
     );
 }

@@ -1,4 +1,4 @@
-const user_json=`
+const user_json = `
 JSONB_BUILD_OBJECT
 (
 	'id',USERS.ID,
@@ -28,19 +28,19 @@ ${is_followed} AS IS_FOLLOWED
 const like_count = `
 (SELECT COUNT(*)
 		FROM LIKES
-		WHERE LIKES.POST_ID = POST.ID)::INT AS LIKE_COUNT`;
+		WHERE LIKES.POST_ID = POST.ID)::INT`;
 
 const liked_by_user = `
 EXISTS
 	(SELECT *
 		FROM LIKES
 		WHERE LIKES.POST_ID = POST.ID
-			AND USER_ID = :user_id) AS LIKED_BY_USER`;
+			AND USER_ID = :user_id)`;
 
 const repost_count = `
 (SELECT COUNT(*)
 		FROM POSTS REPOSTS
-		WHERE REPOSTS.REPOST = POST.ID)::INT AS REPOST_COUNT`;
+		WHERE REPOSTS.REPOST = POST.ID)::INT`;
 
 const reposted_by_user = `
 EXISTS
@@ -48,36 +48,45 @@ EXISTS
 		FROM POSTS REPOSTS
 		WHERE REPOSTS.REPOST = POST.ID
 			AND REPOSTS.TEXT IS NULL
-			AND REPOSTS.PUBLISHER = :user_id) AS REPOSTED_BY_USER`;
+			AND REPOSTS.PUBLISHER = :user_id)`;
 
 const bookmark_count = `
 (SELECT COUNT(*)
 		FROM BOOKMARKS BOOKMARK
-		WHERE BOOKMARK.POST_ID = POST.ID)::INT AS BOOKMARK_COUNT`;
+		WHERE BOOKMARK.POST_ID = POST.ID)::INT`;
 
 const bookmarked_by_user = `
 EXISTS
-	(SELECT *
-		FROM BOOKMARKS BOOKMARK
-		WHERE BOOKMARK.POST_ID = POST.ID
-			AND BOOKMARK.USER_ID = :user_id) AS BOOKMARKED_BY_USER`;
+(
+	SELECT * FROM BOOKMARKS BOOKMARK
+	WHERE BOOKMARK.POST_ID = POST.ID
+	AND BOOKMARK.USER_ID = :user_id
+)`;
 
 const comment_count = `
 (SELECT COUNT(*)
 		FROM POSTS AS COMMENTS_TABLE
-		WHERE COMMENTS_TABLE.REPLYING_TO = POST.ID)::INT AS COMMENT_COUNT`;
+		WHERE COMMENTS_TABLE.REPLYING_TO = POST.ID)::INT`;
 
 const view_count = `
 (SELECT COUNT(*)
 		FROM VIEWS
-		WHERE VIEWS.POST_ID = POST.ID)::INT AS VIEWS`;
+		WHERE VIEWS.POST_ID = POST.ID)::INT`;
 
 const publisher = `
 (
 	SELECT
 		${user_json} AS PUBLISHER
-	FROM
-		USERS WHERE USERS.ID=POST.PUBLISHER
+	FROM USERS 
+		WHERE USERS.ID=POST.PUBLISHER
+)`;
+
+const replied_user = `
+(
+	SELECT
+		${user_json} AS REPLIED_USER
+	FROM USERS 
+		WHERE USERS.ID=POST.REPLYING_TO_PUBLISHER
 )`;
 
 const columns = `
@@ -88,23 +97,26 @@ const columns = `
 	POST.REPOST AS REPOSTED_ID,
 	POST.REPLYING_TO,
     POST.REPLYING_TO_PUBLISHER,
-    ${view_count},
-	${like_count},
-	${liked_by_user},
-	${repost_count},
-	${reposted_by_user},
-	${bookmark_count},
-	${bookmarked_by_user},
+    ${view_count} AS VIEWS,
+	${like_count} AS LIKE_COUNT,
+	${liked_by_user} AS LIKED_BY_USER,
+	${repost_count} AS REPOST_COUNT,
+	${reposted_by_user} AS REPOSTED_BY_USER,
+	${bookmark_count} AS BOOKMARK_COUNT,
+	${bookmarked_by_user} AS BOOKMARKED_BY_USER,
+    ${comment_count} AS COMMENT_COUNT,
     ${publisher},
-    ${comment_count}`;
+	${replied_user}`;
 
-const postQueryText = `
-SELECT 
-	${columns}
-FROM
-(SELECT *
-    FROM POSTS
-    ORDER BY POSTS.DATE DESC) POST`;
+function postQuery(where = "", offset = 0, limit = config.posts_per_request, posts = "POSTS") {
+	return `
+	SELECT
+		${columns}
+	FROM ${posts} POST
+		${where}
+	ORDER BY DATE DESC
+	OFFSET ${offset}
+	LIMIT ${limit}`;
+}
 
-export default postQueryText;
-export { is_followed, is_blocked, user_columns, user_columns_extended,columns,is_following,user_json}
+export { postQuery, is_followed, is_blocked, user_columns, user_columns_extended, columns, is_following, user_json, bookmarked_by_user }

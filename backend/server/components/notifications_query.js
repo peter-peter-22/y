@@ -1,4 +1,4 @@
-import postQueryText,{user_json} from "./post_query.js";
+import {postQuery,user_json} from "./post_query.js";
 
 const users_column = `
 (
@@ -80,8 +80,7 @@ date as timestamp,
 null as users,
 TO_JSONB(FORMATTED_POSTS.*) as post
 
-FROM (${postQueryText}) as FORMATTED_POSTS
-WHERE REPLYING_TO_PUBLISHER = :user_id`;
+FROM (${postQuery("WHERE REPLYING_TO_PUBLISHER = :user_id")}) as FORMATTED_POSTS`;
 
 const columns = `
 TYPE,

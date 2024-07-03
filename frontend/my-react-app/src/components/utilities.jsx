@@ -478,7 +478,15 @@ function LinelessLink({ to, children }) {
     );
 }
 
-const OnlineList = forwardRef(({ entryMapper, getEntries, overrideEntryMapController, ...props }, ref) => {
+function defaultEntryMapController({ entries,EntryMapper }) {
+    return (
+        <List sx={{ p: 0 }} >
+            {entries.map((entry, index) => <EntryMapper key={index} index={index} entry={entry} />)}
+        </List>
+    );
+}
+
+const OnlineList = forwardRef(({ EntryMapper, getEntries, entryMapController: overrideEntryMapController }, ref) => {
     const [entries, setEntries] = useState([]);
     const listRef = useRef(null);
     const savedScrollRef = useRef(0);
@@ -508,7 +516,7 @@ const OnlineList = forwardRef(({ entryMapper, getEntries, overrideEntryMapContro
 
     async function FillEntries() {
         const from = entries.length;
-        const results = await GetEntries(from);
+        const results = await getEntries(from);
         //if no results recieved, then this is the end of the list, do not ask for more entries
         if (results.length === 0) {
             setEnd(true);
@@ -547,21 +555,13 @@ const OnlineList = forwardRef(({ entryMapper, getEntries, overrideEntryMapContro
         return () => { window.removeEventListener("scroll", Scrolling) };
     }, [])
 
-
-    async function GetEntries(from) {
-        return await getEntries(from);
-    }
-
-    const EntryMapper = entryMapper;
-
+    const EntryMapController = overrideEntryMapController ? overrideEntryMapController : defaultEntryMapController;
 
     return (
-        <>
-            <List sx={{ p: 0 }} ref={listRef}>
-                {entries.map((entry, index) => <EntryMapper key={index} index={index} entry={entry} />)}
-            </List>
+        <div ref={listRef}>
+            <EntryMapController entries={entries} EntryMapper={EntryMapper}/>
             {!end && <Loading />}
-        </>
+        </div>
     );
 });
 
@@ -639,4 +639,4 @@ function ListTitle(props) {
     );
 }
 
-export { AboveBreakpoint, ResponsiveSelector, TopMenu, ProfileText, FadeLink, TabSwitcher, UserName, UserKey, noOverflow, BoldLink, UserLink, UserKeyLink, DateLink, TextRow, ReplyingToUser as ReplyingTo, GetUserName, GetUserKey, logo, creation, ToCorner, CenterLogo, FollowDialog, GetProfilePicture, FollowButton, GetPostMedia, LinelessLink, OnlineList, Loading, SimplePopOver, formatNumber, TabSwitcherLinks, GetProfileBanner, GetProfileLink, ReplyingFromPost as ReplyingFrom, ToggleFollow, ToggleBlock, StyledLink, InheritLink, AvatarImageDisplayer, ProfilePic, NavMenu,ListTitle }
+export { AboveBreakpoint, ResponsiveSelector, TopMenu, ProfileText, FadeLink, TabSwitcher, UserName, UserKey, noOverflow, BoldLink, UserLink, UserKeyLink, DateLink, TextRow, ReplyingToUser as ReplyingTo, GetUserName, GetUserKey, logo, creation, ToCorner, CenterLogo, FollowDialog, GetProfilePicture, FollowButton, GetPostMedia, LinelessLink, OnlineList, Loading, SimplePopOver, formatNumber, TabSwitcherLinks, GetProfileBanner, GetProfileLink, ReplyingFromPost as ReplyingFrom, ToggleFollow, ToggleBlock, StyledLink, InheritLink, AvatarImageDisplayer, ProfilePic, NavMenu, ListTitle }

@@ -114,7 +114,7 @@ function TrendList() {
             <ListTitle>
                 Trends
             </ListTitle>
-            <OnlineList getEntries={GetEntries} entryMapper={TrendEntry} />
+            <OnlineList getEntries={GetEntries} EntryMapper={TrendEntry} />
         </Stack>
     );
 }
