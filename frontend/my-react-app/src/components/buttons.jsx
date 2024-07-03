@@ -6,7 +6,7 @@ import Avatar from '@mui/material/Avatar';
 import Stack from '@mui/material/Stack';
 import { Typography } from '@mui/material';
 import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ProfileText, ToCorner, GetUserKey, noOverflow, GetProfilePicture, SimplePopOver, AvatarImageDisplayer, ProfilePic } from '/src/components/utilities';
+import { ResponsiveSelector, ProfileText, ToCorner, GetUserKey, noOverflow, GetProfilePicture, SimplePopOver, AvatarImageDisplayer, ProfilePic,LinelessLink } from '/src/components/utilities';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
@@ -19,10 +19,11 @@ import axios from "axios";
 import { Endpoint } from "/src/communication.js";
 import { UserData } from '/src/App';
 import { ImageDisplayer } from "/src/components/media.jsx";
-import {  Modals } from "/src/components/modals";
-import {PostModalFrame} from "/src/components/posts";
+import { Modals } from "/src/components/modals";
+import { PostModalFrame } from "/src/components/posts";
 import { PostCreator } from '/src/components/post_creator';
-import {  ThrowIfNotAxios } from "/src/communication.js";
+import { ThrowIfNotAxios } from "/src/communication.js";
+import {BlueTextButton} from "/src/components/containers";
 
 const smallerButtons = "leftMenuIcons";
 const iconSize = "30px";
@@ -47,13 +48,13 @@ function BottomTabButton(props) {
     );
 }
 
-function SelectableButton({ selected, active_icon, inactive_icon, children,onClick }) {
+function SelectableButton({ selected, active_icon, inactive_icon, children, onClick }) {
     return (
         <Fab variant="extended" color="secondary_noBg" sx={{
             paddingLeft: "8px",
             paddingRight: "25px"
         }}
-        onClick={onClick}
+            onClick={onClick}
         >
             {selected ?
                 active_icon
@@ -90,9 +91,9 @@ function TopMenuButton(props) {
     );
 }
 
-function SelectableIcon({ size = "medium", active_icon, inactive_icon, selected ,onClick}) {
+function SelectableIcon({ size = "medium", active_icon, inactive_icon, selected, onClick }) {
     return (
-        <Fab size={size} color="secondary_noBg"  onClick={onClick}>
+        <Fab size={size} color="secondary_noBg" onClick={onClick}>
             {selected ?
                 active_icon :
                 inactive_icon
@@ -139,7 +140,7 @@ function PostButton(props) {
     function handlePost() {
         Modals[0].Show(
             <PostModalFrame>
-                <PostCreator onPost={posted}/>
+                <PostCreator onPost={posted} />
             </PostModalFrame>
         );
     }
@@ -173,9 +174,9 @@ function ProfileButton() {
         try {
             await axios.get(Endpoint("/logout"));
             UserData.update();
-        }  catch (err) {
-                ThrowIfNotAxios(err);
-            }
+        } catch (err) {
+            ThrowIfNotAxios(err);
+        }
     }
 
     return (
@@ -247,7 +248,17 @@ function WideButton({ style, ...props }) {
     );
 }
 
-function BlueTextButton(props) {
+function LinkButton({to,children}) {
+    return (
+        <LinelessLink to={to}>
+            <BlueTextButton>
+                {children}
+            </BlueTextButton>
+        </LinelessLink>
+    );
+}
+
+function BlueCenterButton(props) {
     return (
         <Typography variant="medium" color="primary" sx={{ textAlign: "center", cursor: "pointer", "&:hover": { textDecoration: "underline" } }} {...props}>
             {props.children}
@@ -255,4 +266,4 @@ function BlueTextButton(props) {
     );
 }
 
-export { TabButton, PostButton, ButtonSvg, ButtonIcon, ProfileButton, ResponsiveButton, SelectableButton, SelectableIcon, TopMenuButton, CornerButton, OutlinedButton, WideButton, BlueTextButton, OutlinedFab, BottomTabButton };
+export { TabButton, PostButton, ButtonSvg, ButtonIcon, ProfileButton, ResponsiveButton, SelectableButton, SelectableIcon, TopMenuButton, CornerButton, OutlinedButton, WideButton, OutlinedFab, BottomTabButton,LinkButton,BlueCenterButton };

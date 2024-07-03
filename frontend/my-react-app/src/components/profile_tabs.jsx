@@ -18,7 +18,7 @@ import ListItemText from '@mui/material/ListItemText';
 import { BoxList, BoxListOutlined } from '/src/components/containers';
 import IconButton from '@mui/material/IconButton';
 import Link from '@mui/material/Link';
-import { BlueTextButton, CornerButton } from "/src/components/buttons.jsx";
+import { CornerButton } from "/src/components/buttons.jsx";
 import { Grid } from '@mui/material';
 import Divider from '@mui/material/Divider';
 import TextField from '@mui/material/TextField';

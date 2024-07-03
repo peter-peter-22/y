@@ -31,6 +31,7 @@ import general from "./logged_in/general.js";
 import feed from "./logged_in/feed.js";
 import notifications from "./logged_in/notifications.js";
 import trends from "./logged_in/trends.js";
+import search from "./logged_in/search.js";
 
 const router = express.Router();
 
@@ -45,6 +46,7 @@ router.use("/general", general);
 router.use("/feed", feed);
 router.use("/notifications", notifications);
 router.use("/trends", trends);
+router.use("/search", search);
 
 async function UpdateUser(newUser, req) {
     return new Promise(resolve => {

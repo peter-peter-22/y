@@ -1,3 +1,10 @@
+
+const is_followed = (by = ":user_id") => `EXISTS (SELECT * FROM FOLLOWS WHERE FOLLOWER = ${by} AND FOLLOWED = USERS.ID)`;
+
+const is_following = (target = ":user_id") => `EXISTS (SELECT * FROM FOLLOWS WHERE FOLLOWED = ${target} AND FOLLOWER = USERS.ID)`;
+
+const is_blocked = `EXISTS (SELECT * FROM BLOCKS WHERE BLOCKER = :user_id AND BLOCKED = USERS.ID)`;
+
 const user_json = `
 JSONB_BUILD_OBJECT
 (
@@ -7,11 +14,16 @@ JSONB_BUILD_OBJECT
 	'picture',USERS.PICTURE
 )`;
 
-const is_followed = `EXISTS (SELECT * FROM FOLLOWS WHERE FOLLOWER = :user_id AND FOLLOWED = USERS.ID)`
-
-const is_following = `EXISTS (SELECT * FROM FOLLOWS WHERE FOLLOWED = :user_id AND FOLLOWER = USERS.ID)`
-
-const is_blocked = `EXISTS (SELECT * FROM BLOCKS WHERE BLOCKER = :user_id AND BLOCKED = USERS.ID)`
+const user_json_extended = `
+JSONB_BUILD_OBJECT
+(
+	'id',USERS.ID,
+	'username',USERS.USERNAME,
+	'name',USERS.NAME,
+	'picture',USERS.PICTURE,
+	'is_followed',${is_followed()},
+	'is_blocked',${is_blocked}
+)`;
 
 const user_columns = `
 id,
@@ -22,7 +34,7 @@ picture`;
 const user_columns_extended = `
 ${user_columns},
 ${is_blocked} AS IS_BLOCKED,
-${is_followed} AS IS_FOLLOWED
+${is_followed()} AS IS_FOLLOWED
 `
 
 const like_count = `
@@ -76,7 +88,7 @@ const view_count = `
 const publisher = `
 (
 	SELECT
-		${user_json} AS PUBLISHER
+		${user_json_extended} AS PUBLISHER
 	FROM USERS 
 		WHERE USERS.ID=POST.PUBLISHER
 )`;
@@ -84,7 +96,7 @@ const publisher = `
 const replied_user = `
 (
 	SELECT
-		${user_json} AS REPLIED_USER
+		${user_json_extended} AS REPLIED_USER
 	FROM USERS 
 		WHERE USERS.ID=POST.REPLYING_TO_PUBLISHER
 )`;
@@ -108,11 +120,11 @@ const columns = `
     ${publisher},
 	${replied_user}`;
 
-function postQuery(where = "", offset = 0, limit = config.posts_per_request, posts = "POSTS") {
+function postQuery(where = "", offset = 0, limit = config.posts_per_request, posts = "POSTS AS POST") {
 	return `
 	SELECT
 		${columns}
-	FROM ${posts} POST
+	FROM ${posts}
 		${where}
 	ORDER BY DATE DESC
 	OFFSET ${offset}

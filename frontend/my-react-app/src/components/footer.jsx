@@ -18,10 +18,10 @@ import ListItemText from '@mui/material/ListItemText';
 import { BoxList, BoxListOutlined, BlueTextButton } from '/src/components/containers';
 import IconButton from '@mui/material/IconButton';
 import Link from '@mui/material/Link';
-import { ResponsiveButton, ButtonIcon, ButtonSvg, TabButton, PostButton, ProfileButton, TopMenuButton, CornerButton } from "/src/components/buttons.jsx";
+import { ResponsiveButton, ButtonIcon, ButtonSvg, TabButton, PostButton, ProfileButton, TopMenuButton, CornerButton, LinkButton } from "/src/components/buttons.jsx";
 import { UserData } from "/src/App.jsx";
 import { NavLink } from "react-router-dom";
-import { Endpoint, FormatAxiosError ,ThrowIfNotAxios} from "/src/communication.js";
+import { Endpoint, FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
 import axios, { AxiosError } from 'axios';
 import links from "/src/components/footer_links";
 import Trends from "/src/components/trends";
@@ -137,11 +137,9 @@ function WhoToFollow() {
 
             {users ? users.map((user, index) => <FollowDialog user={user} key={index} />) : <Loading />}
 
-            <LinelessLink to="/add_followers">
-                <BlueTextButton>
-                    Show more
-                </BlueTextButton>
-            </LinelessLink>
+            <LinkButton to="/">
+                Show more
+            </LinkButton>
         </List>
     );
 }

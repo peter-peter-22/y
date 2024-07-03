@@ -18,7 +18,7 @@ import axios from "axios";
 import nodemailer from "nodemailer";
 import { Validator } from "node-input-validator";
 import { CheckV, CheckErr } from "./validations.js";
-import { postQuery, is_followed, is_blocked, user_columns, user_columns_extended } from "./post_query.js";
+import { postQuery, is_blocked, user_columns, user_columns_extended } from "./post_query.js";
 
 
 async function CountableToggleSimplified(req, res, table, unique_constraint_name, first_column_name = "user_id", second_column_name = "post_id") {
@@ -99,7 +99,7 @@ async function add_data_to_posts(posts, user_id, level = 0) {
         });
         if (reposted_ids.length !== 0) {
             //downloading the reposted posts and assigning them to their reposter
-            const reposted_posts = await GetPosts(user_id, " WHERE post.id=ANY(:reposted_ids)", { reposted_ids: reposted_ids }, 1, undefined, undefined, level);
+            const reposted_posts = await GetPosts(user_id, " WHERE post.id=ANY(:reposted_ids)", { reposted_ids: reposted_ids }, 999, undefined, undefined, level);
 
             posts.forEach(post => {
                 if (post.reposted_id !== null) {
@@ -155,7 +155,7 @@ async function post_list(req, res, add_validations, where, where_params, posts_q
 
     const { from } = req.body;
     const posts = await GetPosts(UserId(req), where, where_params, undefined, from, posts_query);
-    res.send(posts);
+    res.json(posts);
 }
 
 export { CountableToggleSimplified, CountableToggle, GetPosts, editable_query, updateViews, post_list };

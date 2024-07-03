@@ -40,7 +40,7 @@ export default () => {
           <Route path="/messages" element={<NotImplemented />} />
           <Route path="/premium" element={<NotImplemented />} />
           <Route path="/settings" element={<NotImplemented />} />
-          <Route path="/search" element={<Search />} />
+          <Route path="/search/*" element={<Search />} />
           <Route path="*" element={<Error />} />
         </Routes>
       </Box>

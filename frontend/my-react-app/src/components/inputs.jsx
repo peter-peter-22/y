@@ -1,16 +1,18 @@
 import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
 import { Icon } from '@mui/material';
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { IconButton } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { Endpoint, FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
 import axios from 'axios';
 import { useNavigate } from "react-router-dom";
+import { GetSearchText } from "/src/pages/search";
 
 function SearchField() {
     const [isFocused, setIsFocused] = React.useState(false);
-    const [getText, setText] = React.useState("");
+    const urlText = GetSearchText();
+    const [getText, setText] = React.useState(urlText?urlText:"");
     const navigate = useNavigate();
 
     const handleFocus = () => {
@@ -32,7 +34,8 @@ function SearchField() {
     }
 
     async function submit() {
-        navigate("/search?q="+getText);
+        if (getText.length > 0)
+            navigate("/search?q=" + getText);
     }
 
     return (<TextField
@@ -51,6 +54,7 @@ function SearchField() {
         onFocus={handleFocus}
         onBlur={handleBlur}
         onChange={handleChange}
+        value={getText}
         onKeyDown={handleKey}
         placeholder="Search"
         InputProps={{

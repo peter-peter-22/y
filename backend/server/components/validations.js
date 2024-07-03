@@ -37,16 +37,32 @@ function CheckErr(message) {
 }
 
 niv.extend('name', ({ value }) => {
+  if (!is_string(value))
+    return false;
+
   const length = value.length;
   return (length >= 3 && length <= 50);
 });
 niv.extend('username', ({ value }) => {
+  if (!is_string(value))
+    return false;
+
   const length = value.length;
   return (length > 0 && length <= 50);
 });
 niv.extend('password', ({ value }) => {
+  if (!is_string(value))
+    return false;
+
   const length = value.length;
   return (length >= 8 && length <= 50);
+});
+niv.extend('search', ({ value }) => {
+  if (!is_string(value))
+    return false;
+
+  const length = value.length;
+  return (length >= 1 && length <= 50);
 });
 niv.extend('mydate', ({ value }) => {
   return !isNaN(new Date(value));
@@ -58,24 +74,27 @@ niv.extend('datepast', ({ value }) => {
   return !moment.isAfter();
 });
 
+function is_string(val) {
+  return typeof val === "string";
+}
+
 function validate_image(file) {
-    validate_any(file,config.accepted_image_types);
+  validate_any(file, config.accepted_image_types);
 }
 
 function validate_video(file) {
-    validate_any(file,config.accepted_video_types);
+  validate_any(file, config.accepted_video_types);
 }
 
 function validate_media(file) {
-  validate_any(file,config.accepted_media_types);
+  validate_any(file, config.accepted_media_types);
 }
 
-function validate_any(file,accepted_formats)
-{
+function validate_any(file, accepted_formats) {
   if (file === undefined)
     CheckErr("failed to upload file");
   if (!accepted_formats.includes(file.mimetype))
     CheckErr(`invalid format "${file.mimetype}". accepted formats: ${accepted_formats.join(", ")}`);
 }
 
-export { CheckV, CheckErr, validate_image, validate_video,validate_media };
+export { CheckV, CheckErr, validate_image, validate_video, validate_media };

@@ -15,10 +15,10 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import { BoxList, BoxListOutlined } from '/src/components/containers';
+import { BoxList, BoxListOutlined, BlueTextButton } from '/src/components/containers';
 import IconButton from '@mui/material/IconButton';
 import Link from '@mui/material/Link';
-import { BlueTextButton, CornerButton } from "/src/components/buttons.jsx";
+import { CornerButton } from "/src/components/buttons.jsx";
 import { Grid } from '@mui/material';
 import Divider from '@mui/material/Divider';
 import TextField from '@mui/material/TextField';
@@ -44,6 +44,7 @@ import { ClickableSingleImageContainer } from "/src/components/posts";
 import { UserListExtended } from "/src/pages/follow_people.jsx";
 import { ProfileEditor } from "/src/components/profile_editor";
 import { Followers, Following, LikesOfUser, CommentsOfUser, PostsOfUser, MediaOfUser } from "/src/components/profile_tabs";
+import { BlueCenterButton } from "/src/components/buttons";
 
 function Profile() {
     const [user, setUser] = useState();
@@ -84,9 +85,8 @@ function Profile() {
     }
 }
 
-function ProfileInfo({ user }) {
+function ProfileInfo({ user, setLocalBlocked }) {
     const profileSize = "100px";
-    const sideMargins = 1.5;
     const moment = Moment(new Date(user.registration_date));
     const baseUrl = GetBaseUrl(user);
     const is_me = user.id === UserData.getData.user.id;
@@ -113,7 +113,7 @@ function ProfileInfo({ user }) {
                     transform: "translateY(-50%)",
                     top: "100%",
                     left: "0px",
-                    ml: sideMargins,
+                    ml: 1.5,
                     height: profileSize,
                     width: profileSize,
                     display: "flex",
@@ -122,7 +122,7 @@ function ProfileInfo({ user }) {
                     border: "solid white 3px",
                 }} />
             </Box>
-            <Box sx={{ mx: sideMargins, position: "relative" }}>
+            <Box sx={{ mx: 1.5, position: "relative" }}>
                 <Stack direction="column" spacing={1.5}>
                     <div>
                         <Typography variant="big_bold"><GetUserName user={user} /></Typography>
@@ -138,10 +138,10 @@ function ProfileInfo({ user }) {
                         </div>
                     </div>
                     <Typography variant="small_fade" >
-                        <TextRow>
+                        <Stack direction="row" spacing={0.5}>
                             <Icon style={{ fontSize: "1.5em" }}>calendar_month</Icon>
                             <span>Joined {moment.format('MMMM YYYY')}</span>
-                        </TextRow>
+                        </Stack>
                     </Typography>
 
                     {user.bio !== null &&
@@ -178,11 +178,10 @@ function ProfileInfo({ user }) {
     );
 }
 
-
 function Main({ user, setLocalBlocked }) {
     return (
         <Stack direction="column">
-            <ProfileInfo user={user} />
+            <ProfileInfo user={user} setLocalBlocked={setLocalBlocked} />
 
             {user.is_blocked ?
                 <NotVisible user={user} setLocalBlocked={setLocalBlocked} />
@@ -195,7 +194,7 @@ function Main({ user, setLocalBlocked }) {
 
 function NotVisible({ user, setLocalBlocked }) {
     return (
-        <Stack direction="column" sx={{ mx: sideMargins, my: 2, }}>
+        <Stack direction="column" sx={{ mx: 1.5, my: 2, }}>
             <Typography variant="big_fade" sx={{ textAlign: "center" }}>
                 You blocked this user.
             </Typography>
@@ -262,9 +261,9 @@ function UnblockButton(props) {
     }
 
     return (
-        <BlueTextButton onClick={Unblock}>
+        <BlueCenterButton onClick={Unblock}>
             Unblock
-        </BlueTextButton>
+        </BlueCenterButton>
     );
 }
 

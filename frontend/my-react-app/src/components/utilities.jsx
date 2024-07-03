@@ -633,7 +633,7 @@ function formatNumber(number) {
 
 function ListTitle(props) {
     return (
-        <Typography variant="big_bold" sx={{ my: 2, mx: 7 }}>
+        <Typography variant="big_bold" sx={{ my: 2, mx: 2 }}>
             {props.children}
         </Typography>
     );

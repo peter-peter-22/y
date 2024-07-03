@@ -35,7 +35,7 @@ router.post("/get_post", async (req, res) => {
     });
     await CheckV(v);
     const { id } = req.body;
-    const posts = await GetPosts(req, "WHERE post.id=:id", { id: id }, 1);
+    const posts = await GetPosts(UserId(req), "WHERE post.id=:id", { id: id }, 1);
     const post = posts[0];
     if (post === undefined)
         CheckErr("this post does not exists");
@@ -123,7 +123,7 @@ router.post("/follower_recommendations", async (req, res) => {
     const v = new Validator(req.body, { from: "required|integer" });
     await CheckV(v);
     const { from } = req.body;
-    const text = `SELECT ${user_columns} from USERS WHERE NOT ${is_followed} LIMIT :limit OFFSET :offset`;
+    const text = `SELECT ${user_columns}, FALSE as is_followed from USERS WHERE NOT ${is_followed()} LIMIT :limit OFFSET :offset`;
     const users = await db.query(named(text)({
         user_id: UserId(req),
         offset: from,
@@ -139,7 +139,7 @@ router.post("/followed_by_user", async (req, res) => {
     });
     await CheckV(v);
     const { from, id } = req.body;
-    const text = `SELECT ${user_columns},TRUE as is_followed from USERS WHERE ${is_followed} LIMIT :limit OFFSET :offset`;
+    const text = `SELECT ${user_columns},TRUE as is_followed from USERS WHERE ${(is_followed(":target_id"))} LIMIT :limit OFFSET :offset`;
     const users = await db.query(named(text)({
         user_id: UserId(req),
         offset: from,
@@ -159,9 +159,9 @@ router.post("/followers_of_user", async (req, res) => {
     const text = `
     SELECT 
         ${user_columns},
-        ${is_followed} as is_followed 
+        ${is_followed()} as is_followed 
     from USERS 
-        WHERE ${is_following} 
+        WHERE ${is_following(":target_id")} 
         LIMIT :limit 
         OFFSET :offset`;
     const users = await db.query(named(text)({
@@ -182,22 +182,15 @@ router.post("/likers_of_post", async (req, res) => {
     await CheckV(v);
     const { from, post_id } = req.body;
 
-    const user_liked_this_post = `
-    EXISTS(
-        SELECT * FROM LIKES
-        WHERE
-        USER_ID=USERS.ID
-        AND
-        POST_ID=:post_id
-    )`;
-
     const text = `
     SELECT 
     ${user_columns},
-    ${is_followed} AS IS_FOLLOWED,
-    USERS.BIO 
-    from USERS 
-    WHERE ${user_liked_this_post} 
+    ${is_followed()} AS IS_FOLLOWED,
+    USERS.BIO
+    FROM LIKES
+    LEFT JOIN USERS ON LIKES.USER_ID=USERS.ID
+    WHERE
+    POST_ID=:post_id
     LIMIT :limit OFFSET :offset`;
 
     const users = await db.query(named(text)({
@@ -234,14 +227,8 @@ router.post("/celebrities", async (req, res) => {
     res.send(users.rows);
 });
 
-
-router.post("/viewers_of_post", async (req, res) => {
-    await user_list(req, res, undefined, undefined, " WHERE IS_FOLLOWED=FALSE");
-});
-
-
 router.get("/follower_recommendations_preview", async (req, res) => {
-    const text = `SELECT ${user_columns} from USERS WHERE NOT ${is_followed} LIMIT 3`;
+    const text = `SELECT ${user_columns}, FALSE AS IS_FOLLOWED from USERS WHERE NOT ${is_followed()} LIMIT 3`;
     const users = await db.query(named(text)({ user_id: UserId(req) }));
     res.send(users.rows);
 });

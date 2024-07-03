@@ -18,7 +18,7 @@ import ListItemText from '@mui/material/ListItemText';
 import { BoxList, BoxListOutlined } from '/src/components/containers';
 import IconButton from '@mui/material/IconButton';
 import Link from '@mui/material/Link';
-import { ResponsiveButton, ButtonIcon, ButtonSvg, TabButton, PostButton, ProfileButton, TopMenuButton, CornerButton, BlueTextButton } from "/src/components/buttons.jsx";
+import { ResponsiveButton, ButtonIcon, ButtonSvg, TabButton, PostButton, ProfileButton, TopMenuButton, CornerButton } from "/src/components/buttons.jsx";
 import { Grid } from '@mui/material';
 import Divider from '@mui/material/Divider';
 import TextField from '@mui/material/TextField';
@@ -32,13 +32,12 @@ import axios from 'axios';
 import { Endpoint, FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
 import { ErrorText, Modals, ShowImage } from "/src/components/modals";
 import { useNavigate } from "react-router-dom";
-import { ManagePost } from "/src/components/manage_content_button.jsx";
 import { commentSections, BorderlessPost, RowWithPrefix, PostMedia ,QuotedFrame} from "/src/components/posts.jsx";
 import { fileToMedia } from "/src/components/media.jsx";
 import ContentEditable from 'react-contenteditable'
 import { findHashtags,findHtml } from "/src/components/sync.js";
 
-function PostCreator({ post, quoted, onPost, ...props }) {
+function PostCreator({ post, quoted, onPost }) {
     const [isFocused, setIsFocused] = React.useState(false);
     const [getText, setText] = React.useState("");
     const maxLetters = UserData.getData.maxLetters;
@@ -98,7 +97,7 @@ function PostCreator({ post, quoted, onPost, ...props }) {
             endpoint = "/member/create/comment";
         }
         else if (isQuote) {
-            formData.append("quoted", props.quoted.id);
+            formData.append("quoted", quoted.id);
             endpoint = "/member/create/quote";
         }
         else {
@@ -192,7 +191,7 @@ function PostCreator({ post, quoted, onPost, ...props }) {
 
             {isQuote &&
                 <QuotedFrame>
-                    <BorderlessPost post={props.quoted} />
+                    <BorderlessPost post={quoted} />
                 </QuotedFrame>
             }
 

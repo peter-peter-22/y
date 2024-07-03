@@ -18,7 +18,7 @@ import ListItemText from '@mui/material/ListItemText';
 import { BoxList, BoxListOutlined } from '/src/components/containers';
 import IconButton from '@mui/material/IconButton';
 import Link from '@mui/material/Link';
-import { ResponsiveButton, ButtonIcon, ButtonSvg, TabButton, PostButton, ProfileButton, TopMenuButton, CornerButton, BlueTextButton } from "/src/components/buttons.jsx";
+import { ResponsiveButton, ButtonIcon, ButtonSvg, TabButton, PostButton, ProfileButton, TopMenuButton, CornerButton, BlueCenterButton } from "/src/components/buttons.jsx";
 import { Grid } from '@mui/material';
 import Divider from '@mui/material/Divider';
 import TextField from '@mui/material/TextField';
@@ -34,14 +34,15 @@ import { Error, Modals, ShowImage, ShowSingleImage } from "/src/components/modal
 import { useNavigate } from "react-router-dom";
 import { ManagePost } from "/src/components/manage_content_button.jsx";
 import { ExamplePost, ExampleUser } from "/src/components/exampleData.js";
-import { PostCreator,findAndColorHashtags } from "/src/components/post_creator.jsx";
+import { PostCreator, findAndColorHashtags } from "/src/components/post_creator.jsx";
 import { BlockMedia } from "/src/components/media.jsx";
+import { BlueTextButton } from "/src/components/containers";
 
 const commentSections = {};
 
 function Prefix(props) {
     return (
-        <div style={{  display: "flex", justifyContent: "end", padding: "0px 10px", flexShrink: 0 }}>
+        <div style={{ display: "flex", justifyContent: "end", padding: "0px 10px", flexShrink: 0 }}>
             {props.children}
         </div>
     )
@@ -58,7 +59,7 @@ function RowWithPrefix(props) {
     );
 }
 
-function Post({post}) {
+function Post({ post }) {
     return (
         <ListBlockButton>
             <BorderlessPost post={post} />
@@ -66,8 +67,8 @@ function Post({post}) {
     );
 }
 
-function BorderlessPost(props) {
-    const original = props.post;
+function BorderlessPost({ post, hideButtons }) {
+    const original = post;
     const overriden = OverrideWithRepost(original);
 
     return (<OpenPostOnClick id={original.id}>
@@ -82,7 +83,7 @@ function BorderlessPost(props) {
                         <UserKey user={overriden.publisher} />
                         ·
                         <DateLink passed isoString={overriden.date} />
-                        <ManagePost post={original} />
+                        <ManagePost post={overriden} />
                     </Stack>
                     <ReplyingToPost post={overriden} />
                     <PostText post={overriden} />
@@ -98,7 +99,7 @@ function BorderlessPost(props) {
                         </QuotedFrame>
                     </Box>
                 }
-                {!props.hideButtons &&
+                {!hideButtons &&
                     <PostButtonRow post={overriden} />
                 }
             </Stack>
@@ -116,9 +117,9 @@ function BlockedComment(props) {
                 This comment belongs to a user you blocked.
             </Typography>
 
-            <BlueTextButton onClick={unHide}>
+            <BlueCenterButton onClick={unHide}>
                 Show
-            </BlueTextButton>
+            </BlueCenterButton>
         </ListBlockButton>
     );
 }
@@ -165,7 +166,7 @@ function PostFocused(props) {
                     <Stack direction="column" style={{ overflow: "hidden" }}>
                         <Stack direction="row" spacing={0.25} style={{ alignItems: "center" }}>
                             <ProfileText user={overriden.publisher} link />
-                            <ManagePost post={original} />
+                            <ManagePost post={overriden} />
                         </Stack>
                         <ReplyingToPost post={overriden} />
                     </Stack>
@@ -360,7 +361,7 @@ function CountableButton(post, initial_count, initial_active, url) {
     }
 }
 
-const HideablePostMemo=memo((props)=> {
+const HideablePostMemo = memo((props) => {
     const post = props.entry;
     const [hidden, setHidden] = useState(post.publisher.is_blocked)
     if (!hidden)
@@ -398,16 +399,15 @@ function PostList({ post, ...props }) {
     );
 }
 
-function SimplifiedPostList(props) {
+function SimplifiedPostList({ endpoint, params: additional_params, post }) {
     async function getPosts(from) {
         let params = { from: from };
-        const additional_params = props.params;
         if (additional_params)
             params = { ...params, ...additional_params };
-        const response = await axios.post(Endpoint(props.endpoint), params);
+        const response = await axios.post(Endpoint(endpoint), params);
         return response.data;
     }
-    return <PostList getPosts={getPosts} post={props.post} />;
+    return <PostList getPosts={getPosts} post={post} />;
 }
 
 function PostBottomIcon(props) {
@@ -522,7 +522,7 @@ function PostMedia(props) {
 }
 function PostText(props) {
     return (
-        <Typography variant="small" style={{ wordWrap: "break-word" }}  dangerouslySetInnerHTML={{__html: findAndColorHashtags(props.post.text)}}/>
+        <Typography variant="small" style={{ wordWrap: "break-word" }} dangerouslySetInnerHTML={{ __html: findAndColorHashtags(props.post.text) }} />
     );
 }
 
@@ -603,4 +603,4 @@ function OverrideWithRepost(post) {
 }
 
 
-export { Post, PostList, PostFocused, ListBlockButton, ListBlock, RowWithPrefix, PostButtonRow, WritePost, OverrideWithRepost, MediaContext, ClickableImage, PostModalFrame, OpenPostOnClick, OpenOnClick, SimplifiedPostList, commentSections, BorderlessPost, PostMedia, ClickableSingleImageContainer,QuotedFrame };
+export { Post, PostList, PostFocused, ListBlockButton, ListBlock, RowWithPrefix, PostButtonRow, WritePost, OverrideWithRepost, MediaContext, ClickableImage, PostModalFrame, OpenPostOnClick, OpenOnClick, SimplifiedPostList, commentSections, BorderlessPost, PostMedia, ClickableSingleImageContainer, QuotedFrame };

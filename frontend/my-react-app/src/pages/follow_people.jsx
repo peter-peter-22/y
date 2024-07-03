@@ -81,4 +81,4 @@ function UserListExtended({ url, params: additionalParams }) {
 
 
 export default FollowableList;
-export { UserListExtended };
+export { UserListExtended,FollowDialogExtended };
