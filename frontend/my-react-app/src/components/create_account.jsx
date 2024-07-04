@@ -593,11 +593,11 @@ function GetProps(props) {
     return [data, handleNext];
 }
 
-function WaitAfterChange(cb, timerRef) {
+function WaitAfterChange(cb, timerRef,wait=300) {
     clearTimeout(timerRef.current);
     timerRef.current = setTimeout(() => {
         cb();
-    }, 300);
+    }, wait);
 }
 
 const ProfilePicEditor = memo(({user,size : overwriteSize,onUploadFile})=> {

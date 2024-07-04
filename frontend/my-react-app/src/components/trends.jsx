@@ -18,12 +18,13 @@ import ListItemText from '@mui/material/ListItemText';
 import { BoxList, BoxListOutlined, BlueTextButton } from '/src/components/containers';
 import IconButton from '@mui/material/IconButton';
 import Link from '@mui/material/Link';
-import { ResponsiveButton, ButtonIcon, ButtonSvg, TabButton, PostButton, ProfileButton, TopMenuButton, CornerButton,LinkButton } from "/src/components/buttons.jsx";
+import { ResponsiveButton, ButtonIcon, ButtonSvg, TabButton, PostButton, ProfileButton, TopMenuButton, CornerButton, LinkButton } from "/src/components/buttons.jsx";
 import { UserData } from "/src/App.jsx";
 import { NavLink } from "react-router-dom";
 import { Endpoint, FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
 import axios, { AxiosError } from 'axios';
 import links from "/src/components/footer_links";
+import { GetSearchUrl } from "/src/pages/search.jsx";
 
 function TrendsPreview() {
     const [getEntries, setEntries] = useState();
@@ -59,7 +60,7 @@ function TrendsPreview() {
             {getEntries.map((entry, i) => <TrendEntry key={i} index={i} entry={entry} />)}
 
             <LinkButton to="/trends">
-                    Show more
+                Show more
             </LinkButton>
 
         </BoxList>
@@ -70,27 +71,29 @@ const TrendEntry = memo(({ entry, index }) => {
     const { hashtag, count } = entry;
     return (
         <ListItem disablePadding>
-            <ListItemButton>
-                <ListItemText>
-                    <Typography variant="small_fade">
-                        <div>
-                            <span>{index + 1}</span><span style={{ margin: "0px 4px" }}>·</span><span>Trending</span>
-                        </div>
-                    </Typography>
-                    <Typography variant="small_bold">
-                        <div>
-                            #{hashtag}
-                        </div>
-                    </Typography>
-                    <Typography variant="small_fade">
-                        <div>
-                            {formatNumber(count)} posts
-                        </div>
-                    </Typography>
+            <InheritLink to={GetSearchUrl(hashtag)} style={{width:"100%"}}>
+                <ListItemButton>
+                    <ListItemText>
+                        <Typography variant="small_fade">
+                            <div>
+                                <span>{index + 1}</span><span style={{ margin: "0px 4px" }}>·</span><span>Trending</span>
+                            </div>
+                        </Typography>
+                        <Typography variant="small_bold">
+                            <div>
+                                #{hashtag}
+                            </div>
+                        </Typography>
+                        <Typography variant="small_fade">
+                            <div>
+                                {formatNumber(count)} posts
+                            </div>
+                        </Typography>
 
-                    <CornerButton right>more_horiz</CornerButton>
-                </ListItemText>
-            </ListItemButton>
+                        <CornerButton right>more_horiz</CornerButton>
+                    </ListItemText>
+                </ListItemButton>
+            </InheritLink>
         </ListItem>
     );
 });

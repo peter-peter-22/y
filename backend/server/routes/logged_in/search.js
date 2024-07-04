@@ -6,18 +6,43 @@ import { CheckV, CheckErr } from "../../components/validations.js";
 
 const router = express.Router();
 
+const isOk="ILIKE '%' || :text || '%'";
+
 const searchUser = `
 SELECT 
     ${user_columns},
     ${is_followed()} as is_followed 
 FROM USERS
 WHERE
-    USERNAME ILIKE '%' || :text || '%'
+    USERNAME ${isOk}
     OR
-    NAME ILIKE '%' || :text || '%'`;
+    NAME ${isOk}`;
 
 const searchUserPreview = `${searchUser} LIMIT 3`;
 const searchUserList = `${searchUser} OFFSET :from LIMIT :limit`;
+
+const autoFillPerTopic=5;
+const searchAutofill=`
+(
+	select hashtag as value, 'Topics' as group from trends
+	where hashtag ${isOk}
+	order by trends.count desc
+    limit ${autoFillPerTopic}
+)
+union 
+(
+	select username as value, 'Usernames' as group from users
+	where username ${isOk}
+	order by follower_count desc
+    limit ${autoFillPerTopic}
+)
+union 
+(
+	select name as value, 'Names' as group from users
+	where name ${isOk}
+	order by follower_count desc
+    limit ${autoFillPerTopic}
+)`;
 
 router.post("/people_preview", async (req, res) => {
     const v = new Validator(req.body, {
@@ -60,6 +85,19 @@ router.post("/posts", async (req, res) => {
         },
         "HASHTAGS LEFT JOIN POSTS AS POST ON HASHTAGS.POST_ID=POST.ID"
     );
+});
+
+router.post("/autofill", async (req, res) => {
+    const v = new Validator(req.body, {
+        text: "required|search",
+    });
+    await CheckV(v);
+
+    const { text } = req.body;
+    const q = await db.query(named(searchAutofill)({
+        text: text,
+    }));
+    res.json(q.rows);
 });
 
 export default router;

@@ -260,7 +260,7 @@ function DateLink(props) {
 
 function TextRow(props) {
     return (
-        <Stack direction="row" spacing={0.5} style={{ overflow: "hidden", alignItems: "baseline", margin: 0 }}>
+        <Stack direction="row" spacing={0.5} sx={{ overflow: "hidden", alignItems: "baseline", m: 0, "& img,& icon": { alignSelf: "center" } }}>
             {props.children}
         </Stack>
     );
@@ -421,16 +421,19 @@ function GetProfilePicture(user) {
 function GetProfileBanner(user) {
     return new MediaFromFileData(user.banner);
 }
+
 const ProfilePic = memo(({ user, ...props }) => {
     return (
         <AvatarImageDisplayer media={GetProfilePicture(user)} {...props} />
     );
 }, (prevProps, nextProps) => prevProps.user === nextProps.user);
+
 function AvatarImageDisplayer({ media, ...props }) {
     const defa = "/images/default_image.jpg";
     return (
         <Avatar {...props}>
             <ClickableSingleImageContainer
+                disabled={props.disabled}
                 media={media}
                 style={{
                     width: "100%",
@@ -478,7 +481,7 @@ function LinelessLink({ to, children }) {
     );
 }
 
-function defaultEntryMapController({ entries,EntryMapper }) {
+function defaultEntryMapController({ entries, EntryMapper }) {
     return (
         <List sx={{ p: 0 }} >
             {entries.map((entry, index) => <EntryMapper key={index} index={index} entry={entry} />)}
@@ -559,7 +562,7 @@ const OnlineList = forwardRef(({ EntryMapper, getEntries, entryMapController: ov
 
     return (
         <div ref={listRef}>
-            <EntryMapController entries={entries} EntryMapper={EntryMapper}/>
+            <EntryMapController entries={entries} EntryMapper={EntryMapper} />
             {!end && <Loading />}
         </div>
     );

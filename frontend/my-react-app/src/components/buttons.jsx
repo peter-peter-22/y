@@ -185,7 +185,7 @@ function ProfileButton() {
                 above={
                     <Fab onClick={handleOpen} variant="extended" color="secondary_noBg" sx={{ height: size, borderRadius: size, width: "100%", p: 1, flexShrink: 0 }}>
                         <Stack direction="row" spacing={1} sx={{ width: "100%", height: "100%", alignItems: "center" }}>
-                            <ProfilePic user={user} />
+                            <ProfilePic user={user} disabled/>
                             <ProfileText user={user} />
                             <Icon fontSize="small">
                                 more_horiz
@@ -195,7 +195,7 @@ function ProfileButton() {
                 }
                 below={
                     <Fab onClick={handleOpen} color="secondary_noBg" sx={{ height: size, width: size, borderRadius: "100%", p: 0, flexShrink: 0 }}>
-                        <ProfilePic user={user} />
+                        <ProfilePic user={user} disabled/>
                     </Fab>
                 }
             />

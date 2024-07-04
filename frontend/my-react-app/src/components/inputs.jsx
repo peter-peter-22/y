@@ -1,19 +1,30 @@
+import React, { useEffect, useState, useRef,useMemo } from "react";
 import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
 import { Icon } from '@mui/material';
-import React, { useEffect, useState } from "react";
 import { IconButton } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { Endpoint, FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
 import axios from 'axios';
 import { useNavigate } from "react-router-dom";
-import { GetSearchText } from "/src/pages/search";
+import { GetSearchText,GetSearchUrl } from "/src/pages/search";
+import Autocomplete from '@mui/material/Autocomplete';
+
+const topicOrder = {
+    Topics: 0,
+    Usernames: 1,
+    Names: 2
+};
 
 function SearchField() {
     const [isFocused, setIsFocused] = React.useState(false);
     const urlText = GetSearchText();
-    const [getText, setText] = React.useState(urlText?urlText:"");
+    const [getText, setText] = React.useState(urlText ? urlText : "");
     const navigate = useNavigate();
+    const [auto, setAuto] = useState([]);
+    const textRef = useRef();
+    textRef.current = getText;
+    const lastTextRef = useRef();
 
     const handleFocus = () => {
         setIsFocused(true);
@@ -23,9 +34,12 @@ function SearchField() {
         setIsFocused(false);
     };
 
-    function handleChange(e) {
-        setText(e.target.value);
-    }
+    useEffect(() => {
+        if (lastTextRef.current !== getText) {
+            lastTextRef.current = getText;
+            UpdateAutofill(getText);
+        }
+    }, [getText]);
 
     function handleKey(e) {
         if (e.keyCode == 13) {
@@ -34,46 +48,80 @@ function SearchField() {
     }
 
     async function submit() {
-        if (getText.length > 0)
-            navigate("/search?q=" + getText);
+        window.requestAnimationFrame(() => {
+            const text = textRef.current;
+            if (text.length <= 0)
+                return;
+
+            navigate(GetSearchUrl(text));
+        });
     }
 
-    return (<TextField
-        variant="outlined"
-        sx={{
-            width: "100%",
-            height: "100%",
-            borderRadius: "100px",
-            my: 0.5,
-            backgroundColor: (isFocused ? "inherit" : "secondary_blue.main"),
-            'fieldset': {
-                borderWidth: 0,
-            },
-        }}
-        size="small"
-        onFocus={handleFocus}
-        onBlur={handleBlur}
-        onChange={handleChange}
-        value={getText}
-        onKeyDown={handleKey}
-        placeholder="Search"
-        InputProps={{
-            sx: { borderRadius: '999px', height: "100%" },
-            startAdornment: (
-                <InputAdornment position="start">
-                    <Icon color={isFocused ? "primary" : ""}>
-                        search
-                    </Icon>
-                </InputAdornment>
-            ),
-            endAdornment: (
-                isFocused && getText.length > 0 && <InputAdornment position="end">
-                    <Icon color="primary" >
-                        cancel
-                    </Icon>
-                </InputAdornment>
-            ),
-        }} />);
+    async function UpdateAutofill(val) {
+        if (val.length <= 0)
+            return;
+
+        try {
+            const res = await axios.post(Endpoint("/member/search/autofill"), {
+                text: val
+            });
+            const sorted = res.data.sort((a, b) => topicOrder[a.group] > topicOrder[b.group] ? 1 : -1);
+            setAuto(sorted);
+        }
+        catch (err) {
+            ThrowIfNotAxios(err);
+        }
+    }
+
+    return (
+        <Autocomplete
+            freeSolo
+            disableClearable
+
+            options={auto}
+            groupBy={(option) => option.group}
+            getOptionLabel={(option) => option.value}
+
+            inputValue={getText}
+            onInputChange={(event, newInputValue) => {
+                setText(newInputValue);
+            }}
+
+            renderInput={(params) => (
+                <TextField
+                    {...params}
+                    variant="outlined"
+                    sx={{
+                        width: "100%",
+                        height: "100%",
+                        borderRadius: "100px",
+                        my: 0.5,
+                        backgroundColor: (isFocused ? "inherit" : "secondary_blue.main"),
+                        'fieldset': {
+                            borderWidth: 0,
+                        },
+                    }}
+                    size="small"
+                    onFocus={handleFocus}
+                    onBlur={handleBlur}
+                    placeholder="Search"
+                    InputProps={{
+                        ...params.InputProps,
+                        onKeyDown: handleKey,
+                        type: 'search',
+                        sx: { borderRadius: '999px', height: "100%" },
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <Icon color={isFocused ? "primary" : ""}>
+                                    search
+                                </Icon>
+                            </InputAdornment>
+                        )
+                    }}
+                />
+            )}
+        />
+    );
 }
 
 const PlainTextField = React.forwardRef((props, ref) => {
@@ -129,7 +177,5 @@ const VisuallyHiddenInput = styled('input')({
     width: "100%",
     opacity: 0
 });
-
-
 
 export { SearchField, PlainTextField, PasswordFieldWithToggle, VisuallyHiddenInput };

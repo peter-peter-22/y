@@ -114,4 +114,9 @@ function Main({ text }) {
     );
 }
 
-export { GetSearchText };
+function GetSearchUrl(text)
+{
+    return "/search?q=" + text;
+}
+
+export { GetSearchText,GetSearchUrl };

@@ -436,8 +436,11 @@ function ClickableImage({ index, children }) {
 }
 
 
-function ClickableSingleImageContainer({ media, children, style }) {
+function ClickableSingleImageContainer({ media, children, style, disabled }) {
     function Clicked(e) {
+        if (disabled)
+            return;
+
         e.stopPropagation();
         if (media.type !== undefined)
             ShowSingleImage(media);
