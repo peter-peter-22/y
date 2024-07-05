@@ -48,6 +48,8 @@ const types = {
 };
 types.accepted_media_types = [...types.accepted_image_types, ...types.accepted_video_types];
 
+//config
+
 const config = {
     port: 3000,
     saltRounds: 10,
@@ -65,6 +67,8 @@ const config = {
     ...types
 }
 
+//nodemailer
+
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -72,6 +76,8 @@ const transporter = nodemailer.createTransport({
         pass: process.env.EMAIL_PASSWORD
     }
 });
+
+//pg
 
 const pgPool = new pg.Pool({
     user: process.env.PG_USER,
@@ -86,6 +92,8 @@ async function initialize() {
     await db.connect();
     global.db = db;
 }
+
+//global
 
 global.app = app;
 global.config = config;

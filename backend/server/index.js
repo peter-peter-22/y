@@ -19,13 +19,13 @@ const named = yesql.pg;
 import cors from "cors";
 import axios from "axios";
 import nodemailer from "nodemailer";
+
 import * as c from "./config.js";
 await c.initialize();
 import "./components/validations.js";
 
 import initialize_app from "./components/app_use.js";
 initialize_app();
-import { router as passport_routes } from "./components/passport.js";
 
 //routes
 import register from "./routes/register.js";
@@ -37,7 +37,11 @@ app.use("/user", user);
 import member from "./routes/logged_in.js";
 app.use("/member", member);
 
+import { router as passport_routes } from "./components/passport.js";
 app.use("/", passport_routes);
+
+import webpush from "./routes/web_push.js";
+app.use("/", webpush);
 
 //error
 app.use((err, req, res, next) => {
