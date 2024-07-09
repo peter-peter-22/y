@@ -35,11 +35,6 @@ function Page() {
           contents: <Following/>
         }
       ]}>
-        <IconButton size="small" sx={{mx:1}}>
-          <Icon fontSize="small">
-            settings
-          </Icon>
-        </IconButton>
       </TabSwitcher >
   )
 }

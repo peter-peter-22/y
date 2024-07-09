@@ -22,9 +22,9 @@ import Search from "/src/pages/search";
 
 export default () => {
   return (
-    <div style={{ display: "flex", flexDirection: "row", padding: 0, overflowY: "scroll", justifyContent: "center" }}>
+    <div style={{ display: "flex", flexDirection: "row", padding: 0, justifyContent: "center" }}>
       <Header />
-      <Box sx={{ maxWidth: "500px", flexGrow: 1, overflow: "hidden", borderLeft: 1, borderRight: 1, borderColor: "divider", boxSizing: "border-box",minHeight:"100vh" }}>
+      <Box sx={{ maxWidth: "500px", flexGrow: 1, width:"100%", borderLeft: 1, borderRight: 1, borderColor: "divider", boxSizing: "border-box",minHeight:"100vh" }}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/notifications" element={<Notifications />} />

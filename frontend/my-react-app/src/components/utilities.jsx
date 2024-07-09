@@ -9,7 +9,6 @@ import { Typography } from '@mui/material';
 import Fab from '@mui/material/Fab';
 import { Icon } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
-import { ThemeProvider } from '@mui/material';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -31,6 +30,7 @@ import Popover from '@mui/material/Popover';
 import Grid from '@mui/material/Grid';
 import { ImageDisplayer, Media, MediaDisplayer, mediaTypes, MediaFromFileData } from "/src/components/media.jsx";
 import { OpenOnClick, ClickableSingleImageContainer } from "/src/components/posts";
+import { alpha } from "@mui/material";
 
 const noOverflow = {
     whiteSpace: 'nowrap',
@@ -82,16 +82,28 @@ function AboveValue(value) {
 
 function TopMenu(props) {
     return (
-        <div style={{ position: "static" }}>
-            <NavMenu>
-                {props.children}
-            </NavMenu>
-        </div>);
+        <NavMenu style={{
+            position: "sticky",
+            top: 0,
+            zIndex: 1051
+        }}>
+            <div style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%",
+                backgroundColor: alpha(theme.palette.background.default, 0.8),
+                backdropFilter: "blur(5px)"
+            }} />
+            {props.children}
+        </NavMenu>
+    );
 }
 
 function NavMenu({ children, style }) {
     return (
-        <div style={{ height: "40px", ...style }}>
+        <div style={{ height: "50px", ...style }}>
             {children}
         </div>
     );
@@ -180,7 +192,7 @@ function TabSwitcher(props) {
     return (
         <>
             <TopMenu>
-                <Box sx={{ borderBottom: 1, borderColor: 'divider', height: "100%", width: "100%", display: "flex", alignItems: "center", flexDirection: "row" }}>
+                <Box sx={{ borderBottom: 1, borderColor: 'divider', height: "100%", width: "100%", display: "flex", alignItems: "center", flexDirection: "row",position:"relative" }}>
                     {props.tabs.map((tab, index) => {
                         return (
                             <TopMenuButton
@@ -195,7 +207,9 @@ function TabSwitcher(props) {
                     {props.children}
                 </Box>
             </TopMenu>
-            {selectedTab.contents}
+            <div style={{ position: "relative" }}>
+                {selectedTab.contents}
+            </div>
         </>
     );
 }

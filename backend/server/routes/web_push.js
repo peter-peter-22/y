@@ -10,22 +10,29 @@ webpush.setVapidDetails(
     process.env.WEB_PUSH_PRIVATE
 );
 
-router.post("/subscribe", (req, res) => {
+router.post("/subscribe", async (req, res) => {
     const subscription = req.body.subscription;
 
-    res.status(201).json({ status: "success" });
-
-    const notificationPayload = {
-        title: "New Notification",
-        body: "This is a new notification",
-        icon: "",
-        data: {
-            url: config.address_mode.client,
-        },
+    const payload = {
+        title: "test"
     };
+    await sendNotification(subscription, payload);
 
-    webpush.sendNotification(subscription, JSON.stringify(notificationPayload));
+    res.status(201).json({ status: "success" });
 });
+
+function sendNotification(subscription, payload) {
+    //  const notificationPayload = {
+    //      title: "New Notification",
+    //      body: "This is a new notification",
+    //      icon: "",
+    //      data: {
+    //          url: config.address_mode.client,
+    //      },
+    //  };
+
+    webpush.sendNotification(subscription, JSON.stringify(payload));
+}
 
 router.post("/send-notification", (req, res) => {
     const notificationPayload = {

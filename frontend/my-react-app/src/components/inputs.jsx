@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef,useMemo } from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
 import { Icon } from '@mui/material';
@@ -7,7 +7,7 @@ import { styled } from '@mui/material/styles';
 import { Endpoint, FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
 import axios from 'axios';
 import { useNavigate } from "react-router-dom";
-import { GetSearchText,GetSearchUrl } from "/src/pages/search";
+import { GetSearchText, GetSearchUrl } from "/src/pages/search";
 import Autocomplete from '@mui/material/Autocomplete';
 
 const topicOrder = {
@@ -35,6 +35,7 @@ function SearchField() {
     };
 
     useEffect(() => {
+        //update autofill when text changes and prevent duplicated requests
         if (lastTextRef.current !== getText) {
             lastTextRef.current = getText;
             UpdateAutofill(getText);
@@ -47,9 +48,11 @@ function SearchField() {
         }
     }
 
+
     async function submit() {
         window.requestAnimationFrame(() => {
             const text = textRef.current;
+
             if (text.length <= 0)
                 return;
 
@@ -58,7 +61,7 @@ function SearchField() {
     }
 
     async function UpdateAutofill(val) {
-        if (val.length <= 0)
+        if (!val || val.length <= 0)
             return;
 
         try {
@@ -75,12 +78,15 @@ function SearchField() {
 
     return (
         <Autocomplete
-            freeSolo
             disableClearable
-
+            freeSolo
             options={auto}
             groupBy={(option) => option.group}
-            getOptionLabel={(option) => option.value}
+            getOptionLabel={(option) => {
+                if (typeof option == "string")
+                    return option;
+                return option.value;
+            }}
 
             inputValue={getText}
             onInputChange={(event, newInputValue) => {
