@@ -239,23 +239,25 @@ router.post("/repost", async (req, res) => {
     async function onAdd(reposted_post_id, user_id) {
         //check if this post can be reposted
         //if the reposted post does not exists, the constraint will throw an error in the next query so it can be ignored here
-        const validation = await db.query(named("select exists(select * from posts where id=:post_id and repost is not null and text is null) as is_a_repost")({ post_id: reposted_post_id, user_id: user_id }));
-        if (validation.rowCount !== 0) {
-            const tests = validation.rows[0];
-            if (tests.is_a_repost)
-                throw ("a repost cannot be reposted");
-        }
+        //    const validation = await db.query(named("select exists(select * from posts where id=:post_id and repost is not null and text is null) as is_a_repost")({ post_id: reposted_post_id, user_id: user_id }));
+        //    if (validation.rowCount !== 0) {
+        //        const tests = validation.rows[0];
+        //        if (tests.is_a_repost)
+        //            throw ("a repost cannot be reposted");
+        //    }
 
         //insert
         try {
-            const getRepostedUser = `(SELECT publisher FROM POSTS WHERE id=:post_id)`;
             await db.query(named(`
-            INSERT INTO POSTS (PUBLISHER,REPOST,REPOSTED_FROM_USER)
-            SELECT :user_id,:post_id,${getRepostedUser} WHERE 
-            NOT EXISTS 
-            (SELECT * FROM POSTS WHERE PUBLISHER = :user_id AND REPOST = :post_id)
-            AND NOT EXISTS 
-            (SELECT * FROM POSTS WHERE ID = :post_id AND REPOST IS NOT NULL AND text IS NULL)`)({ user_id: user_id, post_id: reposted_post_id }));
+            INSERT INTO POSTS (PUBLISHER,REPOST)
+            VALUES (:user_id,:post_id)`)({
+                user_id: user_id, post_id: reposted_post_id
+            }));
+            //WHERE 
+            //NOT EXISTS 
+            //(SELECT * FROM POSTS WHERE PUBLISHER = :user_id AND REPOST = :post_id)
+            //AND NOT EXISTS 
+            //(SELECT * FROM POSTS WHERE ID = :post_id AND REPOST IS NOT NULL AND text IS NULL)
         }
         catch (err) {
             if (err.constraint === "posts_repost_fkey")
@@ -278,17 +280,7 @@ router.post("/repost", async (req, res) => {
 
 
 router.post("/like", async (req, res) => {
-    async function onAdd(key, user_id) {
-        const get_publisher_id = `(SELECT publisher from posts where id=:post_id)`;
-        const addLike = `INSERT INTO likes (user_id,post_id,publisher_id) VALUES (:user,:post_id, ${get_publisher_id}) ON CONFLICT ON CONSTRAINT unique_likes DO NOTHING`;
-        await db.query(named(addLike)({ user: user_id, post_id: key }));
-    }
-
-    async function onRemove(key, user_id) {
-        await db.query(named("DELETE FROM likes WHERE user_id=:user AND post_id=:post_id")({ user: user_id, post_id: key }));
-    }
-
-    await CountableToggle(req, res, onAdd, onRemove);
+    await CountableToggleSimplified(req, res, "likes", "unique_likes");
 });
 
 router.post("/bookmark", async (req, res) => {

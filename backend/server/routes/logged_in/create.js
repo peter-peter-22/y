@@ -53,11 +53,10 @@ router.post("/comment", async (req, res) => {
     //db
     async function commentToDatabase(baseCols, baseRefs, baseVals) {
         try {
-            const getRepliedPublisher = "(SELECT publisher FROM POSTS WHERE id=:replying_to)";
             const result = await db.query(named(`
             INSERT INTO posts 
-            (${baseCols},replying_to,replying_to_publisher) 
-            VALUES (${baseRefs},:replying_to,${getRepliedPublisher}) 
+            (${baseCols},replying_to) 
+            VALUES (${baseRefs},:replying_to) 
             RETURNING id`)
                 (
                     {
@@ -87,30 +86,29 @@ router.post("/quote", async (req, res) => {
 
     //check if the selected post can be quoted
     //if the quoted post does not exists, the constraint will throw an error in the next query so it can be ignored here
-    const quoted_post = await db.query(named(`
-        select exists
-        (
-            select * from posts 
-            where id=:post_id 
-            and 
-            repost is not null 
-            and 
-            text is null
-        ) 
-        as contains_repost`)
-        ({ post_id: quoted }));
-
-    if (quoted_post.rowCount !== 0 && quoted_post.rows[0].contains_repost)
-        CheckErr("a repost cannot be quoted");
+    // const quoted_post = await db.query(named(`
+    //     select exists
+    //     (
+    //         select * from posts 
+    //         where id=:post_id 
+    //         and 
+    //         repost is not null 
+    //         and 
+    //         text is null
+    //     ) 
+    //     as contains_repost`)
+    //     ({ post_id: quoted }));
+    //
+    // if (quoted_post.rowCount !== 0 && quoted_post.rows[0].contains_repost)
+    //     CheckErr("a repost cannot be quoted");
 
     //db
     async function quoteToDatabase(baseCols, baseRefs, baseVals) {
         try {
-            const getQuotedUser = `(SELECT publisher FROM POSTS WHERE id=:quoted)`;
             const result = await db.query(named(`
             INSERT INTO posts 
-            (${baseCols},repost,reposted_from_user) 
-            VALUES (${baseRefs},:quoted,${getQuotedUser}) 
+            (${baseCols},repost) 
+            VALUES (${baseRefs},:quoted) 
             RETURNING id`)
                 (
                     {
@@ -143,7 +141,7 @@ async function postAny(req, res, saveToDatabase) {
 
 
     //the values those are sent to all kinds of posts
-    const user_id=UserId(req);
+    const user_id = UserId(req);
     const baseCols = "PUBLISHER, TEXT";
     const baseRefs = ":user_id, :text";
     const baseVals = { user_id: user_id, text: text };

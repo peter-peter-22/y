@@ -93,13 +93,6 @@ const publisher = `
 		WHERE USERS.ID=POST.PUBLISHER
 )`;
 
-const replied_user = `
-(
-	SELECT
-		${user_json_extended} AS REPLIED_USER
-	FROM USERS 
-		WHERE USERS.ID=POST.REPLYING_TO_PUBLISHER
-)`;
 
 const columns = `
     POST.TEXT,
@@ -108,7 +101,6 @@ const columns = `
 	POST.DATE,
 	POST.REPOST AS REPOSTED_ID,
 	POST.REPLYING_TO,
-    POST.REPLYING_TO_PUBLISHER,
     ${view_count} AS VIEWS,
 	${like_count} AS LIKE_COUNT,
 	${liked_by_user} AS LIKED_BY_USER,
@@ -117,8 +109,7 @@ const columns = `
 	${bookmark_count} AS BOOKMARK_COUNT,
 	${bookmarked_by_user} AS BOOKMARKED_BY_USER,
     ${comment_count} AS COMMENT_COUNT,
-    ${publisher},
-	${replied_user}`;
+    ${publisher}`;
 
 function postQuery(where = "", offset = 0, limit = config.posts_per_request, posts = "POSTS AS POST") {
 	return `

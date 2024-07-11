@@ -6,7 +6,7 @@ import { CheckV, CheckErr } from "../../components/validations.js";
 
 const router = express.Router();
 
-const isOk="ILIKE '%' || :text || '%'";
+const isOk = "ILIKE '%' || :text || '%'";
 
 const searchUser = `
 SELECT 
@@ -21,8 +21,8 @@ WHERE
 const searchUserPreview = `${searchUser} LIMIT 3`;
 const searchUserList = `${searchUser} OFFSET :from LIMIT :limit`;
 
-const autoFillPerTopic=5;
-const searchAutofill=`
+const autoFillPerTopic = 5;
+const searchAutofill = `
 (
 	select hashtag as value, 'Topics' as group from trends
 	where hashtag ${isOk}
@@ -91,7 +91,9 @@ router.post("/autofill", async (req, res) => {
     const v = new Validator(req.body, {
         text: "required|search",
     });
-    await CheckV(v);
+    const matched = await v.check();
+    if (!matched)
+       return res.json([]);
 
     const { text } = req.body;
     const q = await db.query(named(searchAutofill)({
