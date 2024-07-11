@@ -44,14 +44,22 @@ import webpush from "./routes/web_push.js";
 app.use("/", webpush);
 
 //error
+const extra_debug = true;//log the errors those would not be logged normally
 app.use((err, req, res, next) => {
     if (!err.status) {
+        //error without status is unintended
         console.log("CAUGHT internal server error:");
         console.error(err)
         res.status(500).send("Internal server error: '" + err.message + "'");
     }
     else {
+        //error with status is normal
         res.status(err.status).send(err.message);
+
+        if (extra_debug) {
+            console.log("EXTRA DEBUG error:");
+            console.error(err)
+        }
     }
 });
 

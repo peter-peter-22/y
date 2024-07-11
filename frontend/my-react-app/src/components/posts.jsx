@@ -328,6 +328,7 @@ function PostModalFrame(props) {
 
 function CountableButton(post, initial_count, initial_active, url) {
     const [like, setLike] = useState(initial_active);
+    const last_updateRef = useRef(initial_active);
 
     function handleLike() {
         setLike((prev) => {
@@ -341,7 +342,12 @@ function CountableButton(post, initial_count, initial_active, url) {
                     setLike(prev);//server error, put back previous value
                 }
             }
-            updateServer(newValue);
+
+            //prevent duplicated requests
+            if (last_updateRef.current !== newValue) {
+                last_updateRef.current = newValue;
+                updateServer(newValue);
+            }
 
             return newValue;
         });

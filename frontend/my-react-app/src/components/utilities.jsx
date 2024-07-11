@@ -192,7 +192,7 @@ function TabSwitcher(props) {
     return (
         <>
             <TopMenu>
-                <Box sx={{ borderBottom: 1, borderColor: 'divider', height: "100%", width: "100%", display: "flex", alignItems: "center", flexDirection: "row",position:"relative" }}>
+                <Box sx={{ borderBottom: 1, borderColor: 'divider', height: "100%", width: "100%", display: "flex", alignItems: "center", flexDirection: "row", position: "relative" }}>
                     {props.tabs.map((tab, index) => {
                         return (
                             <TopMenuButton
@@ -391,10 +391,13 @@ function ToggleBlock(user, onChange) {
 }
 
 function ToggleOnlineBool(user, url, startingValue, onChange) {
-    const [get, set] = useState(Boolean(startingValue));
+    const start = Boolean(startingValue);
+    const [get, set] = useState(start);
+    const lastValueRef = useRef(start);
+
     const firstRef = useRef(true);
 
-    function toggle(e) {
+    function toggle() {
         set((prev) => {
             const newValue = !prev;
             update(newValue);
@@ -404,7 +407,13 @@ function ToggleOnlineBool(user, url, startingValue, onChange) {
     }
 
     async function update(newValue) {
-        try {
+        //prevent duplicated requiests
+        if (newValue === lastValueRef.current)
+            return;
+        else
+            lastValueRef.current = newValue;
+
+            try {
             await axios.post(Endpoint(url),
                 {
                     key: user.id,

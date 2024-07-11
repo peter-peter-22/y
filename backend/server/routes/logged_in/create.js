@@ -84,24 +84,6 @@ router.post("/quote", async (req, res) => {
     await CheckV(v);
     const { quoted } = req.body;
 
-    //check if the selected post can be quoted
-    //if the quoted post does not exists, the constraint will throw an error in the next query so it can be ignored here
-    // const quoted_post = await db.query(named(`
-    //     select exists
-    //     (
-    //         select * from posts 
-    //         where id=:post_id 
-    //         and 
-    //         repost is not null 
-    //         and 
-    //         text is null
-    //     ) 
-    //     as contains_repost`)
-    //     ({ post_id: quoted }));
-    //
-    // if (quoted_post.rowCount !== 0 && quoted_post.rows[0].contains_repost)
-    //     CheckErr("a repost cannot be quoted");
-
     //db
     async function quoteToDatabase(baseCols, baseRefs, baseVals) {
         try {

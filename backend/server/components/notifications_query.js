@@ -88,8 +88,7 @@ POST_ID,
 USER_COUNT,
 timestamp,
 ${users_column},
-${posts_column}
-`;
+${posts_column}`;
 
 const notifications_query = `
 SELECT * FROM(

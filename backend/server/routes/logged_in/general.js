@@ -237,15 +237,6 @@ router.post("/repost", async (req, res) => {
 
     //create repost
     async function onAdd(reposted_post_id, user_id) {
-        //check if this post can be reposted
-        //if the reposted post does not exists, the constraint will throw an error in the next query so it can be ignored here
-        //    const validation = await db.query(named("select exists(select * from posts where id=:post_id and repost is not null and text is null) as is_a_repost")({ post_id: reposted_post_id, user_id: user_id }));
-        //    if (validation.rowCount !== 0) {
-        //        const tests = validation.rows[0];
-        //        if (tests.is_a_repost)
-        //            throw ("a repost cannot be reposted");
-        //    }
-
         //insert
         try {
             await db.query(named(`
@@ -253,17 +244,12 @@ router.post("/repost", async (req, res) => {
             VALUES (:user_id,:post_id)`)({
                 user_id: user_id, post_id: reposted_post_id
             }));
-            //WHERE 
-            //NOT EXISTS 
-            //(SELECT * FROM POSTS WHERE PUBLISHER = :user_id AND REPOST = :post_id)
-            //AND NOT EXISTS 
-            //(SELECT * FROM POSTS WHERE ID = :post_id AND REPOST IS NOT NULL AND text IS NULL)
         }
         catch (err) {
             if (err.constraint === "posts_repost_fkey")
                 throw new Error("this post does not exists");
             if (err.constraint === "unique_repost") {
-                //ignore
+                //duplicated repost attempt, ignore
             } else
                 throw (err);
         }
@@ -271,7 +257,7 @@ router.post("/repost", async (req, res) => {
 
     //delete repost
     async function onRemove(reposted_post_id, user_id) {
-        await db.query(named("DELETE FROM posts WHERE publisher=:user_id AND repost=:post_id")({ user_id: user_id, post_id: reposted_post_id }));
+        await db.query(named("DELETE FROM posts WHERE publisher=:user_id AND repost=:post_id AND TEXT IS NULL")({ user_id: user_id, post_id: reposted_post_id }));
     }
 
     await CountableToggle(req, res, onAdd, onRemove);
