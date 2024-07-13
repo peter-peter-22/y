@@ -1,113 +1,120 @@
 import {postQuery,user_json} from "./post_query.js";
 
-const users_column = `
+const visible_users=`LEAST(10,NOTIFICATIONS.COUNT)`;
+
+const comment_column=`
 (
-	SELECT ARRAY_AGG
+	CASE WHEN
+		post_id IS NOT NULL 
+	THEN
+		to_jsonb
+		(
+			comments.*
+		)
+	END
+)`;
+
+const post_column=`
+(
+	CASE WHEN
+		post_id IS NOT NULL 
+	THEN
+		JSONB_BUILD_OBJECT
+		(
+			'id',POSTS.ID,
+			'text',POSTS.TEXT
+		)
+	END
+)`;
+
+const follow_users= `
+WHEN
+	type = 'follow' 
+THEN
+(
+	SELECT ARRAY
 	(
-		${user_json}
-	)
-	FROM USERS
-	WHERE USERS.ID = ANY(USER_IDS)
-)
-AS USERS`;
-
-const posts_column = `
-(
-	SELECT JSONB_BUILD_OBJECT(
-		'id',
-		POSTS.ID,
-		'text',
-		POSTS.TEXT
-	)
-	FROM POSTS
-	WHERE POSTS.ID = POST_ID
-)
-AS POST`;
-
-const repost_query = `
-SELECT 2 AS TYPE,
-	REPOST AS POST_ID,
-	MAX(COUNT) AS USER_COUNT,
-	ARRAY_AGG(PUBLISHER) AS USER_IDS,
-	MAX(timestamp) AS timestamp
-FROM
-	(SELECT PUBLISHER,
-			REPOST,
-			MAX(date) OVER W AS timestamp,
-			COUNT(*) OVER W,
-			ROW_NUMBER(*) OVER W
-		FROM POSTS
-		WHERE REPOSTED_FROM_USER = :user_id WINDOW W AS (PARTITION BY POSTS.REPOST) ) AS NUMBERED_ROWS
-WHERE ROW_NUMBER <= 3
-GROUP BY REPOST`;
-
-const likes_query = `
-SELECT 0 AS TYPE,
-	POST_ID,
-	MAX(COUNT) AS USER_COUNT,
-	ARRAY_AGG(USER_ID) AS USER_IDS,
-	MAX(timestamp) AS timestamp
-FROM
-	(SELECT USER_ID,
-			POST_ID,
-			MAX(timestamp) OVER W AS timestamp,
-			COUNT(*) OVER W,
-			ROW_NUMBER(*) OVER W
-		FROM LIKES
-		WHERE PUBLISHER_ID = :user_id WINDOW W AS (PARTITION BY LIKES.POST_ID) ) AS NUMBERED_ROWS
-WHERE ROW_NUMBER <= 3
-GROUP BY POST_ID`;
-
-const follows_query = `
-SELECT *
-FROM
-	(SELECT 4 AS TYPE,
-			NULL::int AS POST_ID,
-			COUNT(*) OVER() AS USER_COUNT,
-			ARRAY_AGG(FOLLOWED) AS USER_IDS,
-			MAX(timestamp) AS timestamp
+		SELECT
+			${user_json}
 		FROM FOLLOWS
-		WHERE FOLLOWED = :user_id
-		ORDER BY timestamp DESC
-		LIMIT 3) AS FOLLOWS`;
+			LEFT JOIN USERS ON FOLLOWS.FOLLOWER = USERS.ID
+		WHERE
+			TIMESTAMP >= NOTIFICATIONS.DATE
+			AND
+			FOLLOWED=NOTIFICATIONS.USER_ID
+		ORDER BY FOLLOWS.TIMESTAMP
+		LIMIT ${visible_users}
+	)
+)`;
 
-const comment_query = `
-SELECT
-1 AS TYPE,
-id as post_id,
-1 AS USER_COUNT,
-date as timestamp,
-null as users,
-TO_JSONB(FORMATTED_POSTS.*) as post
+const like_users=`
+WHEN
+	type = 'like' 
+THEN
+(
+	SELECT ARRAY
+	(
+		SELECT
+			${user_json}
+		FROM LIKES
+			LEFT JOIN USERS ON LIKES.USER_ID=USERS.ID
+		WHERE
+			TIMESTAMP >= NOTIFICATIONS.DATE
+			AND
+			POST_ID=NOTIFICATIONS.POST_ID
+		ORDER BY LIKES.TIMESTAMP
+		LIMIT ${visible_users}
+	)
+)`;
 
-FROM (${postQuery("WHERE REPLYING_TO_PUBLISHER = :user_id")}) as FORMATTED_POSTS`;
+const repost_users=`
+WHEN
+	type = 'repost' 
+THEN
+(
+	SELECT ARRAY
+	(
+		SELECT
+			${user_json}
+		FROM POSTS
+			LEFT JOIN USERS ON USERS.ID = POSTS.PUBLISHER
+		WHERE
+			REPOST=NOTIFICATIONS.POST_ID
+			AND
+			DATE>=NOTIFICATIONS.DATE
+		ORDER BY DATE
+		LIMIT ${visible_users}
+	)
+)`;
 
-const columns = `
-TYPE,
-POST_ID,
-USER_COUNT,
-timestamp,
-${users_column},
-${posts_column}`;
+const users_column=`
+(
+	CASE 
+	${follow_users}
+	${like_users}
+	${repost_users}
+	END
+)`;
 
-const notifications_query = `
-SELECT * FROM(
-    SELECT
-    ${columns}
-    FROM
-        (
-            ${repost_query}
-            UNION ALL 
-            ${likes_query}
-            UNION ALL 
-            ${follows_query}
-        ) 
-    AS LIKES_FOLLOWS_REPOSTS
-    WHERE LIKES_FOLLOWS_REPOSTS.USER_IDS IS NOT NULL
-UNION ALL ${comment_query}
-    ) AS NOTIFICATIONS
-ORDER BY timestamp DESC
-OFFSET :from LIMIT ${config.notifications_per_request}`;
-//"WHERE LIKES_FOLLOWS_REPOSTS.USER_IDS IS NOT NULL" is necessary because the likes, reposts, and follows are grouped, and they return an empty group if there are 0 entries. this row filters out the empty groups
+const notifications=`
+select
+	notifications.*,
+	${post_column} AS POST,
+	${comment_column} AS COMMENT,
+	${users_column} AS USERS
+from notifications
+	left join posts comments on comments.id=notifications.comment_id
+	left join posts on posts.id=notifications.post_id
+where user_id=:user_id
+order by notifications.date desc
+limit :limit offset :from`;
 
-export default notifications_query;
+const markAsRead=`
+UPDATE NOTIFICATIONS
+	SET SEEN=TRUE
+WHERE 
+	SEEN=FALSE
+	AND USER_ID=:user_id`;
+
+export default notifications;
+export {markAsRead};

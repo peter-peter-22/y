@@ -148,9 +148,10 @@ function OpenOnClick(props) {
 
 
 function ReplyingToPost({ post }) {
-    if (post.replied_user) {
-        return (<ReplyingFrom post={post} />);
-    }
+    //if (post.replied_user) {
+    //    return (<ReplyingFrom post={post} />);
+    //}
+    return "replying to: under construction";
 }
 
 function PostFocused(props) {
@@ -552,7 +553,7 @@ function RepostedOrQuoted(props) {
     if (post.repost || post.quote) {
         return (
             <RowWithPrefix
-                prefix={<Icon color="secondary" style={{ fontSize: "15px", alignSelf: "end" }}>loop</Icon>}
+                prefix={<Icon color="secondary" style={{ fontSize: "15px", alignSelf: "center" }}>loop</Icon>}
                 contents={
                     <FadeLink to={"/posts/" + post.reposted_post.id} style={{ fontWeight: "bold", overflow: "hidden" }}>
                         <TextRow>
@@ -579,7 +580,7 @@ function ListBlock(props) {
 
 function ListBlockButton(props) {
     return (
-        <ListItem disablePadding sx={{ borderBottom: 1, borderColor: "divider" }}>
+        <ListItem disablePadding sx={{ borderBottom: 1, borderColor: "divider" }} {...props}>
             <ListItemButton>
                 <Stack direction="column" style={{ overflow: "hidden", width: "100%" }}>
                     {props.children}

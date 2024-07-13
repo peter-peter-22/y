@@ -25,6 +25,7 @@ JSONB_BUILD_OBJECT
 	'is_blocked',${is_blocked}
 )`;
 
+//for session
 const user_columns = `
 id,
 username,

@@ -1,4 +1,4 @@
-import React, { useState, useEffect,memo } from "react";
+import React, { useState, useEffect, memo } from "react";
 import Stack from '@mui/material/Stack';
 import { Inside } from "./side_menus.jsx";
 import { TopMenu } from '/src/components/utilities';
@@ -26,17 +26,24 @@ import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import { theme } from "/src/styles/mui/my_theme";
 import { PlainTextField } from "/src/components/inputs";
-import { Post, PostList, PostFocused, ListBlockButton, ListBlock, RowWithPrefix, PostButtonRow, OpenPostOnClick, OpenOnClick } from "/src/components/posts";
+import { BorderlessPost, PostList, PostFocused, ListBlockButton, ListBlock, RowWithPrefix, PostButtonRow, OpenPostOnClick, OpenOnClick } from "/src/components/posts";
 import { Endpoint, FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
 import axios from 'axios';
 import { UserData } from "/src/App.jsx";
 
 const spacing = 1.5;
 
-function Like(props) {
-    const data = props.data;
+function NotificationBase({ seen, children }) {
     return (
-        <ListBlockButton>
+        <ListBlockButton selected={!seen}>
+            {children}
+        </ListBlockButton>
+    );
+}
+
+function Like({data}) {
+    return (
+        <NotificationBase seen={data.seen}>
             <OpenPostOnClick id={data.post_id}>
                 <Stack direction="column" spacing={spacing}>
                     <RowWithPrefix
@@ -57,7 +64,7 @@ function Like(props) {
                     />
                 </Stack>
             </OpenPostOnClick>
-        </ListBlockButton>
+        </NotificationBase>
     );
 }
 
@@ -68,11 +75,11 @@ function ReplyOrPost(post) {
         return "post";
 }
 
-function Follow(props) {
-    const data = props.data;
+function Follow({data}) {
+    console.log(data);
     const link = "/profile/" + data.users[0].id;
     return (
-        <ListBlockButton>
+        <NotificationBase seen={data.seen}>
             <OpenOnClick link={link}>
                 <Stack direction="column" spacing={spacing}>
                     <RowWithPrefix
@@ -90,17 +97,17 @@ function Follow(props) {
                     />
                 </Stack>
             </OpenOnClick>
-        </ListBlockButton>
+        </NotificationBase>
     );
 }
 
-function UserCounter(props) {
-    const data = props.data;
+function UserCounter({ data, after }) {
+    const count = data.count;
     return (
         <TextRow>
             <UserLink user={data.users[0]} />
-            {data.user_count > 1 && <Typography variant="small" style={{ flexShrink: 0, ...noOverflow }}>and {data.user_count - 1} others</Typography>}
-            <Typography variant="small" style={{ flexShrink: 0, ...noOverflow }}>{props.after}</Typography>
+            {count > 1 && <Typography variant="small" style={{ flexShrink: 0, ...noOverflow }}>and {count - 1} others</Typography>}
+            <Typography variant="small" style={{ flexShrink: 0, ...noOverflow }}>{after}</Typography>
         </TextRow>
     );
 }
@@ -113,10 +120,9 @@ function UserBalls(props) {
     );
 }
 
-function Repost(props) {
-    const data = props.data;
+function Repost({data}) {
     return (
-        <ListBlockButton>
+        <NotificationBase seen={data.seen}>
             <OpenPostOnClick id={data.post_id}>
                 <Stack direction="column" spacing={spacing}>
                     <RowWithPrefix
@@ -137,7 +143,7 @@ function Repost(props) {
                     />
                 </Stack>
             </OpenPostOnClick>
-        </ListBlockButton>
+        </NotificationBase>
     );
 }
 
@@ -147,11 +153,12 @@ function SmallIcon(props) {
     );
 }
 
-function Comment(props) {
-    const post = props.data.post;
-    post.replied_user = UserData.getData.user;
+function Comment({data}) {
+    const post = data.comment;
     return (
-        <Post post={post} />
+        <NotificationBase seen={data.seen}>
+            <BorderlessPost post={post} />
+        </NotificationBase>
     );
 }
 
@@ -161,14 +168,22 @@ function SmallAvatar({ user }) {
     );
 }
 
-const notificationTypes = {
-    like: 0,
-    reply: 1,
-    repost: 2,
-    follow: 4
+function InvalidNotification() {
+    return (
+        <ListItem>
+            invalid notification type
+        </ListItem>
+    );
 }
 
-const Notification = memo(({entry:data})=> {
+const notificationTypes = {
+    like: "like",
+    reply: "comment",
+    repost: "repost",
+    follow: "follow"
+}
+
+const Notification = memo(({ entry: data }) => {
     const type = data.type;
     switch (type) {
         case notificationTypes.like:
@@ -180,7 +195,7 @@ const Notification = memo(({entry:data})=> {
         case notificationTypes.follow:
             return <Follow data={data} />;
         default:
-            return "invalid notification type";
+            return <InvalidNotification />;
     }
 });
 
