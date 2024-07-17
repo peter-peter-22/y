@@ -27,6 +27,7 @@ import { GetPosts } from "../../components/general_components.js";
 import { GetMaxLetters } from "../user.js";
 import { uploadMedia } from "../../components/cloudinary_handler.js";
 import { findHashtags, findHtml } from "../../components/sync.js";
+import { notifyUser, commentPush,repostPush } from "../web_push.js";
 
 const router = express.Router();
 
@@ -53,17 +54,23 @@ router.post("/comment", async (req, res) => {
     //db
     async function commentToDatabase(baseCols, baseRefs, baseVals) {
         try {
+            //insert and return
             const result = await db.query(named(`
             INSERT INTO posts 
             (${baseCols},replying_to) 
             VALUES (${baseRefs},:replying_to) 
-            RETURNING id`)
-                (
-                    {
-                        ...baseVals,
-                        replying_to: replying_to
-                    }
-                ));
+            RETURNING id`
+            )(
+                {
+                    ...baseVals,
+                    replying_to: replying_to
+                }
+            ));
+
+            //send push
+            const comment_id = result.rows[0].id;
+            commentPush(req.user, comment_id, replying_to);
+
             return result;
         }
         catch (err) {
@@ -73,6 +80,7 @@ router.post("/comment", async (req, res) => {
         }
     }
 
+    //handle post
     await postAny(req, res, commentToDatabase);
 });
 
@@ -87,17 +95,23 @@ router.post("/quote", async (req, res) => {
     //db
     async function quoteToDatabase(baseCols, baseRefs, baseVals) {
         try {
+            //insert and return
             const result = await db.query(named(`
             INSERT INTO posts 
             (${baseCols},repost) 
             VALUES (${baseRefs},:quoted) 
-            RETURNING id`)
-                (
-                    {
-                        ...baseVals,
-                        quoted: quoted
-                    }
-                ));
+            RETURNING id`
+            )(
+                {
+                    ...baseVals,
+                    quoted: quoted
+                }
+            ));
+
+            //send push
+            const quote_id = result.rows[0].id;
+            repostPush(req.user, quote_id, quoted);
+
             return result;
         }
         catch (err) {

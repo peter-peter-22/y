@@ -4,8 +4,10 @@ import { Endpoint } from "/src/communication.js";
 const publicVapidKey = "BJAV4oJB0p26ezj0U7-GeTMgMIvCMpvqKflKjUzgSCPQuJ9Wklh36Sfbs5uWHbBaoK06GkVR9Ni1PtIjAiJrxiQ";
 
 //check for service worker
-if ("serviceWorker" in navigator) {
-    send().catch(err => console.error(err));
+function Ask() {
+    if ("serviceWorker" in navigator) {
+        send().catch(err => console.error(err));
+    }
 }
 
 //register SW, register push, send push
@@ -23,13 +25,14 @@ async function send() {
         userVisibleOnly: true,
         applicationServerKey: publicVapidKey
     });
-    console.log(subscription);
     console.log("push registered");
 
     //send push notification
-    console.log("sending push");
+    console.log("sending subscription to server");
     await axios.post(Endpoint("/subscribe"),
         { subscription: subscription }
     );
-    console.log("push sent");
+    console.log("subscription sent");
 }
+
+export default Ask;

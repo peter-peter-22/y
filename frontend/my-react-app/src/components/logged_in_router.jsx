@@ -17,6 +17,7 @@ import AddFollowers from "/src/pages/follow_people";
 import Profile from "/src/pages/profile_main";
 import PostEngagements from "/src/pages/post_engagements";
 import NotImplemented from "/src/pages/not_implemented";
+import Settings from "/src/pages/settings";
 import Trends from "/src/pages/trendlist";
 import Search from "/src/pages/search";
 
@@ -39,7 +40,7 @@ export default () => {
           <Route path="/explore" element={<NotImplemented />} />
           <Route path="/messages" element={<NotImplemented />} />
           <Route path="/premium" element={<NotImplemented />} />
-          <Route path="/settings" element={<NotImplemented />} />
+          <Route path="/settings" element={<Settings />} />
           <Route path="/search/*" element={<Search />} />
           <Route path="*" element={<Error />} />
         </Routes>

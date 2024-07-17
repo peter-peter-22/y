@@ -1,20 +1,17 @@
 console.log("service worker loaded");
 
 self.addEventListener("push", (event) => {
-    const data = event.data.json();
-    const title = data.title;
-    const body = data.body;
-    const icon = data.icon;
-    const url = data.data.url;
-
-    const notificationOptions = {
-        body: body,
-        tag: "unique-tag", // Use a unique tag to prevent duplicate notifications
-        icon: icon,
-        data: {
-            url: "http://localhost:3001", // Replace with the desired URL for redirecting user to the desired page
-        },
-    };
-
-    self.registration.showNotification(title, notificationOptions);
+    //get data from event
+    const data=event.data.json();
+    const { title, options } = data;
+    //show notification
+    self.registration.showNotification(title, options);
 });
+
+//on click, close the notification and open it's url
+self.addEventListener('notificationclick', function (event) {
+    event.notification.close();
+    event.waitUntil(
+        clients.openWindow(event.notification.data.url)
+    );
+})

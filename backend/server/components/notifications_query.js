@@ -1,8 +1,8 @@
-import {postQuery,user_json} from "./post_query.js";
+import { postQuery, user_json } from "./post_query.js";
 
-const visible_users=`LEAST(10,NOTIFICATIONS.COUNT)`;
+const visible_users = `LEAST(10,NOTIFICATIONS.COUNT)`;
 
-const comment_column=`
+const comment_column = `
 (
 	CASE WHEN
 		post_id IS NOT NULL 
@@ -14,7 +14,7 @@ const comment_column=`
 	END
 )`;
 
-const post_column=`
+const post_column = `
 (
 	CASE WHEN
 		post_id IS NOT NULL 
@@ -27,7 +27,7 @@ const post_column=`
 	END
 )`;
 
-const follow_users= `
+const follow_users = `
 WHEN
 	type = 'follow' 
 THEN
@@ -47,7 +47,7 @@ THEN
 	)
 )`;
 
-const like_users=`
+const like_users = `
 WHEN
 	type = 'like' 
 THEN
@@ -67,7 +67,7 @@ THEN
 	)
 )`;
 
-const repost_users=`
+const repost_users = `
 WHEN
 	type = 'repost' 
 THEN
@@ -87,7 +87,7 @@ THEN
 	)
 )`;
 
-const users_column=`
+const users_column = `
 (
 	CASE 
 	${follow_users}
@@ -96,20 +96,35 @@ const users_column=`
 	END
 )`;
 
-const notifications=`
+const columns =`
+notifications.*,
+${post_column} AS POST,
+${comment_column} AS COMMENT,
+${users_column} AS USERS`;
+
+const tables=`
+notifications
+left join posts comments on comments.id=notifications.comment_id
+left join posts on posts.id=notifications.post_id`;
+
+const selection = `	
 select
-	notifications.*,
-	${post_column} AS POST,
-	${comment_column} AS COMMENT,
-	${users_column} AS USERS
-from notifications
-	left join posts comments on comments.id=notifications.comment_id
-	left join posts on posts.id=notifications.post_id
+	${columns}
+from
+	${tables}
+where user_id=:user_id`;
+	
+
+const notifications = `
+select
+	${columns}
+from
+	${tables}
 where user_id=:user_id
 order by notifications.date desc
 limit :limit offset :from`;
 
-const markAsRead=`
+const markAsRead = `
 UPDATE NOTIFICATIONS
 	SET SEEN=TRUE
 WHERE 
@@ -117,4 +132,4 @@ WHERE
 	AND USER_ID=:user_id`;
 
 export default notifications;
-export {markAsRead};
+export { markAsRead };

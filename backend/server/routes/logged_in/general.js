@@ -7,11 +7,17 @@ import { Validator } from "node-input-validator";
 import { CheckV, CheckErr } from "../../components/validations.js";
 import { is_followed, is_blocked, user_columns, user_columns_extended, is_following, bookmarked_by_user } from "../../components/post_query.js";
 import { CountableToggleSimplified, CountableToggle, GetPosts, editable_query, updateViews, post_list } from "../../components/general_components.js";
+import { likePush, repostPush, followPush } from "../web_push.js";
 
 const router = express.Router();
 
 router.post("/follow_user", async (req, res) => {
     await CountableToggleSimplified(req, res, "follows", "follow_unique", "follower", "followed");
+
+    //send push
+    const { key, value } = req.body;
+    if (value)
+        followPush(req.user, key);
 });
 
 router.post("/block_user", async (req, res) => {
@@ -237,13 +243,18 @@ router.post("/repost", async (req, res) => {
 
     //create repost
     async function onAdd(reposted_post_id, user_id) {
-        //insert
         try {
-            await db.query(named(`
+            //insert
+            const add = await db.query(named(`
             INSERT INTO POSTS (PUBLISHER,REPOST)
-            VALUES (:user_id,:post_id)`)({
+            VALUES (:user_id,:post_id)
+            RETURNING ID`)({
                 user_id: user_id, post_id: reposted_post_id
             }));
+
+            //send push
+            const repost_id = add.rows[0].id;
+            repostPush(req.user, repost_id, reposted_post_id);
         }
         catch (err) {
             if (err.constraint === "posts_repost_fkey")
@@ -263,10 +274,13 @@ router.post("/repost", async (req, res) => {
     await CountableToggle(req, res, onAdd, onRemove);
 });
 
-
-
 router.post("/like", async (req, res) => {
     await CountableToggleSimplified(req, res, "likes", "unique_likes");
+
+    //send push about like
+    const { key, value } = req.body;
+    if (value)
+        likePush(req.user, key);
 });
 
 router.post("/bookmark", async (req, res) => {
