@@ -19,7 +19,7 @@ import IconButton from '@mui/material/IconButton';
 import { ResponsiveButton, ButtonIcon, ButtonSvg, TabButton, PostButton, ProfileButton, TopMenuButton } from "/src/components/buttons.jsx";
 import Moment from "moment";
 import { Endpoint, FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
-import { UserData } from "/src/App.jsx";
+import { UserData } from "/src/components/user_data";
 import { Error, Modals } from "/src/components/modals";
 import axios from 'axios';
 import Tooltip from '@mui/material/Tooltip';

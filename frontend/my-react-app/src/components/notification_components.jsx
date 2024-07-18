@@ -29,7 +29,7 @@ import { PlainTextField } from "/src/components/inputs";
 import { BorderlessPost, PostList, PostFocused, ListBlockButton, ListBlock, RowWithPrefix, PostButtonRow, OpenPostOnClick, OpenOnClick } from "/src/components/posts";
 import { Endpoint, FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
 import axios from 'axios';
-import { UserData } from "/src/App.jsx";
+import { UserData } from "/src/components/user_data";
 
 const spacing = 1.5;
 

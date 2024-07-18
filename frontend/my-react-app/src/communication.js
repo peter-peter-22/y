@@ -19,23 +19,21 @@ function Endpoint(endpoint) {
 
 function FormatAxiosError(error) {
     let text;
-    try {
-        text = error.response.data;
-    } catch {
+    const res = error.response;
+    if (typeof res.data == "string")
+        text = res.data
+    else
         text = error.message;
-    }
     return text;
 }
 
-function IsAxiosError(err)
-{
+function IsAxiosError(err) {
     return err.name === "AxiosError";
 }
 
-function ThrowIfNotAxios(err)
-{
-    if(!IsAxiosError(err))
+function ThrowIfNotAxios(err) {
+    if (!IsAxiosError(err))
         throw (err);
 }
 
-export { Endpoint, FormatAxiosError ,ThrowIfNotAxios,IsAxiosError}
+export { Endpoint, FormatAxiosError, ThrowIfNotAxios, IsAxiosError }

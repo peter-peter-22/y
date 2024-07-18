@@ -1,16 +1,20 @@
-import { postQuery, user_json } from "./post_query.js";
+import { postQuery, user_json,columns as post_columns } from "./post_query.js";
 
 const visible_users = `LEAST(10,NOTIFICATIONS.COUNT)`;
 
 const comment_column = `
 (
 	CASE WHEN
-		post_id IS NOT NULL 
+		comment_id IS NOT NULL 
 	THEN
-		to_jsonb
+	(
+		select to_jsonb(comment_sq) from
 		(
-			comments.*
-		)
+			select
+			${post_columns}
+		) 
+		as comment_sq
+	)
 	END
 )`;
 
@@ -96,24 +100,16 @@ const users_column = `
 	END
 )`;
 
-const columns =`
+const columns = `
 notifications.*,
 ${post_column} AS POST,
 ${comment_column} AS COMMENT,
 ${users_column} AS USERS`;
 
-const tables=`
+const tables = `
 notifications
-left join posts comments on comments.id=notifications.comment_id
+left join posts post on post.id=notifications.comment_id
 left join posts on posts.id=notifications.post_id`;
-
-const selection = `	
-select
-	${columns}
-from
-	${tables}
-where user_id=:user_id`;
-	
 
 const notifications = `
 select

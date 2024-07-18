@@ -41,7 +41,7 @@ import { Endpoint } from "/src/communication.js";
 import { styled } from '@mui/material/styles';
 import InputAdornment from '@mui/material/InputAdornment';
 import Dialog from '@mui/material/Dialog';
-import { UserData } from "/src/App.jsx";
+import { UserData } from "/src/components/user_data";
 import CreateAccount from "/src/components/create_account.jsx";
 import Login from "/src/components/login.jsx";
 import { Error, Modals } from "/src/components/modals";

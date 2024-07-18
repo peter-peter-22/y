@@ -41,7 +41,7 @@ import { Endpoint, FormatAxiosError, ThrowIfNotAxios } from "/src/communication.
 import { styled } from '@mui/material/styles';
 import InputAdornment from '@mui/material/InputAdornment';
 import Dialog from '@mui/material/Dialog';
-import { UserData } from "/src/App.jsx";
+import { UserData } from "/src/components/user_data";
 import { Error, Modals, ErrorText,SuccessModal } from "/src/components/modals";
 import { AlternativeLogin, GrowingLine, BigModal, Or, BottomButtonWithBorder, ByRegistering, ModalMargin, BigModalMargin } from "/src/components/no_user";
 import { RechaptaInput, validateEmail, EmailInput } from "/src/components/create_account";

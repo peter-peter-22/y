@@ -20,14 +20,16 @@ import cors from "cors";
 import axios from "axios";
 import nodemailer from "nodemailer";
 
+//initialize and set global variables
 import * as c from "./config.js";
 await c.initialize();
 import "./components/validations.js";
 
+//add middlewares
 import initialize_app from "./components/app_use.js";
 initialize_app();
 
-//routes
+//add routes to app
 import register from "./routes/register.js";
 app.use('/', register);
 

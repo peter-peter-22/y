@@ -26,7 +26,7 @@ import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import { theme } from "/src/styles/mui/my_theme";
 import { PlainTextField, PasswordFieldWithToggle, VisuallyHiddenInput } from "/src/components/inputs";
-import { UserData } from "/src/App.jsx";
+import { UserData } from "/src/components/user_data";
 import config from "/src/components/config.js";
 import axios from 'axios';
 import { Endpoint, FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
@@ -42,7 +42,7 @@ const commentSections = {};
 
 function Prefix(props) {
     return (
-        <div style={{ display: "flex", justifyContent: "end", padding: "0px 10px", flexShrink: 0 }}>
+        <div style={{ display: "flex", justifyContent: "end", padding: "0px 10px", flexShrink: 0,width:60 }}>
             {props.children}
         </div>
     )
@@ -90,20 +90,22 @@ function BorderlessPost({ post, hideButtons }) {
                     <PostMedia medias={overriden.mediaObjects} />
                 </Stack>
             } />
-        <RowWithPrefix contents={
-            <Stack direction="column" spacing={1} style={{ overflow: "hidden" }}>
-                {overriden.quote &&
-                    <Box sx={{ pt: 1 }}>
-                        <QuotedFrame>
-                            <BorderlessPost post={overriden.reposted_post} hideButtons={true} />
-                        </QuotedFrame>
-                    </Box>
-                }
-                {!hideButtons &&
-                    <PostButtonRow post={overriden} />
-                }
-            </Stack>
-        } />
+
+        <RowWithPrefix
+            contents={
+                <Stack direction="column" spacing={1} style={{ overflow: "hidden" }}>
+                    {overriden.quote &&
+                        <Box sx={{ pt: 1 }}>
+                            <QuotedFrame>
+                                <BorderlessPost post={overriden.reposted_post} hideButtons={true} />
+                            </QuotedFrame>
+                        </Box>
+                    }
+                    {!hideButtons &&
+                        <PostButtonRow post={overriden} key={overriden.id}/>
+                    }
+                </Stack>
+            } />
     </OpenPostOnClick>
     );
 }
@@ -148,10 +150,9 @@ function OpenOnClick(props) {
 
 
 function ReplyingToPost({ post }) {
-    //if (post.replied_user) {
-    //    return (<ReplyingFrom post={post} />);
-    //}
-    return "replying to: under construction";
+    if (post.replied_user) {
+        return (<ReplyingFrom post={post} />);
+    }
 }
 
 function PostFocused(props) {

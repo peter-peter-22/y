@@ -5,7 +5,7 @@ import { ResponsiveButton, ButtonIcon, ButtonSvg, TabButton, PostButton, Profile
 import { Inside } from "./side_menus.jsx";
 import { ThemeProvider } from '@mui/material';
 import { AboveBreakpoint, logo, SimplePopOver } from './utilities';
-import { UserData } from "/src/App.jsx";
+import { UserData } from "/src/components/user_data";
 import { GetProfileLink,InheritLink } from '/src/components/utilities';
 import Box from '@mui/material/Box';
 import List from '@mui/material/List';
@@ -13,6 +13,7 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
+import {GetNotificationCount} from "/src/components/notification_listener";
 
 function Tab(name, link, active_icon, inactive_icon) {
     this.active_icon = active_icon;
@@ -78,6 +79,7 @@ function Header() {
             <ButtonIcon icon="person" filled={false} />
         )
     };
+
     const alwaysHiddenTabs=[
          new Tab(
             "settings",
@@ -85,7 +87,10 @@ function Header() {
             <ButtonIcon icon="settings" filled={true} />,
             <ButtonIcon icon="settings" filled={false} />
         )
-    ]
+    ];
+
+    //get notification count
+    const notificationsCount=GetNotificationCount();
 
     const wideButtons = AboveBreakpoint("leftMenuIcons");
     const bigMargins = AboveBreakpoint("smallIconMargins");

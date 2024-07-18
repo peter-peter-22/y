@@ -38,10 +38,7 @@ ${is_blocked} AS IS_BLOCKED,
 ${is_followed()} AS IS_FOLLOWED
 `
 
-const like_count = `
-(SELECT COUNT(*)
-		FROM LIKES
-		WHERE LIKES.POST_ID = POST.ID)::INT`;
+const like_count = "like_count";
 
 const liked_by_user = `
 EXISTS
@@ -50,10 +47,7 @@ EXISTS
 		WHERE LIKES.POST_ID = POST.ID
 			AND USER_ID = :user_id)`;
 
-const repost_count = `
-(SELECT COUNT(*)
-		FROM POSTS REPOSTS
-		WHERE REPOSTS.REPOST = POST.ID)::INT`;
+const repost_count = "repost_count";
 
 const reposted_by_user = `
 EXISTS
@@ -63,10 +57,7 @@ EXISTS
 			AND REPOSTS.TEXT IS NULL
 			AND REPOSTS.PUBLISHER = :user_id)`;
 
-const bookmark_count = `
-(SELECT COUNT(*)
-		FROM BOOKMARKS BOOKMARK
-		WHERE BOOKMARK.POST_ID = POST.ID)::INT`;
+const bookmark_count = "bookmark_count";
 
 const bookmarked_by_user = `
 EXISTS
@@ -76,22 +67,24 @@ EXISTS
 	AND BOOKMARK.USER_ID = :user_id
 )`;
 
-const comment_count = `
-(SELECT COUNT(*)
-		FROM POSTS AS COMMENTS_TABLE
-		WHERE COMMENTS_TABLE.REPLYING_TO = POST.ID)::INT`;
+const comment_count = "post.comment_count";
 
-const view_count = `
-(SELECT COUNT(*)
-		FROM VIEWS
-		WHERE VIEWS.POST_ID = POST.ID)::INT`;
+const view_count = "post.view_count";
 
 const publisher = `
 (
 	SELECT
-		${user_json_extended} AS PUBLISHER
+		${user_json_extended}
 	FROM USERS 
 		WHERE USERS.ID=POST.PUBLISHER
+)`;
+
+const replied_user=`
+(
+	select
+		${user_json}
+	from users
+		where users.id=post.replying_to_user
 )`;
 
 
@@ -110,13 +103,14 @@ const columns = `
 	${bookmark_count} AS BOOKMARK_COUNT,
 	${bookmarked_by_user} AS BOOKMARKED_BY_USER,
     ${comment_count} AS COMMENT_COUNT,
-    ${publisher}`;
+    ${publisher} AS PUBLISHER,
+	${replied_user} as replied_user`;
 
-function postQuery(where = "", offset = 0, limit = config.posts_per_request, posts = "POSTS AS POST") {
+function postQuery(where = "", offset = 0, limit = config.posts_per_request, from = "POSTS AS POST") {
 	return `
 	SELECT
 		${columns}
-	FROM ${posts}
+	FROM ${from}
 		${where}
 	ORDER BY DATE DESC
 	OFFSET ${offset}

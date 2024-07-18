@@ -18,7 +18,7 @@ import { BoxList, BoxListOutlined, BlueTextButton } from '/src/components/contai
 import IconButton from '@mui/material/IconButton';
 import Link from '@mui/material/Link';
 import { ResponsiveButton, ButtonIcon, ButtonSvg, TabButton, PostButton, ProfileButton, TopMenuButton, CornerButton, LinkButton } from "/src/components/buttons.jsx";
-import { UserData } from "/src/App.jsx";
+import { UserData } from "/src/components/user_data";
 import { NavLink } from "react-router-dom";
 import { Endpoint, FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
 import axios, { AxiosError } from 'axios';

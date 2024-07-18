@@ -23,7 +23,7 @@ import * as pp from "../../components/passport.js";
 import { username_exists, selectable_username } from "../user.js";
 import { Validator } from "node-input-validator";
 import { CheckV, CheckErr, validate_image } from "../../components/validations.js";
-import notifications_query,{markAsRead} from "../../components/notifications_query.js";
+import notifications_query, { markAsRead } from "../../components/notifications_query.js";
 
 const router = express.Router();
 router.post("/get", async (req, res) => {
@@ -33,7 +33,7 @@ router.post("/get", async (req, res) => {
 	});
 	await CheckV(v);
 	const { from } = req.body;
-	const user_id=UserId(req);
+	const user_id = UserId(req);
 
 	//get the notifications
 	const notifs = await db.query(named(notifications_query)({
@@ -48,6 +48,27 @@ router.post("/get", async (req, res) => {
 	}));
 
 	res.json(notifs.rows);
+});
+
+router.get("/events", async (req, res) => {
+	//start stream
+	const headers = {
+		'Content-Type': 'text/event-stream',
+		'Connection': 'keep-alive',
+		'Cache-Control': 'no-cache'
+	};
+	res.writeHead(200, headers);
+
+	let counter = 0;
+	const interval = setInterval(() => {
+		const chunk = JSON.stringify({ chunk: counter++ });
+		res.write(`data: ${chunk}\n\n`);
+	}, 100);
+
+	res.on("close", () => {
+		clearInterval(interval);
+		res.end();
+	});
 });
 
 export default router;

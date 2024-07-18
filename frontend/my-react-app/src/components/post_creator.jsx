@@ -26,7 +26,7 @@ import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import { theme } from "/src/styles/mui/my_theme";
 import { PlainTextField, PasswordFieldWithToggle, VisuallyHiddenInput } from "/src/components/inputs";
-import { UserData } from "/src/App.jsx";
+import { UserData } from "/src/components/user_data";
 import config from "/src/components/config.js";
 import axios from 'axios';
 import { Endpoint, FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
@@ -146,7 +146,7 @@ function PostCreator({ post, quoted, onPost }) {
             {isComment && isFocused &&
                 <Box sx={{ my: 1 }} >
                     <RowWithPrefix contents={
-                        <ReplyingTo post={post} />
+                        <ReplyingTo user={post.publisher} />
                     } />
                 </Box>
             }

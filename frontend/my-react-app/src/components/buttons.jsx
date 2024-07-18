@@ -17,7 +17,7 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import axios from "axios";
 import { Endpoint } from "/src/communication.js";
-import { UserData } from '/src/App';
+import { UserData } from '/src/components/user_data';
 import { ImageDisplayer } from "/src/components/media.jsx";
 import { Modals } from "/src/components/modals";
 import { PostModalFrame } from "/src/components/posts";
