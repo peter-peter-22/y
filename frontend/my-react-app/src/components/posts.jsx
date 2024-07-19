@@ -180,7 +180,7 @@ function PostFocused(props) {
                 <Stack direction="row" spacing={0.5} sx={{ alignItems: "baseline", my: 1 }}>
                     <DateLink passed isoString={overriden.date} />
                     <Typography variant="small_fade">·</Typography>
-                    <Typography variant="small_bold">{formatNumber(overriden.views)}</Typography>
+                    <Typography variant="small_bold">{formatNumber(overriden.view_count)}</Typography>
                     <Typography variant="small_fade">Views</Typography>
                 </Stack>
             </Stack>
@@ -273,7 +273,7 @@ function PostButtonRow(props) {
                 active={liked}
                 onClick={handleLike} />
 
-            <PostBottomIcon text={formatNumber(post.views)}
+            <PostBottomIcon text={formatNumber(post.view_count)}
                 active_icon="align_vertical_bottom"
                 inactive_icon="align_vertical_bottom"
                 active_color="primary.main" />

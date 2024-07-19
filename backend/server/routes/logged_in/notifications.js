@@ -50,7 +50,7 @@ router.post("/get", async (req, res) => {
 	res.json(notifs.rows);
 });
 
-router.get("/events", async (req, res) => {
+router.get("/events", (req, res) => {
 	//start stream
 	const headers = {
 		'Content-Type': 'text/event-stream',
@@ -58,17 +58,33 @@ router.get("/events", async (req, res) => {
 		'Cache-Control': 'no-cache'
 	};
 	res.writeHead(200, headers);
+	const user_id=UserId(req);
 
-	let counter = 0;
-	const interval = setInterval(() => {
-		const chunk = JSON.stringify({ chunk: counter++ });
+	//send count to client
+	async function sendCount() {
+		//get unread notification count
+		const count = await countUnread(user_id);
+	
+		//write to stream
+		const chunk = JSON.stringify({ chunk: count });
 		res.write(`data: ${chunk}\n\n`);
-	}, 100);
+	}
+
+	//send on connect
+	sendCount();
+
+	//continuusly send the count of the unread notifications 
+	const interval = setInterval(sendCount, 5000);
 
 	res.on("close", () => {
 		clearInterval(interval);
 		res.end();
 	});
 });
+
+async function countUnread(user_id) {
+	const q = await db.query("select count(*) from notifications where user_id=$1 and seen=false", [user_id]);
+	return q.rows[0].count;
+}
 
 export default router;

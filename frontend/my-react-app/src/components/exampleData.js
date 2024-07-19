@@ -17,7 +17,7 @@ function ExamplePost() {
         date: new Date("2024-01-01").toISOString(),
         text: "post text",
         images: [default_image],
-        views: 9999999,
+        view_count: 9999999,
         repost_count: 353,
         like_count: 4242,
         comment_count: 1234423,

@@ -30,7 +30,7 @@ const iconSize = "30px";
 
 const TabButton = forwardRef((props, ref) => {
     return (
-        <NavLink to={props.to} ref={ref} >
+        <NavLink to={props.to} ref={ref} style={{position:"relative",zIndex:0}}>
             {({ isActive }) => (
                 <ResponsiveButton selected={isActive} {...props}>{props.children}</ResponsiveButton>
             )}

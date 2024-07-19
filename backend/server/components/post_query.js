@@ -47,8 +47,6 @@ EXISTS
 		WHERE LIKES.POST_ID = POST.ID
 			AND USER_ID = :user_id)`;
 
-const repost_count = "repost_count";
-
 const reposted_by_user = `
 EXISTS
 	(SELECT *
@@ -57,8 +55,6 @@ EXISTS
 			AND REPOSTS.TEXT IS NULL
 			AND REPOSTS.PUBLISHER = :user_id)`;
 
-const bookmark_count = "bookmark_count";
-
 const bookmarked_by_user = `
 EXISTS
 (
@@ -66,10 +62,6 @@ EXISTS
 	WHERE BOOKMARK.POST_ID = POST.ID
 	AND BOOKMARK.USER_ID = :user_id
 )`;
-
-const comment_count = "post.comment_count";
-
-const view_count = "post.view_count";
 
 const publisher = `
 (
@@ -95,14 +87,14 @@ const columns = `
 	POST.DATE,
 	POST.REPOST AS REPOSTED_ID,
 	POST.REPLYING_TO,
-    ${view_count} AS VIEWS,
-	${like_count} AS LIKE_COUNT,
+	POST.VIEW_COUNT,
+	POST.LIKE_COUNT,
+	POST.REPOST_COUNT,
+	POST.BOOKMARK_COUNT,
+    POST.COMMENT_COUNT,
 	${liked_by_user} AS LIKED_BY_USER,
-	${repost_count} AS REPOST_COUNT,
 	${reposted_by_user} AS REPOSTED_BY_USER,
-	${bookmark_count} AS BOOKMARK_COUNT,
 	${bookmarked_by_user} AS BOOKMARKED_BY_USER,
-    ${comment_count} AS COMMENT_COUNT,
     ${publisher} AS PUBLISHER,
 	${replied_user} as replied_user`;
 

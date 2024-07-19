@@ -6,20 +6,41 @@ import { Inside } from "./side_menus.jsx";
 import { ThemeProvider } from '@mui/material';
 import { AboveBreakpoint, logo, SimplePopOver } from './utilities';
 import { UserData } from "/src/components/user_data";
-import { GetProfileLink,InheritLink } from '/src/components/utilities';
+import { GetProfileLink, InheritLink } from '/src/components/utilities';
 import Box from '@mui/material/Box';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import {GetNotificationCount} from "/src/components/notification_listener";
+import { DisplayNotificationCount } from "/src/components/notification_listener";
 
-function Tab(name, link, active_icon, inactive_icon) {
+function Tab(name, link, active_icon, inactive_icon, element = BasicTab) {
     this.active_icon = active_icon;
     this.inactive_icon = inactive_icon;
     this.name = name;
     this.link = link;
+    this.element = element;
+}
+
+function BasicTab({ tab }) {
+    return (
+        <TabButton
+            to={tab.link}
+            active_icon={tab.active_icon}
+            inactive_icon={tab.inactive_icon}
+        >
+            {tab.name}
+        </TabButton>
+    );
+}
+
+function NotificationsTab({ tab }) {
+    return (
+       <DisplayNotificationCount>
+       <BasicTab tab={tab} />
+       </DisplayNotificationCount>
+    );
 }
 
 function Header() {
@@ -40,7 +61,8 @@ function Header() {
             "notifications",
             "/notifications",
             <ButtonIcon icon="notifications" filled={true} />,
-            <ButtonIcon icon="notifications" filled={false} />
+            <ButtonIcon icon="notifications" filled={false} />,
+            NotificationsTab
         ),
         messages: new Tab(
             "messages",
@@ -80,17 +102,14 @@ function Header() {
         )
     };
 
-    const alwaysHiddenTabs=[
-         new Tab(
+    const alwaysHiddenTabs = [
+        new Tab(
             "settings",
             "/settings",
             <ButtonIcon icon="settings" filled={true} />,
             <ButtonIcon icon="settings" filled={false} />
         )
     ];
-
-    //get notification count
-    const notificationsCount=GetNotificationCount();
 
     const wideButtons = AboveBreakpoint("leftMenuIcons");
     const bigMargins = AboveBreakpoint("smallIconMargins");
@@ -105,7 +124,7 @@ function Header() {
         const tabsArray = Object.values(tabs);
 
         function MoreButton() {
-            const { handleOpen,handleClose, ShowPopover } = SimplePopOver();
+            const { handleOpen, handleClose, ShowPopover } = SimplePopOver();
             return (
                 <div>
                     <ResponsiveButton
@@ -121,7 +140,7 @@ function Header() {
                         <List>
                             {invisibleTabs.map((tab, i) =>
                                 <ListItem disablePadding key={i}>
-                                    <InheritLink to={tab.link} style={{width:"100%"}} onClick={handleClose}>
+                                    <InheritLink to={tab.link} style={{ width: "100%" }} onClick={handleClose}>
                                         <ListItemButton>
                                             <ListItemIcon>
                                                 {tab.inactive_icon}
@@ -172,10 +191,10 @@ function Header() {
 
         //split the tabs into 2 groups based on the tabcount
         const visibleTabs = tabsArray.slice(0, tabCount);
-        let invisibleTabs = tabsArray.slice(tabCount, tabsArray.length );
+        let invisibleTabs = tabsArray.slice(tabCount, tabsArray.length);
 
         //add the always hidden tabs
-        invisibleTabs=[...invisibleTabs,...alwaysHiddenTabs];
+        invisibleTabs = [...invisibleTabs, ...alwaysHiddenTabs];
 
         return (
             <div style={{ width: width, height: "100vh", flexShrink: 0 }}>
@@ -192,15 +211,10 @@ function Header() {
                                     />
 
                                     {visibleTabs.map(((tab, index) =>
-                                        <TabButton
-                                            to={tab.link}
-                                            active_icon={tab.active_icon}
-                                            inactive_icon={tab.inactive_icon}
-                                            {...tab.props}
+                                        <tab.element
+                                            tab={tab}
                                             key={index}
-                                        >
-                                            {tab.name}
-                                        </TabButton>
+                                        />
                                     ))}
 
                                     <MoreButton />
