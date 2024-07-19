@@ -8,6 +8,7 @@ import { CheckV, CheckErr } from "../../components/validations.js";
 import { is_followed, is_blocked, user_columns, user_columns_extended, is_following, bookmarked_by_user } from "../../components/post_query.js";
 import { CountableToggleSimplified, CountableToggle, GetPosts, editable_query, updateViews, post_list } from "../../components/general_components.js";
 import { likePush, repostPush, followPush } from "../web_push.js";
+import { prepareEmailNotification } from "../../components/email_notifications.js";
 
 const router = express.Router();
 
@@ -16,8 +17,10 @@ router.post("/follow_user", async (req, res) => {
 
     //send push
     const { key, value } = req.body;
-    if (value)
+    if (value) {
         followPush(req.user, key);
+        prepareEmailNotification(UserId(req));
+    }
 });
 
 router.post("/block_user", async (req, res) => {
@@ -255,6 +258,7 @@ router.post("/repost", async (req, res) => {
             //send push
             const repost_id = add.rows[0].id;
             repostPush(req.user, repost_id, reposted_post_id);
+            prepareEmailNotification(user_id);
         }
         catch (err) {
             if (err.constraint === "posts_repost_fkey")
@@ -279,8 +283,10 @@ router.post("/like", async (req, res) => {
 
     //send push about like
     const { key, value } = req.body;
-    if (value)
+    if (value) {
         likePush(req.user, key);
+        prepareEmailNotification(UserId(req));
+    }
 });
 
 router.post("/bookmark", async (req, res) => {
