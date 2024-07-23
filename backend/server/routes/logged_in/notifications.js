@@ -88,3 +88,4 @@ async function countUnread(user_id) {
 }
 
 export default router;
+export {countUnread};

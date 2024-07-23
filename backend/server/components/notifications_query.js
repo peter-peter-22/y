@@ -127,5 +127,13 @@ WHERE
 	SEEN=FALSE
 	AND USER_ID=:user_id`;
 
+const email_notifications=`
+update users
+	set last_email_notifications=unread_notification_count
+where unread_notification_count>0
+	and last_email_notifications!=unread_notification_count
+returning
+	name,unread_notification_count,email`;
+
 export default notifications;
-export { markAsRead };
+export { markAsRead,email_notifications };

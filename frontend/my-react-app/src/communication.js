@@ -20,7 +20,7 @@ function Endpoint(endpoint) {
 function FormatAxiosError(error) {
     let text;
     const res = error.response;
-    if (typeof res.data == "string")
+    if (res && typeof res.data == "string")
         text = res.data
     else
         text = error.message;

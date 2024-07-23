@@ -22,11 +22,12 @@ import { Validator } from "node-input-validator";
 import * as g from "../config.js";
 import bodyParser from "body-parser";
 const pgSession = ConnectPg(session);
+import {start} from "./email_notifications.js";
 
 function initialize() {
     //express
     app.use(cors({
-        origin: [config.all_clients],
+        origin: config.address_mode.client,
         credentials: true
     }));
     app.use(express.static("public"));
@@ -72,5 +73,8 @@ function initialize() {
     //passport
     app.use(passport.initialize());
     app.use(passport.session());
+
+    //email notifications
+    start();
 }
 export default initialize;

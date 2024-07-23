@@ -28,7 +28,6 @@ import { GetMaxLetters } from "../user.js";
 import { uploadMedia } from "../../components/cloudinary_handler.js";
 import { findHashtags, findHtml } from "../../components/sync.js";
 import { notifyUser, commentPush,repostPush } from "../web_push.js";
-import {prepareEmailNotification} from "../../components/email_notifications.js";
 
 const router = express.Router();
 
@@ -71,7 +70,6 @@ router.post("/comment", async (req, res) => {
             //send push
             const comment_id = result.rows[0].id;
             commentPush(req.user, comment_id, replying_to);
-            prepareEmailNotification(UserId(req));
 
             return result;
         }
@@ -113,7 +111,6 @@ router.post("/quote", async (req, res) => {
             //send push
             const quote_id = result.rows[0].id;
             repostPush(req.user, quote_id, quoted);
-            prepareEmailNotification(UserId(req));
 
             return result;
         }
