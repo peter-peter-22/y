@@ -5,12 +5,18 @@ import { email_notifications } from "./notifications_query.js";
 //send emails to the users who have new unread notifications
 async function sendEmailNotifications() {
     try {
-        console.log("sending email notifications...");
+        if(config.log_email_notifications) console.log("sending email notifications...");
+
+        //get the users who need email notifications and their necessary data
+        //the query also updates the users and excludes them from the next emails as long as the don't get new unread notifications
         const q = await db.query(email_notifications);
+
+        //send emails simultaneously
         for await (const row of q.rows) {
             await sendEmailNotification(row.email, row.name, row.unread_notification_count);
         }
-        console.log("email notifications sent successfully");
+
+        if(config.log_email_notifications)  console.log("email notifications sent successfully");
     }
     catch (e) {
         console.error(e);

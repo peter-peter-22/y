@@ -26,7 +26,9 @@ import { CheckV, CheckErr } from "../components/validations.js";
 import { user_columns } from "../components/post_query.js";
 
 import modify from "./logged_in/modify.js";
-import create from "./logged_in/create.js";
+import create_post from "./logged_in/create_post.js";
+import delete_post from "./logged_in/delete_post.js";
+import edit_post from "./logged_in/edit_post.js";
 import general from "./logged_in/general.js";
 import feed from "./logged_in/feed.js";
 import notifications from "./logged_in/notifications.js";
@@ -41,7 +43,9 @@ router.use((req, res, next) => {
 });
 
 router.use("/modify", modify);
-router.use("/create", create);
+router.use("/create", create_post);
+router.use("/delete", delete_post);
+router.use("/edit", edit_post);
 router.use("/general", general);
 router.use("/feed", feed);
 router.use("/notifications", notifications);

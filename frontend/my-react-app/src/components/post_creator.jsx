@@ -32,21 +32,25 @@ import axios from 'axios';
 import { Endpoint, FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
 import { ErrorText, Modals, ShowImage } from "/src/components/modals";
 import { useNavigate } from "react-router-dom";
-import { commentSections, BorderlessPost, RowWithPrefix, PostMedia ,QuotedFrame} from "/src/components/posts.jsx";
+import { commentSections, BorderlessPost, RowWithPrefix, QuotedFrame } from "/src/components/posts.jsx";
 import { fileToMedia } from "/src/components/media.jsx";
 import ContentEditable from 'react-contenteditable'
-import { findHashtags,findHtml } from "/src/components/sync.js";
+import { findHashtags, findHtml } from "/src/components/sync.js";
+import { PostMediaEditor } from "/src/components/post_media";
 
-function PostCreator({ post, quoted, onPost }) {
+
+function PostCreator({ post, quoted, onPost, editing }) {
     const [isFocused, setIsFocused] = React.useState(false);
-    const [getText, setText] = React.useState("");
+    const [getText, setText] = React.useState(editing ? editing.text : "");
     const maxLetters = UserData.getData.maxLetters;
     const isComment = post !== undefined;
     const isQuote = quoted !== undefined;
+    const isEditing = editing !== undefined;
     const [files, setFiles] = useState([]);
-    const [medias, setMedias] = useState([]);
+    const [medias, setMedias] = useState(editing ? editing.mediaObjects : []);
     const inputRef = useRef(null);
     const [uploading, setUploading] = useState(false);
+    const [deletedCloud, setDeletedCloud] = useState([]);
 
     const handleFocus = () => {
         setIsFocused(true);
@@ -72,9 +76,24 @@ function PostCreator({ post, quoted, onPost }) {
         inputRef.current.click();
     }
 
-    function notImplemented()
-    {
+    function notImplemented() {
         ErrorText("Not implemented");
+    }
+
+    function onDelete(index) {
+        //get the deleted media object
+        const media = medias[index];
+
+        //remove from the media array
+        setMedias((prev) => prev.filter((m, i) => i !== index));
+
+        //if local file then remove from the local files, 
+        //if cloud file then add to the deleted cloud files list
+        if (media.is_local())
+            setFiles((prev) => prev.filter((file) => file !== media.local_file));
+        else
+            setDeletedCloud((prev) => [...prev, media.filedata.public_id]);
+
     }
 
     function Clear() {
@@ -92,7 +111,14 @@ function PostCreator({ post, quoted, onPost }) {
         formData.append('text', getText);
 
         let endpoint;
-        if (isComment) {
+        if (isEditing) {
+            deletedCloud.forEach(deleted => {
+                formData.append("deleted_media", deleted);                
+            });
+            formData.append("id", editing.id);
+            endpoint = "/member/edit/post";
+        }
+        else if (isComment) {
             formData.append("replying_to", post.id);
             endpoint = "/member/create/comment";
         }
@@ -181,11 +207,11 @@ function PostCreator({ post, quoted, onPost }) {
                                         <LetterCounter maxvalue={maxLetters} letters={getText.length} />
                                     </Stack>
                                 }
-                                <Fab disabled={getText.length === 0 || getText.length > maxLetters} variant="extended" size="small" color="primary" onClick={submitPost}>{isComment ? "Reply" : "Post"}</Fab>
+                                <Fab disabled={getText.length === 0 || getText.length > maxLetters} variant="extended" size="small" color="primary" onClick={submitPost}>{get_publish_message(isComment, isEditing)}</Fab>
                             </Stack>
 
                         </Stack>
-                        <PostMedia medias={medias} />
+                        <PostMediaEditor medias={medias} onDelete={onDelete} />
                     </Stack>
                 } />
 
@@ -197,6 +223,14 @@ function PostCreator({ post, quoted, onPost }) {
 
         </Stack>
     );
+}
+
+function get_publish_message(isComment, isEditing) {
+    if (isEditing)
+        return "Save";
+    if (isComment)
+        return "Reply";
+    return "Post";
 }
 
 function ColorHashtag(hashtagString) {
@@ -348,4 +382,4 @@ function AddPostToCommentSection(post) {
 }
 
 
-export { PostCreator,findAndColorHashtags }
+export { PostCreator, findAndColorHashtags }

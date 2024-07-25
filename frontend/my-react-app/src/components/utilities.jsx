@@ -29,7 +29,8 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Popover from '@mui/material/Popover';
 import Grid from '@mui/material/Grid';
 import { ImageDisplayer, Media, MediaDisplayer, mediaTypes, MediaFromFileData } from "/src/components/media.jsx";
-import { OpenOnClick, ClickableSingleImageContainer } from "/src/components/posts";
+import { OpenOnClick } from "/src/components/posts";
+import {ClickableSingleImageContainer} from "/src/components/post_media";
 import { alpha } from "@mui/material";
 
 const noOverflow = {
@@ -607,6 +608,7 @@ function SimplePopOver() {
     };
 
     const handleClose = (e) => {
+        if(e)
         e.stopPropagation();
         setAnchorEl(null);
     };

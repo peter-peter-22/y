@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import Stack from '@mui/material/Stack';
-import  { Inside } from "./side_menus.jsx";
+import { Inside } from "./side_menus.jsx";
 import { TopMenu } from '/src/components/utilities';
 import { SearchField } from "/src/components/inputs.jsx";
 import { Backdrop, Box } from '@mui/material';
@@ -46,7 +46,8 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Dialog from '@mui/material/Dialog';
 import { MediaDisplayer } from "/src/components/media.jsx";
-
+import Paper from '@mui/material/Paper';
+import Modal from '@mui/material/Modal';
 
 //creating modal data
 let Modals = [];
@@ -82,9 +83,9 @@ function CreateModal(props) {
 function CreateModals(props) {
     return (
         <>
+            <ImagesModal />
             <CreateModal id={0} />
             <CreateModal id={1} />
-            <ImagesModal />
         </>
     );
 }
@@ -206,27 +207,45 @@ function ImagesModal() {
     );
 
     return (
-        <Backdrop open={open} onClick={Close} style={{ zIndex: 1 }}>
-            <ResponsiveSelector breakpoint="md"
-                above={
-                    <Stack direction="row" style={{ height: "80%", width: "80%", alignItems: "center", justifyContent: "center" }}>
-                        <StepButton icon="arrow_left" tall={true} onClick={(e) => { Step(-1, e); }} />
-                        {DisplayedMedia}
-                        <StepButton icon="arrow_right" tall={true} onClick={(e) => { Step(1, e); }} />
-                    </Stack>
-                }
-                below={
-                    <Stack direction="column" style={{ height: "80%", width: "95%", alignItems: "center", justifyContent: "center" }}>
-                        {DisplayedMedia}
-                        <Stack direction="row" style={{ width: "100%" }}>
-                            <StepButton icon="arrow_left" onClick={(e) => { Step(-1, e); }} />
-                            <StepButton icon="arrow_right" onClick={(e) => { Step(1, e); }} />
+        <Modal open={open} onClick={Close}>
+            <div style={{
+                width: "100%",
+                height: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center"
+            }}>
+                <ResponsiveSelector breakpoint="md"
+                    above={
+                        <Stack direction="row" style={{ height: "80%", width: "80%", alignItems: "center", justifyContent: "center" }}>
+                            <StepButton icon="arrow_left" tall={true} onClick={(e) => { Step(-1, e); }} />
+                            {DisplayedMedia}
+                            <StepButton icon="arrow_right" tall={true} onClick={(e) => { Step(1, e); }} />
                         </Stack>
-                    </Stack>
-                }
-            />
-        </Backdrop>
+                    }
+                    below={
+                        <Stack direction="column" style={{ height: "80%", width: "95%", alignItems: "center", justifyContent: "center" }}>
+                            {DisplayedMedia}
+                            <Stack direction="row" style={{ width: "100%" }}>
+                                <StepButton icon="arrow_left" onClick={(e) => { Step(-1, e); }} />
+                                <StepButton icon="arrow_right" onClick={(e) => { Step(1, e); }} />
+                            </Stack>
+                        </Stack>
+                    }
+                />
+            </div>
+        </Modal>
     );
+}
+
+function SimpleDialog({ open, onClose, children }) {
+    return (
+        <Backdrop open={open} onClick={onClose} style={{ zIndex: 1 }}>
+            <Paper style={{ borderRadius: 15 }} onClick={(e) => e.stopPropagation()}>
+                {children}
+            </Paper>
+        </Backdrop>
+    )
 }
 
 function StepButton(props) {
@@ -251,4 +270,4 @@ function ShowSingleImage(media) {
     ImagesDisplay.ShowSingle(media);
 }
 
-export { ErrorModal, Modals, ImagesDisplay, CreateModals, Error, ErrorText, ShowImage, SuccessModal,ShowSingleImage };
+export { ErrorModal, Modals, ImagesDisplay, CreateModals, Error, ErrorText, ShowImage, SuccessModal, ShowSingleImage };

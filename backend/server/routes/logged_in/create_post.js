@@ -27,7 +27,7 @@ import { GetPosts } from "../../components/general_components.js";
 import { GetMaxLetters } from "../user.js";
 import { uploadMedia } from "../../components/cloudinary_handler.js";
 import { findHashtags, findHtml } from "../../components/sync.js";
-import { notifyUser, commentPush,repostPush } from "../web_push.js";
+import { notifyUser, commentPush, repostPush } from "../web_push.js";
 
 const router = express.Router();
 
@@ -40,7 +40,8 @@ router.post("/post", async (req, res) => {
         return result;
     }
 
-    await postAny(req, res, postToDatabase);
+    const post = await postAny(req, postToDatabase);
+    res.json(post);
 });
 
 router.post("/comment", async (req, res) => {
@@ -81,7 +82,8 @@ router.post("/comment", async (req, res) => {
     }
 
     //handle post
-    await postAny(req, res, commentToDatabase);
+    const post = await postAny(req, commentToDatabase);
+    res.json(post);
 });
 
 router.post("/quote", async (req, res) => {
@@ -121,20 +123,21 @@ router.post("/quote", async (req, res) => {
         }
     }
 
-    await postAny(req, res, quoteToDatabase);
+    const post = await postAny(req, quoteToDatabase);
+    res.json(post);
 });
 
 
-async function postAny(req, res, saveToDatabase) {
+async function postAny(req, saveToDatabase) {
     //get files and validate inputs
-    const files = await getAndValidatePost(req);
+    await validatePost(req);
+    const files = getAndValidateFiles(req);
 
     //upload to database
     let { text } = req.body;
 
     //remove html from text 
     text = CleanText(text);
-
 
     //the values those are sent to all kinds of posts
     const user_id = UserId(req);
@@ -145,11 +148,19 @@ async function postAny(req, res, saveToDatabase) {
     const result = await saveToDatabase(baseCols, baseRefs, baseVals);//must return the id of the published post
     const post_id = result.rows[0].id;
 
-    //find hashtags in text
-    const hashtags = FindHashtags(text);
-    //upload hashtags to their table
-    await UploadHashtags(post_id, hashtags);
+    //get the hashtags of the post and upload them to their separate table
+    //could this be skipped by putting a trigger with regex into sql?
+    await FindAndUploadHashtag(text, post_id)
 
+    //upload the files of the post to the cloud then add the returned file data to the post
+    await UploadFiles(files, post_id);
+
+    //return the created post 
+    const recentlyAddedPost = await GetPosts(user_id, "WHERE post.id=:post_id", { post_id: post_id }, 1);//this can be skipped by returning the updated post after cloud upload
+    return recentlyAddedPost[0];
+}
+
+async function UploadFiles(files, post_id) {
     if (files) {
         //upload files and return the post
         const filedatas = await uploadPostFiles(files, post_id);
@@ -163,9 +174,13 @@ async function postAny(req, res, saveToDatabase) {
         })
         );
     }
-    //return the created post to client
-    const recentlyAddedPost = await GetPosts(user_id, "WHERE post.id=:post_id", { post_id: post_id }, 1);
-    res.send(recentlyAddedPost[0]);
+}
+
+async function FindAndUploadHashtag(text, post_id) {
+    //find hashtags in text
+    const hashtags = FindHashtags(text);
+    //upload hashtags to their table
+    await UploadHashtags(post_id, hashtags);
 }
 
 async function UploadHashtags(post_id, hashtags) {
@@ -184,6 +199,7 @@ async function UploadHashtags(post_id, hashtags) {
 }
 
 function CleanText(text) {
+    //remove html from text to prevent abusing the html displayer of the posts
     return text.replace(findHtml, '');
 }
 
@@ -195,17 +211,15 @@ function FindHashtags(text) {
     return hashtags;
 }
 
-async function getAndValidatePost(req) {
-    if (!Array.isArray(req.body.hashtags))
-        req.body.hashtags = [req.body.hashtags];
-
+async function validatePost(req) {
     const v = new Validator(req.body, {
-        text: "required|string|maxLength:" + GetMaxLetters(req.user)
+        text: validateText(req.user)
     });
     await CheckV(v);
+}
 
-    const files = getAndValidateFiles(req);
-    return files;
+function validateText(user) {
+    return "required|string|maxLength:" + GetMaxLetters(user);
 }
 
 async function uploadPostFiles(files, post_id) {
@@ -241,7 +255,7 @@ function tryGetFiles(req, fileName) {
         else
             return target;
     }
-    return undefined;
 }
 
 export default router;
+export { postAny };

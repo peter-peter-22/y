@@ -32,12 +32,18 @@ import axios from 'axios';
 import { Endpoint, FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
 import { Error, Modals, ShowImage } from "/src/components/modals";
 import { NavLink, useNavigate } from "react-router-dom";
-import { commentSections } from "/src/components/posts";
+import { PostModalFrame, commentSections } from "/src/components/posts";
+import { PostCreator } from "/src/components/post_creator";
+import { get_focused_id } from "/src/pages/post_focused.jsx";
 
-
+let closeCurrent = undefined;
+function close() {
+    if (closeCurrent)
+        closeCurrent();
+}
 
 function ManageContent(props) {
-    const { handleOpen, ShowPopover } = SimplePopOver();
+    const { handleOpen, handleClose, ShowPopover } = SimplePopOver();
 
     function PostOptions() {
         return (
@@ -54,6 +60,7 @@ function ManageContent(props) {
     function Clicked(e) {
         e.stopPropagation();
         handleOpen(e);
+        closeCurrent = handleClose;
     }
 
     return (
@@ -92,15 +99,67 @@ function FollowRow(props) {
 
 function BlockRow(props) {
     const user = props.user;
-    const [blocked, setBlock, toggleBlock] = ToggleBlock(user, props.onChange);
+    const [blocked, setBlock, toggleBlock] = ToggleBlock(user, update);
+
+    function handleBlock() {
+        close();
+        toggleBlock();
+    }
 
     return (
-        <Row onClick={toggleBlock}>
+        <Row onClick={handleBlock}>
             <Icon>{blocked ? "do_disturb_on" : "do_disturb"}</Icon>
             <span>{blocked ? "Unblock" : "Block"} < GetUserKey user={user} /></span>
         </Row>
     );
 }
+
+function DeleteRow({ post }) {
+    const navigate = useNavigate();
+    async function handle_delete() {
+        //delete from db
+        await axios.post(
+            Endpoint("/member/delete/post"),
+            { id: post.id }
+        );
+
+        //display the update
+        if (get_focused_id() === post.id) {
+            //if the deleted post was focused, go back to the main page
+            navigate("/");
+        }
+        else {
+            //if not, update the comment section
+            update();
+        }
+    }
+
+    return (
+        <Row onClick={handle_delete}>
+            <Icon>close</Icon>
+            <span>Delete</span>
+        </Row>
+    );
+}
+
+function EditRow({ post }) {
+    async function handle_edit() {
+        close();
+        Modals[0].Show(
+            <PostModalFrame>
+                <PostCreator onPost={update} editing={post} quoted={post.reposted_post} />
+            </PostModalFrame>
+        );
+    }
+
+    return (
+        <Row onClick={handle_edit}>
+            <Icon>edit</Icon>
+            <span>Edit</span>
+        </Row>
+    );
+}
+
 
 function Row(props) {
     return (
@@ -114,24 +173,28 @@ function Row(props) {
     );
 }
 
+function update() {
+    commentSections.active.update();
+}
 
-function ManagePost(props) {
-    const post = props.post;
-    const user = post.publisher;
-    const is_me = post.publisher.id === UserData.getData.user.id;
-    function onBlock() {
-        commentSections.active.update();
-    }
+function ManagePost({original,overriden}) {
+    const user = overriden.publisher;
+    const is_me = original.publisher.id === UserData.getData.user.id;
 
     return (
         <ManageContent>
-            {!is_me &&
+            {is_me ?
+                <>
+                    <DeleteRow post={original} />
+                    {!original.repost && <EditRow post={original} />}
+                </>
+                :
                 <>
                     <FollowRow user={user} />
-                    <BlockRow user={user} onChange={onBlock} />
+                    <BlockRow user={user} />
                 </>
             }
-            <EngagementsRow post={post} />
+            <EngagementsRow post={overriden} />
         </ManageContent>
     );
 }

@@ -34,13 +34,12 @@ import { Error, Modals, ShowImage } from "/src/components/modals";
 import { useNavigate } from "react-router-dom";
 import { WhoToFollow } from "/src/components/footer";
 import Moment from "moment";
-import { SimplifiedPostList, ClickableImage, MediaContext, PostModalFrame } from "/src/components/posts";
+import { SimplifiedPostList, PostModalFrame } from "/src/components/posts";
 import { useParams } from "react-router-dom";
 import { ProfilePicEditor, ChangeablePicture, UserNameEditor, NameEditor, BirthDateEditor } from "/src/components/create_account";
 import { ManageProfile } from "/src/components/manage_content_button.jsx";
 import { Media, mediaTypes } from "/src/components/media";
 import { ImageDisplayer, MediaDisplayer } from "/src/components/media";
-import { ClickableSingleImageContainer } from "/src/components/posts";
 import { UserListExtended } from "/src/pages/follow_people.jsx";
 import {ProfileBanner} from "/src/pages/profile_main";
 

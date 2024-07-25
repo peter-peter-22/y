@@ -62,6 +62,7 @@ const config = {
     notifications_per_request: 10,
     uploadLimitMB: 100,
     email_notification_interval:10*50*1000,//10 minutes
+    log_email_notifications:false,
     ...types
 }
 

@@ -6,8 +6,10 @@ const extra_debug = true;//log all errors
 function error_handler(err, req, res, next) {
     //if db constraint, or error with status
     if (err.constraint || err.status) {
+        //if this is a constraint error, than the status is not set yet
         if(err.constraint)
-            
+            err.status=422;
+
         res.status(err.status).send(err.message);
 
         if (extra_debug) {

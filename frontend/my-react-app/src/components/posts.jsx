@@ -37,12 +37,13 @@ import { ExamplePost, ExampleUser } from "/src/components/exampleData.js";
 import { PostCreator, findAndColorHashtags } from "/src/components/post_creator.jsx";
 import { BlockMedia } from "/src/components/media.jsx";
 import { BlueTextButton } from "/src/components/containers";
+import {PostMedia} from "/src/components/post_media";
 
 const commentSections = {};
 
 function Prefix(props) {
     return (
-        <div style={{ display: "flex", justifyContent: "end", padding: "0px 10px", flexShrink: 0,width:60 }}>
+        <div style={{ display: "flex", justifyContent: "end", padding: "0px 10px", flexShrink: 0, width: 60 }}>
             {props.children}
         </div>
     )
@@ -83,7 +84,7 @@ function BorderlessPost({ post, hideButtons }) {
                         <UserKey user={overriden.publisher} />
                         ·
                         <DateLink passed isoString={overriden.date} />
-                        <ManagePost post={overriden} />
+                        <ManagePost original={original} overriden={overriden}/>
                     </Stack>
                     <ReplyingToPost post={overriden} />
                     <PostText post={overriden} />
@@ -102,7 +103,7 @@ function BorderlessPost({ post, hideButtons }) {
                         </Box>
                     }
                     {!hideButtons &&
-                        <PostButtonRow post={overriden} key={overriden.id}/>
+                        <PostButtonRow post={overriden} />
                     }
                 </Stack>
             } />
@@ -168,7 +169,7 @@ function PostFocused(props) {
                     <Stack direction="column" style={{ overflow: "hidden" }}>
                         <Stack direction="row" spacing={0.25} style={{ alignItems: "center" }}>
                             <ProfileText user={overriden.publisher} link />
-                            <ManagePost post={overriden} />
+                            <ManagePost original={original} overriden={overriden}/>
                         </Stack>
                         <ReplyingToPost post={overriden} />
                     </Stack>
@@ -196,7 +197,7 @@ function PostFocused(props) {
             <Divider />
 
             <Box sx={{ my: 1 }}>
-                <PostButtonRow post={overriden} key={overriden.id} />
+                <PostButtonRow post={overriden} />
             </Box>
 
             <Divider />
@@ -403,7 +404,15 @@ function PostList({ post, ...props }) {
     }, []);
 
     return (
-        <OnlineList getEntries={GetEntries} EntryMapper={HideablePostMemo} ref={onlineListRef} key={key} />
+        <OnlineList getEntries={GetEntries} EntryMapper={HideablePostMemo} ref={onlineListRef} key={key} entryMapController={postEntryMapController} />
+    );
+}
+
+function postEntryMapController({ entries, EntryMapper }) {
+    return (
+        <List sx={{ p: 0 }} >
+            {entries.map((entry, index) => <EntryMapper key={entry.id} index={index} entry={entry} />)}
+        </List>
     );
 }
 
@@ -428,109 +437,6 @@ function PostBottomIcon(props) {
         </IconButton>);
 }
 
-function ClickableImage({ index, children }) {
-    const medias = useContext(MediaContext);
-    const media = medias[index];
-
-    function Clicked(index, e) {
-        e.stopPropagation();
-        ShowImage(medias, index);
-    }
-    return (
-        <BlockMedia media={media} onClick={(e) => { Clicked(index, e); }}>
-            {children}
-        </BlockMedia>
-    );
-}
-
-
-function ClickableSingleImageContainer({ media, children, style, disabled }) {
-    function Clicked(e) {
-        if (disabled)
-            return;
-
-        e.stopPropagation();
-        if (media.type !== undefined)
-            ShowSingleImage(media);
-    }
-    return (
-        <div onClick={Clicked} style={{ ...style, cursor: "pointer" }}>
-            {children}
-        </div>
-    );
-}
-
-const MediaContext = createContext([]);
-
-function PostMedia(props) {
-    const spacing = "2px";
-    const medias = props.medias;
-
-    if (medias && medias.length > 0) {
-        let imageElements;
-        const count = medias.length;
-        if (count === 1) {
-            imageElements = (
-                <ClickableImage index={0} />
-            );
-        }
-        else if (count === 2) {
-            imageElements = (
-                <>
-                    <Stack direction="row" spacing={spacing}>
-                        <ClickableImage index={0} />
-                        <ClickableImage index={1} />
-                    </Stack>
-                </>);
-        }
-        else if (count === 3) {
-            imageElements = (
-                <>
-                    <Stack direction="row" spacing={spacing}>
-                        <ClickableImage index={0} />
-                    </Stack>
-                    <Stack direction="row" spacing={spacing}>
-                        <ClickableImage index={1} />
-                        <ClickableImage index={2} />
-                    </Stack>
-                </>);
-        }
-        else if (count >= 4) {
-            imageElements = (
-                <>
-                    <Stack direction="row" spacing={spacing}>
-                        <ClickableImage index={0} />
-                        <ClickableImage index={1} />
-                    </Stack>
-                    <Stack direction="row" spacing={spacing}>
-                        <ClickableImage index={2} />
-                        <ClickableImage index={3} >
-                            {count > 4 &&
-                                <Box sx={{ backgroundColor: "transparentBlack.main", }} style={{ position: "absolute", width: "100%", height: "100%", top: "0", left: "0", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                    <Typography variant="medium_bold" color="primary.contrastText">+{count - 4}</Typography>
-                                </Box>
-                            }
-                        </ClickableImage>
-                    </Stack>
-                </>);
-        }
-
-        return (
-            <Box border={1} borderColor="divider" style={{
-                margin: "10px 0px",
-                overflow: "hidden",
-                borderRadius: "10px",
-                boxSizing: "border-box"
-            }}>
-                <MediaContext.Provider value={medias}>
-                    <Stack direction="column" spacing={spacing}>
-                        {imageElements}
-                    </Stack>
-                </MediaContext.Provider>
-            </Box>
-        );
-    }
-}
 function PostText(props) {
     return (
         <Typography variant="small" style={{ wordWrap: "break-word" }} dangerouslySetInnerHTML={{ __html: findAndColorHashtags(props.post.text) }} />
@@ -614,4 +520,4 @@ function OverrideWithRepost(post) {
 }
 
 
-export { Post, PostList, PostFocused, ListBlockButton, ListBlock, RowWithPrefix, PostButtonRow, WritePost, OverrideWithRepost, MediaContext, ClickableImage, PostModalFrame, OpenPostOnClick, OpenOnClick, SimplifiedPostList, commentSections, BorderlessPost, PostMedia, ClickableSingleImageContainer, QuotedFrame };
+export { Post, PostList, PostFocused, ListBlockButton, ListBlock, RowWithPrefix, PostButtonRow, WritePost, OverrideWithRepost, PostModalFrame, OpenPostOnClick, OpenOnClick, SimplifiedPostList, commentSections, BorderlessPost, QuotedFrame };
