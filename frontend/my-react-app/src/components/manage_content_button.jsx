@@ -76,13 +76,18 @@ function ManageContent(props) {
 function EngagementsRow(props) {
     const post = props.post;
     return (
-        <InheritLink to={"/posts/" + post.id + "/likes"}>
+        <InheritLink to={engagementsLink(post)}>
             <Row>
                 <Icon>align_vertical_bottom</Icon>
                 <span>View post engagements</span>
             </Row>
         </InheritLink>
     );
+}
+
+function engagementsLink(post)
+{
+    return "/posts/" + post.id + "/likes";
 }
 
 function FollowRow(props) {
@@ -117,6 +122,8 @@ function BlockRow(props) {
 function DeleteRow({ post }) {
     const navigate = useNavigate();
     async function handle_delete() {
+        close();
+
         //delete from db
         await axios.post(
             Endpoint("/member/delete/post"),
@@ -124,7 +131,7 @@ function DeleteRow({ post }) {
         );
 
         //display the update
-        if (get_focused_id() === post.id) {
+        if (get_focused_id() == post.id) {
             //if the deleted post was focused, go back to the main page
             navigate("/");
         }
@@ -147,9 +154,14 @@ function EditRow({ post }) {
         close();
         Modals[0].Show(
             <PostModalFrame>
-                <PostCreator onPost={update} editing={post} quoted={post.reposted_post} />
+                <PostCreator onPost={onSubmit} editing={post} quoted={post.reposted_post} noUpdate/>
             </PostModalFrame>
         );
+    }
+
+    function onSubmit(edited) {
+        Modals[0].Close();
+        post.setPost(edited);
     }
 
     return (
@@ -177,7 +189,7 @@ function update() {
     commentSections.active.update();
 }
 
-function ManagePost({original,overriden}) {
+function ManagePost({ original, overriden }) {
     const user = overriden.publisher;
     const is_me = original.publisher.id === UserData.getData.user.id;
 
@@ -211,4 +223,4 @@ function ManageProfile(props) {
 }
 
 export default ManageContent;
-export { ManagePost, ManageProfile };
+export { ManagePost, ManageProfile,engagementsLink };

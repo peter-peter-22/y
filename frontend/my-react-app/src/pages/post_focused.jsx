@@ -75,6 +75,7 @@ export default () => {
     }
 
     if (post) {
+        post.setPost=setPost;
         const overriden = OverrideWithRepost(post);
         return (
             <List sx={{ p: 0 }}>

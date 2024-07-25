@@ -25,7 +25,7 @@ import { Validator } from "node-input-validator";
 import { CheckV, CheckErr, validate_image, validate_video, validate_media } from "../../components/validations.js";
 import { GetPosts } from "../../components/general_components.js";
 import { GetMaxLetters } from "../user.js";
-import { uploadMedia } from "../../components/cloudinary_handler.js";
+import { uploadPostFiles } from "../../components/cloudinary_handler.js";
 import { findHashtags, findHtml } from "../../components/sync.js";
 import { notifyUser, commentPush, repostPush } from "../web_push.js";
 
@@ -166,7 +166,7 @@ async function UploadFiles(files, post_id) {
         const filedatas = await uploadPostFiles(files, post_id);
         await db.query(named(`
             UPDATE posts 
-            SET media=:media 
+            SET media=:media||media 
             WHERE id=:post_id`
         )({
             post_id: post_id,
@@ -184,9 +184,14 @@ async function FindAndUploadHashtag(text, post_id) {
 }
 
 async function UploadHashtags(post_id, hashtags) {
+    //delete existing hastags
+    await db.query("delete from hashtags where post_id=$1", [post_id]);
+
+    //if no hashtags, exit
     if (hashtags.length === 0)
         return;
 
+    //upload hashtags
     await db.query(named(`
     INSERT INTO hashtags
     (post_id, hashtag)
@@ -222,17 +227,6 @@ function validateText(user) {
     return "required|string|maxLength:" + GetMaxLetters(user);
 }
 
-async function uploadPostFiles(files, post_id) {
-    const fileDatas = [];
-    for (let n = 0; n < files.length; n++) {
-        const folder = `posts/${post_id}`;
-        const fileName = n;
-        const file = files[n];
-        const fileData = await uploadMedia(file, fileName, folder);
-        fileDatas.push(fileData);
-    }
-    return fileDatas;
-}
 
 function getAndValidateFiles(req) {
     //both images and videos

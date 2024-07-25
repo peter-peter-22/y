@@ -32,7 +32,7 @@ import axios from 'axios';
 import { Endpoint, FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
 import { Error, Modals, ShowImage, ShowSingleImage } from "/src/components/modals";
 import { useNavigate } from "react-router-dom";
-import { ManagePost } from "/src/components/manage_content_button.jsx";
+import { ManagePost ,engagementsLink} from "/src/components/manage_content_button.jsx";
 import { ExamplePost, ExampleUser } from "/src/components/exampleData.js";
 import { PostCreator, findAndColorHashtags } from "/src/components/post_creator.jsx";
 import { BlockMedia } from "/src/components/media.jsx";
@@ -223,6 +223,7 @@ function PostButtonRow(props) {
     const { count: bookmark_count, active: bookmarked, pressed: handleBookmark } = CountableButton(post, post.bookmark_count, post.bookmarked_by_user, "/member/general/bookmark");
     const { count: repost_count, active: reposted, pressed: handleRepost } = CountableButton(post, post.repost_count, post.reposted_by_user, "/member/general/repost");
     const [comment_count, set_comment_count] = useState(post.comment_count);
+    const navigate = useNavigate();
 
     function handleComment() {
         Modals[0].Show(
@@ -243,6 +244,11 @@ function PostButtonRow(props) {
                 <PostCreator quoted={post} onPost={closeModal} />
             </PostModalFrame>
         );
+    }
+
+    function handleViewClick()
+    {
+       navigate(engagementsLink(post));
     }
 
     function closeModal() {
@@ -277,7 +283,9 @@ function PostButtonRow(props) {
             <PostBottomIcon text={formatNumber(post.view_count)}
                 active_icon="align_vertical_bottom"
                 inactive_icon="align_vertical_bottom"
-                active_color="primary.main" />
+                active_color="primary.main"
+                onClick={handleViewClick}
+                 />
 
             <PostBottomIcon
                 text={formatNumber(bookmark_count)}
@@ -371,7 +379,8 @@ function CountableButton(post, initial_count, initial_active, url) {
 }
 
 const HideablePostMemo = memo((props) => {
-    const post = props.entry;
+    const [post,setPost] = useState(props.entry);
+    post.setPost=setPost;
     const [hidden, setHidden] = useState(post.publisher.is_blocked)
     if (!hidden)
         return (<Post post={post} />);

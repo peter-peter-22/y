@@ -39,7 +39,7 @@ import { findHashtags, findHtml } from "/src/components/sync.js";
 import { PostMediaEditor } from "/src/components/post_media";
 
 
-function PostCreator({ post, quoted, onPost, editing }) {
+function PostCreator({ post, quoted, onPost, editing,noUpdate }) {
     const [isFocused, setIsFocused] = React.useState(false);
     const [getText, setText] = React.useState(editing ? editing.text : "");
     const maxLetters = UserData.getData.maxLetters;
@@ -47,7 +47,7 @@ function PostCreator({ post, quoted, onPost, editing }) {
     const isQuote = quoted !== undefined;
     const isEditing = editing !== undefined;
     const [files, setFiles] = useState([]);
-    const [medias, setMedias] = useState(editing ? editing.mediaObjects : []);
+    const [medias, setMedias] = useState(editing && editing.mediaObjects ? editing.mediaObjects : []);
     const inputRef = useRef(null);
     const [uploading, setUploading] = useState(false);
     const [deletedCloud, setDeletedCloud] = useState([]);
@@ -93,7 +93,6 @@ function PostCreator({ post, quoted, onPost, editing }) {
             setFiles((prev) => prev.filter((file) => file !== media.local_file));
         else
             setDeletedCloud((prev) => [...prev, media.filedata.public_id]);
-
     }
 
     function Clear() {
@@ -113,7 +112,7 @@ function PostCreator({ post, quoted, onPost, editing }) {
         let endpoint;
         if (isEditing) {
             deletedCloud.forEach(deleted => {
-                formData.append("deleted_media", deleted);                
+                formData.append("deleted_media", deleted);
             });
             formData.append("id", editing.id);
             endpoint = "/member/edit/post";
@@ -151,11 +150,12 @@ function PostCreator({ post, quoted, onPost, editing }) {
 
             //update post list on client without refreshing the page
             const post = result.data;
+            if(!noUpdate)
             AddPostToCommentSection(post);
 
             //call function if defined
             if (onPost)
-                onPost();
+                onPost(post);
         }
         catch (err) {
             setUploading(false);

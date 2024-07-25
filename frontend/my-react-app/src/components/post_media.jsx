@@ -34,7 +34,6 @@ import { Error, Modals, ShowImage, ShowSingleImage } from "/src/components/modal
 import { useNavigate } from "react-router-dom";
 import { ManagePost } from "/src/components/manage_content_button.jsx";
 import { ExamplePost, ExampleUser } from "/src/components/exampleData.js";
-import { PostCreator, findAndColorHashtags } from "/src/components/post_creator.jsx";
 import { BlockMedia } from "/src/components/media.jsx";
 import { BlueTextButton } from "/src/components/containers";
 

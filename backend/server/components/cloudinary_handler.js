@@ -1,4 +1,5 @@
 import { v2 as cloudinary } from 'cloudinary';
+import { CheckErr } from './validations.js';
 
 // Configuration
 cloudinary.config({
@@ -12,7 +13,7 @@ async function uploadMedia(file, public_id, folder) {
         public_id: public_id,
         folder: folder,
         invalidate: true,
-        resource_type:"auto"
+        resource_type: "auto"
     };
 
     const uploadMethod = getUploadMethod(file);
@@ -24,6 +25,47 @@ async function uploadMedia(file, public_id, folder) {
 
     const data = new FileData(res);
     return data;
+}
+
+async function deleteFile(media) {
+    const options = {
+        invalidate: true,
+        resource_type: media.type
+    };
+
+    await cloudinary.uploader.destroy(media.public_id, options);
+}
+
+function validate_delete(public_id, post_id) {
+    //make sure the deleted file belongs to the post to avoid deleting other files with unnatural an request
+    if (!public_id.startsWith(postsFolder(post_id)))
+        CheckErr("the file you want to delete does not belongs to this post");
+}
+
+async function deletePostFile(media, post_id) {
+    //can I delete this file?
+    validate_delete(media.public_id, post_id);
+    //delete
+    await deleteFile(media);
+}
+
+async function deletePostFiles(medias, post_id) {
+    if (!medias)
+        return;
+
+    for await (const media of medias) {
+        await deletePostFile(media, post_id);
+    }
+}
+
+async function uploadPostFiles(files, post_id) {
+    const fileDatas = [];
+    for await (const file of files) {
+        const folder = postsFolder(post_id);
+        const fileData = await uploadMedia(file, undefined, folder);
+        fileDatas.push(fileData);
+    }
+    return fileDatas;
 }
 
 function getUploadMethod(file) {
@@ -38,18 +80,16 @@ function getUploadMethod(file) {
 function FileData(upload_response) {
     this.version = upload_response.version;
     this.type = upload_response.resource_type;
-    this.public_id=upload_response.public_id;
+    this.public_id = upload_response.public_id;
 }
 
-function postsFolder(post_id)
-{
+function postsFolder(post_id) {
     return `posts/${post_id}`;
 }
-function profileFolder(user_id)
-{
+function profileFolder(user_id) {
     return `users/${user_id}/`;
 }
-const profileId="profile";
-const bannerId="banner";
+const profileId = "profile";
+const bannerId = "banner";
 
-export { uploadMedia,FileData ,postsFolder,profileFolder,profileId,bannerId};
+export { uploadMedia, FileData, postsFolder, profileFolder, profileId, bannerId, uploadPostFiles, deletePostFiles };

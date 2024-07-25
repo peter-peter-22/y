@@ -25,7 +25,7 @@ import { Validator } from "node-input-validator";
 import { CheckV, CheckErr, validate_image, validate_video, validate_media } from "../../components/validations.js";
 import { GetPosts } from "../../components/general_components.js";
 import { GetMaxLetters } from "../user.js";
-import { uploadMedia } from "../../components/cloudinary_handler.js";
+import { deletePostFiles } from "../../components/cloudinary_handler.js";
 import { findHashtags, findHtml } from "../../components/sync.js";
 import { notifyUser, commentPush, repostPush } from "../web_push.js";
 
@@ -44,7 +44,7 @@ router.post("/post", async (req, res) => {
         delete from posts 
         where id=:post_id
         and publisher=:user_id
-        returning id`
+        returning id,media`
     )(
         {
             post_id: id,
@@ -52,11 +52,15 @@ router.post("/post", async (req, res) => {
         }
     ));
 
-    //the files must be deleted too
 
     //if no post was deleted, then the post either not exists or it does not belongs to the user
     if (q.rowCount === 0)
         CheckErr("this post either does not exists or does not belongs to the user");
+
+    //delete the files from the cloud
+    const post=q.rows[0];
+    const files_to_delete = post.media;
+    await deletePostFiles(files_to_delete,post.id);
 
     res.sendStatus(200);
 });
