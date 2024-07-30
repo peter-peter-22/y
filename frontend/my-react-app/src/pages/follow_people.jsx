@@ -19,12 +19,12 @@ import IconButton from '@mui/material/IconButton';
 import Link from '@mui/material/Link';
 import { ResponsiveButton, ButtonIcon, ButtonSvg, TabButton, PostButton, ProfileButton, TopMenuButton, CornerButton } from "/src/components/buttons.jsx";
 import axios from "axios";
-import { Endpoint, FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
+import {  FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
 
 function FollowableList() {
     async function GetEntries(from) {
         try {
-            const response = await axios.post(Endpoint("/member/general/follower_recommendations"), {
+            const response = await axios.post("/member/general/follower_recommendations", {
                 from: from
             });
             return response.data;

@@ -16,7 +16,6 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import axios from "axios";
-import { Endpoint } from "/src/communication.js";
 import { UserData } from '/src/components/user_data';
 import { ImageDisplayer } from "/src/components/media.jsx";
 import { Modals } from "/src/components/modals";
@@ -172,7 +171,7 @@ function ProfileButton() {
 
     async function handleLogout() {
         try {
-            await axios.get(Endpoint("/logout"));
+            await axios.get("/logout");
             UserData.update();
         } catch (err) {
             ThrowIfNotAxios(err);

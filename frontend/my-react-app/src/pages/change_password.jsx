@@ -35,7 +35,7 @@ import FormControl from '@mui/material/FormControl';
 import FormLabel from '@mui/material/FormLabel';
 import ReCAPTCHA from 'react-google-recaptcha';
 import axios from 'axios';
-import { Endpoint, FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
+import {  FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
 import { styled } from '@mui/material/styles';
 import InputAdornment from '@mui/material/InputAdornment';
 import Dialog from '@mui/material/Dialog';
@@ -54,7 +54,7 @@ export default () => {
 
     async function Submit() {
         try {
-            await axios.post(Endpoint("/user/change_password/change"), {
+            await axios.post("/user/change_password/change", {
                 user_id: user_id,
                 secret: secret,
                 password: password

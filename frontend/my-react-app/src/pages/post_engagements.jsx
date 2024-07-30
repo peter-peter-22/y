@@ -29,7 +29,7 @@ import { PlainTextField, PasswordFieldWithToggle, VisuallyHiddenInput } from "/s
 import { UserData } from "/src/components/user_data";
 import config from "/src/components/config.js";
 import axios from 'axios';
-import { Endpoint, FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
+import {  FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
 import { Error, Modals, ShowImage } from "/src/components/modals";
 import { useNavigate } from "react-router-dom";
 import { WhoToFollow } from "/src/components/footer";
@@ -44,7 +44,7 @@ function TabSelector() {
     useEffect(() => { }, [id]);
 
     function Likes() {
-        const url = Endpoint("/member/general/likers_of_post");
+        const url = "/member/general/likers_of_post";
         return (
             <UserListExtended url={url} params={{ post_id: id }} />
         );

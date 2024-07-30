@@ -8,7 +8,7 @@ import { Typography } from '@mui/material';
 import Fab from '@mui/material/Fab';
 import { Icon } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
-import { Endpoint, FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
+import {  FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
 import axios from 'axios';
 
 export default () => {
@@ -17,7 +17,7 @@ export default () => {
       <Fab color="black" variant="extended" onClick={Ask}>
         Test
       </Fab>
-      <Fab color="black" variant="extended"onClick={()=>{axios.get(Endpoint("/send_notification"))}}>
+      <Fab color="black" variant="extended"onClick={()=>{axios.get("/send_notification")}}>
         Test
       </Fab>
     </Stack>

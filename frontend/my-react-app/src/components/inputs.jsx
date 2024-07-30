@@ -4,7 +4,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 import { Icon } from '@mui/material';
 import { IconButton } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import { Endpoint, FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
+import {  FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
 import axios from 'axios';
 import { useNavigate } from "react-router-dom";
 import { GetSearchText, GetSearchUrl } from "/src/pages/search";
@@ -65,7 +65,7 @@ function SearchField() {
             return;
 
         try {
-            const res = await axios.post(Endpoint("/member/search/autofill"), {
+            const res = await axios.post("/member/search/autofill", {
                 text: val
             });
             const sorted = res.data.sort((a, b) => topicOrder[a.group] > topicOrder[b.group] ? 1 : -1);

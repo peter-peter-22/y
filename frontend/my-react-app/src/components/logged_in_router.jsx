@@ -1,7 +1,7 @@
 import React from "react";
 import { AboveBreakpoint } from '/src/components/utilities';
 import Axios from "axios";
-import { Endpoint } from "/src/communication.js";
+
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import Header from "/src/components/header";
 import Footer from "/src/components/footer";

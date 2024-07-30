@@ -29,7 +29,7 @@ import { PlainTextField, PasswordFieldWithToggle, VisuallyHiddenInput } from "/s
 import { UserData } from "/src/components/user_data";
 import config from "/src/components/config.js";
 import axios from 'axios';
-import { Endpoint, FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
+import {  FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
 import { ErrorText, Modals, ShowImage } from "/src/components/modals";
 import { useNavigate } from "react-router-dom";
 import { commentSections, BorderlessPost, RowWithPrefix, QuotedFrame } from "/src/components/posts.jsx";
@@ -135,7 +135,7 @@ function PostCreator({ post, quoted, onPost, editing,noUpdate }) {
 
             //request
             const result = await axios.post(
-                Endpoint(endpoint),
+                
                 formData,
                 {
                     headers: {

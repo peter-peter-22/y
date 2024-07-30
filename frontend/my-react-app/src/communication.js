@@ -3,6 +3,7 @@ import { Error } from "/src/components/modals";
 import config from "/src/components/config.js";
 
 axios.defaults.withCredentials = true
+axios.defaults.baseURL = config.address_mode.server;
 
 axios.interceptors.response.use(function (response) {
     return response;
@@ -10,12 +11,6 @@ axios.interceptors.response.use(function (response) {
     Error(error);
     return Promise.reject(error);
 });
-
-const url = config.address_mode.server;
-
-function Endpoint(endpoint) {
-    return (url + endpoint);
-}
 
 function FormatAxiosError(error) {
     let text;
@@ -36,4 +31,4 @@ function ThrowIfNotAxios(err) {
         throw (err);
 }
 
-export { Endpoint, FormatAxiosError, ThrowIfNotAxios, IsAxiosError }
+export { FormatAxiosError, ThrowIfNotAxios, IsAxiosError }

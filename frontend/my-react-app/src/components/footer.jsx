@@ -20,7 +20,7 @@ import Link from '@mui/material/Link';
 import { ResponsiveButton, ButtonIcon, ButtonSvg, TabButton, PostButton, ProfileButton, TopMenuButton, CornerButton, LinkButton } from "/src/components/buttons.jsx";
 import { UserData } from "/src/components/user_data";
 import { NavLink } from "react-router-dom";
-import { Endpoint, FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
+import {  FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
 import axios, { AxiosError } from 'axios';
 import links from "/src/components/footer_links";
 import Trends from "/src/components/trends";
@@ -205,7 +205,7 @@ function WhoToFollow() {
     useEffect(() => {
         async function getFollowRecommendations() {
             try {
-                const res = await axios.get(Endpoint("/member/general/follower_recommendations_preview"));
+                const res = await axios.get("/member/general/follower_recommendations_preview");
                 setUsers(res.data);
             }
             catch (err) {

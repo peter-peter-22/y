@@ -37,7 +37,7 @@ import FormControl from '@mui/material/FormControl';
 import FormLabel from '@mui/material/FormLabel';
 import ReCAPTCHA from 'react-google-recaptcha';
 import axios from 'axios';
-import { Endpoint } from "/src/communication.js";
+
 import { styled } from '@mui/material/styles';
 import InputAdornment from '@mui/material/InputAdornment';
 import Dialog from '@mui/material/Dialog';
@@ -71,8 +71,8 @@ export default () => {
                             Join today.
                         </Typography>
                         <Stack direction="column" spacing={1} style={{ width: "300px" }}>
-                            <a href={Endpoint("/auth/google")}><AlternativeLogin src="/svg/google.svg" text="Sign-up with Google" /></a>
-                            <a href={Endpoint("/auth/github")}><AlternativeLogin src="/svg/github.svg" text="Sign-up with Github" /></a>
+                            <a href={"/auth/google"}><AlternativeLogin src="/svg/google.svg" text="Sign-up with Google" /></a>
+                            <a href={"/auth/github"}><AlternativeLogin src="/svg/github.svg" text="Sign-up with Github" /></a>
                             <Stack direction="row" sx={{ my: 0.5, alignItems: "center" }}>
                                 <Or />
                             </Stack>

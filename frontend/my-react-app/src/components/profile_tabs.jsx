@@ -29,7 +29,7 @@ import { PlainTextField, PasswordFieldWithToggle, VisuallyHiddenInput } from "/s
 import { UserData } from "/src/components/user_data";
 import config from "/src/components/config.js";
 import axios from 'axios';
-import { Endpoint, FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
+import {  FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
 import { Error, Modals, ShowImage } from "/src/components/modals";
 import { useNavigate } from "react-router-dom";
 import { WhoToFollow } from "/src/components/footer";
@@ -70,7 +70,7 @@ const MediaMemo = memo(({ index }) => {
 function MediaOfUser({ user }) {
     async function GetEntries(from) {
         try {
-            const res = await axios.post(Endpoint("/member/general/media_of_user"), { from: from, user_id: user.id });
+            const res = await axios.post("/member/general/media_of_user", { from: from, user_id: user.id });
             return res.data;
         }
         catch (err) {
@@ -106,7 +106,7 @@ function Followers({ user }) {
             <ListTitle>
                 Followers of <GetUserName user={user} />
             </ListTitle>
-            <UserListExtended url={Endpoint("/member/general/followers_of_user")} params={{ id: user.id }} />
+            <UserListExtended url={"/member/general/followers_of_user"} params={{ id: user.id }} />
         </Stack>
     );
 }
@@ -117,7 +117,7 @@ function Following({ user }) {
             <ListTitle>
                 Followed by <GetUserName user={user} />
             </ListTitle>
-            <UserListExtended url={Endpoint("/member/general/followed_by_user")} params={{ id: user.id }} />
+            <UserListExtended url={"/member/general/followed_by_user"} params={{ id: user.id }} />
         </Stack>
     );
 }

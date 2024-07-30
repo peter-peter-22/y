@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import { AboveBreakpoint } from '/src/components/utilities';
 import axios from "axios";
-import { Endpoint, ThrowIfNotAxios } from "/src/communication.js";
+import {  ThrowIfNotAxios } from "/src/communication.js";
 import Dialog from '@mui/material/Dialog';
 import CreateAccount from "/src/components/create_account.jsx";
 import { Modals, CreateModals, Error } from "/src/components/modals";
@@ -24,7 +24,7 @@ function UserHook() {
         try {
 
             //get user and messages from server
-            const response = await axios.get(Endpoint("/user/get"));
+            const response = await axios.get("/user/get");
             setData(response.data);
 
             //process the messages
@@ -35,7 +35,7 @@ function UserHook() {
 
                 async function CloseStartMessage() {
                     try {
-                        await axios.get(Endpoint("/member/modify/close_starting_message"));
+                        await axios.get("/member/modify/close_starting_message");
                         UserData.update();
                     }
                     catch (err) {
@@ -50,7 +50,7 @@ function UserHook() {
 
                 async function ExitRegistration() {
                     try {
-                        await axios.get(Endpoint("/exit_registration"));
+                        await axios.get("/exit_registration");
                         UserData.update();
                     }
                     catch (err) {

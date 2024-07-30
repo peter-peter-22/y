@@ -29,7 +29,7 @@ import { PlainTextField, PasswordFieldWithToggle, VisuallyHiddenInput } from "/s
 import { UserData } from "/src/components/user_data";
 import config from "/src/components/config.js";
 import axios from 'axios';
-import { Endpoint, FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
+import {  FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
 import { Error, Modals, ShowImage } from "/src/components/modals";
 import { useNavigate } from "react-router-dom";
 import { WhoToFollow } from "/src/components/footer";
@@ -55,7 +55,7 @@ function Profile() {
     useEffect(() => {
         async function get() {
             try {
-                const res = await axios.post(Endpoint("/member/general/user_profile"), { user_id: id });
+                const res = await axios.post("/member/general/user_profile", { user_id: id });
                 const user = res.data;
                 setUser(user);
             } catch (err) {
@@ -249,7 +249,7 @@ function UnblockButton(props) {
 
     async function Unblock() {
         try {
-            await axios.post(Endpoint("/member/general/block_user"), {
+            await axios.post("/member/general/block_user", {
                 key: user_id,
                 value: false
             });

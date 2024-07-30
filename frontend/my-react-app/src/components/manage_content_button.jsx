@@ -29,7 +29,7 @@ import { PlainTextField, PasswordFieldWithToggle, VisuallyHiddenInput } from "/s
 import { UserData } from "/src/components/user_data";
 import config from "/src/components/config.js";
 import axios from 'axios';
-import { Endpoint, FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
+import {  FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
 import { Error, Modals, ShowImage } from "/src/components/modals";
 import { NavLink, useNavigate } from "react-router-dom";
 import { PostModalFrame, commentSections } from "/src/components/posts";
@@ -126,7 +126,7 @@ function DeleteRow({ post }) {
 
         //delete from db
         await axios.post(
-            Endpoint("/member/delete/post"),
+            "/member/delete/post",
             { id: post.id }
         );
 

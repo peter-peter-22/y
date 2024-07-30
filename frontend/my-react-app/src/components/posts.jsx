@@ -29,7 +29,7 @@ import { PlainTextField, PasswordFieldWithToggle, VisuallyHiddenInput } from "/s
 import { UserData } from "/src/components/user_data";
 import config from "/src/components/config.js";
 import axios from 'axios';
-import { Endpoint, FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
+import {  FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
 import { Error, Modals, ShowImage, ShowSingleImage } from "/src/components/modals";
 import { useNavigate } from "react-router-dom";
 import { ManagePost ,engagementsLink} from "/src/components/manage_content_button.jsx";
@@ -347,7 +347,7 @@ function CountableButton(post, initial_count, initial_active, url) {
 
             async function updateServer(newValue) {
                 try {
-                    await axios.post(Endpoint(url), { key: post.id, value: newValue });
+                    await axios.post(url, { key: post.id, value: newValue });
                 }
                 catch (err) {
                     setLike(prev);//server error, put back previous value
@@ -425,12 +425,12 @@ function postEntryMapController({ entries, EntryMapper }) {
     );
 }
 
-function SimplifiedPostList({ endpoint, params: additional_params, post }) {
+function SimplifiedPostList({  params: additional_params, post }) {
     async function getPosts(from) {
         let params = { from: from };
         if (additional_params)
             params = { ...params, ...additional_params };
-        const response = await axios.post(Endpoint(endpoint), params);
+        const response = await axios.post( params);
         return response.data;
     }
     return <PostList getPosts={getPosts} post={post} />;

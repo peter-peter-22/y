@@ -18,7 +18,7 @@ import { BoxList, BoxListOutlined, BlueTextButton } from '/src/components/contai
 import IconButton from '@mui/material/IconButton';
 import { ResponsiveButton, ButtonIcon, ButtonSvg, TabButton, PostButton, ProfileButton, TopMenuButton } from "/src/components/buttons.jsx";
 import Moment from "moment";
-import { Endpoint, FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
+import {  FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
 import { UserData } from "/src/components/user_data";
 import { Error, Modals } from "/src/components/modals";
 import axios from 'axios';
@@ -415,7 +415,7 @@ function ToggleOnlineBool(user, url, startingValue, onChange) {
             lastValueRef.current = newValue;
 
             try {
-            await axios.post(Endpoint(url),
+            await axios.post(url,
                 {
                     key: user.id,
                     value: newValue

@@ -21,7 +21,7 @@ import Link from '@mui/material/Link';
 import { ResponsiveButton, ButtonIcon, ButtonSvg, TabButton, PostButton, ProfileButton, TopMenuButton, CornerButton, LinkButton } from "/src/components/buttons.jsx";
 import { UserData } from "/src/components/user_data";
 import { NavLink } from "react-router-dom";
-import { Endpoint, FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
+import {  FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
 import axios, { AxiosError } from 'axios';
 import links from "/src/components/footer_links";
 import { GetSearchUrl } from "/src/pages/search.jsx";
@@ -31,7 +31,7 @@ function TrendsPreview() {
 
     async function Download() {
         try {
-            const res = await axios.get(Endpoint("/member/trends/preview"));
+            const res = await axios.get("/member/trends/preview");
             setEntries(res.data);
         }
         catch (err) {
@@ -101,7 +101,7 @@ const TrendEntry = memo(({ entry, index }) => {
 function TrendList() {
     async function GetEntries(from) {
         try {
-            const response = await axios.post(Endpoint("/member/trends/list"), { from: from });
+            const response = await axios.post("/member/trends/list", { from: from });
             return response.data;
         }
         catch (err) {

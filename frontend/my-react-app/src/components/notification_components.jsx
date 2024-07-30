@@ -27,7 +27,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import { theme } from "/src/styles/mui/my_theme";
 import { PlainTextField } from "/src/components/inputs";
 import { BorderlessPost, PostList, PostFocused, ListBlockButton, ListBlock, RowWithPrefix, PostButtonRow, OpenPostOnClick, OpenOnClick } from "/src/components/posts";
-import { Endpoint, FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
+import {  FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
 import axios from 'axios';
 import { UserData } from "/src/components/user_data";
 
@@ -202,7 +202,7 @@ const Notification = memo(({ entry: data }) => {
 function NotificationList() {
     async function download(from) {
         try {
-            const res = await axios.post(Endpoint("/member/notifications/get"), { from: from });
+            const res = await axios.post("/member/notifications/get", { from: from });
             return res.data;
         }
         catch (err) {

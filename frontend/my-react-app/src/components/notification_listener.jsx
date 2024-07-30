@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { Endpoint, FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
+import {  FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
 import fetchAdapter from "@shiroyasha9/axios-fetch-adapter";
 import { ListenToStream } from "/src/components/event_stream";
 import Badge from '@mui/material/Badge';
@@ -8,7 +8,7 @@ import { styled } from '@mui/material/styles';
 
 function GetNotificationCount() {
     const [count, setCount] = useState(0);
-    ListenToStream(Endpoint("/member/notifications/events"), (data) => {
+    ListenToStream("/member/notifications/events", (data) => {
         setCount(data);
     });
     return [count, setCount];

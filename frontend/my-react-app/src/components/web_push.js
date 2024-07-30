@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Endpoint } from "/src/communication.js";
+
 
 const publicVapidKey = "BJAV4oJB0p26ezj0U7-GeTMgMIvCMpvqKflKjUzgSCPQuJ9Wklh36Sfbs5uWHbBaoK06GkVR9Ni1PtIjAiJrxiQ";
 
@@ -29,7 +29,7 @@ async function send() {
 
     //send push notification
     console.log("sending subscription to server");
-    await axios.post(Endpoint("/subscribe"),
+    await axios.post("/subscribe",
         { subscription: subscription }
     );
     console.log("subscription sent");

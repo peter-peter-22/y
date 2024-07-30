@@ -29,7 +29,7 @@ import { PlainTextField, PasswordFieldWithToggle, VisuallyHiddenInput } from "/s
 import { UserData } from "/src/components/user_data";
 import config from "/src/components/config.js";
 import axios from 'axios';
-import { Endpoint, FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
+import {  FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
 import { Error, Modals, ShowImage } from "/src/components/modals";
 import { useNavigate } from "react-router-dom";
 import { WhoToFollow } from "/src/components/footer";
@@ -62,7 +62,7 @@ function ProfileEditor({user}) {
             if (form_values.birthdate)
                 form_values.birthdate = new Moment(form_values.birthdate).toISOString();
             await axios.post(
-                Endpoint("/member/modify/update_profile"),
+                "/member/modify/update_profile",
                 form_values,
                 {
                     headers: {

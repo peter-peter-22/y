@@ -37,7 +37,7 @@ import FormControl from '@mui/material/FormControl';
 import FormLabel from '@mui/material/FormLabel';
 import ReCAPTCHA from 'react-google-recaptcha';
 import axios from 'axios';
-import { Endpoint, FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
+import {  FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
 import { styled } from '@mui/material/styles';
 import InputAdornment from '@mui/material/InputAdornment';
 import Dialog from '@mui/material/Dialog';
@@ -83,7 +83,7 @@ function CreateAccount(props) {
     }
     async function send_finish() {
         try {
-            await axios.post(Endpoint("/finish_registration"),
+            await axios.post("/finish_registration",
                 {
                     birthdate: date.toISOString(),
                     checkboxes: checkboxes
@@ -143,7 +143,7 @@ function Page0(props)//enter email, ect.
         WaitAfterChange(async () => {
             if (valid) {
                 try {
-                    const res = await axios.post(Endpoint("/user/exists/email"), {
+                    const res = await axios.post("/user/exists/email", {
                         email: value
                     });
                     if (res.data)
@@ -254,7 +254,7 @@ function Page2(props)//rechapta and send values to server
     async function submitChapta() {
         try {
             const vals = data.current;
-            await axios.post(Endpoint('/register_start'),
+            await axios.post('/register_start',
                 {
                     email: vals.email,
                     name: vals.name,
@@ -296,7 +296,7 @@ function Page3(props)//submit verification code
             return;
 
         try {
-            await axios.post(Endpoint('/verify_code'),
+            await axios.post('/verify_code',
                 {
                     code: code
                 },
@@ -337,7 +337,7 @@ function Page4(props)//enter password, login
             return;
 
         try {
-            await axios.post(Endpoint('/submit_password'),
+            await axios.post('/submit_password',
                 {
                     password: password
                 },
@@ -377,7 +377,7 @@ function Page5(props)//upload profile picture
             formData.append('image', file);
             try {
                 await axios.post(
-                    Endpoint('/member/modify/update_profile_picture'),
+                    '/member/modify/update_profile_picture',
                     formData,
                     {
                         headers: {
@@ -432,7 +432,7 @@ function Page6(props)//enter username
             return;
 
         try {
-            await axios.post(Endpoint("/member/modify/change_username"), {
+            await axios.post("/member/modify/change_username", {
                 username: username
             });
             handleNext();
@@ -458,7 +458,7 @@ function Page7(props)//notifications
     const [data, handleNext] = GetProps(props);
     async function setNotifications(enabled) {
         try {
-            await axios.post(Endpoint("/member/modify/change_browser_notifications"), {
+            await axios.post("/member/modify/change_browser_notifications", {
                 enabled: enabled
             });
             handleNext();
@@ -571,7 +571,7 @@ function RechaptaInput(props) {
 }
 
 function RecommendCelebrities() {
-    const url = Endpoint("/member/general/celebrities");
+    const url = "/member/general/celebrities";
     return (
         <UserListExtended url={url} />
     );
@@ -686,7 +686,7 @@ function UserNameEditor(props) {
         WaitAfterChange(async () => {
             if (value.length > 0) {
                 try {
-                    const res = await axios.post(Endpoint("/member/modify/ok_username"), {
+                    const res = await axios.post("/member/modify/ok_username", {
                         username: value
                     });
                     setUserNameOk(res.data);

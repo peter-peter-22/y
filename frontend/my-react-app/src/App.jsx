@@ -9,7 +9,7 @@ import '@fontsource/roboto/900.css';
 import 'material-icons/iconfont/material-icons.css';
 import { AboveBreakpoint } from '/src/components/utilities';
 import axios from "axios";
-import { Endpoint, ThrowIfNotAxios } from "/src/communication.js";
+import {  ThrowIfNotAxios } from "/src/communication.js";
 import Dialog from '@mui/material/Dialog';
 import CreateAccount from "/src/components/create_account.jsx";
 import { Modals, CreateModals, Error } from "/src/components/modals";

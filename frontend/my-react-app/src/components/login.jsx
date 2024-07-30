@@ -37,7 +37,7 @@ import FormControl from '@mui/material/FormControl';
 import FormLabel from '@mui/material/FormLabel';
 import ReCAPTCHA from 'react-google-recaptcha';
 import axios from 'axios';
-import { Endpoint, FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
+import {  FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
 import { styled } from '@mui/material/styles';
 import InputAdornment from '@mui/material/InputAdornment';
 import Dialog from '@mui/material/Dialog';
@@ -87,7 +87,7 @@ function EnterPassword(props) {
     }
     async function submitPassword() {
         try {
-            await axios.post(Endpoint('/login'),
+            await axios.post('/login',
                 {
                     email: email,
                     password: password
@@ -135,7 +135,7 @@ function ChooseMethod(props) {
     }
     async function submitEmail() {
         try {
-            const res = await axios.post(Endpoint('/user/exists/email'),
+            const res = await axios.post('/user/exists/email',
                 {
                     email: email
                 },
@@ -156,8 +156,8 @@ function ChooseMethod(props) {
                 <Typography variant="verybig_bold" sx={{ my: 4 }}>Sign-in to Y!</Typography>
 
                 <Stack direction="column" spacing={2}>
-                    <a href={Endpoint("/auth/google")}><AlternativeLogin src="/svg/google.svg" text="Sign-in with Google" /></a>
-                    <a href={Endpoint("/auth/github")}><AlternativeLogin src="/svg/github.svg" text="Sign-in with Github" /></a>
+                    <a href={"/auth/google"}><AlternativeLogin src="/svg/google.svg" text="Sign-in with Google" /></a>
+                    <a href={"/auth/github"}><AlternativeLogin src="/svg/github.svg" text="Sign-in with Github" /></a>
                     <Stack direction="row" sx={{ my: 0.5, alignItems: "center" }}>
                         <Or />
                     </Stack>
@@ -198,7 +198,7 @@ function ForgotPassword(props) {
     //submit rechapta
     async function submitChapta() {
         try {
-            await axios.post(Endpoint('/user/change_password/submit_chapta'),
+            await axios.post('/user/change_password/submit_chapta',
                 {
                     email: email,
                     recaptchaToken: captchaValue

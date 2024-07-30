@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Endpoint, FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
+import {  FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
 import axios from 'axios';
 import { SimplifiedPostList } from "/src/components/posts";
 import { useLocation } from "react-router-dom";
@@ -42,7 +42,7 @@ function UsersPreview({ text }) {
     const [getUsers, setUsers] = useState();
 
     async function Download() {
-        const res = await axios.post(Endpoint("/member/search/people_preview"), {
+        const res = await axios.post("/member/search/people_preview", {
             text: text
         });
         setUsers(res.data);
@@ -82,7 +82,7 @@ function UsersPreview({ text }) {
 
 function UsersList({ text }) {
     return (
-        <UserListExtended url={Endpoint("/member/search/people_list")} params={{ text: text }} />
+        <UserListExtended url={"/member/search/people_list"} params={{ text: text }} />
     );
 }
 
