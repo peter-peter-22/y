@@ -5,10 +5,11 @@ import fetchAdapter from "@shiroyasha9/axios-fetch-adapter";
 import { ListenToStream } from "/src/components/event_stream";
 import Badge from '@mui/material/Badge';
 import { styled } from '@mui/material/styles';
+import config from "/src/components/config.js";
 
 function GetNotificationCount() {
     const [count, setCount] = useState(0);
-    ListenToStream("/member/notifications/events", (data) => {
+    ListenToStream(config.address_mode.server+"/member/notifications/events", (data) => {
         setCount(data);
     });
     return [count, setCount];

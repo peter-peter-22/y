@@ -29,15 +29,15 @@ import { PlainTextField, PasswordFieldWithToggle, VisuallyHiddenInput } from "/s
 import { UserData } from "/src/components/user_data";
 import config from "/src/components/config.js";
 import axios from 'axios';
-import {  FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
+import { FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
 import { Error, Modals, ShowImage, ShowSingleImage } from "/src/components/modals";
 import { useNavigate } from "react-router-dom";
-import { ManagePost ,engagementsLink} from "/src/components/manage_content_button.jsx";
+import { ManagePost, engagementsLink } from "/src/components/manage_content_button.jsx";
 import { ExamplePost, ExampleUser } from "/src/components/exampleData.js";
 import { PostCreator, findAndColorHashtags } from "/src/components/post_creator.jsx";
 import { BlockMedia } from "/src/components/media.jsx";
 import { BlueTextButton } from "/src/components/containers";
-import {PostMedia} from "/src/components/post_media";
+import { PostMedia } from "/src/components/post_media";
 
 const commentSections = {};
 
@@ -84,7 +84,7 @@ function BorderlessPost({ post, hideButtons }) {
                         <UserKey user={overriden.publisher} />
                         ·
                         <DateLink passed isoString={overriden.date} />
-                        <ManagePost original={original} overriden={overriden}/>
+                        <ManagePost original={original} overriden={overriden} />
                     </Stack>
                     <ReplyingToPost post={overriden} />
                     <PostText post={overriden} />
@@ -169,7 +169,7 @@ function PostFocused(props) {
                     <Stack direction="column" style={{ overflow: "hidden" }}>
                         <Stack direction="row" spacing={0.25} style={{ alignItems: "center" }}>
                             <ProfileText user={overriden.publisher} link />
-                            <ManagePost original={original} overriden={overriden}/>
+                            <ManagePost original={original} overriden={overriden} />
                         </Stack>
                         <ReplyingToPost post={overriden} />
                     </Stack>
@@ -246,9 +246,8 @@ function PostButtonRow(props) {
         );
     }
 
-    function handleViewClick()
-    {
-       navigate(engagementsLink(post));
+    function handleViewClick() {
+        navigate(engagementsLink(post));
     }
 
     function closeModal() {
@@ -285,7 +284,7 @@ function PostButtonRow(props) {
                 inactive_icon="align_vertical_bottom"
                 active_color="primary.main"
                 onClick={handleViewClick}
-                 />
+            />
 
             <PostBottomIcon
                 text={formatNumber(bookmark_count)}
@@ -379,8 +378,8 @@ function CountableButton(post, initial_count, initial_active, url) {
 }
 
 const HideablePostMemo = memo((props) => {
-    const [post,setPost] = useState(props.entry);
-    post.setPost=setPost;
+    const [post, setPost] = useState(props.entry);
+    post.setPost = setPost;
     const [hidden, setHidden] = useState(post.publisher.is_blocked)
     if (!hidden)
         return (<Post post={post} />);
@@ -388,13 +387,13 @@ const HideablePostMemo = memo((props) => {
         return (<BlockedComment unHide={() => { setHidden(false) }} />);
 });
 
-function PostList({ post, ...props }) {
+function PostList({ post, getPosts }) {
     const onlineListRef = useRef();
     const [key, setKey] = useState(post ? post.id : -1);
 
     async function GetEntries(from) {
         try {
-            const new_posts = await props.getPosts(from);
+            const new_posts = await getPosts(from);
             return new_posts;
         }
         catch (err) {
@@ -425,12 +424,12 @@ function postEntryMapController({ entries, EntryMapper }) {
     );
 }
 
-function SimplifiedPostList({  params: additional_params, post }) {
+function SimplifiedPostList({ params: additional_params, post, endpoint }) {
     async function getPosts(from) {
         let params = { from: from };
         if (additional_params)
             params = { ...params, ...additional_params };
-        const response = await axios.post( params);
+        const response = await axios.post(endpoint, params);
         return response.data;
     }
     return <PostList getPosts={getPosts} post={post} />;

@@ -126,7 +126,7 @@ function DeleteRow({ post }) {
 
         //delete from db
         await axios.post(
-            "/member/delete/post",
+            "member/delete/post",
             { id: post.id }
         );
 

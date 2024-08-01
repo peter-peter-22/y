@@ -53,6 +53,8 @@ const router = express.Router();
                     ]);
                     if (result.rows.length > 0) {
                         const user = result.rows[0];
+                        if(user.password_hash===null)
+                        return cb(new Error("This email belongs to a third party login"));
                         const storedHashedPassword = user.password_hash;
                         bcrypt.compare(password, storedHashedPassword, (err, valid) => {
                             if (err) {

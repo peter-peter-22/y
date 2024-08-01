@@ -115,18 +115,18 @@ function PostCreator({ post, quoted, onPost, editing,noUpdate }) {
                 formData.append("deleted_media", deleted);
             });
             formData.append("id", editing.id);
-            endpoint = "/member/edit/post";
+            endpoint = "member/edit/post";
         }
         else if (isComment) {
             formData.append("replying_to", post.id);
-            endpoint = "/member/create/comment";
+            endpoint = "member/create/comment";
         }
         else if (isQuote) {
             formData.append("quoted", quoted.id);
-            endpoint = "/member/create/quote";
+            endpoint = "member/create/quote";
         }
         else {
-            endpoint = "/member/create/post";
+            endpoint = "member/create/post";
         }
 
         try {
@@ -135,7 +135,7 @@ function PostCreator({ post, quoted, onPost, editing,noUpdate }) {
 
             //request
             const result = await axios.post(
-                
+                endpoint,
                 formData,
                 {
                     headers: {

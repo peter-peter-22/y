@@ -222,7 +222,7 @@ router.post("/celebrities", async (req, res) => {
     ${user_columns},
     USERS.BIO 
     from USERS 
-    ORDER BY (select count(*) from follows where followed=:user_id) DESC
+    ORDER BY follower_count DESC, USERS.ID ASC
     LIMIT :limit OFFSET :offset`;
 
     const users = await db.query(named(text)({

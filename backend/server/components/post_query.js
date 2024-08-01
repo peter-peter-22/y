@@ -38,8 +38,6 @@ ${is_blocked} AS IS_BLOCKED,
 ${is_followed()} AS IS_FOLLOWED
 `
 
-const like_count = "like_count";
-
 const liked_by_user = `
 EXISTS
 	(SELECT *
@@ -104,7 +102,7 @@ function postQuery(where = "", offset = 0, limit = config.posts_per_request, fro
 		${columns}
 	FROM ${from}
 		${where}
-	ORDER BY DATE DESC
+	ORDER BY DATE DESC, ID DESC
 	OFFSET ${offset}
 	LIMIT ${limit}`;
 }

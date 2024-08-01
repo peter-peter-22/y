@@ -24,7 +24,7 @@ import {  FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
 function FollowableList() {
     async function GetEntries(from) {
         try {
-            const response = await axios.post("/member/general/follower_recommendations", {
+            const response = await axios.post("member/general/follower_recommendations", {
                 from: from
             });
             return response.data;

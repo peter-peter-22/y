@@ -70,7 +70,7 @@ const MediaMemo = memo(({ index }) => {
 function MediaOfUser({ user }) {
     async function GetEntries(from) {
         try {
-            const res = await axios.post("/member/general/media_of_user", { from: from, user_id: user.id });
+            const res = await axios.post("member/general/media_of_user", { from: from, user_id: user.id });
             return res.data;
         }
         catch (err) {
@@ -87,17 +87,17 @@ function MediaOfUser({ user }) {
 
 function LikesOfUser(props) {
     const user_id = props.user.id;
-    return <SimplifiedPostList endpoint="/member/general/likes_of_user" params={{ user_id: user_id }} />;
+    return <SimplifiedPostList endpoint="member/general/likes_of_user" params={{ user_id: user_id }} />;
 }
 
 function PostsOfUser(props) {
     const user_id = props.user.id;
-    return <SimplifiedPostList endpoint="/member/general/posts_of_user" params={{ user_id: user_id }} />;
+    return <SimplifiedPostList endpoint="member/general/posts_of_user" params={{ user_id: user_id }} />;
 }
 
 function CommentsOfUser(props) {
     const user_id = props.user.id;
-    return <SimplifiedPostList endpoint="/member/general/comments_of_user" params={{ user_id: user_id }} />;
+    return <SimplifiedPostList endpoint="member/general/comments_of_user" params={{ user_id: user_id }} />;
 }
 
 function Followers({ user }) {
@@ -106,7 +106,7 @@ function Followers({ user }) {
             <ListTitle>
                 Followers of <GetUserName user={user} />
             </ListTitle>
-            <UserListExtended url={"/member/general/followers_of_user"} params={{ id: user.id }} />
+            <UserListExtended url={"member/general/followers_of_user"} params={{ id: user.id }} />
         </Stack>
     );
 }
@@ -117,7 +117,7 @@ function Following({ user }) {
             <ListTitle>
                 Followed by <GetUserName user={user} />
             </ListTitle>
-            <UserListExtended url={"/member/general/followed_by_user"} params={{ id: user.id }} />
+            <UserListExtended url={"member/general/followed_by_user"} params={{ id: user.id }} />
         </Stack>
     );
 }

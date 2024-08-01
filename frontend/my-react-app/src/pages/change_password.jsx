@@ -54,7 +54,7 @@ export default () => {
 
     async function Submit() {
         try {
-            await axios.post("/user/change_password/change", {
+            await axios.post("user/change_password/change", {
                 user_id: user_id,
                 secret: secret,
                 password: password

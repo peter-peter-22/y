@@ -21,7 +21,7 @@ import { Validator } from "node-input-validator";
 import LocalRoutes from "./passport_strategies/local.js";
 import GoogleRoutes from "./passport_strategies/google.js";
 import GithubRoutes from "./passport_strategies/github.js";
-import { CheckV } from "./validations.js";
+import { CheckV,CheckErr } from "./validations.js";
 import { ApplySqlToUser, UpdateUser } from "../routes/logged_in.js";
 import { user_columns } from "./post_query.js";
 const named = yesql.pg;
@@ -66,7 +66,7 @@ function auth(req, res)//checking if the user is admin
     }
 }
 
-function universal_auth(req, res, err, user, info, noRedirect) {
+async function universal_auth(req, res, err, user, info, noRedirect) {
     try {
         if (err) { throw err; }
         if (!user) {
@@ -90,7 +90,7 @@ function universal_auth(req, res, err, user, info, noRedirect) {
         }
     }
     catch (err) {
-        return res.status(400).send(err);
+        res.status(422).send(typeof err =="string"?err: err.message);
     }
 }
 
