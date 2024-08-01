@@ -171,7 +171,7 @@ function ProfileButton() {
 
     async function handleLogout() {
         try {
-            await axios.get("/logout");
+            await axios.get("logout");
             UserData.update();
         } catch (err) {
             ThrowIfNotAxios(err);

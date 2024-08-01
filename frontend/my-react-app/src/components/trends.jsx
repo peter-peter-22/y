@@ -31,7 +31,7 @@ function TrendsPreview() {
 
     async function Download() {
         try {
-            const res = await axios.get("/member/trends/preview");
+            const res = await axios.get("member/trends/preview");
             setEntries(res.data);
         }
         catch (err) {
@@ -101,7 +101,7 @@ const TrendEntry = memo(({ entry, index }) => {
 function TrendList() {
     async function GetEntries(from) {
         try {
-            const response = await axios.post("/member/trends/list", { from: from });
+            const response = await axios.post("member/trends/list", { from: from });
             return response.data;
         }
         catch (err) {

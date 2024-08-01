@@ -219,9 +219,9 @@ function PostButtonRow(props) {
     let post = props.post;
     if (post === undefined)
         post = ExamplePost();
-    const { count: like_count, active: liked, pressed: handleLike } = CountableButton(post, post.like_count, post.liked_by_user, "/member/general/like");
-    const { count: bookmark_count, active: bookmarked, pressed: handleBookmark } = CountableButton(post, post.bookmark_count, post.bookmarked_by_user, "/member/general/bookmark");
-    const { count: repost_count, active: reposted, pressed: handleRepost } = CountableButton(post, post.repost_count, post.reposted_by_user, "/member/general/repost");
+    const { count: like_count, active: liked, pressed: handleLike } = CountableButton(post, post.like_count, post.liked_by_user, "member/general/like");
+    const { count: bookmark_count, active: bookmarked, pressed: handleBookmark } = CountableButton(post, post.bookmark_count, post.bookmarked_by_user, "member/general/bookmark");
+    const { count: repost_count, active: reposted, pressed: handleRepost } = CountableButton(post, post.repost_count, post.reposted_by_user, "member/general/repost");
     const [comment_count, set_comment_count] = useState(post.comment_count);
     const navigate = useNavigate();
 
@@ -413,7 +413,7 @@ function PostList({ post, ...props }) {
     }, []);
 
     return (
-        <OnlineList getEntries={GetEntries} EntryMapper={HideablePostMemo} ref={onlineListRef} key={key} entryMapController={postEntryMapController} />
+        <OnlineList getEntries={GetEntries} EntryMapper={HideablePostMemo} ref={onlineListRef} key={key} entryMapController={postEntryMapController} fromCol="id"/>
     );
 }
 
@@ -425,12 +425,12 @@ function postEntryMapController({ entries, EntryMapper }) {
     );
 }
 
-function SimplifiedPostList({  params: additional_params, post }) {
+function SimplifiedPostList({  params: additional_params, post,endpoint }) {
     async function getPosts(from) {
         let params = { from: from };
         if (additional_params)
             params = { ...params, ...additional_params };
-        const response = await axios.post( params);
+        const response = await axios.post(endpoint, params);
         return response.data;
     }
     return <PostList getPosts={getPosts} post={post} />;

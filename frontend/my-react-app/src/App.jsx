@@ -14,6 +14,7 @@ import Dialog from '@mui/material/Dialog';
 import CreateAccount from "/src/components/create_account.jsx";
 import { Modals, CreateModals, Error } from "/src/components/modals";
 import SharedPages from "/src/components/shared_pages_router";
+import "/src/communication.js";
 
 //components
 import Main from "./components/logged_in_router.jsx";

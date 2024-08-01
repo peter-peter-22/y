@@ -44,18 +44,18 @@ function TabSelector() {
     useEffect(() => { }, [id]);
 
     function Likes() {
-        const url = "/member/general/likers_of_post";
+        const url = "member/general/likers_of_post";
         return (
             <UserListExtended url={url} params={{ post_id: id }} />
         );
     }
 
     function Reposts() {
-        return <SimplifiedPostList endpoint="/member/general/reposts_of_post" params={{ post_id: id }} />;
+        return <SimplifiedPostList endpoint="member/general/reposts_of_post" params={{ post_id: id }} />;
     }
 
     function Quotes() {
-        return <SimplifiedPostList endpoint="/member/general/quotes_of_post" params={{ post_id: id }} />;
+        return <SimplifiedPostList endpoint="member/general/quotes_of_post" params={{ post_id: id }} />;
     }
 
     const baseUrl = "/posts/" + id;

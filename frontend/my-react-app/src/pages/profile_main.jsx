@@ -55,7 +55,7 @@ function Profile() {
     useEffect(() => {
         async function get() {
             try {
-                const res = await axios.post("/member/general/user_profile", { user_id: id });
+                const res = await axios.post("member/general/user_profile", { user_id: id });
                 const user = res.data;
                 setUser(user);
             } catch (err) {
@@ -249,7 +249,7 @@ function UnblockButton(props) {
 
     async function Unblock() {
         try {
-            await axios.post("/member/general/block_user", {
+            await axios.post("member/general/block_user", {
                 key: user_id,
                 value: false
             });

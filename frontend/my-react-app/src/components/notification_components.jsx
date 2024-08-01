@@ -202,7 +202,7 @@ const Notification = memo(({ entry: data }) => {
 function NotificationList() {
     async function download(from) {
         try {
-            const res = await axios.post("/member/notifications/get", { from: from });
+            const res = await axios.post("member/notifications/get", { from: from });
             return res.data;
         }
         catch (err) {
@@ -212,7 +212,7 @@ function NotificationList() {
     }
 
     return (
-        <OnlineList getEntries={download} EntryMapper={Notification} />
+        <OnlineList getEntries={download} EntryMapper={Notification} fromCol="id"/>
     );
 }
 

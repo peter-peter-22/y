@@ -113,8 +113,8 @@ router.post("/user_profile", async (req, res) => {
     registration_date,
     birthdate,
     bio, 
-    (select count(*) from follows where followed=id) as followers , 
-    (select count(*) from follows where follower=id) as follows 
+    follower_count as followers , 
+    following_count as follows 
     from users 
     where id=:target_user_id
     `)({ target_user_id: user_id, user_id: UserId(req) }));
@@ -130,7 +130,7 @@ router.post("/follower_recommendations", async (req, res) => {
     const v = new Validator(req.body, { from: "required|integer" });
     await CheckV(v);
     const { from } = req.body;
-    const text = `SELECT ${user_columns}, FALSE as is_followed from USERS WHERE NOT ${is_followed()} LIMIT :limit OFFSET :offset`;
+    const text = `SELECT ${user_columns}, FALSE as is_followed from USERS WHERE id<:offset AND NOT ${is_followed()} order by id desc LIMIT :limit`;
     const users = await db.query(named(text)({
         user_id: UserId(req),
         offset: from,
@@ -146,7 +146,18 @@ router.post("/followed_by_user", async (req, res) => {
     });
     await CheckV(v);
     const { from, id } = req.body;
-    const text = `SELECT ${user_columns},TRUE as is_followed from USERS WHERE ${(is_followed(":target_id"))} LIMIT :limit OFFSET :offset`;
+
+    const text = `
+    SELECT 
+        FOLLOWS.ID AS FOLLOW_ID,
+        ${user_columns},
+        ${is_followed()} as is_followed 
+    from FOLLOWS 
+        LEFT JOIN USERS ON USERS.ID=FOLLOWS.FOLLOWED 
+        WHERE FOLLOWER=:target_id AND FOLLOWS.ID<:offset
+        ORDER BY FOLLOWS.ID DESC
+        LIMIT :limit`;
+
     const users = await db.query(named(text)({
         user_id: UserId(req),
         offset: from,
@@ -165,12 +176,14 @@ router.post("/followers_of_user", async (req, res) => {
     const { from, id } = req.body;
     const text = `
     SELECT 
+        FOLLOWS.ID AS FOLLOW_ID,
         ${user_columns},
         ${is_followed()} as is_followed 
-    from USERS 
-        WHERE ${is_following(":target_id")} 
-        LIMIT :limit 
-        OFFSET :offset`;
+    from FOLLOWS 
+        LEFT JOIN USERS ON USERS.ID=FOLLOWS.FOLLOWER 
+        WHERE FOLLOWED=:target_id AND FOLLOWS.ID<:offset
+        ORDER BY FOLLOWS.ID DESC
+        LIMIT :limit`;
     const users = await db.query(named(text)({
         user_id: UserId(req),
         offset: from,

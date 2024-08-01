@@ -87,7 +87,7 @@ function EnterPassword(props) {
     }
     async function submitPassword() {
         try {
-            await axios.post('/login',
+            await axios.post('login',
                 {
                     email: email,
                     password: password
@@ -135,7 +135,7 @@ function ChooseMethod(props) {
     }
     async function submitEmail() {
         try {
-            const res = await axios.post('/user/exists/email',
+            const res = await axios.post('user/exists/email',
                 {
                     email: email
                 },
@@ -198,7 +198,7 @@ function ForgotPassword(props) {
     //submit rechapta
     async function submitChapta() {
         try {
-            await axios.post('/user/change_password/submit_chapta',
+            await axios.post('user/change_password/submit_chapta',
                 {
                     email: email,
                     recaptchaToken: captchaValue

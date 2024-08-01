@@ -19,7 +19,7 @@ router.get("/preview", async (req, res) => {
     res.send(q.rows);
 });
 
-router.post("/list", async (req, res) => {
+router.post("/list", async (req, res) => {//needs index
     const v = new Validator(req.body, {
         from: "required|integer",
     });

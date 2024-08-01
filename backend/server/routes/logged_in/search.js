@@ -6,7 +6,7 @@ import { CheckV, CheckErr } from "../../components/validations.js";
 
 const router = express.Router();
 
-const isOk = "ILIKE '%' || :text || '%'";
+const isOk = "ILIKE :text || '%'";//this needs an index?
 
 const searchUser = `
 SELECT 
@@ -14,14 +14,16 @@ SELECT
     ${is_followed()} as is_followed 
 FROM USERS
 WHERE
+(
     USERNAME ${isOk}
     OR
-    NAME ${isOk}`;
+    NAME ${isOk}
+)`;
 
-const searchUserPreview = `${searchUser} LIMIT 3`;
-const searchUserList = `${searchUser} OFFSET :from LIMIT :limit`;
+const searchUserPreview = `${searchUser} ORDER BY USERS.FOLLOWER_COUNT LIMIT 5`;
+const searchUserList = `${searchUser} AND USERS.ID<:from ORDER BY USERS.ID DESC LIMIT :limit`;
 
-const autoFillPerTopic = 5;
+const autoFillPerTopic = 5;//this also needs a index
 const searchAutofill = `
 (
 	select hashtag as value, 'Topics' as group from trends
