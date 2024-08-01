@@ -54,17 +54,11 @@ async function CountableToggle(req, res, onAdd, onRemove) {
     }
 }
 
-async function GetPosts(user_id, where = "", where_params, limit, offset, posts_query, level) {
+async function GetPosts(user_id, where, where_params, limit, offset = 0, posts_query, level) {
     const params = { user_id: user_id, ...where_params };
 
-    if (offset !==undefined) {
-        if (where)
-            where += " and ";
-        where += `post.id<${parseInt(offset)}`;
-    }
-
     //getting the posts
-    const text = postQuery(where, limit, posts_query);
+    const text = postQuery(where, offset, limit, posts_query);
     const posts_q = await db.query(named(text)(params));
     const posts = posts_q.rows;
 
@@ -76,6 +70,23 @@ async function GetPosts(user_id, where = "", where_params, limit, offset, posts_
 
 //adds the necessary data about the replied, reposted and quoted posts and counts the views
 async function add_data_to_posts(posts, user_id, level = 0) {
+    //for each comment, getting the name of the replied user
+    ///  const comments = posts.filter(post => post.replying_to !== null);
+    ///  if (comments.length !== 0) {
+    ///      const replied_ids = [];
+    ///      comments.forEach(comment => {
+    ///          const replied_id = comment.replying_to;
+    ///          if (!replied_ids.includes(replied_id))
+    ///              replied_ids.push(replied_id);
+    ///      });
+    ///      const replied_query = await db.query(named("SELECT POST.ID as post_id, POSTER.ID, POSTER.USERNAME, POSTER.NAME FROM POSTS POST LEFT JOIN USERS POSTER ON POSTER.ID = POST.PUBLISHER WHERE POST.ID = ANY(:ids)")({ ids: replied_ids }));
+    ///      const replied_users = replied_query.rows;
+    ///      comments.forEach(comment => {
+    ///          const myUser = replied_users.find(user => user.post_id === comment.replying_to);
+    ///          comment.replied_user = myUser;
+    ///      });
+    ///  }
+
     //adding the referenced post to each repost or quote
     //level means how much parent posts are above this post
     if (level < 2) {
@@ -88,7 +99,7 @@ async function add_data_to_posts(posts, user_id, level = 0) {
         });
         if (reposted_ids.length !== 0) {
             //downloading the reposted posts and assigning them to their reposter
-            const reposted_posts = await GetPosts(user_id, "WHERE post.id=ANY(:reposted_ids)", { reposted_ids: reposted_ids }, 999, undefined, undefined, level);
+            const reposted_posts = await GetPosts(user_id, " WHERE post.id=ANY(:reposted_ids)", { reposted_ids: reposted_ids }, 999, undefined, undefined, level);
 
             posts.forEach(post => {
                 if (post.reposted_id !== null) {

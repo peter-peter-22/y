@@ -17,7 +17,7 @@ export default () => {
       <Fab color="black" variant="extended" onClick={Ask}>
         Test
       </Fab>
-      <Fab color="black" variant="extended"onClick={()=>{axios.get("send_notification")}}>
+      <Fab color="black" variant="extended"onClick={()=>{axios.get("/send_notification")}}>
         Test
       </Fab>
     </Stack>

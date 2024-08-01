@@ -29,7 +29,7 @@ async function send() {
 
     //send push notification
     console.log("sending subscription to server");
-    await axios.post("subscribe",
+    await axios.post("/subscribe",
         { subscription: subscription }
     );
     console.log("subscription sent");

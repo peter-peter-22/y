@@ -8,7 +8,7 @@ import { styled } from '@mui/material/styles';
 
 function GetNotificationCount() {
     const [count, setCount] = useState(0);
-    ListenToStream("member/notifications/events", (data) => {
+    ListenToStream("/member/notifications/events", (data) => {
         setCount(data);
     });
     return [count, setCount];

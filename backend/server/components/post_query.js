@@ -25,12 +25,12 @@ JSONB_BUILD_OBJECT
 	'is_blocked',${is_blocked}
 )`;
 
-//for session and user list
+//for session
 const user_columns = `
-users.id,
-users.username,
-users.name,
-users.picture`;
+id,
+username,
+name,
+picture`;
 
 const user_columns_extended = `
 ${user_columns},
@@ -98,13 +98,14 @@ const columns = `
     ${publisher} AS PUBLISHER,
 	${replied_user} as replied_user`;
 
-function postQuery(where = "", limit = config.posts_per_request, from = "POSTS AS POST") {
+function postQuery(where = "", offset = 0, limit = config.posts_per_request, from = "POSTS AS POST") {
 	return `
 	SELECT
 		${columns}
 	FROM ${from}
-	${where}
-	ORDER BY POST.ID DESC
+		${where}
+	ORDER BY DATE DESC
+	OFFSET ${offset}
 	LIMIT ${limit}`;
 }
 

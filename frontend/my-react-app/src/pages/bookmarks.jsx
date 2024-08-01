@@ -23,7 +23,7 @@ import axios from "axios";
 import {  FormatAxiosError } from "/src/communication.js";
 
 function BookmarkList() {
-    return <SimplifiedPostList endpoint="member/general/get_bookmarks" />;
+    return <SimplifiedPostList endpoint="/member/general/get_bookmarks" />;
 }
 
 function Bookmarks() {

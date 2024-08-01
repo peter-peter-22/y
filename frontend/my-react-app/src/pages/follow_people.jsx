@@ -24,7 +24,7 @@ import {  FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
 function FollowableList() {
     async function GetEntries(from) {
         try {
-            const response = await axios.post("member/general/follower_recommendations", {
+            const response = await axios.post("/member/general/follower_recommendations", {
                 from: from
             });
             return response.data;
@@ -59,7 +59,7 @@ const FollowDialogExtended = memo(({ entry: user }) => {
 });
 
 //extended because this additionally displays the user bio, and accepts more url parameters
-function UserListExtended({ url, params: additionalParams,fromCol }) {
+function UserListExtended({ url, params: additionalParams }) {
     async function GetEntries(from) {
         try {
             let params = { from: from };
@@ -75,7 +75,7 @@ function UserListExtended({ url, params: additionalParams,fromCol }) {
     }
 
     return (
-        <OnlineList getEntries={GetEntries} EntryMapper={FollowDialogExtended} fromCol={fromCol}/>
+        <OnlineList getEntries={GetEntries} EntryMapper={FollowDialogExtended} />
     );
 }
 

@@ -54,7 +54,7 @@ export default () => {
         (async() => {
             try {
                 //get post from server
-                const result = await axios.post("member/general/get_post", {
+                const result = await axios.post("/member/general/get_post", {
                     id: id
                 });
                 //if success, update state
@@ -93,7 +93,7 @@ export default () => {
 
 function CommentList({ post }) {
     const id = post.id;
-    return <SimplifiedPostList endpoint="member/general/get_comments" params={{ id: id }} key={id} post={post} />;
+    return <SimplifiedPostList endpoint="/member/general/get_comments" params={{ id: id }} key={id} post={post} />;
 }
 
 export { get_focused_id };

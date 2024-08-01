@@ -1,4 +1,4 @@
-import {  user_json,columns as post_columns } from "./post_query.js";
+import { postQuery, user_json,columns as post_columns } from "./post_query.js";
 
 const visible_users = `LEAST(10,NOTIFICATIONS.COUNT)`;
 
@@ -116,9 +116,9 @@ select
 	${columns}
 from
 	${tables}
-where user_id=:user_id and notifications.id <:from
-order by notifications.id desc
-limit :limit`;
+where user_id=:user_id
+order by notifications.date desc
+limit :limit offset :from`;
 
 const markAsRead = `
 UPDATE NOTIFICATIONS

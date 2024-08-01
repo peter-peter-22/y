@@ -40,6 +40,7 @@ import { ProfilePicEditor, ChangeablePicture, UserNameEditor, NameEditor, BirthD
 import { ManageProfile } from "/src/components/manage_content_button.jsx";
 import { Media, mediaTypes } from "/src/components/media";
 import { ImageDisplayer, MediaDisplayer } from "/src/components/media";
+import { UserListExtended } from "/src/pages/follow_people.jsx";
 import {ProfileBanner} from "/src/pages/profile_main";
 
 function ProfileEditor({user}) {

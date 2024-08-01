@@ -23,6 +23,7 @@ import * as pp from "../../components/passport.js";
 import { username_exists, selectable_username } from "../user.js";
 import { Validator } from "node-input-validator";
 import { CheckV, CheckErr, validate_image, validate_video, validate_media } from "../../components/validations.js";
+import { GetPosts } from "../../components/general_components.js";
 import { GetMaxLetters } from "../user.js";
 import { deletePostFiles } from "../../components/cloudinary_handler.js";
 import { findHashtags, findHtml } from "../../components/sync.js";

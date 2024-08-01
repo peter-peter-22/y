@@ -29,7 +29,7 @@ import { PlainTextField, PasswordFieldWithToggle, VisuallyHiddenInput } from "/s
 import { UserData } from "/src/components/user_data";
 import config from "/src/components/config.js";
 import axios from 'axios';
-import { FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
+import {  FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
 import { ErrorText, Modals, ShowImage } from "/src/components/modals";
 import { useNavigate } from "react-router-dom";
 import { commentSections, BorderlessPost, RowWithPrefix, QuotedFrame } from "/src/components/posts.jsx";
@@ -39,7 +39,7 @@ import { findHashtags, findHtml } from "/src/components/sync.js";
 import { PostMediaEditor } from "/src/components/post_media";
 
 
-function PostCreator({ post, quoted, onPost, editing, noUpdate }) {
+function PostCreator({ post, quoted, onPost, editing,noUpdate }) {
     const [isFocused, setIsFocused] = React.useState(false);
     const [getText, setText] = React.useState(editing ? editing.text : "");
     const maxLetters = UserData.getData.maxLetters;
@@ -115,18 +115,18 @@ function PostCreator({ post, quoted, onPost, editing, noUpdate }) {
                 formData.append("deleted_media", deleted);
             });
             formData.append("id", editing.id);
-            endpoint = "member/edit/post";
+            endpoint = "/member/edit/post";
         }
         else if (isComment) {
             formData.append("replying_to", post.id);
-            endpoint = "member/create/comment";
+            endpoint = "/member/create/comment";
         }
         else if (isQuote) {
             formData.append("quoted", quoted.id);
             endpoint = "/member/create/quote";
         }
         else {
-            endpoint = "member/create/post";
+            endpoint = "/member/create/post";
         }
 
         try {
@@ -135,7 +135,7 @@ function PostCreator({ post, quoted, onPost, editing, noUpdate }) {
 
             //request
             const result = await axios.post(
-                endpoint,
+                
                 formData,
                 {
                     headers: {
@@ -150,8 +150,8 @@ function PostCreator({ post, quoted, onPost, editing, noUpdate }) {
 
             //update post list on client without refreshing the page
             const post = result.data;
-            if (!noUpdate)
-                AddPostToCommentSection(post);
+            if(!noUpdate)
+            AddPostToCommentSection(post);
 
             //call function if defined
             if (onPost)

@@ -156,7 +156,7 @@ async function postAny(req, saveToDatabase) {
     await UploadFiles(files, post_id);
 
     //return the created post 
-    const recentlyAddedPost = await GetPosts(user_id, "where post.id=:post_id", { post_id: post_id }, 1);//this can be skipped by returning the updated post after cloud upload
+    const recentlyAddedPost = await GetPosts(user_id, "WHERE post.id=:post_id", { post_id: post_id }, 1);//this can be skipped by returning the updated post after cloud upload
     return recentlyAddedPost[0];
 }
 

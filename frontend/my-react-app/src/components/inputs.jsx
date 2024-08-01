@@ -65,7 +65,7 @@ function SearchField() {
             return;
 
         try {
-            const res = await axios.post("member/search/autofill", {
+            const res = await axios.post("/member/search/autofill", {
                 text: val
             });
             const sorted = res.data.sort((a, b) => topicOrder[a.group] > topicOrder[b.group] ? 1 : -1);

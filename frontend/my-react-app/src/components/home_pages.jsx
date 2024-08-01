@@ -24,11 +24,11 @@ import axios from "axios";
 import {  FormatAxiosError } from "/src/communication.js";
 
 function FeedList() {
-    return <SimplifiedPostList endpoint="member/feed/get_posts" />;
+    return <SimplifiedPostList endpoint="/member/feed/get_posts" />;
 }
 
 function FollowingFeedList() {
-    return <SimplifiedPostList endpoint="member/feed/get_followed_posts" />;
+    return <SimplifiedPostList endpoint="/member/feed/get_followed_posts" />;
 }
 
 function ForYou() {

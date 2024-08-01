@@ -83,7 +83,7 @@ function CreateAccount(props) {
     }
     async function send_finish() {
         try {
-            await axios.post("finish_registration",
+            await axios.post("/finish_registration",
                 {
                     birthdate: date.toISOString(),
                     checkboxes: checkboxes
@@ -143,7 +143,7 @@ function Page0(props)//enter email, ect.
         WaitAfterChange(async () => {
             if (valid) {
                 try {
-                    const res = await axios.post("user/exists/email", {
+                    const res = await axios.post("/user/exists/email", {
                         email: value
                     });
                     if (res.data)
@@ -254,7 +254,7 @@ function Page2(props)//rechapta and send values to server
     async function submitChapta() {
         try {
             const vals = data.current;
-            await axios.post('register_start',
+            await axios.post('/register_start',
                 {
                     email: vals.email,
                     name: vals.name,
@@ -296,7 +296,7 @@ function Page3(props)//submit verification code
             return;
 
         try {
-            await axios.post('verify_code',
+            await axios.post('/verify_code',
                 {
                     code: code
                 },
@@ -337,7 +337,7 @@ function Page4(props)//enter password, login
             return;
 
         try {
-            await axios.post('submit_password',
+            await axios.post('/submit_password',
                 {
                     password: password
                 },
@@ -432,7 +432,7 @@ function Page6(props)//enter username
             return;
 
         try {
-            await axios.post("member/modify/change_username", {
+            await axios.post("/member/modify/change_username", {
                 username: username
             });
             handleNext();
@@ -458,7 +458,7 @@ function Page7(props)//notifications
     const [data, handleNext] = GetProps(props);
     async function setNotifications(enabled) {
         try {
-            await axios.post("member/modify/change_browser_notifications", {
+            await axios.post("/member/modify/change_browser_notifications", {
                 enabled: enabled
             });
             handleNext();
@@ -571,9 +571,9 @@ function RechaptaInput(props) {
 }
 
 function RecommendCelebrities() {
-    const url = "member/general/celebrities";
+    const url = "/member/general/celebrities";
     return (
-        <UserListExtended url={url} fromCol="id"/>
+        <UserListExtended url={url} />
     );
 }
 
@@ -686,7 +686,7 @@ function UserNameEditor(props) {
         WaitAfterChange(async () => {
             if (value.length > 0) {
                 try {
-                    const res = await axios.post("member/modify/ok_username", {
+                    const res = await axios.post("/member/modify/ok_username", {
                         username: value
                     });
                     setUserNameOk(res.data);

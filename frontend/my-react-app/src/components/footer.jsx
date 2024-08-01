@@ -205,7 +205,7 @@ function WhoToFollow() {
     useEffect(() => {
         async function getFollowRecommendations() {
             try {
-                const res = await axios.get("member/general/follower_recommendations_preview");
+                const res = await axios.get("/member/general/follower_recommendations_preview");
                 setUsers(res.data);
             }
             catch (err) {

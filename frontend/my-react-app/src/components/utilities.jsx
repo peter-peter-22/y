@@ -385,10 +385,10 @@ function FollowButton(props) {
 }
 
 function ToggleFollow(user) {
-    return ToggleOnlineBool(user, "member/general/follow_user", user.is_followed);
+    return ToggleOnlineBool(user, "/member/general/follow_user", user.is_followed);
 }
 function ToggleBlock(user, onChange) {
-    return ToggleOnlineBool(user, "member/general/block_user", user.is_blocked, onChange);
+    return ToggleOnlineBool(user, "/member/general/block_user", user.is_blocked, onChange);
 }
 
 function ToggleOnlineBool(user, url, startingValue, onChange) {
@@ -513,14 +513,13 @@ function defaultEntryMapController({ entries, EntryMapper }) {
     );
 }
 
-const OnlineList = forwardRef(({ EntryMapper, getEntries, entryMapController: overrideEntryMapController ,fromCol}, ref) => {
+const OnlineList = forwardRef(({ EntryMapper, getEntries, entryMapController: overrideEntryMapController }, ref) => {
     const [entries, setEntries] = useState([]);
     const listRef = useRef(null);
     const savedScrollRef = useRef(0);
     const [end, setEnd] = useState(false);
     const [downloading, setDownloading] = useState(false);
     const updateRef = useRef({ end, downloading });
-    const fromRef=useRef(2147483647);//starts from the biggest id and goes to the lowest
     useEffect(() => { updateRef.current = { end, downloading } }, [end, downloading]);
 
     //the minimum distance between the bottom of the screen and the bottom of the list in px.
@@ -543,14 +542,14 @@ const OnlineList = forwardRef(({ EntryMapper, getEntries, entryMapController: ov
     }, [entries])
 
     async function FillEntries() {
-        const results = await getEntries(fromRef.current);
+        const from = entries.length;
+        const results = await getEntries(from);
         //if no results recieved, then this is the end of the list, do not ask for more entries
         if (results.length === 0) {
             setEnd(true);
             return;
         }
         else {
-            fromRef.current=results[results.length-1][fromCol];
             setEntries((prev) => {
                 return prev.concat(results)
             });

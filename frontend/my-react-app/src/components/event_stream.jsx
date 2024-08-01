@@ -2,7 +2,6 @@ import { useEffect, useRef } from "react";
 import axios from "axios";
 import {  FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
 import fetchAdapter from "@shiroyasha9/axios-fetch-adapter";
-import config from "/src/components/config.js";
 
 function ListenToStream( url, onData ) {
     const first = useRef(true);
@@ -14,7 +13,7 @@ function ListenToStream( url, onData ) {
             return;
 
         async function createEvents() {
-            const response = await fetch(config.address_mode.server+"/"+ url, {
+            const response = await fetch(url, {
                 headers: {
                     "Accept": "text/event-stream",
                 },

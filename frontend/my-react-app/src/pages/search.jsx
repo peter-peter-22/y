@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
+import {  FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
 import axios from 'axios';
 import { SimplifiedPostList } from "/src/components/posts";
 import { useLocation } from "react-router-dom";
@@ -42,7 +42,7 @@ function UsersPreview({ text }) {
     const [getUsers, setUsers] = useState();
 
     async function Download() {
-        const res = await axios.post("member/search/people_preview", {
+        const res = await axios.post("/member/search/people_preview", {
             text: text
         });
         setUsers(res.data);
@@ -82,7 +82,7 @@ function UsersPreview({ text }) {
 
 function UsersList({ text }) {
     return (
-        <UserListExtended url={"member/search/people_list"} params={{ text: text }} fromCol="id"/>
+        <UserListExtended url={"/member/search/people_list"} params={{ text: text }} />
     );
 }
 
@@ -100,7 +100,7 @@ function Posts({ text }) {
             <ListTitle>
                 Posts
             </ListTitle>
-            <SimplifiedPostList endpoint="member/search/posts" params={{ text: text }} key={text} />
+            <SimplifiedPostList endpoint="/member/search/posts" params={{ text: text }} key={text} />
         </Stack>
     );
 }
@@ -114,8 +114,9 @@ function Main({ text }) {
     );
 }
 
-function GetSearchUrl(text) {
+function GetSearchUrl(text)
+{
     return "/search?q=" + text;
 }
 
-export { GetSearchText, GetSearchUrl };
+export { GetSearchText,GetSearchUrl };
