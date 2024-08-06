@@ -1,17 +1,13 @@
-import React, { useState, useEffect } from "react";
-import {  FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
-import axios from 'axios';
-import { SimplifiedPostList } from "/src/components/posts";
-import { useLocation } from "react-router-dom";
-import { FollowDialogExtended, UserListExtended } from "/src/pages/follow_people";
-import { Loading, ListTitle } from "/src/components/utilities";
 import { Typography } from "@mui/material";
-import Stack from '@mui/material/Stack';
 import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
+import Stack from '@mui/material/Stack';
+import axios from 'axios';
+import React, { useEffect, useState } from "react";
+import { Route, Routes, useLocation } from "react-router-dom";
 import { LinkButton } from "/src/components/buttons";
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import { SimplifiedPostList } from "/src/components/posts";
+import { ListTitle, Loading } from "/src/components/utilities";
+import { FollowDialogExtended, UserListExtended } from "/src/pages/follow_people";
 
 // A custom hook that builds on useLocation to parse
 // the query string for you.
@@ -119,4 +115,4 @@ function GetSearchUrl(text)
     return "/search?q=" + text;
 }
 
-export { GetSearchText,GetSearchUrl };
+export { GetSearchText, GetSearchUrl };

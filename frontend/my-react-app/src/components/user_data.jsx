@@ -1,10 +1,8 @@
-import React, { useState, useRef } from "react";
-import { AboveBreakpoint } from '/src/components/utilities';
 import axios from "axios";
-import {  ThrowIfNotAxios } from "/src/communication.js";
-import Dialog from '@mui/material/Dialog';
+import React, { useState } from "react";
+import { ThrowIfNotAxios } from "/src/communication.js";
 import CreateAccount from "/src/components/create_account.jsx";
-import { Modals, CreateModals, Error } from "/src/components/modals";
+import { Modals } from "/src/components/modals";
 
 
 //globally accessible
@@ -68,4 +66,5 @@ function UserHook() {
     return getData;
 }
 
-export {UserHook,UserData};
+export { UserData, UserHook };
+

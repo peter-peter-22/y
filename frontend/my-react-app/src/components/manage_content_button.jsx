@@ -1,39 +1,17 @@
-import React, { useState, useRef, useEffect, forwardRef, createContext, useContext } from "react";
-import Stack from '@mui/material/Stack';
-import { Inside } from "./side_menus.jsx";
-import { TopMenu } from '/src/components/utilities';
-import { SearchField } from "/src/components/inputs.jsx";
-import { Box, Hidden } from '@mui/material';
-import { Typography } from '@mui/material';
-import Fab from '@mui/material/Fab';
-import { Icon } from '@mui/material';
-import Avatar from '@mui/material/Avatar';
-import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, GetProfilePicture, OnlineList, SimplePopOver, formatNumber, UserLink, ReplyingFrom, ToggleFollow, ToggleBlock, InheritLink } from '/src/components/utilities';
+import { Icon, Typography } from '@mui/material';
+import IconButton from '@mui/material/IconButton';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import { BoxList, BoxListOutlined, BlueTextButton } from '/src/components/containers';
-import IconButton from '@mui/material/IconButton';
-import Link from '@mui/material/Link';
-import { ResponsiveButton, ButtonIcon, ButtonSvg, TabButton, PostButton, ProfileButton, TopMenuButton, CornerButton } from "/src/components/buttons.jsx";
-import { Grid } from '@mui/material';
-import Divider from '@mui/material/Divider';
-import TextField from '@mui/material/TextField';
-import Button from '@mui/material/Button';
-import CircularProgress from '@mui/material/CircularProgress';
-import { theme } from "/src/styles/mui/my_theme";
-import { PlainTextField, PasswordFieldWithToggle, VisuallyHiddenInput } from "/src/components/inputs";
-import { UserData } from "/src/components/user_data";
-import config from "/src/components/config.js";
+import Stack from '@mui/material/Stack';
 import axios from 'axios';
-import {  FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
-import { Error, Modals, ShowImage } from "/src/components/modals";
-import { NavLink, useNavigate } from "react-router-dom";
-import { PostModalFrame, commentSections } from "/src/components/posts";
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { Modals } from "/src/components/modals";
 import { PostCreator } from "/src/components/post_creator";
+import { PostModalFrame, commentSections } from "/src/components/posts";
+import { UserData } from "/src/components/user_data";
+import { GetUserKey, InheritLink, SimplePopOver, ToggleBlock, ToggleFollow, noOverflow } from '/src/components/utilities';
 import { get_focused_id } from "/src/pages/post_focused.jsx";
 
 let closeCurrent = undefined;
@@ -223,4 +201,5 @@ function ManageProfile(props) {
 }
 
 export default ManageContent;
-export { ManagePost, ManageProfile,engagementsLink };
+export { ManagePost, ManageProfile, engagementsLink };
+

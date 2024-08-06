@@ -1,30 +1,12 @@
 import express from "express";
-import pg from "pg";
-import bcrypt from "bcrypt";
-import passport from "passport";
-import { Strategy } from "passport-local";
-import GoogleStrategy from "passport-google-oauth2";
-import session from "express-session";
-import ConnectPg from 'connect-pg-simple';
-import env from "dotenv";
-import { basename, dirname } from "path";
-import { fileURLToPath } from "url";
-import *  as url from "url";
-import path from "path";
-import fileUpload from "express-fileupload";
-import fs from "fs";
-import yesql from 'yesql';
-import cors from "cors";
-import axios from "axios";
-import nodemailer from "nodemailer";
 import { Validator } from "node-input-validator";
-import LocalRoutes from "./passport_strategies/local.js";
-import GoogleRoutes from "./passport_strategies/google.js";
+import passport from "passport";
+import { basename } from "path";
 import GithubRoutes from "./passport_strategies/github.js";
-import { CheckV,CheckErr } from "./validations.js";
-import { ApplySqlToUser, UpdateUser } from "../routes/logged_in.js";
+import GoogleRoutes from "./passport_strategies/google.js";
+import LocalRoutes from "./passport_strategies/local.js";
 import { user_columns } from "./post_query.js";
-const named = yesql.pg;
+import { CheckV } from "./validations.js";
 
 const router = express.Router();
 
@@ -176,5 +158,5 @@ function AddDataToSession(req) {
     remember_session(req, config.cookie_remember);
 }
 
-export { auth, remember_session, router, universal_auth, finish_registration };
+export { auth, finish_registration, remember_session, router, universal_auth };
 

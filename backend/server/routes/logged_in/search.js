@@ -1,8 +1,8 @@
 import express from "express";
-import { post_list } from "../../components/general_components.js";
-import { user_columns, is_followed } from "../../components/post_query.js";
 import { Validator } from "node-input-validator";
-import { CheckV, CheckErr } from "../../components/validations.js";
+import { post_list } from "../../components/general_components.js";
+import { is_followed, user_columns } from "../../components/post_query.js";
+import { CheckV } from "../../components/validations.js";
 
 const router = express.Router();
 

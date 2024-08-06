@@ -1,27 +1,5 @@
-import express from "express";
-import pg from "pg";
-import bcrypt from "bcrypt";
-import passport from "passport";
-import { Strategy } from "passport-local";
-import GoogleStrategy from "passport-google-oauth2";
-import session from "express-session";
-import ConnectPg from 'connect-pg-simple';
-import env from "dotenv";
-import { dirname } from "path";
-import { fileURLToPath } from "url";
-import *  as url from "url";
-import path from "path";
-import fileUpload from "express-fileupload";
-import fs from "fs";
-import yesql from 'yesql';
-const named = yesql.pg;
-import cors from "cors";
-import axios from "axios";
-import nodemailer from "nodemailer";
-import niv from "node-input-validator";
-import * as g from "../config.js";
-import * as pp from "../components/passport.js";
 import Moment from "moment";
+import niv from "node-input-validator";
 
 async function CheckV(v) {
   const matched = await v.check();
@@ -97,4 +75,4 @@ function validate_any(file, accepted_formats) {
     CheckErr(`invalid format "${file.mimetype}". accepted formats: ${accepted_formats.join(", ")}`);
 }
 
-export { CheckV, CheckErr, validate_image, validate_video, validate_media };
+export { CheckErr, CheckV, validate_image, validate_media, validate_video };

@@ -1,30 +1,10 @@
-import express from "express";
 import "express-async-errors";
-import pg from "pg";
-import bcrypt from "bcrypt";
-import passport from "passport";
-import { Strategy } from "passport-local";
-import GoogleStrategy from "passport-google-oauth2";
-import session from "express-session";
-import ConnectPg from 'connect-pg-simple';
-import env from "dotenv";
-import { dirname } from "path";
-import { fileURLToPath } from "url";
-import *  as url from "url";
-import path from "path";
-import fileUpload from "express-fileupload";
-import fs from "fs";
-import yesql from 'yesql';
-const named = yesql.pg;
-import cors from "cors";
-import axios from "axios";
-import nodemailer from "nodemailer";
-import {error_handler} from "./components/error_handler.js";
+import { error_handler } from "./components/error_handler.js";
 
 //initialize and set global variables
+import "./components/validations.js";
 import * as c from "./config.js";
 await c.initialize();
-import "./components/validations.js";
 
 //add middlewares
 import initialize_app from "./components/app_use.js";

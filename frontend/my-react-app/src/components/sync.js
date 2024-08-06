@@ -2,4 +2,4 @@
 const findHashtags = /(\#\w+)/g;
 const findHtml = /<[^>]*>?/gm;
 
-export {findHashtags,findHtml};
+export { findHashtags, findHtml };

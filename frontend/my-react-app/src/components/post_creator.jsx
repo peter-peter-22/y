@@ -1,42 +1,21 @@
-import React, { useState, useRef, useEffect, forwardRef, createContext, useContext } from "react";
-import Stack from '@mui/material/Stack';
-import { Inside } from "./side_menus.jsx";
-import { TopMenu } from '/src/components/utilities';
-import { SearchField } from "/src/components/inputs.jsx";
-import { Box, Hidden } from '@mui/material';
-import { Typography } from '@mui/material';
-import Fab from '@mui/material/Fab';
-import { Icon } from '@mui/material';
-import Avatar from '@mui/material/Avatar';
-import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, GetProfilePicture, OnlineList, SimplePopOver, formatNumber, UserLink, ReplyingFrom, ToggleFollow, ToggleBlock, InheritLink, ProfilePic, Loading } from '/src/components/utilities';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import { BoxList, BoxListOutlined } from '/src/components/containers';
-import IconButton from '@mui/material/IconButton';
-import Link from '@mui/material/Link';
-import { ResponsiveButton, ButtonIcon, ButtonSvg, TabButton, PostButton, ProfileButton, TopMenuButton, CornerButton } from "/src/components/buttons.jsx";
-import { Grid } from '@mui/material';
-import Divider from '@mui/material/Divider';
-import TextField from '@mui/material/TextField';
-import Button from '@mui/material/Button';
+import { Box, Icon, Typography } from '@mui/material';
 import CircularProgress from '@mui/material/CircularProgress';
-import { theme } from "/src/styles/mui/my_theme";
-import { PlainTextField, PasswordFieldWithToggle, VisuallyHiddenInput } from "/src/components/inputs";
-import { UserData } from "/src/components/user_data";
-import config from "/src/components/config.js";
+import Fab from '@mui/material/Fab';
+import IconButton from '@mui/material/IconButton';
+import Stack from '@mui/material/Stack';
 import axios from 'axios';
-import {  FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
-import { ErrorText, Modals, ShowImage } from "/src/components/modals";
-import { useNavigate } from "react-router-dom";
-import { commentSections, BorderlessPost, RowWithPrefix, QuotedFrame } from "/src/components/posts.jsx";
+import React, { useRef, useState } from "react";
+import ContentEditable from 'react-contenteditable';
+import { ThrowIfNotAxios } from "/src/communication.js";
+import config from "/src/components/config.js";
 import { fileToMedia } from "/src/components/media.jsx";
-import ContentEditable from 'react-contenteditable'
-import { findHashtags, findHtml } from "/src/components/sync.js";
+import { ErrorText } from "/src/components/modals";
 import { PostMediaEditor } from "/src/components/post_media";
+import { BorderlessPost, QuotedFrame, RowWithPrefix, commentSections } from "/src/components/posts.jsx";
+import { findHashtags, findHtml } from "/src/components/sync.js";
+import { UserData } from "/src/components/user_data";
+import { Loading, ProfilePic, ReplyingTo } from '/src/components/utilities';
+import { theme } from "/src/styles/mui/my_theme";
 
 
 function PostCreator({ post, quoted, onPost, editing,noUpdate }) {
@@ -382,4 +361,4 @@ function AddPostToCommentSection(post) {
 }
 
 
-export { PostCreator, findAndColorHashtags }
+export { PostCreator, findAndColorHashtags };

@@ -1,32 +1,12 @@
 import express from "express";
-import pg from "pg";
-import bcrypt from "bcrypt";
-import passport from "passport";
-import { Strategy } from "passport-local";
-import GoogleStrategy from "passport-google-oauth2";
-import session from "express-session";
-import ConnectPg from 'connect-pg-simple';
-import env from "dotenv";
-import { dirname } from "path";
-import { fileURLToPath } from "url";
-import *  as url from "url";
-import path from "path";
-import fileUpload from "express-fileupload";
-import fs from "fs";
-import yesql from 'yesql';
-const named = yesql.pg;
-import cors from "cors";
-import axios from "axios";
-import nodemailer from "nodemailer";
-import * as g from "../../config.js";
-import * as pp from "../../components/passport.js";
-import { username_exists, selectable_username } from "../user.js";
-import { Validator } from "node-input-validator";
-import { CheckV, CheckErr, validate_image } from "../../components/validations.js";
-import { ApplySqlToUser, UpdateUser, UpdateUserAfterChange } from "../logged_in.js";
 import Moment from "moment";
-import { uploadMedia, profileFolder, profileId, bannerId } from "../../components/cloudinary_handler.js";
+import { Validator } from "node-input-validator";
+import { bannerId, profileFolder, profileId, uploadMedia } from "../../components/cloudinary_handler.js";
+import * as pp from "../../components/passport.js";
 import { user_columns } from "../../components/post_query.js";
+import { CheckErr, CheckV, validate_image } from "../../components/validations.js";
+import { ApplySqlToUser, UpdateUserAfterChange } from "../logged_in.js";
+import { selectable_username } from "../user.js";
 
 const router = express.Router();
 
@@ -53,11 +33,11 @@ async function update_profile_file(req, file, fileName, update_column) {
         WHERE id=:user_id 
         returning ${user_columns}`
     )
-    ({
-        user_id: user_id,
-        file: fileData
-    }));
-    await ApplySqlToUser(q,req);
+        ({
+            user_id: user_id,
+            file: fileData
+        }));
+    await ApplySqlToUser(q, req);
 }
 
 
@@ -89,7 +69,7 @@ async function update_username(req, username, skip_update = false) {
         WHERE id=:id 
         RETURNING ${user_columns}`
     )
-    ({ username: username, id: UserId(req) }));
+        ({ username: username, id: UserId(req) }));
     if (!skip_update)
         await ApplySqlToUser(result, req);
 }
@@ -122,7 +102,7 @@ router.post("/change_browser_notifications", async (req, res) => {
         WHERE id=:id 
         RETURNING ${user_columns}`
     )
-    ({ enabled: req.body.enabled, id: UserId(req) }));
+        ({ enabled: req.body.enabled, id: UserId(req) }));
     await ApplySqlToUser(result, req);
     res.sendStatus(200);
 });
@@ -163,5 +143,7 @@ router.post("/update_profile", async (req, res) => {
 
     res.sendStatus(200);
 });
+
+function ISOToSQL(iso) { return new Moment(iso).format() }
 
 export default router;

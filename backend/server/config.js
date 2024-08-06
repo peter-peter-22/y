@@ -1,25 +1,12 @@
-import express from "express";
-import pg from "pg";
-import bcrypt from "bcrypt";
-import passport from "passport";
-import { Strategy } from "passport-local";
-import GoogleStrategy from "passport-google-oauth2";
-import session from "express-session";
-import ConnectPg from 'connect-pg-simple';
 import env from "dotenv";
+import express from "express";
+import nodemailer from "nodemailer";
 import { dirname } from "path";
+import pg from "pg";
 import { fileURLToPath } from "url";
-import *  as url from "url";
-import path from "path";
-import fileUpload from "express-fileupload";
-import fs from "fs";
 import yesql from 'yesql';
 const named = yesql.pg;
 env.config();
-import cors from "cors";
-import axios from "axios";
-import nodemailer from "nodemailer";
-import Moment from "moment";
 
 const app = express();
 
@@ -96,8 +83,7 @@ async function initialize() {
 
 global.app = app;
 global.config = config;
-global.ISOToSQL = (iso) => { return new Moment(iso).format() };
 global.UserId=(req)=> req.user.id;
 global.named = named;
 
-export { transporter, pgPool, initialize };
+export { initialize, pgPool, transporter };

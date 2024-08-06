@@ -1,21 +1,8 @@
-import React from "react";
-import Stack from '@mui/material/Stack';
-import  { Inside } from "./side_menus.jsx";
-import { TopMenu } from '/src/components/utilities';
-import { SearchField } from "/src/components/inputs.jsx";
-import { Box } from '@mui/material';
-import { Typography } from '@mui/material';
-import Fab from '@mui/material/Fab';
-import { Icon } from '@mui/material';
-import Avatar from '@mui/material/Avatar';
-import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ProfileText } from '/src/components/utilities';
+import { Box, Typography } from '@mui/material';
 import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import Link from '@mui/material/Link';
+import React from "react";
 
 function BoxList(props) {
     return (
@@ -48,4 +35,4 @@ function BlueTextButton(props) {
     </ListItemButton>);
 }
 
-export { BoxList, BoxListOutlined,BlueTextButton };
+export { BlueTextButton, BoxList, BoxListOutlined };

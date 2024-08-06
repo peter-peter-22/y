@@ -1,12 +1,6 @@
-import React, { useRef, useState, memo } from 'react'
+import { AdvancedImage, AdvancedVideo, lazyload, placeholder, responsive } from '@cloudinary/react';
 import { Cloudinary } from '@cloudinary/url-gen';
-import { auto } from '@cloudinary/url-gen/actions/resize';
-import { autoGravity } from '@cloudinary/url-gen/qualifiers/gravity';
-import { AdvancedImage, lazyload, accessibility, responsive, placeholder, AdvancedVideo } from '@cloudinary/react';
-import axios from "axios";
-import { format, quality } from "@cloudinary/url-gen/actions/delivery";
-import { auto as autoFormat } from "@cloudinary/url-gen/qualifiers/format";
-import { auto as autoQuality } from "@cloudinary/url-gen/qualifiers/quality";
+import React, { memo, useRef } from 'react';
 const cld = new Cloudinary({ cloud: { cloudName: 'dhfm5s5x8' } });
 let playingVideoRef;
 
@@ -168,4 +162,4 @@ function ImageDisplayer(props) {
     }
 }
 
-export { fileToMedia, mediaTypes, Media, ImageDisplayer, VideoDisplayer, MediaDisplayer, BlockMedia, MediaFromFileData };
+export { BlockMedia, fileToMedia, ImageDisplayer, Media, MediaDisplayer, MediaFromFileData, mediaTypes, VideoDisplayer };

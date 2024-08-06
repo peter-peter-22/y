@@ -1,14 +1,13 @@
-import React, { useEffect, useState, useRef, useMemo } from "react";
-import TextField from '@mui/material/TextField';
-import InputAdornment from '@mui/material/InputAdornment';
-import { Icon } from '@mui/material';
-import { IconButton } from '@mui/material';
-import { styled } from '@mui/material/styles';
-import {  FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
-import axios from 'axios';
-import { useNavigate } from "react-router-dom";
-import { GetSearchText, GetSearchUrl } from "/src/pages/search";
+import { Icon, IconButton } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
+import InputAdornment from '@mui/material/InputAdornment';
+import { styled } from '@mui/material/styles';
+import TextField from '@mui/material/TextField';
+import axios from 'axios';
+import React, { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { ThrowIfNotAxios } from "/src/communication.js";
+import { GetSearchText, GetSearchUrl } from "/src/pages/search";
 
 const topicOrder = {
     Topics: 0,
@@ -184,4 +183,4 @@ const VisuallyHiddenInput = styled('input')({
     opacity: 0
 });
 
-export { SearchField, PlainTextField, PasswordFieldWithToggle, VisuallyHiddenInput };
+export { PasswordFieldWithToggle, PlainTextField, SearchField, VisuallyHiddenInput };

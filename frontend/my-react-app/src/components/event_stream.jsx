@@ -1,7 +1,4 @@
 import { useEffect, useRef } from "react";
-import axios from "axios";
-import {  FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
-import fetchAdapter from "@shiroyasha9/axios-fetch-adapter";
 
 function ListenToStream( url, onData ) {
     const first = useRef(true);
@@ -47,4 +44,5 @@ function ListenToStream( url, onData ) {
     }, []);
 }
 
-export {ListenToStream};
+export { ListenToStream };
+

@@ -1,19 +1,17 @@
-import React, { useEffect, useRef, useState } from "react";
-import Fab from '@mui/material/Fab';
-import Stack from '@mui/material/Stack';
-import { ResponsiveButton, ButtonIcon, ButtonSvg, TabButton, PostButton, ProfileButton, BottomTabButton } from "./buttons.jsx";
-import { Inside } from "./side_menus.jsx";
-import { ThemeProvider } from '@mui/material';
-import { AboveBreakpoint, logo, SimplePopOver } from './utilities';
-import { UserData } from "/src/components/user_data";
-import { GetProfileLink, InheritLink } from '/src/components/utilities';
 import Box from '@mui/material/Box';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
+import Stack from '@mui/material/Stack';
+import React, { useEffect, useRef, useState } from "react";
+import { BottomTabButton, ButtonIcon, ButtonSvg, PostButton, ProfileButton, ResponsiveButton, TabButton } from "./buttons.jsx";
+import { Inside } from "./side_menus.jsx";
+import { AboveBreakpoint, logo, SimplePopOver } from './utilities';
 import { DisplayNotificationCount } from "/src/components/notification_listener";
+import { UserData } from "/src/components/user_data";
+import { GetProfileLink, InheritLink } from '/src/components/utilities';
 
 function Tab(name, link, active_icon, inactive_icon, element = BasicTab) {
     this.active_icon = active_icon;

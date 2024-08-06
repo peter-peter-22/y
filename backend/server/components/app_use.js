@@ -1,28 +1,13 @@
-import express from "express";
-import pg from "pg";
-import bcrypt from "bcrypt";
-import passport from "passport";
-import { Strategy } from "passport-local";
-import GoogleStrategy from "passport-google-oauth2";
-import session from "express-session";
-import ConnectPg from 'connect-pg-simple';
-import env from "dotenv";
-import { dirname } from "path";
-import { fileURLToPath } from "url";
-import *  as url from "url";
-import path from "path";
-import fileUpload from "express-fileupload";
-import fs from "fs";
-import yesql from 'yesql';
-const named = yesql.pg;
-import cors from "cors";
-import axios from "axios";
-import nodemailer from "nodemailer";
-import { Validator } from "node-input-validator";
-import * as g from "../config.js";
 import bodyParser from "body-parser";
+import ConnectPg from 'connect-pg-simple';
+import cors from "cors";
+import express from "express";
+import fileUpload from "express-fileupload";
+import session from "express-session";
+import passport from "passport";
+import * as g from "../config.js";
+import { start } from "./email_notifications.js";
 const pgSession = ConnectPg(session);
-import {start} from "./email_notifications.js";
 
 function initialize() {
     //express

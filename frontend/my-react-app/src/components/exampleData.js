@@ -142,4 +142,5 @@ const default_profile = "/images/default_profile.jpg";
 
 const default_image = "/images/default_image.jpg";
 
-export {ExamplePost,ExampleReply,ExampleQuote,ExampleRepost,ExampleUser,ExampleNotifications,default_profile,default_image};
+export { ExampleNotifications, ExamplePost, ExampleQuote, ExampleReply, ExampleRepost, ExampleUser, default_image, default_profile };
+

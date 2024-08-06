@@ -1,8 +1,6 @@
 import React from "react";
-import { AboveBreakpoint } from '/src/components/utilities';
-import Axios from "axios";
 
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import ChangePassword from "/src/pages/change_password";
 import NotImplemented from "/src/pages/not_implemented";
 import PP from "/src/pages/pp";

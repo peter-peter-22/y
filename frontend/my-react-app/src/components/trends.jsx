@@ -1,29 +1,14 @@
-import React, { useState, useEffect, memo } from "react";
-import Stack from '@mui/material/Stack';
-import { Inside } from "./side_menus.jsx";
-import { TopMenu } from '/src/components/utilities';
-import { SearchField } from "/src/components/inputs.jsx";
-import { Box } from '@mui/material';
 import { Typography } from '@mui/material';
-import Fab from '@mui/material/Fab';
-import { Icon } from '@mui/material';
-import Avatar from '@mui/material/Avatar';
-import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ProfileText, FadeLink, creation, FollowDialog, LinelessLink, Loading, AboveBreakpoint, InheritLink, SimplePopOver, formatNumber, OnlineList, ListTitle } from '/src/components/utilities';
-import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import { BoxList, BoxListOutlined, BlueTextButton } from '/src/components/containers';
-import IconButton from '@mui/material/IconButton';
-import Link from '@mui/material/Link';
-import { ResponsiveButton, ButtonIcon, ButtonSvg, TabButton, PostButton, ProfileButton, TopMenuButton, CornerButton, LinkButton } from "/src/components/buttons.jsx";
-import { UserData } from "/src/components/user_data";
-import { NavLink } from "react-router-dom";
-import {  FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
-import axios, { AxiosError } from 'axios';
-import links from "/src/components/footer_links";
+import Stack from '@mui/material/Stack';
+import axios from 'axios';
+import React, { memo, useEffect, useState } from "react";
+import { ThrowIfNotAxios } from "/src/communication.js";
+import { CornerButton, LinkButton } from "/src/components/buttons.jsx";
+import { BoxList } from '/src/components/containers';
+import { formatNumber, InheritLink, ListTitle, Loading, OnlineList } from '/src/components/utilities';
 import { GetSearchUrl } from "/src/pages/search.jsx";
 
 function TrendsPreview() {

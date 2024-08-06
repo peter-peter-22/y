@@ -107,4 +107,4 @@ function postQuery(where = "", offset = 0, limit = config.posts_per_request, fro
 	LIMIT ${limit}`;
 }
 
-export { postQuery, is_followed, is_blocked, user_columns, user_columns_extended, columns, is_following, user_json, bookmarked_by_user }
+export { bookmarked_by_user, columns, is_blocked, is_followed, is_following, postQuery, user_columns, user_columns_extended, user_json };

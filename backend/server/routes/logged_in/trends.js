@@ -1,12 +1,6 @@
 import express from "express";
-import nodemailer from "nodemailer";
-import * as g from "../../config.js";
-import * as pp from "../../components/passport.js";
-import { username_exists, selectable_username } from "../user.js";
 import { Validator } from "node-input-validator";
-import { CheckV, CheckErr } from "../../components/validations.js";
-import  {  is_blocked, user_columns, user_columns_extended, is_following } from "../../components/post_query.js";
-import { CountableToggleSimplified, CountableToggle, editable_query, updateViews, post_list } from "../../components/general_components.js";
+import { CheckV } from "../../components/validations.js";
 
 const router = express.Router();
 

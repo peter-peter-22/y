@@ -1,43 +1,20 @@
-import React, { useState, useRef, useEffect, forwardRef, createContext, useContext, useImperativeHandle, memo } from "react";
-import Stack from '@mui/material/Stack';
-import { Inside } from "./side_menus.jsx";
-import { TopMenu } from '/src/components/utilities';
-import { SearchField } from "/src/components/inputs.jsx";
-import { Box, Hidden } from '@mui/material';
-import { Typography } from '@mui/material';
-import Fab from '@mui/material/Fab';
-import { Icon } from '@mui/material';
-import Avatar from '@mui/material/Avatar';
-import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, GetProfilePicture, GetPostMedia, OnlineList, SimplePopOver, formatNumber, UserLink, ReplyingFrom, ToggleFollow, ToggleBlock, InheritLink, ProfilePic } from '/src/components/utilities';
+import { Box, Icon, Typography } from '@mui/material';
+import Divider from '@mui/material/Divider';
+import IconButton from '@mui/material/IconButton';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import { BoxList, BoxListOutlined } from '/src/components/containers';
-import IconButton from '@mui/material/IconButton';
-import Link from '@mui/material/Link';
-import { ResponsiveButton, ButtonIcon, ButtonSvg, TabButton, PostButton, ProfileButton, TopMenuButton, CornerButton, BlueCenterButton } from "/src/components/buttons.jsx";
-import { Grid } from '@mui/material';
-import Divider from '@mui/material/Divider';
-import TextField from '@mui/material/TextField';
-import Button from '@mui/material/Button';
-import CircularProgress from '@mui/material/CircularProgress';
-import { theme } from "/src/styles/mui/my_theme";
-import { PlainTextField, PasswordFieldWithToggle, VisuallyHiddenInput } from "/src/components/inputs";
-import { UserData } from "/src/components/user_data";
-import config from "/src/components/config.js";
+import Stack from '@mui/material/Stack';
 import axios from 'axios';
-import { FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
-import { Error, Modals, ShowImage, ShowSingleImage } from "/src/components/modals";
+import React, { memo, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { ThrowIfNotAxios } from "/src/communication.js";
+import { ExamplePost } from "/src/components/exampleData.js";
 import { ManagePost, engagementsLink } from "/src/components/manage_content_button.jsx";
-import { ExamplePost, ExampleUser } from "/src/components/exampleData.js";
+import { Modals } from "/src/components/modals";
 import { PostCreator, findAndColorHashtags } from "/src/components/post_creator.jsx";
-import { BlockMedia } from "/src/components/media.jsx";
-import { BlueTextButton } from "/src/components/containers";
 import { PostMedia } from "/src/components/post_media";
+import { DateLink, FadeLink, GetPostMedia, GetUserName, OnlineList, ProfilePic, ProfileText, ReplyingFrom, SimplePopOver, TextRow, UserKey, UserLink, formatNumber, noOverflow } from '/src/components/utilities';
 
 const commentSections = {};
 
@@ -451,18 +428,6 @@ function PostText(props) {
     );
 }
 
-function FromUser(props) {
-    if (props.post.repost)
-        return (
-            <TextRow>
-                <Typography variant="small_fade">
-                    From
-                </Typography>
-                <UserName user={ExampleUser()} />
-            </TextRow>
-        );
-}
-
 function RepostedOrQuoted(props) {
     const post = props.post;
     if (post.repost || post.quote) {
@@ -528,4 +493,4 @@ function OverrideWithRepost(post) {
 }
 
 
-export { Post, PostList, PostFocused, ListBlockButton, ListBlock, RowWithPrefix, PostButtonRow, WritePost, OverrideWithRepost, PostModalFrame, OpenPostOnClick, OpenOnClick, SimplifiedPostList, commentSections, BorderlessPost, QuotedFrame };
+export { BorderlessPost, ListBlock, ListBlockButton, OpenOnClick, OpenPostOnClick, OverrideWithRepost, Post, PostButtonRow, PostFocused, PostList, PostModalFrame, QuotedFrame, RowWithPrefix, SimplifiedPostList, WritePost, commentSections };

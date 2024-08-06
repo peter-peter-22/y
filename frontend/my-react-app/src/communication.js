@@ -1,6 +1,6 @@
 import axios from "axios";
-import { Error } from "/src/components/modals";
 import config from "/src/components/config.js";
+import { Error } from "/src/components/modals";
 
 axios.defaults.withCredentials = true
 axios.defaults.baseURL = config.address_mode.server;
@@ -31,4 +31,4 @@ function ThrowIfNotAxios(err) {
         throw (err);
 }
 
-export { FormatAxiosError, ThrowIfNotAxios, IsAxiosError }
+export { FormatAxiosError, IsAxiosError, ThrowIfNotAxios };

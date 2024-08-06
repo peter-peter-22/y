@@ -1,7 +1,5 @@
 import express from "express";
 import webpush from "web-push";
-import env from "dotenv";
-import pg from "pg";
 
 const router = express.Router();
 
@@ -188,4 +186,4 @@ function formatName(name) {
 }
 
 export default router;
-export { notifyUser, likePush, commentPush,repostPush,followPush };
+export { commentPush, followPush, likePush, notifyUser, repostPush };

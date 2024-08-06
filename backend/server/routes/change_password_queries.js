@@ -31,4 +31,4 @@ returning secret`;
 
 const clear_user_request=`delete from PASSWORD_CHANGES where id=:user_id`;
 
-export {change_password,create_secret,clear_user_request,expiration_minutes};
+export { change_password, clear_user_request, create_secret, expiration_minutes };

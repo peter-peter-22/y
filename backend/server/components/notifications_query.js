@@ -1,4 +1,4 @@
-import { postQuery, user_json,columns as post_columns } from "./post_query.js";
+import { columns as post_columns, user_json } from "./post_query.js";
 
 const visible_users = `LEAST(10,NOTIFICATIONS.COUNT)`;
 
@@ -46,7 +46,7 @@ THEN
 			TIMESTAMP >= NOTIFICATIONS.DATE
 			AND
 			FOLLOWED=NOTIFICATIONS.USER_ID
-		ORDER BY FOLLOWS.TIMESTAMP, FOLLOWED ASC.
+		ORDER BY FOLLOWS.TIMESTAMP, FOLLOWED ASC
 		LIMIT ${visible_users}
 	)
 )`;
@@ -136,4 +136,4 @@ returning
 	name,unread_notification_count,email`;
 
 export default notifications;
-export { markAsRead,email_notifications };
+export { email_notifications, markAsRead };

@@ -1,37 +1,23 @@
-import React, { useState, useEffect, useRef, useImperativeHandle, forwardRef, memo } from 'react';
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { theme } from '/src/styles/mui/my_theme.jsx';
-import Stack from '@mui/material/Stack';
-import { Inside } from "/src/components/side_menus.jsx";
-import { SearchField } from "/src/components/inputs.jsx";
-import { Box } from '@mui/material';
-import { Typography } from '@mui/material';
-import Fab from '@mui/material/Fab';
-import { Icon } from '@mui/material';
+import { alpha, Box, Typography } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
+import CircularProgress from '@mui/material/CircularProgress';
+import Fab from '@mui/material/Fab';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import { BoxList, BoxListOutlined, BlueTextButton } from '/src/components/containers';
-import IconButton from '@mui/material/IconButton';
-import { ResponsiveButton, ButtonIcon, ButtonSvg, TabButton, PostButton, ProfileButton, TopMenuButton } from "/src/components/buttons.jsx";
-import Moment from "moment";
-import {  FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
-import { UserData } from "/src/components/user_data";
-import { Error, Modals } from "/src/components/modals";
-import axios from 'axios';
-import Tooltip from '@mui/material/Tooltip';
-import config from "/src/components/config.js";
-import { NavLink, Link } from "react-router-dom";
-import CircularProgress from '@mui/material/CircularProgress';
 import Popover from '@mui/material/Popover';
-import Grid from '@mui/material/Grid';
-import { ImageDisplayer, Media, MediaDisplayer, mediaTypes, MediaFromFileData } from "/src/components/media.jsx";
+import Stack from '@mui/material/Stack';
+import Tooltip from '@mui/material/Tooltip';
+import axios from 'axios';
+import Moment from "moment";
+import React, { forwardRef, memo, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import { Link, NavLink } from "react-router-dom";
+import { ThrowIfNotAxios } from "/src/communication.js";
+import { TopMenuButton } from "/src/components/buttons.jsx";
+import { Media, MediaDisplayer, MediaFromFileData, mediaTypes } from "/src/components/media.jsx";
+import { ClickableSingleImageContainer } from "/src/components/post_media";
 import { OpenOnClick } from "/src/components/posts";
-import {ClickableSingleImageContainer} from "/src/components/post_media";
-import { alpha } from "@mui/material";
+import { theme } from '/src/styles/mui/my_theme.jsx';
 
 const noOverflow = {
     whiteSpace: 'nowrap',
@@ -135,7 +121,7 @@ function UserName(props) {
 
 function UserLink(props) {
     return (
-        <StyledLink typography="small_bold" to={GetProfileLink(props.user)} style={noOverflow} >
+        <StyledLink typography="small_bold" to={GetProfileLink(props.user)} parentStyle={noOverflow} >
             <GetUserName user={props.user} />
         </StyledLink>
     );
@@ -143,7 +129,7 @@ function UserLink(props) {
 
 function UserKeyLink(props) {
     return (
-        <StyledLink typography="small_fade" to={GetProfileLink(props.user)} style={noOverflow} >
+        <StyledLink typography="small_fade" to={GetProfileLink(props.user)} parentStyle={noOverflow} >
             <GetUserKey user={props.user} />
         </StyledLink>
     );
@@ -304,11 +290,11 @@ function ReplyingTo({ user, link }) {
     );
 }
 
-function StyledLink(props) {
+function StyledLink({ to, children, parentStyle, typography, ...props }) {
     return (
-        <Link to={props.to} style={{ textDecoration: "none", ...noOverflow }} onClick={(e) => { e.stopPropagation() }}>
-            <Typography variant={props.typography} sx={{ "&:hover": { textDecoration: "underline" } }} {...props}>
-                {props.children}
+        <Link to={to} style={{ textDecoration: "none", ...parentStyle }} onClick={(e) => { e.stopPropagation() }} >
+            <Typography variant={typography} sx={{ "&:hover": { textDecoration: "underline" } }} {...props}>
+                {children}
             </Typography>
         </Link>
     );
@@ -414,7 +400,7 @@ function ToggleOnlineBool(user, url, startingValue, onChange) {
         else
             lastValueRef.current = newValue;
 
-            try {
+        try {
             await axios.post(url,
                 {
                     key: user.id,
@@ -608,8 +594,8 @@ function SimplePopOver() {
     };
 
     const handleClose = (e) => {
-        if(e)
-        e.stopPropagation();
+        if (e)
+            e.stopPropagation();
         setAnchorEl(null);
     };
 
@@ -661,10 +647,10 @@ function formatNumber(number) {
 
 function ListTitle(props) {
     return (
-        <Typography variant="big_bold" sx={{ my: 2, mx: 2 }}>
+        <Typography variant="big_bold" sx={{ my: 2, mx: 2 }} style={{whiteSpace:"nowrap",...noOverflow}}>
             {props.children}
         </Typography>
     );
 }
 
-export { AboveBreakpoint, ResponsiveSelector, TopMenu, ProfileText, FadeLink, TabSwitcher, UserName, UserKey, noOverflow, BoldLink, UserLink, UserKeyLink, DateLink, TextRow, ReplyingToUser as ReplyingTo, GetUserName, GetUserKey, logo, creation, ToCorner, CenterLogo, FollowDialog, GetProfilePicture, FollowButton, GetPostMedia, LinelessLink, OnlineList, Loading, SimplePopOver, formatNumber, TabSwitcherLinks, GetProfileBanner, GetProfileLink, ReplyingFromPost as ReplyingFrom, ToggleFollow, ToggleBlock, StyledLink, InheritLink, AvatarImageDisplayer, ProfilePic, NavMenu, ListTitle }
+export { AboveBreakpoint, AvatarImageDisplayer, BoldLink, CenterLogo, creation, DateLink, FadeLink, FollowButton, FollowDialog, formatNumber, GetPostMedia, GetProfileBanner, GetProfileLink, GetProfilePicture, GetUserKey, GetUserName, InheritLink, LinelessLink, ListTitle, Loading, logo, NavMenu, noOverflow, OnlineList, ProfilePic, ProfileText, ReplyingFromPost as ReplyingFrom, ReplyingToUser as ReplyingTo, ResponsiveSelector, SimplePopOver, StyledLink, TabSwitcher, TabSwitcherLinks, TextRow, ToCorner, ToggleBlock, ToggleFollow, TopMenu, UserKey, UserKeyLink, UserLink, UserName };

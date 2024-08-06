@@ -1,50 +1,18 @@
-import React, { useState, useRef, useEffect } from "react";
-import Stack from '@mui/material/Stack';
-import  { Inside } from "./side_menus.jsx";
-import { TopMenu } from '/src/components/utilities';
-import { SearchField } from "/src/components/inputs.jsx";
-import { Box } from '@mui/material';
-import { Typography } from '@mui/material';
-import Fab from '@mui/material/Fab';
-import { Icon } from '@mui/material';
-import Avatar from '@mui/material/Avatar';
-import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, logo, creation, CenterLogo, FollowDialog } from '/src/components/utilities';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import { BoxList, BoxListOutlined, BlueTextButton } from '/src/components/containers';
-import IconButton from '@mui/material/IconButton';
+import { Box, Typography } from '@mui/material';
 import Link from '@mui/material/Link';
-import { ResponsiveButton, ButtonIcon, ButtonSvg, TabButton, PostButton, ProfileButton, TopMenuButton, CornerButton, WideButton, OutlinedButton } from "/src/components/buttons.jsx";
-import { Grid } from '@mui/material';
-import Divider from '@mui/material/Divider';
+import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
-import Button from '@mui/material/Button';
-import CircularProgress from '@mui/material/CircularProgress';
-import { theme } from "/src/styles/mui/my_theme";
-import { PlainTextField, PasswordFieldWithToggle, VisuallyHiddenInput } from "/src/components/inputs";
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
-import 'moment/locale/de';
-import Checkbox from '@mui/material/Checkbox';
-import FormGroup from '@mui/material/FormGroup';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import FormControl from '@mui/material/FormControl';
-import FormLabel from '@mui/material/FormLabel';
-import ReCAPTCHA from 'react-google-recaptcha';
 import axios from 'axios';
-import {  FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
-import { styled } from '@mui/material/styles';
-import InputAdornment from '@mui/material/InputAdornment';
-import Dialog from '@mui/material/Dialog';
+import React, { useRef, useState } from "react";
+import { ThrowIfNotAxios } from "/src/communication.js";
+import { CornerButton, OutlinedButton, WideButton } from "/src/components/buttons.jsx";
+import config from "/src/components/config.js";
+import { EmailInput, RechaptaInput, validateEmail } from "/src/components/create_account";
+import { PasswordFieldWithToggle } from "/src/components/inputs";
+import { ErrorText, Modals, SuccessModal } from "/src/components/modals";
+import { AlternativeLogin, BigModal, BigModalMargin, BottomButtonWithBorder, Or } from "/src/components/no_user";
 import { UserData } from "/src/components/user_data";
-import { Error, Modals, ErrorText,SuccessModal } from "/src/components/modals";
-import { AlternativeLogin, GrowingLine, BigModal, Or, BottomButtonWithBorder, ByRegistering, ModalMargin, BigModalMargin } from "/src/components/no_user";
-import { RechaptaInput, validateEmail, EmailInput } from "/src/components/create_account";
+import { CenterLogo } from '/src/components/utilities';
 
 function Login(props) {
     //shared data
@@ -108,7 +76,7 @@ function EnterPassword(props) {
                 <TextField variant="outlined" type="text" label="Email" value={email} disabled sx={{ mb: 3 }} />
                 <PasswordFieldWithToggle variant="outlined" label="Password" sx={{ mb: 3 }}
                     onChange={handlePassword} value={password} />
-                <Link onClick={() => { props.setPage(2); }} style={{ cursor: "pointer" }}>Forgot password?</Link>
+                <StyledLink onClick={() => { props.setPage(2); }} style={{ cursor: "pointer" }}>Forgot password?</StyledLink>
                 <WideButton onClick={submitPassword} size="medium" color="black" sx={{ mt: "auto", mb: 3 }}>Sign-in</WideButton>
                 <Box sx={{ mb: 3 }}>
                     <NoAccount />
@@ -144,9 +112,9 @@ function ChooseMethod(props) {
                 props.setPage(1);
             else
                 ErrorText("No Y user belongs to this email");
-        }  catch (err) {
-                ThrowIfNotAxios(err);
-            }
+        } catch (err) {
+            ThrowIfNotAxios(err);
+        }
     }
 
     return (
@@ -156,8 +124,8 @@ function ChooseMethod(props) {
                 <Typography variant="verybig_bold" sx={{ my: 4 }}>Sign-in to Y!</Typography>
 
                 <Stack direction="column" spacing={2}>
-                    <a href={"/auth/google"}><AlternativeLogin src="/svg/google.svg" text="Sign-in with Google" /></a>
-                    <a href={"/auth/github"}><AlternativeLogin src="/svg/github.svg" text="Sign-in with Github" /></a>
+                    <a href={config.address_mode.server + "/auth/google"}><AlternativeLogin src="/svg/google.svg" text="Sign-in with Google" /></a>
+                    <a href={config.address_mode.server + "/auth/github"}><AlternativeLogin src="/svg/github.svg" text="Sign-in with Github" /></a>
                     <Stack direction="row" sx={{ my: 0.5, alignItems: "center" }}>
                         <Or />
                     </Stack>
@@ -206,7 +174,7 @@ function ForgotPassword(props) {
             );
             //rechapta ok, email sent, show modal
             Modals[0].Show(
-                <SuccessModal title={"We sent you an email."}/>
+                <SuccessModal title={"We sent you an email."} />
             )
         }
         catch (err) {

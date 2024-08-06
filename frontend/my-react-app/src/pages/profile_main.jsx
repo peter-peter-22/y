@@ -1,50 +1,21 @@
-import React, { useState, useRef, useEffect, forwardRef, memo } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Stack from '@mui/material/Stack';
-import { TopMenu } from '/src/components/utilities';
-import { SearchField } from "/src/components/inputs.jsx";
-import { Box } from '@mui/material';
-import { Typography } from '@mui/material';
+import { Box, Icon, Typography } from '@mui/material';
 import Fab from '@mui/material/Fab';
-import { Icon } from '@mui/material';
-import Avatar from '@mui/material/Avatar';
-import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, GetProfilePicture, GetPostMedia, OnlineList, SimplePopOver, formatNumber, TabSwitcherLinks, Loading, GetProfileBanner, ProfilePic, ListTitle } from '/src/components/utilities';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import { BoxList, BoxListOutlined, BlueTextButton } from '/src/components/containers';
-import IconButton from '@mui/material/IconButton';
-import Link from '@mui/material/Link';
-import { CornerButton } from "/src/components/buttons.jsx";
-import { Grid } from '@mui/material';
-import Divider from '@mui/material/Divider';
-import TextField from '@mui/material/TextField';
-import Button from '@mui/material/Button';
-import CircularProgress from '@mui/material/CircularProgress';
-import { theme } from "/src/styles/mui/my_theme";
-import { PlainTextField, PasswordFieldWithToggle, VisuallyHiddenInput } from "/src/components/inputs";
-import { UserData } from "/src/components/user_data";
-import config from "/src/components/config.js";
+import Stack from '@mui/material/Stack';
 import axios from 'axios';
-import {  FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
-import { Error, Modals, ShowImage } from "/src/components/modals";
-import { useNavigate } from "react-router-dom";
-import { WhoToFollow } from "/src/components/footer";
 import Moment from "moment";
-import { SimplifiedPostList, PostModalFrame } from "/src/components/posts";
-import { useParams } from "react-router-dom";
-import { ProfilePicEditor, ChangeablePicture, UserNameEditor, NameEditor, BirthDateEditor } from "/src/components/create_account";
-import { ManageProfile } from "/src/components/manage_content_button.jsx";
-import { Media, mediaTypes } from "/src/components/media";
-import { ImageDisplayer, MediaDisplayer } from "/src/components/media";
-import { ClickableSingleImageContainer } from "/src/components/post_media";
-import { UserListExtended } from "/src/pages/follow_people.jsx";
-import { ProfileEditor } from "/src/components/profile_editor";
-import { Followers, Following, LikesOfUser, CommentsOfUser, PostsOfUser, MediaOfUser } from "/src/components/profile_tabs";
+import React, { memo, useEffect, useState } from "react";
+import { Route, Routes, useParams } from "react-router-dom";
+import { ThrowIfNotAxios } from "/src/communication.js";
 import { BlueCenterButton } from "/src/components/buttons";
+import { WhoToFollow } from "/src/components/footer";
+import { ManageProfile } from "/src/components/manage_content_button.jsx";
+import { MediaDisplayer } from "/src/components/media";
+import { Modals } from "/src/components/modals";
+import { ClickableSingleImageContainer } from "/src/components/post_media";
+import { ProfileEditor } from "/src/components/profile_editor";
+import { CommentsOfUser, Followers, Following, LikesOfUser, MediaOfUser, PostsOfUser } from "/src/components/profile_tabs";
+import { UserData } from "/src/components/user_data";
+import { FadeLink, GetProfileBanner, GetUserName, Loading, ProfilePic, TabSwitcherLinks, TextRow, UserKey, formatNumber, noOverflow } from '/src/components/utilities';
 
 function Profile() {
     const [user, setUser] = useState();
@@ -124,10 +95,12 @@ function ProfileInfo({ user, setLocalBlocked }) {
             </Box>
             <Box sx={{ mx: 1.5, position: "relative" }}>
                 <Stack direction="column" spacing={1.5}>
-                    <div>
-                        <Typography variant="big_bold"><GetUserName user={user} /></Typography>
-                        <UserKey user={user} />
-                        <div style={{ position: "absolute", right: "0px", top: "0px" }}>
+                    <Stack direction="row" justifyContent="space-between">
+                        <div style={{ overflow: "hidden" }}>
+                            <Typography variant="big_bold" style={noOverflow}><GetUserName user={user} /></Typography>
+                            <UserKey user={user} />
+                        </div>
+                        <div style={{ flexShrink: 0 }}>
                             {is_me ?
                                 <Fab onClick={EditProfile} sx={{ border: 1, borderColor: "divider" }} size="small" variant="extended" color="secondary_noBg">
                                     Edit profile
@@ -136,7 +109,7 @@ function ProfileInfo({ user, setLocalBlocked }) {
                                 <ManageProfile user={user} onBlock={setLocalBlocked} />
                             }
                         </div>
-                    </div>
+                    </Stack>
                     <Typography variant="small_fade" >
                         <Stack direction="row" spacing={0.5}>
                             <Icon style={{ fontSize: "1.5em" }}>calendar_month</Icon>
@@ -290,4 +263,4 @@ const ProfileBannerMemo = memo(({ user, ...props }) => {
 });
 
 export default Profile;
-export { UnblockButton, ProfileBanner };
+export { ProfileBanner, UnblockButton };

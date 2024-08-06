@@ -1,24 +1,6 @@
-import express from "express";
-import pg from "pg";
-import bcrypt from "bcrypt";
-import passport from "passport";
-import { Strategy } from "passport-local";
-import GoogleStrategy from "passport-google-oauth2";
-import session from "express-session";
-import ConnectPg from 'connect-pg-simple';
-import env from "dotenv";
-import { dirname } from "path";
-import { fileURLToPath } from "url";
-import *  as url from "url";
-import path from "path";
-import fileUpload from "express-fileupload";
-import fs from "fs";
-import cors from "cors";
-import axios from "axios";
-import nodemailer from "nodemailer";
 import { Validator } from "node-input-validator";
-import { CheckV, CheckErr } from "./validations.js";
-import { postQuery, is_blocked, user_columns, user_columns_extended } from "./post_query.js";
+import { postQuery } from "./post_query.js";
+import { CheckErr, CheckV } from "./validations.js";
 
 
 async function CountableToggleSimplified(req, res, table, unique_constraint_name, first_column_name = "user_id", second_column_name = "post_id") {
@@ -158,4 +140,4 @@ async function post_list(req, res, add_validations, where, where_params, posts_q
     res.json(posts);
 }
 
-export { CountableToggleSimplified, CountableToggle, GetPosts, editable_query, updateViews, post_list };
+export { CountableToggle, CountableToggleSimplified, editable_query, GetPosts, post_list, updateViews };

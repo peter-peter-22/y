@@ -1,37 +1,12 @@
-import React, { useState, useRef, useEffect } from "react";
-import Stack from '@mui/material/Stack';
-import { TopMenu } from '/src/components/utilities';
-import { SearchField } from "/src/components/inputs.jsx";
-import { Box } from '@mui/material';
-import { Typography } from '@mui/material';
-import Fab from '@mui/material/Fab';
-import { Icon } from '@mui/material';
-import Avatar from '@mui/material/Avatar';
-import { ThemeProvider } from '@mui/material';
-import { ResponsiveSelector, ProfileText, FadeLink, UserName, UserKey, noOverflow, DateLink, TextRow, ReplyingTo, GetUserName, GetUserKey, GetProfilePicture, Loading } from '/src/components/utilities';
 import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import { BoxList, BoxListOutlined, BlueTextButton } from '/src/components/containers';
-import IconButton from '@mui/material/IconButton';
-import Link from '@mui/material/Link';
-import { ResponsiveButton, ButtonIcon, ButtonSvg, TabButton, PostButton, ProfileButton, TopMenuButton, CornerButton } from "/src/components/buttons.jsx";
-import { Grid } from '@mui/material';
-import Divider from '@mui/material/Divider';
-import TextField from '@mui/material/TextField';
-import Button from '@mui/material/Button';
-import CircularProgress from '@mui/material/CircularProgress';
-import { theme } from "/src/styles/mui/my_theme";
-import { PlainTextField, PasswordFieldWithToggle, VisuallyHiddenInput } from "/src/components/inputs";
-import { UserData } from "/src/components/user_data";
-import config from "/src/components/config.js";
+import Stack from '@mui/material/Stack';
 import axios from 'axios';
-import {  FormatAxiosError, ThrowIfNotAxios } from "/src/communication.js";
-import { Error, Modals, ShowImage } from "/src/components/modals";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { PostFocused, SimplifiedPostList, OverrideWithRepost } from "/src/components/posts.jsx";
+import { BackButton } from "../components/back_button";
+import { ThrowIfNotAxios } from "/src/communication.js";
+import { OverrideWithRepost, PostFocused, SimplifiedPostList } from "/src/components/posts.jsx";
+import { ListTitle, Loading } from '/src/components/utilities';
 import { ErrorPage } from "/src/pages/error";
 
 let focused_id = undefined;
@@ -51,7 +26,7 @@ export default () => {
         focused_id = id;
 
         //get and process post
-        (async() => {
+        (async () => {
             try {
                 //get post from server
                 const result = await axios.post("member/general/get_post", {
@@ -70,15 +45,19 @@ export default () => {
 
         //clear focused id on dismounth
         return () => {
-            focused_id=undefined;
+            focused_id = undefined;
         }
     }
 
     if (post) {
-        post.setPost=setPost;
+        post.setPost = setPost;
         const overriden = OverrideWithRepost(post);
         return (
             <List sx={{ p: 0 }}>
+                <Stack direction="row" alignItems="center" mx={1}>
+                    <BackButton />
+                    <ListTitle>Post</ListTitle>
+                </Stack>
                 <PostFocused post={post} />
                 <CommentList post={overriden} />
             </List>
