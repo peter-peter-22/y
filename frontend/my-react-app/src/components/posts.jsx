@@ -16,6 +16,7 @@ import { PostCreator, findAndColorHashtags } from "/src/components/post_creator.
 import { PostMedia } from "/src/components/post_media";
 import { DateLink, FadeLink, GetPostMedia, GetUserName, OnlineList, ProfilePic, ProfileText, ReplyingFrom, SimplePopOver, TextRow, UserKey, UserLink, formatNumber, noOverflow } from '/src/components/utilities';
 
+const postLists = {};
 const commentSections = {};
 
 function Prefix(props) {
@@ -196,9 +197,9 @@ function PostButtonRow(props) {
     let post = props.post;
     if (post === undefined)
         post = ExamplePost();
-    const { count: like_count, active: liked, pressed: handleLike } = CountableButton(post, post.like_count, post.liked_by_user, "/member/general/like");
-    const { count: bookmark_count, active: bookmarked, pressed: handleBookmark } = CountableButton(post, post.bookmark_count, post.bookmarked_by_user, "/member/general/bookmark");
-    const { count: repost_count, active: reposted, pressed: handleRepost } = CountableButton(post, post.repost_count, post.reposted_by_user, "/member/general/repost");
+    const { count: like_count, active: liked, pressed: handleLike } = CountableButton(post, "like_count", "liked_by_user", "/member/general/like");
+    const { count: bookmark_count, active: bookmarked, pressed: handleBookmark } = CountableButton(post, "bookmark_count", "bookmarked_by_user", "/member/general/bookmark");
+    const { count: repost_count, active: reposted, pressed: handleRepost } = CountableButton(post, "repost_count", "reposted_by_user", "/member/general/repost");
     const [comment_count, set_comment_count] = useState(post.comment_count);
     const navigate = useNavigate();
 
@@ -313,8 +314,10 @@ function PostModalFrame(props) {
     );
 }
 
-function CountableButton(post, initial_count, initial_active, url) {
+function CountableButton(post, count_name, active_name, url) {
+    const initial_active=post[active_name];
     const [like, setLike] = useState(initial_active);
+    const startRef = useRef({count:post[count_name],active:post[active_name]});
     const last_updateRef = useRef(initial_active);
 
     function handleLike() {
@@ -340,15 +343,20 @@ function CountableButton(post, initial_count, initial_active, url) {
         });
     }
 
-
+    //calculate offset
     let like_offset = 0;
     if (like)
         like_offset += 1;
-    if (initial_active)
+    if (startRef.current.active)
         like_offset -= 1;
 
+    //save post
+    const count=startRef.current.count + like_offset;
+    post[count_name] = count;
+    post[active_name] = like;
+
     return {
-        count: initial_count + like_offset,
+        count: count,
         active: like,
         pressed: handleLike,
     }
@@ -364,7 +372,7 @@ const HideablePostMemo = memo((props) => {
         return (<BlockedComment unHide={() => { setHidden(false) }} />);
 });
 
-function PostList({ post, getPosts }) {
+function PostList({ post, getPosts, id }) {
     const onlineListRef = useRef();
     const [key, setKey] = useState(post ? post.id : -1);
 
@@ -379,17 +387,27 @@ function PostList({ post, getPosts }) {
         }
     }
 
-    //make the comment section globally accessable
     useEffect(() => {
+        //create the object that will let other components to edit and update this comment section
         const thisCommentSection = {};
         thisCommentSection.addPost = (newPost) => { onlineListRef.current.AddEntryToTop(newPost) };
-        thisCommentSection.update = () => { setKey((prev) => prev + 1) };
+        thisCommentSection.update = () => { setKey((prev) => prev + 1) };//update the list after block
         thisCommentSection.post = post ? post.id : null;//what post belongs to this comment section? null if this is the main feed
         commentSections.active = thisCommentSection;
     }, []);
 
     return (
-        <OnlineList getEntries={GetEntries} EntryMapper={HideablePostMemo} ref={onlineListRef} key={key} entryMapController={postEntryMapController} />
+        <OnlineList
+            getEntries={GetEntries}
+            EntryMapper={HideablePostMemo}
+            ref={onlineListRef}
+            key={key}
+            entryMapController={postEntryMapController}
+            startingEntries={postLists[id]}
+            onDismounth={(entries) => {
+                postLists[id] = entries
+            }}
+        />
     );
 }
 
@@ -409,7 +427,7 @@ function SimplifiedPostList({ params: additional_params, post, endpoint }) {
         const response = await axios.post(endpoint, params);
         return response.data;
     }
-    return <PostList getPosts={getPosts} post={post} />;
+    return <PostList getPosts={getPosts} post={post} id={endpoint} />;
 }
 
 function PostBottomIcon(props) {

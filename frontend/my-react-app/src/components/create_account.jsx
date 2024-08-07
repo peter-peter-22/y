@@ -59,10 +59,11 @@ function CreateAccount(props) {
     }
     async function send_finish() {
         try {
+            const data=dataRef.current;
             await axios.post("finish_registration",
                 {
-                    birthdate: date.toISOString(),
-                    checkboxes: checkboxes
+                    birthdate: data.birthdate.toISOString(),
+                    checkboxes: data.checkboxes
                 });
             close();
         }
@@ -474,8 +475,8 @@ function Page8(props)//follow
 function Page9(props)//only date of birth
 {
     const [data, handleNext] = GetProps(props);
-    const [date, setDate] = useState(null);
-    const [dateOk, setDateOk] = useState(true);
+    const [date, setDate] = useState();
+    const [dateOk, setDateOk] = useState(false);
 
     function Submit() {
         if (dateOk) {
@@ -489,7 +490,7 @@ function Page9(props)//only date of birth
             <ModalMargin>
                 <CenterLogo />
                 <EnterBirthDate onChangeDate={setDate} onChangeOk={setDateOk} />
-                <WideButton color="black" disabled={Boolean(dateOk)} sx={{ mt: "auto", mb: 3 }}
+                <WideButton color="black" disabled={!dateOk} sx={{ mt: "auto", mb: 3 }}
                     onClick={Submit}>Next</WideButton>
             </ModalMargin>
         </Stack>

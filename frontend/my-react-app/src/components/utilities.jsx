@@ -499,14 +499,16 @@ function defaultEntryMapController({ entries, EntryMapper }) {
     );
 }
 
-const OnlineList = forwardRef(({ EntryMapper, getEntries, entryMapController: overrideEntryMapController }, ref) => {
-    const [entries, setEntries] = useState([]);
+const OnlineList = forwardRef(({ EntryMapper, getEntries, entryMapController: overrideEntryMapController, startingEntries, onDismounth }, ref) => {
+    const [entries, setEntries] = useState(startingEntries ? startingEntries : []);
     const listRef = useRef(null);
     const savedScrollRef = useRef(0);
     const [end, setEnd] = useState(false);
     const [downloading, setDownloading] = useState(false);
-    const updateRef = useRef({ end, downloading });
-    useEffect(() => { updateRef.current = { end, downloading } }, [end, downloading]);
+    const updateRef = useRef({ end, downloading, entries });
+    useEffect(() => {
+        updateRef.current = { end, downloading, entries }
+    }, [end, downloading, entries]);
 
     //the minimum distance between the bottom of the screen and the bottom of the list in px.
     const minUnseenHeight = 2000;
@@ -565,7 +567,11 @@ const OnlineList = forwardRef(({ EntryMapper, getEntries, entryMapController: ov
     useEffect(() => {
         window.addEventListener("scroll", Scrolling);
         Scrolling();
-        return () => { window.removeEventListener("scroll", Scrolling) };
+        return () => {
+            window.removeEventListener("scroll", Scrolling)
+            if (onDismounth)
+                onDismounth(updateRef.current.entries);
+        };
     }, [])
 
     const EntryMapController = overrideEntryMapController ? overrideEntryMapController : defaultEntryMapController;
@@ -647,7 +653,7 @@ function formatNumber(number) {
 
 function ListTitle(props) {
     return (
-        <Typography variant="big_bold" sx={{ my: 2, mx: 2 }} style={{whiteSpace:"nowrap",...noOverflow}}>
+        <Typography variant="big_bold" sx={{ my: 2, mx: 2 }} style={{ whiteSpace: "nowrap", ...noOverflow }}>
             {props.children}
         </Typography>
     );
