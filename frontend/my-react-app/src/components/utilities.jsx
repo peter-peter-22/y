@@ -505,6 +505,7 @@ const OnlineList = forwardRef(({ EntryMapper, getEntries, entryMapController: ov
     const savedScrollRef = useRef(0);
     const [end, setEnd] = useState(false);
     const [downloading, setDownloading] = useState(false);
+    const startTimeRef=useRef(Math.floor(Date.now()/1000));//the unix timestamp when this list was created. it is used to filter out the contents those were created after the feed
     const updateRef = useRef({ end, downloading, entries });
     useEffect(() => {
         updateRef.current = { end, downloading, entries }
@@ -531,7 +532,7 @@ const OnlineList = forwardRef(({ EntryMapper, getEntries, entryMapController: ov
 
     async function FillEntries() {
         const from = entries.length;
-        const results = await getEntries(from);
+        const results = await getEntries(from,startTimeRef.current);
         //if no results recieved, then this is the end of the list, do not ask for more entries
         if (results.length === 0) {
             setEnd(true);

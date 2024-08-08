@@ -78,7 +78,7 @@ router.post("/posts", async (req, res) => {
             text: "required|search",
             from: "required|integer"
         },
-        "WHERE HASHTAGS.HASHTAG=:text",
+        "HASHTAGS.HASHTAG=:text",
         {
             text: req.body.text,
             from: req.body.from
@@ -93,7 +93,7 @@ router.post("/autofill", async (req, res) => {
     });
     const matched = await v.check();
     if (!matched)
-       return res.json([]);
+        return res.json([]);
 
     const { text } = req.body;
     const q = await db.query(named(searchAutofill)({

@@ -376,9 +376,9 @@ function PostList({ post, getPosts, id }) {
     const onlineListRef = useRef();
     const [key, setKey] = useState(post ? post.id : -1);
 
-    async function GetEntries(from) {
+    async function GetEntries(from,timestamp) {
         try {
-            const new_posts = await getPosts(from);
+            const new_posts = await getPosts(from,timestamp);
             return new_posts;
         }
         catch (err) {
@@ -420,8 +420,8 @@ function postEntryMapController({ entries, EntryMapper }) {
 }
 
 function SimplifiedPostList({ params: additional_params, post, endpoint }) {
-    async function getPosts(from) {
-        let params = { from: from };
+    async function getPosts(from,timestamp) {
+        let params = { from,timestamp };
         if (additional_params)
             params = { ...params, ...additional_params };
         const response = await axios.post(endpoint, params);

@@ -46,31 +46,31 @@ router.post("/get_post", async (req, res) => {
 });
 
 router.post("/get_comments", async (req, res) => {
-    await post_list(req, res, { id: 'required|integer' }, "WHERE replying_to=:id", { id: req.body.id });
+    await post_list(req, res, { id: 'required|integer' }, "replying_to=:id", { id: req.body.id });
 });
 
 router.post("/posts_of_user", async (req, res) => {
-    await post_list(req, res, { user_id: "required|integer" }, "WHERE post.publisher=:target_user_id AND post.replying_to IS NULL", { target_user_id: req.body.user_id });
+    await post_list(req, res, { user_id: "required|integer" }, "post.publisher=:target_user_id AND post.replying_to IS NULL", { target_user_id: req.body.user_id });
 });
 
 router.post("/reposts_of_post", async (req, res) => {
-    await post_list(req, res, { post_id: "required|integer" }, "WHERE post.repost=:post_id AND TEXT IS NULL", { post_id: req.body.post_id });
+    await post_list(req, res, { post_id: "required|integer" }, "post.repost=:post_id AND TEXT IS NULL", { post_id: req.body.post_id });
 });
 
 router.post("/quotes_of_post", async (req, res) => {
-    await post_list(req, res, { post_id: "required|integer" }, "WHERE post.repost=:post_id AND TEXT IS NOT NULL", { post_id: req.body.post_id });
+    await post_list(req, res, { post_id: "required|integer" }, "post.repost=:post_id AND TEXT IS NOT NULL", { post_id: req.body.post_id });
 });
 
 router.post("/comments_of_user", async (req, res) => {
-    await post_list(req, res, { user_id: "required|integer" }, "WHERE post.publisher=:target_user_id AND post.replying_to IS NOT NULL", { target_user_id: req.body.user_id });
+    await post_list(req, res, { user_id: "required|integer" }, "post.publisher=:target_user_id AND post.replying_to IS NOT NULL", { target_user_id: req.body.user_id });
 });
 
 router.post("/likes_of_user", async (req, res) => {
-    await post_list(req, res, { user_id: "required|integer" }, "WHERE EXISTS(select * from likes WHERE likes.post_id=post.id AND post.publisher=:target_user_id)", { target_user_id: req.body.user_id });
+    await post_list(req, res, { user_id: "required|integer" }, "EXISTS(select * from likes WHERE likes.post_id=post.id AND post.publisher=:target_user_id)", { target_user_id: req.body.user_id });
 });
 
 router.post("/get_bookmarks", async (req, res) => {
-    await post_list(req, res, undefined, `WHERE ${bookmarked_by_user}=TRUE`);
+    await post_list(req, res, undefined, `${bookmarked_by_user}=TRUE`);
 });
 
 router.post("/media_of_user", async (req, res) => {

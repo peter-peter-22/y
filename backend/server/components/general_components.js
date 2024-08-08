@@ -128,14 +128,24 @@ async function updateViews(posts, user_id) {
     }
 }
 
-async function post_list(req, res, add_validations, where, where_params, posts_query) {
-    let validations = { from: "required|integer" };
+async function post_list(req, res, add_validations, where, where_params = {}, posts_query,where_timestamp="where post.date<=to_timestamp(:timestamp)") {
+    //validate inputs
+    let validations = { from: "required|integer", timestamp: "required|integer" };
     if (add_validations)
         validations = { ...validations, ...add_validations };
     const v = new Validator(req.body, validations);
     await CheckV(v);
 
-    const { from } = req.body;
+    //filter out the posts those were created after this feed began
+    if (where)
+        where = where_timestamp + " and " + where;
+    else where = where_timestamp;
+
+    //add the timestamp to the where parameters
+    const { from, timestamp } = req.body;
+    where_params = { ...where_params, timestamp };
+
+    //get the posts
     const posts = await GetPosts(UserId(req), where, where_params, undefined, from, posts_query);
     res.json(posts);
 }
