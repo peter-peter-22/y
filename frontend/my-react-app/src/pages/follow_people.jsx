@@ -6,31 +6,28 @@ import { ThrowIfNotAxios } from "/src/communication.js";
 import { FollowDialog, ListTitle, OnlineList } from '/src/components/utilities';
 
 function FollowableList() {
-    async function GetEntries(from) {
-        try {
-            const response = await axios.post("member/general/follower_recommendations", {
-                from: from
-            });
-            return response.data;
-        }
-        catch (err) {
-            console.error(err);
-            return [];
-        }
-    }
-
-    function EntryMapper(props) {
-        return (<FollowDialog user={props.entry} />);
-    }
     return (
         <Stack direction="column">
             <ListTitle>
                 Who to follow
             </ListTitle>
-            <OnlineList getEntries={GetEntries} EntryMapper={EntryMapper} />
+            <UserListNormal url="member/general/follower_recommendations" />
         </Stack>
     );
 }
+
+function UserListNormal({ url, params }) {
+    return (
+        <UserListAny url={url} params={params} entryMapper={FollowDialogMemo} />
+    );
+}
+
+
+const FollowDialogMemo = memo(({ entry: user }) => {
+    return (
+        <FollowDialog user={user} />
+    );
+});
 
 const FollowDialogExtended = memo(({ entry: user }) => {
     return (
@@ -42,11 +39,17 @@ const FollowDialogExtended = memo(({ entry: user }) => {
     );
 });
 
-//extended because this additionally displays the user bio, and accepts more url parameters
-function UserListExtended({ url, params: additionalParams }) {
-    async function GetEntries(from) {
+//extended because this additionally displays the user bio
+function UserListExtended({ url, params }) {
+    return (
+        <UserListAny url={url} params={params} entryMapper={FollowDialogExtended} />
+    );
+}
+
+function UserListAny({ url, params: additionalParams, entryMapper }) {
+    async function GetEntries(from, timestamp) {
         try {
-            let params = { from: from };
+            let params = { from, timestamp };
             if (additionalParams) params = { ...params, ...additionalParams };
 
             const response = await axios.post(url, params);
@@ -59,7 +62,7 @@ function UserListExtended({ url, params: additionalParams }) {
     }
 
     return (
-        <OnlineList getEntries={GetEntries} EntryMapper={FollowDialogExtended} />
+        <OnlineList getEntries={GetEntries} EntryMapper={entryMapper} />
     );
 }
 

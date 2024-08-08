@@ -14,12 +14,14 @@ SELECT
     ${is_followed()} as is_followed 
 FROM USERS
 WHERE
+(
     USERNAME ${isOk}
     OR
-    NAME ${isOk}`;
+    NAME ${isOk}
+)`;
 
 const searchUserPreview = `${searchUser} LIMIT 3`;
-const searchUserList = `${searchUser} OFFSET :from LIMIT :limit`;
+const searchUserList = `${searchUser} AND registration_date < to_timestamp(:timestamp) OFFSET :from LIMIT :limit`;
 
 const autoFillPerTopic = 5;
 const searchAutofill = `
@@ -58,16 +60,18 @@ router.post("/people_preview", async (req, res) => {
 router.post("/people_list", async (req, res) => {
     const v = new Validator(req.body, {
         text: "required|search",
-        from: "required|integer"
+        from: "required|integer",
+        timestamp: "required|integer"
     });
     await CheckV(v);
 
-    const { text, from } = req.body;
+    const { text, from ,timestamp} = req.body;
     const q = await db.query(named(searchUserList)({
         user_id: UserId(req),
-        text: text,
+        text,
         limit: config.users_per_request,
-        from: from
+        from,
+        timestamp
     }));
     res.json(q.rows);
 });
@@ -76,7 +80,7 @@ router.post("/posts", async (req, res) => {
     await post_list(req, res,
         {
             text: "required|search",
-            from: "required|integer"
+            from: "required|integer",
         },
         "HASHTAGS.HASHTAG=:text",
         {

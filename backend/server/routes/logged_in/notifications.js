@@ -7,17 +7,19 @@ const router = express.Router();
 router.post("/get", async (req, res) => {
 	//get and validate
 	const v = new Validator(req.body, {
-		from: 'required|integer'
+		from: 'required|integer',
+		timestamp: 'required|integer'
 	});
 	await CheckV(v);
-	const { from } = req.body;
+	const { from, timestamp } = req.body;
 	const user_id = UserId(req);
 
 	//get the notifications
 	const notifs = await db.query(named(notifications_query)({
-		user_id: user_id,
-		from: from,
-		limit: config.notifications_per_request
+		user_id,
+		from,
+		limit: config.notifications_per_request,
+		timestamp
 	}));
 
 	//mark the downloaded notifications as read
@@ -36,13 +38,13 @@ router.get("/events", (req, res) => {
 		'Cache-Control': 'no-cache'
 	};
 	res.writeHead(200, headers);
-	const user_id=UserId(req);
+	const user_id = UserId(req);
 
 	//send count to client
 	async function sendCount() {
 		//get unread notification count
 		const count = await countUnread(user_id);
-	
+
 		//write to stream
 		const chunk = JSON.stringify({ chunk: count });
 		res.write(`data: ${chunk}\n\n`);

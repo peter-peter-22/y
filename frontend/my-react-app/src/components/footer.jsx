@@ -27,7 +27,7 @@ function Footer() {
 }
 
 function TwoSidedSticky({ children }) {
-    const ref = useRef();
+    const ref = useRef(null);
     const scrollPrevRef = useRef(0);
     const scrollingDownRef = useRef(false);
     const [scrollingDown, setScrollingDown] = useState(false);
@@ -36,6 +36,7 @@ function TwoSidedSticky({ children }) {
     //the threshold where the sticky div will start following the screen.
     //equal to the max overflow height
     const height = ref.current ? ref.current.offsetHeight - window.innerHeight : 0;
+    const tooSmall = ref.current?ref.current.offsetHeight <= window.innerHeight:true;
 
     //decide if the sticky div should stick to the op or bottom
     const position = scrollingDown ?
@@ -89,16 +90,30 @@ function TwoSidedSticky({ children }) {
 
     return (
         <Stack direction="column" >
-            <div style={{ height: offset }} />
-            <div
-                ref={ref}
-                style={{
-                    position: "sticky",
-                    ...position
-                }}
-            >
-                {children}
-            </div>
+            {tooSmall ?
+                <div
+                    ref={ref}
+                    style={{
+                        position: "sticky",
+                        top: 0
+                    }}
+                >
+                    {children}
+                </div>
+                :
+                <>
+                    <div style={{ height: offset }} />
+                    <div
+                        ref={ref}
+                        style={{
+                            position: "sticky",
+                            ...position
+                        }}
+                    >
+                        {children}
+                    </div>
+                </>
+            }
         </Stack>
     );
 }

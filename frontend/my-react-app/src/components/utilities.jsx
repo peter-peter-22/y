@@ -499,13 +499,13 @@ function defaultEntryMapController({ entries, EntryMapper }) {
     );
 }
 
-const OnlineList = forwardRef(({ EntryMapper, getEntries, entryMapController: overrideEntryMapController, startingEntries, onDismounth }, ref) => {
+const OnlineList = forwardRef(({ EntryMapper, getEntries, entryMapController: overrideEntryMapController, startingEntries, onDismounth, deDuplicate }, ref) => {
     const [entries, setEntries] = useState(startingEntries ? startingEntries : []);
     const listRef = useRef(null);
     const savedScrollRef = useRef(0);
     const [end, setEnd] = useState(false);
     const [downloading, setDownloading] = useState(false);
-    const startTimeRef=useRef(Math.floor(Date.now()/1000));//the unix timestamp when this list was created. it is used to filter out the contents those were created after the feed
+    const startTimeRef = useRef(Math.floor(Date.now() / 1000));//the unix timestamp when this list was created. it is used to filter out the contents those were created after the feed
     const updateRef = useRef({ end, downloading, entries });
     useEffect(() => {
         updateRef.current = { end, downloading, entries }
@@ -532,13 +532,17 @@ const OnlineList = forwardRef(({ EntryMapper, getEntries, entryMapController: ov
 
     async function FillEntries() {
         const from = entries.length;
-        const results = await getEntries(from,startTimeRef.current);
+        let results = await getEntries(from, startTimeRef.current);
         //if no results recieved, then this is the end of the list, do not ask for more entries
         if (results.length === 0) {
             setEnd(true);
             return;
         }
         else {
+            //filter out duplicated entries if necessary
+            if (deDuplicate)
+                results = deDuplicate(results,entries);
+
             setEntries((prev) => {
                 return prev.concat(results)
             });
@@ -597,6 +601,7 @@ function SimplePopOver() {
     const [anchorEl, setAnchorEl] = React.useState(null);
 
     const handleOpen = (event) => {
+        event.stopPropagation();
         setAnchorEl(event.currentTarget);
     };
 

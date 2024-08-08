@@ -53,7 +53,6 @@ function ReplyOrPost(post) {
 }
 
 function Follow({data}) {
-    console.log(data);
     const link = "/profile/" + data.users[0].id;
     return (
         <NotificationBase seen={data.seen}>
@@ -177,9 +176,9 @@ const Notification = memo(({ entry: data }) => {
 });
 
 function NotificationList() {
-    async function download(from) {
+    async function download(from,timestamp) {
         try {
-            const res = await axios.post("member/notifications/get", { from: from });
+            const res = await axios.post("member/notifications/get", { from,timestamp });
             return res.data;
         }
         catch (err) {

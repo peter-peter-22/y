@@ -116,7 +116,7 @@ select
 	${columns}
 from
 	${tables}
-where user_id=:user_id
+where user_id=:user_id and notifications.date < to_timestamp(:timestamp)
 order by notifications.date desc
 limit :limit offset :from`;
 

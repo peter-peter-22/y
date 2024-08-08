@@ -1,8 +1,10 @@
 const address_modes = {
     localhost: {
+        client:"http://localhost:3001",
         server: "http://localhost:3000"
     },
     dev: {
+        client: "http://192.168.1.111.nip.io:3001",
         server: "http://192.168.1.111.nip.io:3000"
     },
 }

@@ -18,12 +18,13 @@ import Profile from "/src/pages/profile_main";
 import Search from "/src/pages/search";
 import Settings from "/src/pages/settings";
 import Trends from "/src/pages/trendlist";
+import Explore from "/src/pages/explore";
 
 export default () => {
   return (
     <div style={{ display: "flex", flexDirection: "row", padding: 0, justifyContent: "center" }}>
       <Header />
-      <Box sx={{ maxWidth: "500px", flexGrow: 1, width:"100%", borderLeft: 1, borderRight: 1, borderColor: "divider", boxSizing: "border-box",minHeight:"100vh"}}>
+      <Box sx={{ maxWidth: "500px", flexGrow: 1, width: "100%", borderLeft: 1, borderRight: 1, borderColor: "divider", boxSizing: "border-box", minHeight: "100vh" }}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/notifications" element={<Notifications />} />
@@ -35,7 +36,7 @@ export default () => {
           <Route path="/trends" element={<Trends />} />
           <Route path="/lists" element={<NotImplemented />} />
           <Route path="/communities" element={<NotImplemented />} />
-          <Route path="/explore" element={<NotImplemented />} />
+          <Route path="/explore" element={<Explore />} />
           <Route path="/messages" element={<NotImplemented />} />
           <Route path="/premium" element={<NotImplemented />} />
           <Route path="/settings" element={<Settings />} />

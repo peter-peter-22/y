@@ -109,8 +109,8 @@ router.post("/user_profile", async (req, res) => {
     registration_date,
     birthdate,
     bio, 
-    (select count(*) from follows where followed=id) as followers , 
-    (select count(*) from follows where follower=id) as follows 
+    follower_count as followers , 
+    followed_count as follows 
     from users 
     where id=:target_user_id
     `)({ target_user_id: user_id, user_id: UserId(req) }));
@@ -123,14 +123,25 @@ router.post("/user_profile", async (req, res) => {
 
 
 router.post("/follower_recommendations", async (req, res) => {
-    const v = new Validator(req.body, { from: "required|integer" });
+    const v = new Validator(req.body, {
+        from: "required|integer",
+        timestamp: "required|integer"
+    });
     await CheckV(v);
-    const { from } = req.body;
-    const text = `SELECT ${user_columns}, FALSE as is_followed from USERS WHERE NOT ${is_followed()} LIMIT :limit OFFSET :offset`;
+
+    const { from,timestamp } = req.body;
+    const text = `
+    SELECT ${user_columns}, FALSE as is_followed 
+        from USERS
+    WHERE 
+        NOT ${is_followed()} 
+        AND registration_date < TO_TIMESTAMP(:timestamp) 
+    LIMIT :limit OFFSET :offset`;
     const users = await db.query(named(text)({
         user_id: UserId(req),
         offset: from,
-        limit: config.users_per_request
+        limit: config.users_per_request,
+        timestamp
     }));
     res.send(users.rows);
 });
@@ -138,16 +149,27 @@ router.post("/follower_recommendations", async (req, res) => {
 router.post("/followed_by_user", async (req, res) => {
     const v = new Validator(req.body, {
         from: "required|integer",
-        id: "required|integer"
+        id: "required|integer",
+        timestamp: "required|integer"
     });
     await CheckV(v);
-    const { from, id } = req.body;
-    const text = `SELECT ${user_columns},TRUE as is_followed from USERS WHERE ${(is_followed(":target_id"))} LIMIT :limit OFFSET :offset`;
+
+    const { from, id,timestamp } = req.body;
+    const text = `
+    SELECT 
+        ${user_columns},
+        ${is_followed()} as is_followed 
+    from FOLLOWS LEFT JOIN USERS ON FOLLOWED=USERS.ID 
+    WHERE 
+        FOLLOWER=:target_id 
+        AND TIMESTAMP <= TO_TIMESTAMP(:timestamp)
+    LIMIT :limit OFFSET :offset`;
     const users = await db.query(named(text)({
         user_id: UserId(req),
         offset: from,
         limit: config.users_per_request,
-        target_id: id
+        target_id: id,
+        timestamp
     }));
     res.send(users.rows);
 });
@@ -155,23 +177,27 @@ router.post("/followed_by_user", async (req, res) => {
 router.post("/followers_of_user", async (req, res) => {
     const v = new Validator(req.body, {
         from: "required|integer",
-        id: "required|integer"
+        id: "required|integer",
+        timestamp: "required|integer"
     });
     await CheckV(v);
-    const { from, id } = req.body;
+
+    const { from, id,timestamp } = req.body;
     const text = `
     SELECT 
         ${user_columns},
         ${is_followed()} as is_followed 
-    from USERS 
-        WHERE ${is_following(":target_id")} 
-        LIMIT :limit 
-        OFFSET :offset`;
+    from FOLLOWS LEFT JOIN USERS ON FOLLOWED=USERS.ID 
+    WHERE 
+        FOLLOWED=:target_id 
+        AND TIMESTAMP <= TO_TIMESTAMP(:timestamp)
+    LIMIT :limit OFFSET :offset`;
     const users = await db.query(named(text)({
         user_id: UserId(req),
         offset: from,
         limit: config.users_per_request,
-        target_id: id
+        target_id: id,
+        timestamp
     }));
     res.send(users.rows);
 });
@@ -180,27 +206,30 @@ router.post("/followers_of_user", async (req, res) => {
 router.post("/likers_of_post", async (req, res) => {
     const v = new Validator(req.body, {
         from: "required|integer",
-        post_id: "required|integer"
+        post_id: "required|integer",
+        timestamp: "required|integer"
     });
     await CheckV(v);
-    const { from, post_id } = req.body;
+    const { from, post_id,timestamp } = req.body;
 
     const text = `
     SELECT 
-    ${user_columns},
-    ${is_followed()} AS IS_FOLLOWED,
-    USERS.BIO
+        ${user_columns},
+        ${is_followed()} AS IS_FOLLOWED,
+        USERS.BIO
     FROM LIKES
-    LEFT JOIN USERS ON LIKES.USER_ID=USERS.ID
+        LEFT JOIN USERS ON LIKES.USER_ID=USERS.ID
     WHERE
-    POST_ID=:post_id
+        POST_ID=:post_id
+        AND REGISTRATION_DATE<=TO_TIMESTAMP(:timestamp)
     LIMIT :limit OFFSET :offset`;
 
     const users = await db.query(named(text)({
         user_id: UserId(req),
         offset: from,
         limit: config.users_per_request,
-        post_id: post_id
+        post_id: post_id,
+        timestamp
     }));
 
     res.send(users.rows);

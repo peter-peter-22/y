@@ -11,10 +11,11 @@ import { useNavigate } from "react-router-dom";
 import { ThrowIfNotAxios } from "/src/communication.js";
 import { ExamplePost } from "/src/components/exampleData.js";
 import { ManagePost, engagementsLink } from "/src/components/manage_content_button.jsx";
-import { Modals } from "/src/components/modals";
+import { Modals,SuccessModal } from "/src/components/modals";
 import { PostCreator, findAndColorHashtags } from "/src/components/post_creator.jsx";
 import { PostMedia } from "/src/components/post_media";
 import { DateLink, FadeLink, GetPostMedia, GetUserName, OnlineList, ProfilePic, ProfileText, ReplyingFrom, SimplePopOver, TextRow, UserKey, UserLink, formatNumber, noOverflow } from '/src/components/utilities';
+import config from './config';
 
 const postLists = {};
 const commentSections = {};
@@ -105,11 +106,15 @@ function BlockedComment(props) {
     );
 }
 
-function OpenPostOnClick(props) {
-    const link = "/posts/" + props.id;
+function getPostLink(id) {
+    return "/posts/" + id;
+}
+
+function OpenPostOnClick({ id, children }) {
+    const link = getPostLink(id);
     return (
         <OpenOnClick link={link}>
-            {props.children}
+            {children}
         </OpenOnClick>
     )
 }
@@ -197,6 +202,7 @@ function PostButtonRow(props) {
     let post = props.post;
     if (post === undefined)
         post = ExamplePost();
+
     const { count: like_count, active: liked, pressed: handleLike } = CountableButton(post, "like_count", "liked_by_user", "/member/general/like");
     const { count: bookmark_count, active: bookmarked, pressed: handleBookmark } = CountableButton(post, "bookmark_count", "bookmarked_by_user", "/member/general/bookmark");
     const { count: repost_count, active: reposted, pressed: handleRepost } = CountableButton(post, "repost_count", "reposted_by_user", "/member/general/repost");
@@ -232,7 +238,13 @@ function PostButtonRow(props) {
         Modals[0].Close();
     }
 
-    const { handleOpen: showRepostDialog, handleClose, ShowPopover: RepostPopover } = SimplePopOver();
+    function handleLink() {
+        navigator.clipboard.writeText(config.address_mode.client+getPostLink(post.id));
+        Modals[0].Show(<SuccessModal text="Link copied"/>);
+    }
+
+    const { handleOpen: showRepostDialog,handleClose:handleCloseRepost, ShowPopover: RepostPopover } = SimplePopOver();
+    const { handleOpen: showShareDialog,handleClose:handleCloseShare, ShowPopover: SharePopover } = SimplePopOver();
 
     return (
         <Stack direction="row" justifyContent="space-between" style={{ flexGrow: 1 }}>
@@ -272,7 +284,7 @@ function PostButtonRow(props) {
                 active={bookmarked}
                 onClick={handleBookmark} />
 
-            <IconButton size="small">
+            <IconButton size="small" onClick={showShareDialog}>
                 <Icon fontSize="small">
                     upload
                 </Icon>
@@ -280,20 +292,30 @@ function PostButtonRow(props) {
 
             <RepostPopover>
                 <ListItem disablePadding>
-                    <ListItemButton onClick={(e) => { handleClose(e); handleRepost() }}>
+                    <ListItemButton onClick={(e) => { handleCloseRepost(e); handleRepost() }}>
                         <Typography variant="medium_bold">
                             {reposted ? "Undo repost" : "Repost"}
                         </Typography>
                     </ListItemButton>
                 </ListItem>
                 <ListItem disablePadding>
-                    <ListItemButton onClick={(e) => { handleClose(e); handleQuote() }}>
+                    <ListItemButton onClick={(e) => { handleCloseRepost(e); handleQuote() }}>
                         <Typography variant="medium_bold">
                             Quote
                         </Typography>
                     </ListItemButton>
                 </ListItem>
             </RepostPopover>
+
+            <SharePopover>
+                <ListItem disablePadding>
+                    <ListItemButton onClick={(e) => { handleCloseShare(e); handleLink() }}>
+                        <Typography variant="medium_bold">
+                            Copy link
+                        </Typography>
+                    </ListItemButton>
+                </ListItem>
+            </SharePopover>
         </Stack>
     );
 }
@@ -315,9 +337,9 @@ function PostModalFrame(props) {
 }
 
 function CountableButton(post, count_name, active_name, url) {
-    const initial_active=post[active_name];
+    const initial_active = post[active_name];
     const [like, setLike] = useState(initial_active);
-    const startRef = useRef({count:post[count_name],active:post[active_name]});
+    const startRef = useRef({ count: post[count_name], active: post[active_name] });
     const last_updateRef = useRef(initial_active);
 
     function handleLike() {
@@ -351,7 +373,7 @@ function CountableButton(post, count_name, active_name, url) {
         like_offset -= 1;
 
     //save post
-    const count=startRef.current.count + like_offset;
+    const count = startRef.current.count + like_offset;
     post[count_name] = count;
     post[active_name] = like;
 
@@ -376,9 +398,9 @@ function PostList({ post, getPosts, id }) {
     const onlineListRef = useRef();
     const [key, setKey] = useState(post ? post.id : -1);
 
-    async function GetEntries(from,timestamp) {
+    async function GetEntries(from, timestamp) {
         try {
-            const new_posts = await getPosts(from,timestamp);
+            const new_posts = await getPosts(from, timestamp);
             return new_posts;
         }
         catch (err) {
@@ -407,6 +429,11 @@ function PostList({ post, getPosts, id }) {
             onDismounth={(entries) => {
                 postLists[id] = entries
             }}
+            deDuplicate={
+                (results, entries) => {
+                    return results.filter((result) => entries.findIndex((entry) => entry.id === result.id) === -1);
+                }
+            }
         />
     );
 }
@@ -420,8 +447,8 @@ function postEntryMapController({ entries, EntryMapper }) {
 }
 
 function SimplifiedPostList({ params: additional_params, post, endpoint }) {
-    async function getPosts(from,timestamp) {
-        let params = { from,timestamp };
+    async function getPosts(from, timestamp) {
+        let params = { from, timestamp };
         if (additional_params)
             params = { ...params, ...additional_params };
         const response = await axios.post(endpoint, params);

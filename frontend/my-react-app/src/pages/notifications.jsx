@@ -10,10 +10,6 @@ function Page() {
                 contents: <All />
             },
             {
-                text: "Verified",
-                contents: <p>verified</p>
-            },
-            {
                 text: "Mentions",
                 contents: <p>mentions</p>
             }
