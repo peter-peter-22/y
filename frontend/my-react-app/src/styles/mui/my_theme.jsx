@@ -216,8 +216,8 @@ const theme = createTheme({
             lg: 1200,
             xl: 1536,
             leftMenuIcons: 1300,
-            rightMenuSmaller: 1000,
-            hideRightMenu: 870,
+            rightMenuSmaller: 1060,
+            hideRightMenu: 990,
             smallIconMargins: 600,
             bottomTabs: 500
         },

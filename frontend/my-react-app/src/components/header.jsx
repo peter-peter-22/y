@@ -112,7 +112,7 @@ function Header() {
     const wideButtons = AboveBreakpoint("leftMenuIcons");
     const bigMargins = AboveBreakpoint("smallIconMargins");
     const leftTabs = AboveBreakpoint("bottomTabs");
-    const width = wideButtons ? "250px" : bigMargins ? "70px" : "60px";
+    const width = wideButtons ? "270px" : bigMargins ? "70px" : "60px";
 
     function LeftTabs() {
         const spaceRef = useRef();
@@ -201,7 +201,7 @@ function Header() {
                         <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", alignItems: wideButtons ? "stretch" : "center", height: "100%" }}>
                             {/*this div show the maximum available space for the tabs*/}
                             <div style={{ flexGrow: 1, overflow: "hidden" }} ref={spaceRef}>
-                                <Stack direction="column" gap={1} ref={parentRef} sx={{ mr: wideButtons ? 4 : 0 }}>
+                                <Stack direction="column" gap={2} ref={parentRef} sx={{ mr: wideButtons ? 4 : 0 }}>
                                     <TabButton to="/"
                                         inactive_icon={<ButtonSvg src={logo} />}
                                         active_icon={<ButtonSvg src={logo} />}
@@ -216,7 +216,7 @@ function Header() {
                                     ))}
 
                                     <MoreButton />
-                                    <PostButton />
+                                    <PostButton style={{marginTop:10}}/>
 
                                 </Stack>
                             </div>

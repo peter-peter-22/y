@@ -18,7 +18,7 @@ function NotificationBase({ seen, children }) {
     );
 }
 
-function Like({data}) {
+function Like({ data }) {
     return (
         <NotificationBase seen={data.seen}>
             <OpenPostOnClick id={data.post_id}>
@@ -52,7 +52,7 @@ function ReplyOrPost(post) {
         return "post";
 }
 
-function Follow({data}) {
+function Follow({ data }) {
     const link = "/profile/" + data.users[0].id;
     return (
         <NotificationBase seen={data.seen}>
@@ -96,7 +96,7 @@ function UserBalls(props) {
     );
 }
 
-function Repost({data}) {
+function Repost({ data }) {
     return (
         <NotificationBase seen={data.seen}>
             <OpenPostOnClick id={data.post_id}>
@@ -129,7 +129,7 @@ function SmallIcon(props) {
     );
 }
 
-function Comment({data}) {
+function Comment({ data }) {
     const post = data.comment;
     return (
         <NotificationBase seen={data.seen}>
@@ -161,6 +161,10 @@ const notificationTypes = {
 
 const Notification = memo(({ entry: data }) => {
     const type = data.type;
+
+    if (type !== notificationTypes.reply && data.users.length === 0)
+        return;//the users those caused this notification were deleted. don't display the notification to avoid error
+
     switch (type) {
         case notificationTypes.like:
             return <Like data={data} />;
@@ -176,9 +180,9 @@ const Notification = memo(({ entry: data }) => {
 });
 
 function NotificationList() {
-    async function download(from,timestamp) {
+    async function download(from, timestamp) {
         try {
-            const res = await axios.post("member/notifications/get", { from,timestamp });
+            const res = await axios.post("member/notifications/get", { from, timestamp });
             return res.data;
         }
         catch (err) {

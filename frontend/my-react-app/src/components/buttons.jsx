@@ -18,11 +18,11 @@ import { UserData } from '/src/components/user_data';
 import { GetUserKey, LinelessLink, noOverflow, ProfilePic, ProfileText, ResponsiveSelector, SimplePopOver, ToCorner } from '/src/components/utilities';
 
 const smallerButtons = "leftMenuIcons";
-const iconSize = "30px";
+const iconSize = "35px";
 
 const TabButton = forwardRef((props, ref) => {
     return (
-        <NavLink to={props.to} ref={ref} style={{position:"relative",zIndex:0}}>
+        <NavLink to={props.to} ref={ref} style={{ position: "relative", zIndex: 0 }}>
             {({ isActive }) => (
                 <ResponsiveButton selected={isActive} {...props}>{props.children}</ResponsiveButton>
             )}
@@ -44,7 +44,7 @@ function SelectableButton({ selected, active_icon, inactive_icon, children, onCl
     return (
         <Fab variant="extended" color="secondary_noBg" sx={{
             paddingLeft: "8px",
-            paddingRight: "25px"
+            paddingRight: "25px",
         }}
             onClick={onClick}
         >
@@ -140,18 +140,18 @@ function PostButton(props) {
         Modals[0].Close();
     }
     return (
-        <ResponsiveSelector breakpoint={smallerButtons}
-            above={
-                <WideButton color="primary" style={{ flexShrink: 0 }} {...props} onClick={handlePost}>
-                    <Typography variant="big_bold" color="primary.contrastText">Post</Typography>
-                </WideButton>
-            }
-            below={
-                <Fab size="medium" color="primary" style={{ flexShrink: 0 }} {...props} onClick={handlePost}>
-                    <ButtonIcon icon="create" filled="true" />
-                </Fab>
-            }
-        />
+            <ResponsiveSelector breakpoint={smallerButtons}
+                above={
+                    <WideButton color="primary" style={{ flexShrink: 0 }} {...props} onClick={handlePost}>
+                        <Typography variant="big_bold" color="primary.contrastText">Post</Typography>
+                    </WideButton>
+                }
+                below={
+                    <Fab size="medium" color="primary" style={{ flexShrink: 0 }} {...props} onClick={handlePost}>
+                        <ButtonIcon icon="create" filled="true" />
+                    </Fab>
+                }
+            />
     );
 }
 
@@ -177,7 +177,7 @@ function ProfileButton() {
                 above={
                     <Fab onClick={handleOpen} variant="extended" color="secondary_noBg" sx={{ height: size, borderRadius: size, width: "100%", p: 1, flexShrink: 0 }}>
                         <Stack direction="row" spacing={1} sx={{ width: "100%", height: "100%", alignItems: "center" }}>
-                            <ProfilePic user={user} disabled/>
+                            <ProfilePic user={user} disabled />
                             <ProfileText user={user} />
                             <Icon fontSize="small">
                                 more_horiz
@@ -187,7 +187,7 @@ function ProfileButton() {
                 }
                 below={
                     <Fab onClick={handleOpen} color="secondary_noBg" sx={{ height: size, width: size, borderRadius: "100%", p: 0, flexShrink: 0 }}>
-                        <ProfilePic user={user} disabled/>
+                        <ProfilePic user={user} disabled />
                     </Fab>
                 }
             />
@@ -240,7 +240,7 @@ function WideButton({ style, ...props }) {
     );
 }
 
-function LinkButton({to,children}) {
+function LinkButton({ to, children }) {
     return (
         <LinelessLink to={to}>
             <BlueTextButton>

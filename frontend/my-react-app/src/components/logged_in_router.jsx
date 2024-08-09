@@ -24,7 +24,7 @@ export default () => {
   return (
     <div style={{ display: "flex", flexDirection: "row", padding: 0, justifyContent: "center" }}>
       <Header />
-      <Box sx={{ maxWidth: "500px", flexGrow: 1, width: "100%", borderLeft: 1, borderRight: 1, borderColor: "divider", boxSizing: "border-box", minHeight: "100vh" }}>
+      <Box sx={{ maxWidth: "600px", flexGrow: 1, width: "100%", borderLeft: 1, borderRight: 1, borderColor: "divider", boxSizing: "border-box", minHeight: "100vh" }}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/notifications" element={<Notifications />} />

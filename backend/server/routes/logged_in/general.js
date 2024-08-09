@@ -110,7 +110,7 @@ router.post("/user_profile", async (req, res) => {
     birthdate,
     bio, 
     follower_count as followers , 
-    followed_count as follows 
+    following_count as follows 
     from users 
     where id=:target_user_id
     `)({ target_user_id: user_id, user_id: UserId(req) }));

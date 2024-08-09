@@ -127,7 +127,7 @@ const Contents = memo(() => {
                 pl: 4,
             }}
             style={{
-                width: wide ? "300px" : "220px",
+                width: wide ? "350px" : "288px",
             }}
         >
             <NavMenu>
