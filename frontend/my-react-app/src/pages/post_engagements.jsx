@@ -17,11 +17,11 @@ function TabSelector() {
     }
 
     function Reposts() {
-        return <SimplifiedPostList endpoint="member/general/reposts_of_post" params={{ post_id: id }} />;
+        return <SimplifiedPostList endpoint="member/general/reposts_of_post" params={{ post_id: id }} id={"reposts"+id}/>;
     }
 
     function Quotes() {
-        return <SimplifiedPostList endpoint="member/general/quotes_of_post" params={{ post_id: id }} />;
+        return <SimplifiedPostList endpoint="member/general/quotes_of_post" params={{ post_id: id }} id={"quotes"+id}/>;
     }
 
     const baseUrl = "/posts/" + id;

@@ -4,7 +4,7 @@ import { SimplifiedPostList } from "/src/components/posts.jsx";
 import { ListTitle } from '/src/components/utilities';
 
 function BookmarkList() {
-    return <SimplifiedPostList endpoint="member/general/get_bookmarks" />;
+    return <SimplifiedPostList endpoint="member/general/get_bookmarks" id={"bookmarks"}/>;
 }
 
 function Bookmarks() {

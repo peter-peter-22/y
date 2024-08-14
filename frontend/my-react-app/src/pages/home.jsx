@@ -21,11 +21,11 @@ function Page() {
 }
 
 function FeedList() {
-  return <SimplifiedPostList endpoint="member/feed/get_posts" />;
+  return <SimplifiedPostList endpoint="member/feed/get_posts" id={"feed"}/>;
 }
 
 function FollowingFeedList() {
-  return <SimplifiedPostList endpoint="member/feed/get_followed_posts" />;
+  return <SimplifiedPostList endpoint="member/feed/get_followed_posts" id={"following"}/>;
 }
 
 function ForYou() {

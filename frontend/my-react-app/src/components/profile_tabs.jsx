@@ -52,17 +52,17 @@ function MediaOfUser({ user }) {
 
 function LikesOfUser(props) {
     const user_id = props.user.id;
-    return <SimplifiedPostList endpoint="member/general/likes_of_user" params={{ user_id: user_id }} />;
+    return <SimplifiedPostList endpoint="member/general/likes_of_user" params={{ user_id: user_id }} id={"likes"+user_id} />;
 }
 
 function PostsOfUser(props) {
     const user_id = props.user.id;
-    return <SimplifiedPostList endpoint="member/general/posts_of_user" params={{ user_id: user_id }} />;
+    return <SimplifiedPostList endpoint="member/general/posts_of_user" params={{ user_id: user_id }} id={"posts"+user_id}/>;
 }
 
 function CommentsOfUser(props) {
     const user_id = props.user.id;
-    return <SimplifiedPostList endpoint="member/general/comments_of_user" params={{ user_id: user_id }} />;
+    return <SimplifiedPostList endpoint="member/general/comments_of_user" params={{ user_id: user_id }} id={"comments"+user_id}/>;
 }
 
 function Followers({ user }) {

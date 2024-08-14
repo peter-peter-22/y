@@ -11,13 +11,12 @@ import { useNavigate } from "react-router-dom";
 import { ThrowIfNotAxios } from "/src/communication.js";
 import { ExamplePost } from "/src/components/exampleData.js";
 import { ManagePost, engagementsLink } from "/src/components/manage_content_button.jsx";
-import { Modals,SuccessModal } from "/src/components/modals";
+import { Modals, SuccessModal } from "/src/components/modals";
 import { PostCreator, findAndColorHashtags } from "/src/components/post_creator.jsx";
 import { PostMedia } from "/src/components/post_media";
 import { DateLink, FadeLink, GetPostMedia, GetUserName, OnlineList, ProfilePic, ProfileText, ReplyingFrom, SimplePopOver, TextRow, UserKey, UserLink, formatNumber, noOverflow } from '/src/components/utilities';
-import config from './config';
+import config from '/src/components/config';
 
-const postLists = {};
 const commentSections = {};
 
 function Prefix(props) {
@@ -239,12 +238,12 @@ function PostButtonRow(props) {
     }
 
     function handleLink() {
-        navigator.clipboard.writeText(config.address_mode.client+getPostLink(post.id));
-        Modals[0].Show(<SuccessModal text="Link copied"/>);
+        navigator.clipboard.writeText(config.address_mode.client + getPostLink(post.id));
+        Modals[0].Show(<SuccessModal text="Link copied" />);
     }
 
-    const { handleOpen: showRepostDialog,handleClose:handleCloseRepost, ShowPopover: RepostPopover } = SimplePopOver();
-    const { handleOpen: showShareDialog,handleClose:handleCloseShare, ShowPopover: SharePopover } = SimplePopOver();
+    const { handleOpen: showRepostDialog, handleClose: handleCloseRepost, ShowPopover: RepostPopover } = SimplePopOver();
+    const { handleOpen: showShareDialog, handleClose: handleCloseShare, ShowPopover: SharePopover } = SimplePopOver();
 
     return (
         <Stack direction="row" justifyContent="space-between" style={{ flexGrow: 1 }}>
@@ -394,9 +393,8 @@ const HideablePostMemo = memo((props) => {
         return (<BlockedComment unHide={() => { setHidden(false) }} />);
 });
 
-function PostList({ post, getPosts, id }) {
+const PostList = ({ post, getPosts,id }) => {
     const onlineListRef = useRef();
-    const [key, setKey] = useState(post ? post.id : -1);
 
     async function GetEntries(from, timestamp) {
         try {
@@ -423,12 +421,8 @@ function PostList({ post, getPosts, id }) {
             getEntries={GetEntries}
             EntryMapper={HideablePostMemo}
             ref={onlineListRef}
-            key={key}
+            key={id}
             entryMapController={postEntryMapController}
-            startingEntries={postLists[id]}
-            onDismounth={(entries) => {
-                postLists[id] = entries
-            }}
             deDuplicate={
                 (results, entries) => {
                     return results.filter((result) => entries.findIndex((entry) => entry.id === result.id) === -1);
@@ -446,7 +440,7 @@ function postEntryMapController({ entries, EntryMapper }) {
     );
 }
 
-function SimplifiedPostList({ params: additional_params, post, endpoint }) {
+function SimplifiedPostList({ params: additional_params, post, endpoint, id }) {
     async function getPosts(from, timestamp) {
         let params = { from, timestamp };
         if (additional_params)
@@ -454,7 +448,7 @@ function SimplifiedPostList({ params: additional_params, post, endpoint }) {
         const response = await axios.post(endpoint, params);
         return response.data;
     }
-    return <PostList getPosts={getPosts} post={post} id={endpoint} />;
+    return <PostList getPosts={getPosts} post={post} id={id} key={id} />;
 }
 
 function PostBottomIcon(props) {

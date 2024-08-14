@@ -72,7 +72,7 @@ export default () => {
 
 function CommentList({ post }) {
     const id = post.id;
-    return <SimplifiedPostList endpoint="member/general/get_comments" params={{ id: id }} key={id} post={post} />;
+    return <SimplifiedPostList endpoint="member/general/get_comments" params={{ id: id }} id={"comments_of"+id} post={post} />;
 }
 
 export { get_focused_id };

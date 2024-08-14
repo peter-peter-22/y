@@ -96,7 +96,7 @@ function Posts({ text }) {
             <ListTitle>
                 Posts
             </ListTitle>
-            <SimplifiedPostList endpoint="member/search/posts" params={{ text: text }} key={text} />
+            <SimplifiedPostList endpoint="member/search/posts" params={{ text: text }} id={"search_of" + text} />
         </Stack>
     );
 }
@@ -110,8 +110,7 @@ function Main({ text }) {
     );
 }
 
-function GetSearchUrl(text)
-{
+function GetSearchUrl(text) {
     return "/search?q=" + text;
 }
 
