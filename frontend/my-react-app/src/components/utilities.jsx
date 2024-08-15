@@ -18,6 +18,7 @@ import { Media, MediaDisplayer, MediaFromFileData, mediaTypes } from "/src/compo
 import { ClickableSingleImageContainer } from "/src/components/post_media";
 import { OpenOnClick } from "/src/components/posts";
 import { theme } from '/src/styles/mui/my_theme.jsx';
+import { useVisible } from '/src/components/cache_router';
 
 const noOverflow = {
     whiteSpace: 'nowrap',
@@ -499,8 +500,8 @@ function defaultEntryMapController({ entries, EntryMapper }) {
     );
 }
 
-const OnlineList = forwardRef(({ EntryMapper, getEntries, entryMapController: overrideEntryMapController, startingEntries, onDismounth, deDuplicate }, ref) => {
-    const [entries, setEntries] = useState(startingEntries ? startingEntries : []);
+const OnlineList = forwardRef(({ EntryMapper, getEntries, entryMapController: overrideEntryMapController, deDuplicate }, ref) => {
+    const [entries, setEntries] = useState([]);
     const listRef = useRef(null);
     const savedScrollRef = useRef(0);
     const [end, setEnd] = useState(false);
@@ -510,6 +511,7 @@ const OnlineList = forwardRef(({ EntryMapper, getEntries, entryMapController: ov
     useEffect(() => {
         updateRef.current = { end, downloading, entries }
     }, [end, downloading, entries]);
+    const visible = useVisible();
 
     //the minimum distance between the bottom of the screen and the bottom of the list in px.
     const minUnseenHeight = 2000;
@@ -541,7 +543,7 @@ const OnlineList = forwardRef(({ EntryMapper, getEntries, entryMapController: ov
         else {
             //filter out duplicated entries if necessary
             if (deDuplicate)
-                results = deDuplicate(results,entries);
+                results = deDuplicate(results, entries);
 
             setEntries((prev) => {
                 return prev.concat(results)
@@ -570,14 +572,17 @@ const OnlineList = forwardRef(({ EntryMapper, getEntries, entryMapController: ov
     }
 
     useEffect(() => {
-        window.addEventListener("scroll", Scrolling);
-        Scrolling();
+        if (visible) {
+            window.addEventListener("scroll", Scrolling);
+            Scrolling();
+        }
+        else {
+            window.removeEventListener("scroll", Scrolling)
+        }
         return () => {
             window.removeEventListener("scroll", Scrolling)
-            if (onDismounth)
-                onDismounth(updateRef.current.entries);
         };
-    }, [])
+    }, [visible])
 
     const EntryMapController = overrideEntryMapController ? overrideEntryMapController : defaultEntryMapController;
 

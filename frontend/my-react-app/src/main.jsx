@@ -7,9 +7,7 @@ import '/src/styles/css/App.css';
 import MyTheme from '/src/styles/mui/my_theme.jsx';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
     <MyTheme>
       <App />
     </MyTheme>
-  </React.StrictMode>
 )

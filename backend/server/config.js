@@ -43,10 +43,10 @@ const config = {
     cookie_remember: 1000 * 60 * 60 * 24 * 30,//1 month. 
     cookie_registering: 1000 * 60 * 60 * 2,//2 hours. the email, name, ect. the user sends at the start of the registration must be finalized within this time
     address_mode: address_modes.localhost,
-    posts_per_request: 20,
-    users_per_request: 50,
-    trends_per_request:50,
-    notifications_per_request: 40,
+    posts_per_request: 30,
+    users_per_request: 60,
+    trends_per_request:60,
+    notifications_per_request: 60,
     uploadLimitMB: 100,
     email_notification_interval:10*50*1000,//10 minutes
     log_email_notifications:false,

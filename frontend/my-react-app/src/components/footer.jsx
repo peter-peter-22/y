@@ -36,7 +36,7 @@ function TwoSidedSticky({ children }) {
     //the threshold where the sticky div will start following the screen.
     //equal to the max overflow height
     const height = ref.current ? ref.current.offsetHeight - window.innerHeight : 0;
-    const tooSmall = ref.current?ref.current.offsetHeight <= window.innerHeight:true;
+    const tooSmall = ref.current ? ref.current.offsetHeight <= window.innerHeight : true;
 
     //decide if the sticky div should stick to the op or bottom
     const position = scrollingDown ?
@@ -88,32 +88,21 @@ function TwoSidedSticky({ children }) {
         };
     }, []);
 
+    //render the container depenting on the scaling mode
     return (
         <Stack direction="column" >
-            {tooSmall ?
+            <>
+                {!tooSmall && <div style={{ height: offset }} />}
                 <div
                     ref={ref}
                     style={{
                         position: "sticky",
-                        top: 0
+                        ...(tooSmall ? { top: 0 } : position)
                     }}
                 >
                     {children}
                 </div>
-                :
-                <>
-                    <div style={{ height: offset }} />
-                    <div
-                        ref={ref}
-                        style={{
-                            position: "sticky",
-                            ...position
-                        }}
-                    >
-                        {children}
-                    </div>
-                </>
-            }
+            </>
         </Stack>
     );
 }

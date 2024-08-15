@@ -4,6 +4,7 @@ import { TabSwitcher } from '/src/components/utilities';
 
 function Page() {
     return (
+        <div>
         <TabSwitcher tabs={[
             {
                 text: "All",
@@ -15,6 +16,7 @@ function Page() {
             }
         ]}>
         </TabSwitcher >
+        </div>
     )
 }
 
