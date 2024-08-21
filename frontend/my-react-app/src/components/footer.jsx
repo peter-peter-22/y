@@ -151,7 +151,7 @@ function Links() {
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "0px 10px" }}>
                     {visibleLinks.map((link, i) => <link.GetElement key={i} />)}
                     <FadeLink onClick={handleOpen}>More ···</FadeLink>
-                    <Typography variant="small_fade">{creation}</Typography>
+                    <div><Typography variant="small_fade">{creation}</Typography></div>
                 </div>
             </ListItem>
             <ShowPopover>

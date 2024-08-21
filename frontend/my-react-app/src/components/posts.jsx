@@ -393,7 +393,7 @@ const HideablePostMemo = memo((props) => {
         return (<BlockedComment unHide={() => { setHidden(false) }} />);
 });
 
-const PostList = ({ post, getPosts,id }) => {
+const PostList = ({ post, getPosts, id }) => {
     const onlineListRef = useRef();
 
     async function GetEntries(from, timestamp) {
@@ -422,12 +422,7 @@ const PostList = ({ post, getPosts,id }) => {
             EntryMapper={HideablePostMemo}
             ref={onlineListRef}
             key={id}
-            entryMapController={postEntryMapController}
-            deDuplicate={
-                (results, entries) => {
-                    return results.filter((result) => entries.findIndex((entry) => entry.id === result.id) === -1);
-                }
-            }
+            getKey={(entry,index)=>entry.id}
         />
     );
 }

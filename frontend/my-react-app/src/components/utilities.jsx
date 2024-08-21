@@ -18,7 +18,6 @@ import { Media, MediaDisplayer, MediaFromFileData, mediaTypes } from "/src/compo
 import { ClickableSingleImageContainer } from "/src/components/post_media";
 import { OpenOnClick } from "/src/components/posts";
 import { theme } from '/src/styles/mui/my_theme.jsx';
-import { useVisible } from '/src/components/cache_router';
 
 const noOverflow = {
     whiteSpace: 'nowrap',
@@ -492,15 +491,20 @@ function LinelessLink({ to, children }) {
     );
 }
 
-function defaultEntryMapController({ entries, EntryMapper }) {
+function defaultEntryMapController({ entries, EntryMapper, getKey=defaultGetKey }) {
     return (
-        <List sx={{ p: 0 }} >
-            {entries.map((entry, index) => <EntryMapper key={index} index={index} entry={entry} />)}
+        <List style={{ padding: 0 }}>
+            {entries.map((entry, index) => <EntryMapper entry={entry} key={getKey(entry, index)} />)}
         </List>
     );
 }
 
-const OnlineList = forwardRef(({ EntryMapper, getEntries, entryMapController: overrideEntryMapController, deDuplicate }, ref) => {
+function defaultGetKey(entry, index)
+{
+   return index;
+}
+
+const OnlineList = forwardRef(({ EntryMapper, getEntries, entryMapController: overrideEntryMapController, getKey }, ref) => {
     const [entries, setEntries] = useState([]);
     const listRef = useRef(null);
     const savedScrollRef = useRef(0);
@@ -511,7 +515,6 @@ const OnlineList = forwardRef(({ EntryMapper, getEntries, entryMapController: ov
     useEffect(() => {
         updateRef.current = { end, downloading, entries }
     }, [end, downloading, entries]);
-    const visible = useVisible();
 
     //the minimum distance between the bottom of the screen and the bottom of the list in px.
     const minUnseenHeight = 2000;
@@ -541,10 +544,6 @@ const OnlineList = forwardRef(({ EntryMapper, getEntries, entryMapController: ov
             return;
         }
         else {
-            //filter out duplicated entries if necessary
-            if (deDuplicate)
-                results = deDuplicate(results, entries);
-
             setEntries((prev) => {
                 return prev.concat(results)
             });
@@ -572,23 +571,18 @@ const OnlineList = forwardRef(({ EntryMapper, getEntries, entryMapController: ov
     }
 
     useEffect(() => {
-        if (visible) {
-            window.addEventListener("scroll", Scrolling);
-            Scrolling();
-        }
-        else {
-            window.removeEventListener("scroll", Scrolling)
-        }
+        window.addEventListener("scroll", Scrolling);
+        Scrolling();
         return () => {
             window.removeEventListener("scroll", Scrolling)
         };
-    }, [visible])
+    }, [])
 
     const EntryMapController = overrideEntryMapController ? overrideEntryMapController : defaultEntryMapController;
 
     return (
         <div ref={listRef}>
-            <EntryMapController entries={entries} EntryMapper={EntryMapper} />
+            <EntryMapController entries={entries} EntryMapper={EntryMapper} getKey={getKey} />
             {!end && <Loading />}
         </div>
     );

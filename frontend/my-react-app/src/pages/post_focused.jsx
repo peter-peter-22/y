@@ -8,7 +8,6 @@ import { ThrowIfNotAxios } from "/src/communication.js";
 import { OverrideWithRepost, PostFocused, SimplifiedPostList } from "/src/components/posts.jsx";
 import { ListTitle, Loading } from '/src/components/utilities';
 import { ErrorPage } from "/src/pages/error";
-import { useParamsCached } from '/src/components/cache_router';
 
 let focused_id = undefined;
 function get_focused_id() {
@@ -17,7 +16,7 @@ function get_focused_id() {
 
 export default () => {
     const [post, setPost] = useState();
-    const { id } = useParamsCached();
+    const { id } = useParams();
     const [error, setError] = useState(false);
 
     useEffect(getPost, [id]);
