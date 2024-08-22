@@ -25,10 +25,14 @@ import {
 import { Loading } from "/src/components/utilities";
 import { useVirtualizer, useWindowVirtualizer } from '@tanstack/react-virtual'
 
+const lastIndexes = {};
+
 const OnlineList = forwardRef(({ exampleSize = 100, EntryMapper, getEntries, overscan = 5, id }, ref) => {
-    const startTimeRef = useRef(Math.floor(Date.now() / 1000));//the unix timestamp when this list was created. it is used to filter out the contents those were created after the feed
+    //the unix timestamp when this list was created. it is used to filter out the contents those were created after the feed
+    const startTimeRef = useRef(Math.floor(Date.now() / 1000));
     const listRef = useRef(null)
 
+    //handle infinite list queries
     const {
         status,
         data,
@@ -43,8 +47,10 @@ const OnlineList = forwardRef(({ exampleSize = 100, EntryMapper, getEntries, ove
         initialPageParam: 0,
     })
 
+    //array of all rows generated from the infinite list data
     const allRows = data ? data.pages.flatMap((d) => d.rows) : []
 
+    //external functions
     useImperativeHandle(ref, () => ({
         AddEntryToTop(newEntry) {
             // setEntries((prev) => [newEntry, ...prev]);
@@ -52,6 +58,7 @@ const OnlineList = forwardRef(({ exampleSize = 100, EntryMapper, getEntries, ove
         }
     }));
 
+    //handle virtualizer
     const virtualizer = useWindowVirtualizer({
         count: hasNextPage ? allRows.length + 1 : allRows.length,
         estimateSize: () => exampleSize,
@@ -59,15 +66,19 @@ const OnlineList = forwardRef(({ exampleSize = 100, EntryMapper, getEntries, ove
         scrollMargin: listRef.current?.offsetTop ?? 0,
     })
 
+    //the visible rows
     const items = virtualizer.getVirtualItems();
 
+    //fetch the next page when reached the bottom
     useEffect(() => {
+        //the last visible item
         const [lastItem] = [...items].reverse()
 
         if (!lastItem) {
             return
         }
 
+        //if there are no more invisible items after this one, and there is a next page, and currently not fetching, fetch the next page 
         if (
             lastItem.index >= allRows.length - 1 &&
             hasNextPage &&
@@ -82,6 +93,18 @@ const OnlineList = forwardRef(({ exampleSize = 100, EntryMapper, getEntries, ove
         isFetchingNextPage,
         items
     ]);
+
+    //save the last rendered location
+    useEffect(() => {
+        lastIndexes[id] = items[0]?.index ?? 0;
+    }, [items, id]);
+
+    //load the last rendered location
+    useEffect(() => {
+        const loaded = lastIndexes[id];
+        if (loaded)
+            virtualizer.scrollToIndex(loaded, { align: "top" });
+    }, [id, virtualizer]);
 
     return (
         <div key={id} ref={listRef}>
@@ -136,8 +159,8 @@ const OnlineList = forwardRef(({ exampleSize = 100, EntryMapper, getEntries, ove
 async function fetchServerPage(getEntries, offset = 0, timestamp) {
     try {
         const rows = await getEntries(offset, timestamp);
-        if(rows.length===0)//if fetched 0 posts, this is the end. nextOffset:null means hasNextPage will be false
-            return{rows, nextOffset:null};
+        if (rows.length === 0)//if fetched 0 posts, this is the end. nextOffset:null means hasNextPage will be false
+            return { rows, nextOffset: null };
         return { rows, nextOffset: offset + rows.length };
     }
     catch (err) {
@@ -146,4 +169,4 @@ async function fetchServerPage(getEntries, offset = 0, timestamp) {
     };
 }
 
-export {  OnlineList };
+export { OnlineList };

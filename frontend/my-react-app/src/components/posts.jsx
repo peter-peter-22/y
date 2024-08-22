@@ -422,6 +422,7 @@ function SimplifiedPostList({ params: additional_params, post, endpoint, id }) {
             EntryMapper={HideablePostMemo}
             ref={onlineListRef}
             key={id}
+            id={id}
             getKey={(entry, index) => entry.id}
         />
     );

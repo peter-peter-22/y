@@ -22,7 +22,13 @@ import Main from "./components/logged_in_router.jsx";
 import NoUser from "./components/no_user.jsx";
 import { GetUser } from "/src/components/user_data";
 
-const queryClient = new QueryClient()
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: Infinity,
+    },
+  },
+});
 
 function App() {
   //get user data
