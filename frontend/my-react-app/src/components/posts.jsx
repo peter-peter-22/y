@@ -14,8 +14,9 @@ import { ManagePost, engagementsLink } from "/src/components/manage_content_butt
 import { Modals, SuccessModal } from "/src/components/modals";
 import { PostCreator, findAndColorHashtags } from "/src/components/post_creator.jsx";
 import { PostMedia } from "/src/components/post_media";
-import { DateLink, FadeLink, GetPostMedia, GetUserName, OnlineList, ProfilePic, ProfileText, ReplyingFrom, SimplePopOver, TextRow, UserKey, UserLink, formatNumber, noOverflow } from '/src/components/utilities';
+import { DateLink, FadeLink, GetPostMedia, GetUserName, ProfilePic, ProfileText, ReplyingFrom, SimplePopOver, TextRow, UserKey, UserLink, formatNumber, noOverflow } from '/src/components/utilities';
 import config from '/src/components/config';
+import { OnlineList } from '/src/components/online_list';
 
 const commentSections = {};
 
@@ -393,49 +394,8 @@ const HideablePostMemo = memo((props) => {
         return (<BlockedComment unHide={() => { setHidden(false) }} />);
 });
 
-const PostList = ({ post, getPosts, id }) => {
-    const onlineListRef = useRef();
-
-    async function GetEntries(from, timestamp) {
-        try {
-            const new_posts = await getPosts(from, timestamp);
-            return new_posts;
-        }
-        catch (err) {
-            ThrowIfNotAxios(err);
-            return [];
-        }
-    }
-
-    useEffect(() => {
-        //create the object that will let other components to edit and update this comment section
-        const thisCommentSection = {};
-        thisCommentSection.addPost = (newPost) => { onlineListRef.current.AddEntryToTop(newPost) };
-        thisCommentSection.update = () => { setKey((prev) => prev + 1) };//update the list after block
-        thisCommentSection.post = post ? post.id : null;//what post belongs to this comment section? null if this is the main feed
-        commentSections.active = thisCommentSection;
-    }, []);
-
-    return (
-        <OnlineList
-            getEntries={GetEntries}
-            EntryMapper={HideablePostMemo}
-            ref={onlineListRef}
-            key={id}
-            getKey={(entry,index)=>entry.id}
-        />
-    );
-}
-
-function postEntryMapController({ entries, EntryMapper }) {
-    return (
-        <List sx={{ p: 0 }} >
-            {entries.map((entry, index) => <EntryMapper key={entry.id} index={index} entry={entry} />)}
-        </List>
-    );
-}
-
 function SimplifiedPostList({ params: additional_params, post, endpoint, id }) {
+    const onlineListRef = useRef();
     async function getPosts(from, timestamp) {
         let params = { from, timestamp };
         if (additional_params)
@@ -443,7 +403,28 @@ function SimplifiedPostList({ params: additional_params, post, endpoint, id }) {
         const response = await axios.post(endpoint, params);
         return response.data;
     }
-    return <PostList getPosts={getPosts} post={post} id={id} key={id} />;
+
+    useEffect(() => {
+        //create the object that will let other components to edit and update this comment section
+
+        const addPost = (newPost) => { onlineListRef.current.AddEntryToTop(newPost) };
+        const update = () => { setKey((prev) => prev + 1) };//update the list after block
+        const replied_post = post ? post.id : null;//what post belongs to this comment section? null if this is the main feed
+
+        const thisCommentSection = { addPost, update, replied_post };
+
+        commentSections.active = thisCommentSection;
+    }, [post]);
+
+    return (
+        <OnlineList
+            getEntries={getPosts}
+            EntryMapper={HideablePostMemo}
+            ref={onlineListRef}
+            key={id}
+            getKey={(entry, index) => entry.id}
+        />
+    );
 }
 
 function PostBottomIcon(props) {
@@ -527,4 +508,4 @@ function OverrideWithRepost(post) {
 }
 
 
-export { BorderlessPost, ListBlock, ListBlockButton, OpenOnClick, OpenPostOnClick, OverrideWithRepost, Post, PostButtonRow, PostFocused, PostList, PostModalFrame, QuotedFrame, RowWithPrefix, SimplifiedPostList, WritePost, commentSections };
+export { BorderlessPost, ListBlock, ListBlockButton, OpenOnClick, OpenPostOnClick, OverrideWithRepost, Post, PostButtonRow, PostFocused, PostModalFrame, QuotedFrame, RowWithPrefix, SimplifiedPostList, WritePost, commentSections };

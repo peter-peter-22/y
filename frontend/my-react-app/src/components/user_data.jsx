@@ -8,7 +8,7 @@ import { Modals } from "/src/components/modals";
 //globally accessible
 let UserData = {};
 
-function UserHook() {
+function GetUser() {
     const [getData, setData] = useState();
     UserData.getData = getData;
     UserData.setData = setData;
@@ -66,5 +66,5 @@ function UserHook() {
     return getData;
 }
 
-export { UserData, UserHook };
+export { UserData, GetUser };
 

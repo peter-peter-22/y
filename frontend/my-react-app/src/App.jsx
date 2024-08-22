@@ -6,19 +6,27 @@ import '@fontsource/roboto/700.css';
 import '@fontsource/roboto/900.css';
 import 'material-icons/iconfont/material-icons.css';
 import React from "react";
-import { BrowserRouter as Router } from "react-router-dom";
+import { BrowserRouter } from "react-router-dom";
 import { CreateModals } from "/src/components/modals";
 import SharedPages from "/src/components/shared_pages_router";
+import {
+  QueryClient,
+  QueryClientProvider,
+  useInfiniteQuery,
+} from '@tanstack/react-query';
+import MyTheme from '/src/styles/mui/my_theme.jsx';
 
 //components
 import Loading from "./components/loading.jsx";
 import Main from "./components/logged_in_router.jsx";
 import NoUser from "./components/no_user.jsx";
-import { UserHook } from "/src/components/user_data";
+import { GetUser } from "/src/components/user_data";
+
+const queryClient = new QueryClient()
 
 function App() {
   //get user data
- const getUser=UserHook();
+  const getUser = GetUser();
 
   //choose page
   let Page;
@@ -35,14 +43,18 @@ function App() {
   }
 
   return (
-    <Router>
-      <CreateModals />
-      <div style={{ position: "relative", zIndex: 0 }}>
-        <SharedPages>
-          <Page />
-        </SharedPages>
-      </div>
-    </Router>
+    <QueryClientProvider client={queryClient}>
+      <MyTheme>
+        <BrowserRouter>
+          <CreateModals />
+          <div style={{ position: "relative", zIndex: 0 }}>
+            <SharedPages>
+              <Page />
+            </SharedPages>
+          </div>
+        </BrowserRouter>
+      </MyTheme >
+    </QueryClientProvider>
   );
 }
 

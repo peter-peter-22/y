@@ -26,6 +26,10 @@ app.use("/", passport_routes);
 import webpush from "./routes/web_push.js";
 app.use("/", webpush);
 
+app.get("/", (req, res) => {
+    res.send("this is the server");
+});
+
 //handle all (currently) uncaught errors
 app.use(error_handler);
 
