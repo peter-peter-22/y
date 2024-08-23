@@ -1,22 +1,21 @@
 import { Box, Icon, Typography } from '@mui/material';
 import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
-import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import Stack from '@mui/material/Stack';
 import axios from 'axios';
 import React, { memo, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ThrowIfNotAxios } from "/src/communication.js";
+import { BlueCenterButton } from "/src/components/buttons";
+import config from '/src/components/config';
 import { ExamplePost } from "/src/components/exampleData.js";
 import { ManagePost, engagementsLink } from "/src/components/manage_content_button.jsx";
 import { Modals, SuccessModal } from "/src/components/modals";
+import { OnlineList } from '/src/components/online_list';
 import { PostCreator, findAndColorHashtags } from "/src/components/post_creator.jsx";
 import { PostMedia } from "/src/components/post_media";
 import { DateLink, FadeLink, GetPostMedia, GetUserName, ProfilePic, ProfileText, ReplyingFrom, SimplePopOver, TextRow, UserKey, UserLink, formatNumber, noOverflow } from '/src/components/utilities';
-import config from '/src/components/config';
-import { OnlineList } from '/src/components/online_list';
 
 const commentSections = {};
 
@@ -90,16 +89,14 @@ function BorderlessPost({ post, hideButtons }) {
     );
 }
 
-function BlockedComment(props) {
-    const unHide = props.unHide;
-
+function BlockedComment({ show }) {
     return (
         <ListBlockButton>
             <Typography variant="small_fade" style={{ textAlign: "center", width: "100%" }}>
-                This comment belongs to a user you blocked.
+                This content belongs to a user you blocked.
             </Typography>
 
-            <BlueCenterButton onClick={unHide}>
+            <BlueCenterButton onClick={show}>
                 Show
             </BlueCenterButton>
         </ListBlockButton>
@@ -385,16 +382,26 @@ function CountableButton(post, count_name, active_name, url) {
 }
 
 const HideablePostMemo = memo((props) => {
-    const [post, setPost] = useState(props.entry);
-    post.setPost = setPost;
-    const [hidden, setHidden] = useState(post.publisher.is_blocked)
-    if (!hidden)
-        return (<Post post={post} />);
-    else if (post.replying_to !== null)//comments are visible in an alternative way if the user is blocked
-        return (<BlockedComment unHide={() => { setHidden(false) }} />);
-});
+    return (<HideablePostAny {...props} Renderer={Post} />);
+}, (prev, next) => { prev.entry === next.entry });
 
-function SimplifiedPostList({ params: additional_params, post, endpoint, id }) {
+const HideablePostFocusedMemo = memo((props) => {
+    return (<HideablePostAny {...props} Renderer={PostFocused} />);
+}, (prev, next) => { prev.entry === next.entry });
+
+function HideablePostAny({ entry, Renderer }) {
+    const [show, setShow] = useState(false);
+
+    if (entry.deleted)
+        return;
+
+    if (entry.publisher.is_blocked && !show)
+        return (<BlockedComment show={() => { setShow(true) }} />);
+
+    return (<Renderer post={entry} />);
+}
+
+function SimplifiedPostList({ params: additional_params, post, endpoint, id,scrollRestoration=true }) {
     const onlineListRef = useRef();
     async function getPosts(from, timestamp) {
         let params = { from, timestamp };
@@ -408,10 +415,11 @@ function SimplifiedPostList({ params: additional_params, post, endpoint, id }) {
         //create the object that will let other components to edit and update this comment section
 
         const addPost = (newPost) => { onlineListRef.current.AddEntryToTop(newPost) };
-        const update = () => { setKey((prev) => prev + 1) };//update the list after block
+        const update = () => { onlineListRef.current.update };
+        const mapRows = (fn) => { onlineListRef.current.mapRows(fn) };
         const replied_post = post ? post.id : null;//what post belongs to this comment section? null if this is the main feed
 
-        const thisCommentSection = { addPost, update, replied_post };
+        const thisCommentSection = { addPost, update, mapRows, replied_post };
 
         commentSections.active = thisCommentSection;
     }, [post]);
@@ -423,7 +431,9 @@ function SimplifiedPostList({ params: additional_params, post, endpoint, id }) {
             ref={onlineListRef}
             key={id}
             id={id}
-            getKey={(entry, index) => entry.id}
+            getKey={(entry, index) => entry?.id??"loading"}
+            exampleSize={100}
+            scrollRestoration={scrollRestoration}
         />
     );
 }
@@ -509,4 +519,5 @@ function OverrideWithRepost(post) {
 }
 
 
-export { BorderlessPost, ListBlock, ListBlockButton, OpenOnClick, OpenPostOnClick, OverrideWithRepost, Post, PostButtonRow, PostFocused, PostModalFrame, QuotedFrame, RowWithPrefix, SimplifiedPostList, WritePost, commentSections };
+export { BorderlessPost, HideablePostFocusedMemo, ListBlock, ListBlockButton, OpenOnClick, OpenPostOnClick, OverrideWithRepost, Post, PostButtonRow, PostModalFrame, QuotedFrame, RowWithPrefix, SimplifiedPostList, WritePost, commentSections };
+

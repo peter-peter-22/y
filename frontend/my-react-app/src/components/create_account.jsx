@@ -3,7 +3,6 @@ import Checkbox from '@mui/material/Checkbox';
 import Fab from '@mui/material/Fab';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import InputAdornment from '@mui/material/InputAdornment';
-import Link from '@mui/material/Link';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
@@ -21,7 +20,7 @@ import config from "/src/components/config.js";
 import { PasswordFieldWithToggle, VisuallyHiddenInput } from "/src/components/inputs";
 import { fileToMedia } from '/src/components/media';
 import { Modals } from "/src/components/modals";
-import { BigModal, BottomButtonWithBorder, ByRegistering, ModalMargin } from "/src/components/no_user";
+import { BigModal, BottomButtonWithBorder, ByRegistering, ModalMargin ,SmallLink} from "/src/components/no_user";
 import { UserData } from "/src/components/user_data";
 import { AvatarImageDisplayer, CenterLogo, GetProfilePicture } from '/src/components/utilities';
 import { UserListExtended } from "/src/pages/follow_people";
@@ -335,7 +334,7 @@ function Page4(props)//enter password, login
                 <Typography variant="small_fade" sx={{ mt: 3 }}>At least 8 characters {data.current.email}</Typography>
                 <PasswordInput onChangePassword={setPassword} onChangeOk={setPasswordOk} />
                 <ByRegistering variant="small_fade" sx={{ mt: "auto" }} />
-                <Typography variant="small_fade">Y can use your contact informations, including your email address and phone number according to the privacy policy. <Link href="#">See more</Link></Typography>
+                <Typography variant="small_fade">Y can use your contact informations, including your email address and phone number according to the privacy policy. <SmallLink href="#">See more</SmallLink></Typography>
                 <WideButton color="black" sx={{ my: 3 }}
                     onClick={submitPassword} disabled={!passwordOk}>Next</WideButton>
             </ModalMargin>

@@ -382,13 +382,13 @@ function ToggleOnlineBool(user, url, startingValue, onChange) {
     const [get, set] = useState(start);
     const lastValueRef = useRef(start);
 
-    const firstRef = useRef(true);
-
     function toggle() {
         set((prev) => {
             const newValue = !prev;
             update(newValue);
-            firstRef.current = false;
+            if (onChange)
+                onChange(newValue);
+
             return newValue;
         });
     }
@@ -412,14 +412,6 @@ function ToggleOnlineBool(user, url, startingValue, onChange) {
             ThrowIfNotAxios(err);
         }
     }
-
-    useEffect(() => {
-        //skip first update
-        if (!firstRef.current) {
-            if (onChange)
-                onChange(get);
-        }
-    }, [get]);
 
     return [get, set, toggle];
 }
@@ -491,7 +483,7 @@ function LinelessLink({ to, children }) {
     );
 }
 
-function defaultEntryMapController({ entries, EntryMapper, getKey=defaultGetKey }) {
+function defaultEntryMapController({ entries, EntryMapper, getKey = defaultGetKey }) {
     return (
         <List style={{ padding: 0 }}>
             {entries.map((entry, index) => <EntryMapper entry={entry} key={getKey(entry, index)} />)}
@@ -499,9 +491,8 @@ function defaultEntryMapController({ entries, EntryMapper, getKey=defaultGetKey 
     );
 }
 
-function defaultGetKey(entry, index)
-{
-   return index;
+function defaultGetKey(entry, index) {
+    return index;
 }
 
 const OnlineList = forwardRef(({ EntryMapper, getEntries, entryMapController: overrideEntryMapController, getKey }, ref) => {

@@ -45,24 +45,24 @@ function MediaOfUser({ user }) {
     }
 
     return (
-        <OnlineList getEntries={GetEntries} entryMapController={Container} key={user.id} />
+        <OnlineList getEntries={GetEntries} entryMapController={Container} key={user.id} scrollRestoration={false}/>
     );
 }
 
 
 function LikesOfUser(props) {
     const user_id = props.user.id;
-    return <SimplifiedPostList endpoint="member/general/likes_of_user" params={{ user_id: user_id }} id={"likes"+user_id} />;
+    return <SimplifiedPostList endpoint="member/general/likes_of_user" params={{ user_id: user_id }} id={"likes"+user_id} scrollRestoration={false}/>;
 }
 
 function PostsOfUser(props) {
     const user_id = props.user.id;
-    return <SimplifiedPostList endpoint="member/general/posts_of_user" params={{ user_id: user_id }} id={"posts"+user_id}/>;
+    return <SimplifiedPostList endpoint="member/general/posts_of_user" params={{ user_id: user_id }} id={"posts"+user_id} scrollRestoration={false}/>;
 }
 
 function CommentsOfUser(props) {
     const user_id = props.user.id;
-    return <SimplifiedPostList endpoint="member/general/comments_of_user" params={{ user_id: user_id }} id={"comments"+user_id}/>;
+    return <SimplifiedPostList endpoint="member/general/comments_of_user" params={{ user_id: user_id }} id={"comments"+user_id} scrollRestoration={false}/>;
 }
 
 function Followers({ user }) {

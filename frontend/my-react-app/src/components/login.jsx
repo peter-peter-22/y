@@ -1,5 +1,4 @@
 import { Box, Typography } from '@mui/material';
-import Link from '@mui/material/Link';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import axios from 'axios';
@@ -10,7 +9,7 @@ import config from "/src/components/config.js";
 import { EmailInput, RechaptaInput, validateEmail } from "/src/components/create_account";
 import { PasswordFieldWithToggle } from "/src/components/inputs";
 import { ErrorText, Modals, SuccessModal } from "/src/components/modals";
-import { AlternativeLogin, BigModal, BigModalMargin, BottomButtonWithBorder, Or } from "/src/components/no_user";
+import { AlternativeLogin, BigModal, BigModalMargin, BottomButtonWithBorder, Or,SmallLink } from "/src/components/no_user";
 import { UserData } from "/src/components/user_data";
 import { CenterLogo } from '/src/components/utilities';
 
@@ -19,25 +18,25 @@ function Login(props) {
     const dataRef = useRef({});
 
     //pages
-    const pages = [
-        ChooseMethod,
-        EnterPassword,
-        ForgotPassword
-    ]
-    const [page, setPage] = useState(0);
+    const pages = {
+        main: ChooseMethod,
+        password: EnterPassword,
+        forgot: ForgotPassword
+    }
+    const [page, setPage] = useState("main");
 
     function handleBack() {
-        if (page === 0)
+        if (page === "main")
             Close()
         else
-            setPage(0);
+            setPage("main");
     }
 
     const CurrentPage = pages[page];
 
     return (
         <BigModal close={props.close} open={true}>
-            <CornerButton onClick={handleBack}>{page === pages.choose ? "close" : "arrow_back"}</CornerButton>
+            <CornerButton onClick={handleBack}>{page === "main" ? "close" : "arrow_back"}</CornerButton>
             <CurrentPage dataRef={dataRef} setPage={setPage} />
         </BigModal>
     );
@@ -76,7 +75,7 @@ function EnterPassword(props) {
                 <TextField variant="outlined" type="text" label="Email" value={email} disabled sx={{ mb: 3 }} />
                 <PasswordFieldWithToggle variant="outlined" label="Password" sx={{ mb: 3 }}
                     onChange={handlePassword} value={password} />
-                <StyledLink onClick={() => { props.setPage(2); }} style={{ cursor: "pointer" }}>Forgot password?</StyledLink>
+                <SmallLink onClick={() => { props.setPage("forgot"); }} style={{ cursor: "pointer" }}>Forgot password?</SmallLink>
                 <WideButton onClick={submitPassword} size="medium" color="black" sx={{ mt: "auto", mb: 3 }}>Sign-in</WideButton>
                 <Box sx={{ mb: 3 }}>
                     <NoAccount />
@@ -109,7 +108,7 @@ function ChooseMethod(props) {
                 },
             );
             if (res.data)
-                props.setPage(1);
+                props.setPage("password");
             else
                 ErrorText("No Y user belongs to this email");
         } catch (err) {
@@ -131,7 +130,7 @@ function ChooseMethod(props) {
                     </Stack>
                     <TextField autoComplete="email" variant="outlined" type="email" label="Email" onChange={handleEmail} value={email} />
                     <WideButton onClick={submitEmail} size="small" color="black">Next</WideButton>
-                    <OutlinedButton onClick={() => { props.setPage(2); }} size="small">Forgot password?</OutlinedButton>
+                    <OutlinedButton onClick={() => { props.setPage("forgot"); }} size="small">Forgot password?</OutlinedButton>
                     <Box sx={{ mt: 3 }}>
                         <NoAccount />
                     </Box>
@@ -201,7 +200,7 @@ function ForgotPassword(props) {
 
 function NoAccount() {
     return (
-        <Typography variant="small_fade">You have no account? <Link style={{ cursor: "pointer" }} onClick={Close}>Register</Link></Typography>
+        <Typography variant="small_fade">You have no account? <SmallLink style={{ cursor: "pointer" }} onClick={Close}>Register</SmallLink></Typography>
     );
 }
 

@@ -5,7 +5,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { BackButton } from "../components/back_button";
 import { ThrowIfNotAxios } from "/src/communication.js";
-import { OverrideWithRepost, PostFocused, SimplifiedPostList } from "/src/components/posts.jsx";
+import { OverrideWithRepost, HideablePostFocusedMemo, SimplifiedPostList } from "/src/components/posts.jsx";
 import { ListTitle, Loading } from '/src/components/utilities';
 import { ErrorPage } from "/src/pages/error";
 
@@ -58,7 +58,7 @@ export default () => {
                     <BackButton />
                     <ListTitle>Post</ListTitle>
                 </Stack>
-                <PostFocused post={post} />
+                <HideablePostFocusedMemo entry={post} />
                 <CommentList post={overriden} />
             </List>
         );
@@ -72,7 +72,7 @@ export default () => {
 
 function CommentList({ post }) {
     const id = post.id;
-    return <SimplifiedPostList endpoint="member/general/get_comments" params={{ id: id }} id={"comments_of"+id} post={post} />;
+    return <SimplifiedPostList endpoint="member/general/get_comments" params={{ id: id }} id={"comments_of" + id} post={post} />;
 }
 
 export { get_focused_id };

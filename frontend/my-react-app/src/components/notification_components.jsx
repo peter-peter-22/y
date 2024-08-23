@@ -3,10 +3,10 @@ import ListItem from '@mui/material/ListItem';
 import Stack from '@mui/material/Stack';
 import axios from 'axios';
 import React, { memo } from "react";
-import { ThrowIfNotAxios } from "/src/communication.js";
 import { BorderlessPost, ListBlockButton, OpenOnClick, OpenPostOnClick, RowWithPrefix } from "/src/components/posts";
-import { OnlineList, ProfilePic, TextRow, UserLink, noOverflow } from '/src/components/utilities';
+import {  ProfilePic, TextRow, UserLink, noOverflow } from '/src/components/utilities';
 import { theme } from "/src/styles/mui/my_theme";
+import {OnlineList} from "/src/components/online_list";
 
 const spacing = 1.5;
 
@@ -181,18 +181,18 @@ const Notification = memo(({ entry: data }) => {
 
 function NotificationList() {
     async function download(from, timestamp) {
-        try {
-            const res = await axios.post("member/notifications/get", { from, timestamp });
-            return res.data;
-        }
-        catch (err) {
-            ThrowIfNotAxios(err);
-            return [];
-        }
+        const res = await axios.post("member/notifications/get", { from, timestamp });
+        return res.data;
     }
 
     return (
-        <OnlineList getEntries={download} EntryMapper={Notification} />
+        <OnlineList
+            getEntries={download}
+            EntryMapper={Notification}
+            id={"notifs"}
+            exampleSize={100}
+        />
+
     );
 }
 

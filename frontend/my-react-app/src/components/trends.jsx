@@ -8,8 +8,9 @@ import React, { memo, useEffect, useState } from "react";
 import { ThrowIfNotAxios } from "/src/communication.js";
 import { CornerButton, LinkButton } from "/src/components/buttons.jsx";
 import { BoxList } from '/src/components/containers';
-import { formatNumber, InheritLink, ListTitle, Loading, OnlineList } from '/src/components/utilities';
+import { formatNumber, InheritLink, ListTitle, Loading } from '/src/components/utilities';
 import { GetSearchUrl } from "/src/pages/search.jsx";
+import { OnlineList } from "/src/components/online_list";
 
 function TrendsPreview() {
     const [getEntries, setEntries] = useState();
@@ -56,7 +57,7 @@ const TrendEntry = memo(({ entry, index }) => {
     const { hashtag, count } = entry;
     return (
         <ListItem disablePadding>
-            <InheritLink to={GetSearchUrl(hashtag)} style={{width:"100%"}}>
+            <InheritLink to={GetSearchUrl(hashtag)} style={{ width: "100%" }}>
                 <ListItemButton>
                     <ListItemText>
                         <Typography variant="small_fade">
@@ -100,7 +101,12 @@ function TrendList() {
             <ListTitle>
                 Trends
             </ListTitle>
-            <OnlineList getEntries={GetEntries} EntryMapper={TrendEntry} />
+            <OnlineList
+                getEntries={GetEntries}
+                EntryMapper={TrendEntry}
+                id={"trends"}
+                exampleHeight={81}
+            />
         </Stack>
     );
 }

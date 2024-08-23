@@ -3,7 +3,8 @@ import Stack from '@mui/material/Stack';
 import axios from "axios";
 import React, { memo } from "react";
 import { ThrowIfNotAxios } from "/src/communication.js";
-import { FollowDialog, ListTitle, OnlineList } from '/src/components/utilities';
+import { FollowDialog, ListTitle } from '/src/components/utilities';
+import { OnlineList } from "/src/components/online_list";
 
 function FollowableList() {
     return (
@@ -62,7 +63,12 @@ function UserListAny({ url, params: additionalParams, entryMapper }) {
     }
 
     return (
-        <OnlineList getEntries={GetEntries} EntryMapper={entryMapper} />
+        <OnlineList
+            getEntries={GetEntries}
+            EntryMapper={entryMapper}
+            exampleSize={56}
+            id={url}
+        />
     );
 }
 

@@ -1,36 +1,23 @@
-import { alpha, Box, Typography } from '@mui/material';
-import Avatar from '@mui/material/Avatar';
-import CircularProgress from '@mui/material/CircularProgress';
-import Fab from '@mui/material/Fab';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import Popover from '@mui/material/Popover';
-import Stack from '@mui/material/Stack';
-import Tooltip from '@mui/material/Tooltip';
-import axios from 'axios';
-import Moment from "moment";
-import React, { forwardRef, memo, useEffect, useImperativeHandle, useRef, useState } from 'react';
-import { Link, NavLink } from "react-router-dom";
-import { ThrowIfNotAxios } from "/src/communication.js";
-import { TopMenuButton } from "/src/components/buttons.jsx";
-import { Media, MediaDisplayer, MediaFromFileData, mediaTypes } from "/src/components/media.jsx";
-import { ClickableSingleImageContainer } from "/src/components/post_media";
-import { OpenOnClick } from "/src/components/posts";
 import {
-    QueryClient,
-    QueryClientProvider,
     useInfiniteQuery,
+    useQueryClient
 } from '@tanstack/react-query';
+import { useWindowVirtualizer } from '@tanstack/react-virtual';
+import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import { ThrowIfNotAxios } from "/src/communication.js";
 import { Loading } from "/src/components/utilities";
-import { useVirtualizer, useWindowVirtualizer } from '@tanstack/react-virtual'
 
 const lastIndexes = {};
 
-const OnlineList = forwardRef(({ exampleSize = 100, EntryMapper, getEntries, overscan = 5, id }, ref) => {
+const OnlineList = forwardRef(({ exampleSize = 100, EntryMapper, getEntries, overscan = 5, id, getKey,scrollRestoration=true }, ref) => {
     //the unix timestamp when this list was created. it is used to filter out the contents those were created after the feed
     const startTimeRef = useRef(Math.floor(Date.now() / 1000));
-    const listRef = useRef(null)
+    const listRef = useRef(null);
+    const queryClient = useQueryClient();
+    const [version, setVersion] = useState(0);
+
+    //update the virtualized rows
+    const update = useCallback(() => setVersion(prev => prev + 1));
 
     //handle infinite list queries
     const {
@@ -53,8 +40,31 @@ const OnlineList = forwardRef(({ exampleSize = 100, EntryMapper, getEntries, ove
     //external functions
     useImperativeHandle(ref, () => ({
         AddEntryToTop(newEntry) {
-            // setEntries((prev) => [newEntry, ...prev]);
-            console.log(newEntry);
+            queryClient.setQueryData([id], (data) => {
+                const topPage = data.pages[0]
+                topPage.rows = [newEntry, ...topPage.rows];
+
+                return {
+                    pages: data.pages,
+                    pageParams: data.pageParams
+                }
+            });
+            update();
+        },
+
+        update,
+
+        mapRows(fn) {
+            queryClient.setQueryData([id], (data) => {
+                return {
+                    pages: data.pages.map(page => {
+                        page.rows = page.rows.map(row => fn(row))
+                        return page;
+                    }),
+                    pageParams: data.pageParams
+                }
+            });
+            update();
         }
     }));
 
@@ -94,17 +104,20 @@ const OnlineList = forwardRef(({ exampleSize = 100, EntryMapper, getEntries, ove
         items
     ]);
 
-    //save the last rendered location
-    useEffect(() => {
-        lastIndexes[id] = items[0]?.index ?? 0;
-    }, [items, id]);
-
     //load the last rendered location
     useEffect(() => {
         const loaded = lastIndexes[id];
-        if (loaded)
-            virtualizer.scrollToIndex(loaded, { align: "top" });
-    }, [id, virtualizer]);
+        if (loaded && scrollRestoration)
+            virtualizer.scrollToIndex(loaded, { align: "middle" });
+    }, [id, virtualizer,scrollRestoration]);
+
+    //save the last rendered location
+    useEffect(() => {
+        if (items.length !== 0) {
+            const row = items[Math.floor((items.length - 1) / 2)].index;
+            lastIndexes[id] = row;
+        }
+    }, [items, id, overscan]);
 
     return (
         <div key={id} ref={listRef}>
@@ -144,7 +157,7 @@ const OnlineList = forwardRef(({ exampleSize = 100, EntryMapper, getEntries, ove
                                             ? <Loading />
                                             : 'Nothing more to load'
                                         :
-                                        <EntryMapper entry={entry} />
+                                        <EntryMapper entry={entry} index={virtualRow.index}/>
                                     }
                                 </div>
                             )

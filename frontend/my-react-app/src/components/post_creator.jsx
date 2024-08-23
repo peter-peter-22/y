@@ -353,7 +353,7 @@ function AddPostToCommentSection(post) {
     if (!section)
         return;
 
-    const myCommentSection = post.replying_to === section.post;
+    const myCommentSection = post.replying_to === section.replied_post;
     if (!myCommentSection)
         return;
 

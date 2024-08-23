@@ -63,8 +63,7 @@ function EngagementsRow(props) {
     );
 }
 
-function engagementsLink(post)
-{
+function engagementsLink(post) {
     return "/posts/" + post.id + "/likes";
 }
 
@@ -80,13 +79,20 @@ function FollowRow(props) {
     );
 }
 
-function BlockRow(props) {
-    const user = props.user;
-    const [blocked, setBlock, toggleBlock] = ToggleBlock(user, update);
+function BlockRow({ user }) {
+    const [blocked, setBlock, toggleBlock] = ToggleBlock(user, onChange);
 
     function handleBlock() {
         close();
         toggleBlock();
+    }
+
+    function onChange(isBlocked) {
+        commentSections.active.mapRows((row) => {
+            if (row.publisher.id === user.id)
+                row.publisher.is_blocked = isBlocked;
+            return row;
+        });
     }
 
     return (
@@ -132,7 +138,7 @@ function EditRow({ post }) {
         close();
         Modals[0].Show(
             <PostModalFrame>
-                <PostCreator onPost={onSubmit} editing={post} quoted={post.reposted_post} noUpdate/>
+                <PostCreator onPost={onSubmit} editing={post} quoted={post.reposted_post} noUpdate />
             </PostModalFrame>
         );
     }
