@@ -6,15 +6,17 @@ import { useWindowVirtualizer } from '@tanstack/react-virtual';
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { ThrowIfNotAxios } from "/src/communication.js";
 import { Loading } from "/src/components/utilities";
+import { Typography } from '@mui/material';
 
 const lastIndexes = {};
 
-const OnlineList = forwardRef(({ exampleSize = 100, EntryMapper, getEntries, overscan = 5, id, getKey,scrollRestoration=true }, ref) => {
+const OnlineList = forwardRef(({ exampleSize = 100, EntryMapper, getEntries, overscan = 5, id, getKey, scrollRestoration = true }, ref) => {
     //the unix timestamp when this list was created. it is used to filter out the contents those were created after the feed
     const startTimeRef = useRef(Math.floor(Date.now() / 1000));
     const listRef = useRef(null);
     const queryClient = useQueryClient();
     const [version, setVersion] = useState(0);
+    const [ready, setReady] = useState(false);
 
     //update the virtualized rows
     const update = useCallback(() => setVersion(prev => prev + 1));
@@ -36,6 +38,11 @@ const OnlineList = forwardRef(({ exampleSize = 100, EntryMapper, getEntries, ove
 
     //array of all rows generated from the infinite list data
     const allRows = data ? data.pages.flatMap((d) => d.rows) : []
+
+    //prevent the loading of the posts from delaying route change by returning an empty page on first render
+    useEffect(() => {
+        setReady(true);
+    }, [])
 
     //external functions
     useImperativeHandle(ref, () => ({
@@ -106,18 +113,30 @@ const OnlineList = forwardRef(({ exampleSize = 100, EntryMapper, getEntries, ove
 
     //load the last rendered location
     useEffect(() => {
+        if (!ready)
+            return;
+
         const loaded = lastIndexes[id];
+        //console.log("loaded " + loaded);
         if (loaded && scrollRestoration)
             virtualizer.scrollToIndex(loaded, { align: "middle" });
-    }, [id, virtualizer,scrollRestoration]);
+    }, [id, virtualizer, scrollRestoration, ready]);
 
     //save the last rendered location
     useEffect(() => {
+        if (!ready)
+            return;
+
         if (items.length !== 0) {
             const row = items[Math.floor((items.length - 1) / 2)].index;
+            //console.log("saved " + row);
             lastIndexes[id] = row;
         }
     }, [items, id, overscan]);
+
+    //show loading bar when waiting for rendering
+    if (!ready)
+        return <StaticLoading/>;
 
     return (
         <div key={id} ref={listRef}>
@@ -157,7 +176,7 @@ const OnlineList = forwardRef(({ exampleSize = 100, EntryMapper, getEntries, ove
                                             ? <Loading />
                                             : 'Nothing more to load'
                                         :
-                                        <EntryMapper entry={entry} index={virtualRow.index}/>
+                                        <EntryMapper entry={entry} index={virtualRow.index} />
                                     }
                                 </div>
                             )
@@ -168,6 +187,11 @@ const OnlineList = forwardRef(({ exampleSize = 100, EntryMapper, getEntries, ove
         </div>
     )
 });
+
+function StaticLoading()
+{
+    return <Typography variant="small_fade" style={{textAlign:"center",display:"block",margin:20}}>Loading...</Typography>;
+}
 
 async function fetchServerPage(getEntries, offset = 0, timestamp) {
     try {

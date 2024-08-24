@@ -398,10 +398,12 @@ function HideablePostAny({ entry, Renderer }) {
     if (entry.publisher.is_blocked && !show)
         return (<BlockedComment show={() => { setShow(true) }} />);
 
-    return (<Renderer post={entry} />);
+    return (
+            <Renderer post={entry} />
+    );
 }
 
-function SimplifiedPostList({ params: additional_params, post, endpoint, id,scrollRestoration=true }) {
+function SimplifiedPostList({ params: additional_params, post, endpoint, id, scrollRestoration = true }) {
     const onlineListRef = useRef();
     async function getPosts(from, timestamp) {
         let params = { from, timestamp };
@@ -431,7 +433,7 @@ function SimplifiedPostList({ params: additional_params, post, endpoint, id,scro
             ref={onlineListRef}
             key={id}
             id={id}
-            getKey={(entry, index) => entry?.id??"loading"}
+            getKey={(entry, index) => entry?.id ?? "loading"}
             exampleSize={100}
             scrollRestoration={scrollRestoration}
         />
@@ -519,5 +521,5 @@ function OverrideWithRepost(post) {
 }
 
 
-export { BorderlessPost, HideablePostFocusedMemo, ListBlock, ListBlockButton, OpenOnClick, OpenPostOnClick, OverrideWithRepost, Post, PostButtonRow, PostModalFrame, QuotedFrame, RowWithPrefix, SimplifiedPostList, WritePost, commentSections };
+export { BorderlessPost, HideablePostFocusedMemo, HideablePostMemo, ListBlock, ListBlockButton, OpenOnClick, OpenPostOnClick, OverrideWithRepost, Post, PostButtonRow, PostModalFrame, QuotedFrame, RowWithPrefix, SimplifiedPostList, WritePost, commentSections };
 
