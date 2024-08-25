@@ -404,7 +404,7 @@ function HideablePostAny({ entry, Renderer }) {
 }
 
 function SimplifiedPostList({ params: additional_params, post, endpoint, id, scrollRestoration = true }) {
-    const onlineListRef = useRef();
+    const onlineListRef = useRef(null);
     async function getPosts(from, timestamp) {
         let params = { from, timestamp };
         if (additional_params)

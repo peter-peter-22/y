@@ -16,7 +16,7 @@ function ExamplePost() {
         publisher: ExampleUser(),
         date: new Date("2024-01-01").toISOString(),
         text: "post text",
-        images: [default_image],
+        media: undefined,
         view_count: 9999999,
         repost_count: 353,
         like_count: 4242,
@@ -64,7 +64,7 @@ function ExampleRepost() {
         publisher: ExampleUser(),
         date: new Date("2024-01-01").toISOString(),
         text: undefined,
-        images: undefined,
+        media: undefined,
         views: 0,
         repost_count: 0,
         like_count: 0,
@@ -138,9 +138,26 @@ function ExampleNotifications() {
     ];
 }
 
+const ExampleFileData_ = {
+    type: "image",
+    version: 1724519118,
+    public_id: "posts/31425/pj3ug5fix6jiy1wyulb3"
+}
+
+function ExampleFileData()
+{
+return {...ExampleFileData_};
+}
+
+function PostWithMedia() {
+    const post = ExamplePost();
+    post.media = Array(5).fill(ExampleFileData());
+    return post;
+}
+
 const default_profile = "/images/default_profile.jpg";
 
 const default_image = "/images/default_image.jpg";
 
-export { ExampleNotifications, ExamplePost, ExampleQuote, ExampleReply, ExampleRepost, ExampleUser, default_image, default_profile };
+export { ExampleNotifications, ExamplePost, ExampleQuote, ExampleReply, ExampleRepost, ExampleUser, default_image, default_profile, ExampleFileData ,PostWithMedia};
 

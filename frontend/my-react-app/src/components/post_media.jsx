@@ -90,26 +90,6 @@ function PostMediaImages() {
             })}
         </Stack >
     );
-
-    if (count >= 4) {
-        return (
-            <>
-                <Stack direction="row" spacing={spacing}>
-                    <ClickableImage index={0} />
-                    <ClickableImage index={1} />
-                </Stack>
-                <Stack direction="row" spacing={spacing}>
-                    <ClickableImage index={2} />
-                    <ClickableImage index={3} >
-                        {count > 4 &&
-                            <Box sx={{ backgroundColor: "transparentBlack.main", }} style={{ position: "absolute", width: "100%", height: "100%", top: "0", left: "0", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                <Typography variant="medium_bold" color="primary.contrastText">+{count - 4}</Typography>
-                            </Box>
-                        }
-                    </ClickableImage>
-                </Stack>
-            </>);
-    }
 }
 
 function PostMediaContainer({ medias, Displayer, ...props }) {

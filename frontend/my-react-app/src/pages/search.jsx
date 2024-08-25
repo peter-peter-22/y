@@ -96,7 +96,7 @@ function Posts({ text }) {
             <ListTitle>
                 Posts
             </ListTitle>
-            <SimplifiedPostList endpoint="member/search/posts" params={{ text: text }} id={"search_of" + text} />
+            <SimplifiedPostList endpoint="member/search/posts" params={{ text: text }} id={"search_of_" + text} />
         </Stack>
     );
 }

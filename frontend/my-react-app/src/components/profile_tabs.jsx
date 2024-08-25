@@ -1,34 +1,50 @@
 import { Grid } from '@mui/material';
 import Stack from '@mui/material/Stack';
 import axios from 'axios';
-import React, { memo } from "react";
+import React, { forwardRef, memo, useCallback } from "react";
 import { ThrowIfNotAxios } from "/src/communication.js";
-import { ClickableImage, MediaContext } from "/src/components/post_media";
+import { ClickableImage, MediaContext, ClickableSingleImageContainer } from "/src/components/post_media";
 import { SimplifiedPostList } from "/src/components/posts";
-import { GetPostMedia, GetUserName, ListTitle, OnlineList } from '/src/components/utilities';
+import { GetPostMedia, GetUserName, ListTitle } from '/src/components/utilities';
 import { UserListExtended } from "/src/pages/follow_people.jsx";
+import { OnlineList } from '/src/components/online_list';
+import { BlockMedia, MediaFromFileData } from "/src/components/media";
+import { Loading } from './utilities';
+import { PostWithMedia, ExampleFileData } from './exampleData';
 
-function Container({ entries: posts }) {
-    let medias = []
-    posts.forEach(post => {
-        medias = medias.concat(GetPostMedia(post));
-    });
+function ImageGrid({ items, allRows, virtualizer }) {
     return (
-        <MediaContext.Provider value={medias}>
-            <Grid container spacing={1} columns={{ xs: 1, sm: 2, md: 3 }}>
-                {medias.map((media, index) =>
-                    <MediaMemo key={index} index={index} />
-                )}
+        <MediaContext.Provider value={allRows}>
+            <Grid container spacing={1} columns={virtualizer.options.lanes}>
+                {
+                    items.map((virtualRow) => {
+                        const isLoaderRow = virtualRow.index > allRows.length - 1
+                        return (
+                            <Grid item
+                                xs={1}
+                                key={virtualRow.key}
+                                ref={virtualizer.measureElement}
+                                data-index={virtualRow.index}
+                            >
+                                {isLoaderRow ?
+                                    <Loading />
+                                    :
+                                    <MediaMemo
+                                        index={virtualRow.index}
+                                    />
+                                }
+                            </Grid>
+                        )
+                    })
+                }
             </Grid>
         </MediaContext.Provider>
-    );
+    )
 }
 
 const MediaMemo = memo(({ index }) => {
     return (
-        <Grid item xs={1}>
-            <ClickableImage index={index} />
-        </Grid>
+        <ClickableImage index={index} />
     );
 });
 
@@ -36,6 +52,11 @@ function MediaOfUser({ user }) {
     async function GetEntries(from) {
         try {
             const res = await axios.post("member/general/media_of_user", { from: from, user_id: user.id });
+            res.data.forEach((row) => {
+                //convert media object to media class
+                if (row.media)
+                    row.media = row.media.map(el => MediaFromFileData(el));
+            });
             return res.data;
         }
         catch (err) {
@@ -44,25 +65,40 @@ function MediaOfUser({ user }) {
         }
     }
 
+    const entryArranger = useCallback((data) => {
+        return data.pages.flatMap((d) => {
+            return d.rows.flatMap(row => row.media);
+        });
+    });
+
     return (
-        <OnlineList getEntries={GetEntries} entryMapController={Container} key={user.id} scrollRestoration={false}/>
+        <OnlineList
+            getEntries={GetEntries}
+            key={user.id}
+            id={"media_of_" + user.id}
+            scrollRestoration={false}
+            virtualizerProps={{ lanes: 3 }}
+            entryArranger={entryArranger}
+            Displayer={ImageGrid}
+            exampleHeight={202}
+        />
     );
 }
 
 
 function LikesOfUser(props) {
     const user_id = props.user.id;
-    return <SimplifiedPostList endpoint="member/general/likes_of_user" params={{ user_id: user_id }} id={"likes"+user_id} scrollRestoration={false}/>;
+    return <SimplifiedPostList endpoint="member/general/likes_of_user" params={{ user_id: user_id }} id={"likes" + user_id} scrollRestoration={false} />;
 }
 
 function PostsOfUser(props) {
     const user_id = props.user.id;
-    return <SimplifiedPostList endpoint="member/general/posts_of_user" params={{ user_id: user_id }} id={"posts"+user_id} scrollRestoration={false}/>;
+    return <SimplifiedPostList endpoint="member/general/posts_of_user" params={{ user_id: user_id }} id={"posts" + user_id} scrollRestoration={false} />;
 }
 
 function CommentsOfUser(props) {
     const user_id = props.user.id;
-    return <SimplifiedPostList endpoint="member/general/comments_of_user" params={{ user_id: user_id }} id={"comments"+user_id} scrollRestoration={false}/>;
+    return <SimplifiedPostList endpoint="member/general/comments_of_user" params={{ user_id: user_id }} id={"comments" + user_id} scrollRestoration={false} />;
 }
 
 function Followers({ user }) {

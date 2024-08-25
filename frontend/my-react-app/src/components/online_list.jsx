@@ -10,13 +10,17 @@ import { Typography } from '@mui/material';
 
 const lastIndexes = {};
 
-const OnlineList = forwardRef(({ exampleSize = 100, EntryMapper, getEntries, overscan = 5, id, getKey, scrollRestoration = true }, ref) => {
+//convert the data of the query to an array of readable entries 
+function defaultEntryArranger(data) {
+    return data.pages.flatMap((d) => d.rows)
+}
+
+const OnlineList = forwardRef(({ exampleSize = 100, EntryMapper, getEntries, overscan = 5, id, getKey, scrollRestoration = true, virtualizerProps, entryArranger = defaultEntryArranger, Displayer = DefaultDisplayer }, ref) => {
     //the unix timestamp when this list was created. it is used to filter out the contents those were created after the feed
     const startTimeRef = useRef(Math.floor(Date.now() / 1000));
     const listRef = useRef(null);
     const queryClient = useQueryClient();
     const [version, setVersion] = useState(0);
-    const [ready, setReady] = useState(false);
 
     //update the virtualized rows
     const update = useCallback(() => setVersion(prev => prev + 1));
@@ -37,12 +41,8 @@ const OnlineList = forwardRef(({ exampleSize = 100, EntryMapper, getEntries, ove
     })
 
     //array of all rows generated from the infinite list data
-    const allRows = data ? data.pages.flatMap((d) => d.rows) : []
+    const allRows = data ? entryArranger(data) : []
 
-    //prevent the loading of the posts from delaying route change by returning an empty page on first render
-    useEffect(() => {
-        setReady(true);
-    }, [])
 
     //external functions
     useImperativeHandle(ref, () => ({
@@ -81,6 +81,8 @@ const OnlineList = forwardRef(({ exampleSize = 100, EntryMapper, getEntries, ove
         estimateSize: () => exampleSize,
         overscan: overscan,
         scrollMargin: listRef.current?.offsetTop ?? 0,
+        getItemKey: getKey ? (i) => getKey(allRows[i], i) : undefined,
+        ...virtualizerProps
     })
 
     //the visible rows
@@ -113,20 +115,14 @@ const OnlineList = forwardRef(({ exampleSize = 100, EntryMapper, getEntries, ove
 
     //load the last rendered location
     useEffect(() => {
-        if (!ready)
-            return;
-
         const loaded = lastIndexes[id];
         //console.log("loaded " + loaded);
         if (loaded && scrollRestoration)
             virtualizer.scrollToIndex(loaded, { align: "middle" });
-    }, [id, virtualizer, scrollRestoration, ready]);
+    }, [id, virtualizer, scrollRestoration]);
 
     //save the last rendered location
     useEffect(() => {
-        if (!ready)
-            return;
-
         if (items.length !== 0) {
             const row = items[Math.floor((items.length - 1) / 2)].index;
             //console.log("saved " + row);
@@ -134,9 +130,6 @@ const OnlineList = forwardRef(({ exampleSize = 100, EntryMapper, getEntries, ove
         }
     }, [items, id, overscan]);
 
-    //show loading bar when waiting for rendering
-    if (!ready)
-        return <StaticLoading/>;
 
     return (
         <div key={id} ref={listRef}>
@@ -161,26 +154,7 @@ const OnlineList = forwardRef(({ exampleSize = 100, EntryMapper, getEntries, ove
                             transform: `translateY(${(items[0]?.start ?? 0) - virtualizer.options.scrollMargin}px)`,
                         }}
                     >
-                        {items.map((virtualRow) => {
-                            const isLoaderRow = virtualRow.index > allRows.length - 1
-                            const entry = allRows[virtualRow.index]
-
-                            return (
-                                <div
-                                    key={virtualRow.key}
-                                    data-index={virtualRow.index}
-                                    ref={virtualizer.measureElement}
-                                >
-                                    {isLoaderRow
-                                        ? hasNextPage
-                                            ? <Loading />
-                                            : 'Nothing more to load'
-                                        :
-                                        <EntryMapper entry={entry} index={virtualRow.index} />
-                                    }
-                                </div>
-                            )
-                        })}
+                        <Displayer items={items} allRows={allRows} virtualizer={virtualizer} EntryMapper={EntryMapper} hasNextPage={hasNextPage} />
                     </div>
                 </div>
             )}
@@ -188,9 +162,31 @@ const OnlineList = forwardRef(({ exampleSize = 100, EntryMapper, getEntries, ove
     )
 });
 
-function StaticLoading()
-{
-    return <Typography variant="small_fade" style={{textAlign:"center",display:"block",margin:20}}>Loading...</Typography>;
+function StaticLoading() {
+    return <Typography variant="small_fade" style={{ textAlign: "center", display: "block", margin: 20 }}>Loading...</Typography>;
+}
+
+function DefaultDisplayer({ items, allRows, virtualizer, EntryMapper, hasNextPage }) {
+    return items.map((virtualRow) => {
+        const isLoaderRow = virtualRow.index > allRows.length - 1
+        const entry = allRows[virtualRow.index]
+
+        return (
+            <div
+                key={virtualRow.key}
+                data-index={virtualRow.index}
+                ref={virtualizer.measureElement}
+            >
+                {isLoaderRow
+                    ? hasNextPage
+                        ? <Loading />
+                        : 'Nothing more to load'
+                    :
+                    <EntryMapper entry={entry} index={virtualRow.index} />
+                }
+            </div>
+        )
+    })
 }
 
 async function fetchServerPage(getEntries, offset = 0, timestamp) {
@@ -206,4 +202,18 @@ async function fetchServerPage(getEntries, offset = 0, timestamp) {
     };
 }
 
-export { OnlineList };
+function AsyncRender({ element, loading }) {
+    const [ready, setReady] = useState(false);
+
+    useEffect(() => {
+        setReady(true);
+    }, [])
+
+    return ready ? element : loading;
+}
+
+const AsyncOnlineList = forwardRef((props, ref) => {
+    return <AsyncRender element={<OnlineList {...props} ref={ref} />} loading={<StaticLoading />} />
+})
+
+export { AsyncOnlineList as OnlineList };
