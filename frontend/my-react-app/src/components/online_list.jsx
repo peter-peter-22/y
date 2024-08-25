@@ -1,3 +1,4 @@
+import { Typography } from '@mui/material';
 import {
     useInfiniteQuery,
     useQueryClient
@@ -6,7 +7,6 @@ import { useWindowVirtualizer } from '@tanstack/react-virtual';
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { ThrowIfNotAxios } from "/src/communication.js";
 import { Loading } from "/src/components/utilities";
-import { Typography } from '@mui/material';
 
 const lastIndexes = {};
 
@@ -217,3 +217,4 @@ const AsyncOnlineList = forwardRef((props, ref) => {
 })
 
 export { AsyncOnlineList as OnlineList };
+
