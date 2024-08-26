@@ -124,7 +124,7 @@ function ChooseMethod(props) {
 
                 <Stack direction="column" spacing={2}>
                     <a href={config.address_mode.server + "/auth/google"}><AlternativeLogin src="/svg/google.svg" text="Sign-in with Google" /></a>
-                    <a href={config.address_mode.server + "/auth/github"}><AlternativeLogin src="/svg/github.svg" text="Sign-in with Github" /></a>
+                    {/*<a href={config.address_mode.server + "/auth/github"}><AlternativeLogin src="/svg/github.svg" text="Sign-in with Github" /></a>*/}
                     <Stack direction="row" sx={{ my: 0.5, alignItems: "center" }}>
                         <Or />
                     </Stack>

@@ -1,13 +1,14 @@
 import List from '@mui/material/List';
 import Stack from '@mui/material/Stack';
 import axios from 'axios';
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { BackButton } from "../components/back_button";
 import { ThrowIfNotAxios } from "/src/communication.js";
 import { OverrideWithRepost, HideablePostFocusedMemo, SimplifiedPostList } from "/src/components/posts.jsx";
 import { ListTitle, Loading } from '/src/components/utilities';
 import { ErrorPage } from "/src/pages/error";
+import { useQuery } from '@tanstack/react-query'
 
 let focused_id = undefined;
 function get_focused_id() {
@@ -15,64 +16,49 @@ function get_focused_id() {
 }
 
 export default () => {
-    const [post, setPost] = useState();
     const { id } = useParams();
-    const [error, setError] = useState(false);
 
-    useEffect(getPost, [id]);
-
-    function getPost() {
-        //set the focused id on mounth
+    //update focused_id
+    useEffect(() => {
         focused_id = id;
-
-        //get and process post
-        (async () => {
-            try {
-                //get post from server
-                const result = await axios.post("member/general/get_post", {
-                    id: id
-                });
-                //if success, update state
-                const main_post = result.data;
-                setPost(main_post);
-            }
-            catch (err) {
-                //if fail, display error
-                setError(true);
-                ThrowIfNotAxios(err);
-            }
-        })();
-
-        //clear focused id on dismounth
         return () => {
             focused_id = undefined;
         }
-    }
+    }, [id]);
 
-    if (post) {
-        post.setPost = setPost;
-        const overriden = OverrideWithRepost(post);
-        return (
-            <List sx={{ p: 0 }}>
-                <Stack direction="row" alignItems="center" mx={1}>
-                    <BackButton />
-                    <ListTitle>Post</ListTitle>
-                </Stack>
-                <HideablePostFocusedMemo entry={post} />
-                <CommentList post={overriden} />
-            </List>
-        );
-    }
-    else if (error) {
-        return <ErrorPage text={"This post does not exists"} />
-    }
-    else
-        return <Loading />;
+    //get and process the post
+    const getPost = useCallback(async () => {
+        const result = await axios.post("member/general/get_post", {
+            id: id
+        });
+        return result.data;
+    });
+
+    const { isPending, data: post, isError } = useQuery({
+        queryKey: ['focused_post_' + id],
+        queryFn: getPost,
+    });
+
+    if (isError) return <ErrorPage text={"This post does not exists"} />
+    if (isPending) return <Loading />
+
+    //if this is a repost, then the comment section of the original post will be displayed
+    const overriden = OverrideWithRepost(post);
+    return (
+        <List sx={{ p: 0 }}>
+            <Stack direction="row" alignItems="center" mx={1}>
+                <BackButton />
+                <ListTitle>Post</ListTitle>
+            </Stack>
+            <HideablePostFocusedMemo entry={post} />
+            <CommentList post={overriden} />
+        </List>
+    );
 };
 
 function CommentList({ post }) {
     const id = post.id;
-    return <SimplifiedPostList endpoint="member/general/get_comments" params={{ id: id }} id={"comments_of" + id} post={post} />;
+    return <SimplifiedPostList endpoint="member/general/get_comments" params={{ id: id }} id={"comments_of_" + id} post={post} />;
 }
 
 export { get_focused_id };
