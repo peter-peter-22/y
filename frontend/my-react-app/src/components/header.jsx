@@ -9,7 +9,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { BottomTabButton, ButtonIcon, ButtonSvg, PostButton, ProfileButton, ResponsiveButton, TabButton } from "./buttons.jsx";
 import { Inside } from "./side_menus.jsx";
 import { AboveBreakpoint, logo, SimplePopOver } from './utilities';
-import { DisplayNotificationCount } from "/src/components/notification_listener";
+import { DisplayNotificationCount, NotifCountProvider } from "/src/components/notification_listener";
 import { UserData } from "/src/components/user_data";
 import { GetProfileLink, InheritLink } from '/src/components/utilities';
 
@@ -35,9 +35,9 @@ function BasicTab({ tab }) {
 
 function NotificationsTab({ tab }) {
     return (
-       <DisplayNotificationCount>
-       <BasicTab tab={tab} />
-       </DisplayNotificationCount>
+        <DisplayNotificationCount>
+            <BasicTab tab={tab} />
+        </DisplayNotificationCount>
     );
 }
 
@@ -216,7 +216,7 @@ function Header() {
                                     ))}
 
                                     <MoreButton />
-                                    <PostButton style={{marginTop:10}}/>
+                                    <PostButton style={{ marginTop: 10 }} />
 
                                 </Stack>
                             </div>
@@ -265,4 +265,12 @@ function Header() {
     );
 }
 
-export default Header;
+function Header_() {
+    return (
+        <NotifCountProvider>
+            <Header />
+        </NotifCountProvider>
+    );
+}
+
+export default Header_;

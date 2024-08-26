@@ -7,7 +7,6 @@ import { Validator } from "node-input-validator";
 import { universal_auth, finish_registration } from "../passport.js";
 import { CheckV } from "../validations.js";
 import { user_columns } from "../post_query.js";
-const named = yesql.pg;
 
 const router = express.Router();
 
@@ -34,13 +33,13 @@ const router = express.Router();
             },
             async function verify(email, password, cb) {
                 try {
-                    const result = await db.query(`SELECT ${user_columns},password_hash FROM users WHERE email = $1 `, [
+                    const result = await db.query(`SELECT ${user_columns},password_hash FROM users WHERE email = $1 and password_hash!=''`, [
                         email.toLowerCase()
                     ]);
                     if (result.rows.length > 0) {
                         const user = result.rows[0];
-                        if(user.password_hash===null)
-                        return cb(new Error("This email belongs to a third party login"));
+                        if (user.password_hash === null)
+                            return cb(new Error("This email belongs to a third party login"));
                         const storedHashedPassword = user.password_hash;
                         bcrypt.compare(password, storedHashedPassword, (err, valid) => {
                             if (err) {
