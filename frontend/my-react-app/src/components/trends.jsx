@@ -4,33 +4,25 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import Stack from '@mui/material/Stack';
 import axios from 'axios';
-import React, { memo, useEffect, useState } from "react";
+import React, { memo, useCallback, useEffect, useState } from "react";
 import { ThrowIfNotAxios } from "/src/communication.js";
 import { CornerButton, LinkButton } from "/src/components/buttons.jsx";
 import { BoxList } from '/src/components/containers';
 import { formatNumber, InheritLink, ListTitle, Loading } from '/src/components/utilities';
 import { GetSearchUrl } from "/src/pages/search.jsx";
 import { OnlineList } from "/src/components/online_list";
+import { useQuery } from '@tanstack/react-query'
 
 function TrendsPreview() {
-    const [getEntries, setEntries] = useState();
+    const Download = useCallback(async () => {
+        const res = await axios.get("member/trends/preview");
+        return res.data;
+    });
 
-    async function Download() {
-        try {
-            const res = await axios.get("member/trends/preview");
-            setEntries(res.data);
-        }
-        catch (err) {
-            ThrowIfNotAxios(err);
-        }
-    }
-
-    useEffect(() => {
-        Download();
-    }, []);
-
-    if (getEntries === undefined)
-        return (<Loading />);
+    const { isPending, data: getEntries } = useQuery({
+        queryKey: ['trends_preview'],
+        queryFn: Download,
+    });
 
     return (
         <BoxList>
@@ -43,7 +35,7 @@ function TrendsPreview() {
                 </ListItemText>
             </ListItem>
 
-            {getEntries.map((entry, i) => <TrendEntry key={i} index={i} entry={entry} />)}
+            {isPending ? <Loading /> : getEntries.map((entry, i) => <TrendEntry key={i} index={i} entry={entry} />)}
 
             <LinkButton to="/trends">
                 Show more

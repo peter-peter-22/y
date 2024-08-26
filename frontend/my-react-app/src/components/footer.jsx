@@ -5,7 +5,7 @@ import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import Stack from '@mui/material/Stack';
 import axios from 'axios';
-import React, { memo, useEffect, useRef, useState } from "react";
+import React, { memo, useCallback, useEffect, useRef, useState } from "react";
 import { ThrowIfNotAxios } from "/src/communication.js";
 import { LinkButton } from "/src/components/buttons.jsx";
 import { BoxList } from '/src/components/containers';
@@ -13,6 +13,7 @@ import links from "/src/components/footer_links";
 import { SearchField } from "/src/components/inputs.jsx";
 import Trends from "/src/components/trends";
 import { AboveBreakpoint, creation, FadeLink, FollowDialog, InheritLink, Loading, NavMenu, SimplePopOver } from '/src/components/utilities';
+import { useQuery } from '@tanstack/react-query'
 
 function Footer() {
     const visible = AboveBreakpoint("hideRightMenu");
@@ -194,19 +195,15 @@ function Premium() {
 }
 
 function WhoToFollow() {
-    const [users, setUsers] = useState();
-    useEffect(() => {
-        async function getFollowRecommendations() {
-            try {
-                const res = await axios.get("member/general/follower_recommendations_preview");
-                setUsers(res.data);
-            }
-            catch (err) {
-                ThrowIfNotAxios(err);
-            }
-        }
-        getFollowRecommendations();
-    }, []);
+    const getFollowRecommendations = useCallback(async () => {
+        const res = await axios.get("member/general/follower_recommendations_preview");
+        return res.data;
+    });
+
+    const { isPending, data: users } = useQuery({
+        queryKey: ['follows_preview'],
+        queryFn: getFollowRecommendations,
+    });
 
     return (
         <List sx={{ p: 0 }}>
@@ -218,7 +215,7 @@ function WhoToFollow() {
                 </ListItemText>
             </ListItem>
 
-            {users ? users.map((user, index) => <FollowDialog user={user} key={index} />) : <Loading />}
+            {!isPending ? users.map((user, index) => <FollowDialog user={user} key={index} />) : <Loading />}
 
             <LinkButton to="/add_followers">
                 Show more

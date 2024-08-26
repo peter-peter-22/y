@@ -136,6 +136,7 @@ router.post("/follower_recommendations", async (req, res) => {
     WHERE 
         NOT ${is_followed()} 
         AND registration_date < TO_TIMESTAMP(:timestamp) 
+        AND id!=:user_id
     LIMIT :limit OFFSET :offset`;
     const users = await db.query(named(text)({
         user_id: UserId(req),
@@ -260,7 +261,14 @@ router.post("/celebrities", async (req, res) => {
 });
 
 router.get("/follower_recommendations_preview", async (req, res) => {
-    const text = `SELECT ${user_columns}, FALSE AS IS_FOLLOWED from USERS WHERE NOT ${is_followed()} LIMIT 3`;
+    const text = `
+    SELECT ${user_columns}, FALSE AS IS_FOLLOWED 
+        from USERS 
+    WHERE 
+        NOT ${is_followed()}
+        AND id!=:user_id 
+    ORDER BY follower_count DESC, USERS.ID ASC
+    LIMIT 3`;
     const users = await db.query(named(text)({ user_id: UserId(req) }));
     res.send(users.rows);
 });

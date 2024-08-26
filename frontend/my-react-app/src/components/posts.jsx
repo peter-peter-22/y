@@ -383,11 +383,11 @@ function CountableButton(post, count_name, active_name, url) {
 
 const HideablePostMemo = memo((props) => {
     return (<HideablePostAny {...props} Renderer={Post} />);
-}, (prev, next) => { prev.entry === next.entry });
+}, (prev, next) => prev.entry === next.entry);
 
 const HideablePostFocusedMemo = memo((props) => {
     return (<HideablePostAny {...props} Renderer={PostFocused} />);
-}, (prev, next) => { prev.entry === next.entry });
+}, (prev, next) => prev.entry === next.entry);
 
 function HideablePostAny({ entry, Renderer }) {
     const [show, setShow] = useState(false);
@@ -399,7 +399,7 @@ function HideablePostAny({ entry, Renderer }) {
         return (<BlockedComment show={() => { setShow(true) }} />);
 
     return (
-            <Renderer post={entry} />
+        <Renderer post={entry} />
     );
 }
 
