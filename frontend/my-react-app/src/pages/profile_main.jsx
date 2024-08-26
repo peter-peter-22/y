@@ -3,7 +3,7 @@ import Fab from '@mui/material/Fab';
 import Stack from '@mui/material/Stack';
 import axios from 'axios';
 import Moment from "moment";
-import React, { memo, useEffect, useState } from "react";
+import React, { memo, useCallback, useEffect, useState } from "react";
 import { Route, Routes, useParams } from "react-router-dom";
 import { ThrowIfNotAxios } from "/src/communication.js";
 import { BlueCenterButton } from "/src/components/buttons";
@@ -16,28 +16,25 @@ import { ProfileEditor } from "/src/components/profile_editor";
 import { CommentsOfUser, Followers, Following, LikesOfUser, MediaOfUser, PostsOfUser } from "/src/components/profile_tabs";
 import { UserData } from "/src/components/user_data";
 import { FadeLink, GetProfileBanner, GetUserName, Loading, ProfilePic, TabSwitcherLinks, TextRow, UserKey, formatNumber, noOverflow } from '/src/components/utilities';
+import { useQuery } from '@tanstack/react-query'
 
 function Profile() {
-    const [user, setUser] = useState();
     const { id } = useParams();
     const [localBlocked, setLocalBlocked] = useState();//undefined on start, set when block/unblock happens and overwrites the is_blocked bool 
 
     //download the selected user
-    useEffect(() => {
-        async function get() {
-            try {
-                const res = await axios.post("member/general/user_profile", { user_id: id });
-                const user = res.data;
-                setUser(user);
-            } catch (err) {
-                setUser(undefined);
-                ThrowIfNotAxios(err);
-            }
-        }
-        get(id);
-    }, [id]);
+    const getUser = useCallback(async () => {
+        const res = await axios.post("member/general/user_profile", { user_id: id });
+        return res.data;
+    });
 
-    if (user) {
+    const { isPending, data: user } = useQuery({
+        queryKey: ['profile_' + id],
+        queryFn: getUser,
+    });
+
+
+    if (!isPending) {
         if (localBlocked !== undefined)
             user.is_blocked = localBlocked;
 

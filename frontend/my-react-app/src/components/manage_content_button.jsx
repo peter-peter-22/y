@@ -5,7 +5,7 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import Stack from '@mui/material/Stack';
 import axios from 'axios';
-import React from "react";
+import React, { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Modals } from "/src/components/modals";
 import { PostCreator } from "/src/components/post_creator";
@@ -79,20 +79,12 @@ function FollowRow(props) {
     );
 }
 
-function BlockRow({ user }) {
+function BlockRow({ user, onChange }) {
     const [blocked, setBlock, toggleBlock] = ToggleBlock(user, onChange);
 
     function handleBlock() {
         close();
         toggleBlock();
-    }
-
-    function onChange(isBlocked) {
-        commentSections.active.mapRows((row) => {
-            if (row.publisher.id === user.id)
-                row.publisher.is_blocked = isBlocked;
-            return row;
-        });
     }
 
     return (
@@ -177,6 +169,16 @@ function ManagePost({ original, overriden }) {
     const user = overriden.publisher;
     const is_me = original.publisher.id === UserData.getData.user.id;
 
+    const onChange = useCallback((isBlocked, user) => {
+        commentSections.active.mapRows((row) => {
+            if (row.publisher.id === user.id) {
+                row.publisher.is_blocked = isBlocked;
+                return { ...row };//this will update the post even if it is currently visible
+            }
+            return row;
+        });
+    });
+
     return (
         <ManageContent>
             {is_me ?
@@ -187,7 +189,7 @@ function ManagePost({ original, overriden }) {
                 :
                 <>
                     <FollowRow user={user} />
-                    <BlockRow user={user} />
+                    <BlockRow user={user} onChange={onChange} />
                 </>
             }
             <EngagementsRow post={overriden} />

@@ -387,7 +387,7 @@ function ToggleOnlineBool(user, url, startingValue, onChange) {
             const newValue = !prev;
             update(newValue);
             if (onChange)
-                onChange(newValue);
+                onChange(newValue,user);
 
             return newValue;
         });
