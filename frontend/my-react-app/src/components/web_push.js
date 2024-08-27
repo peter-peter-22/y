@@ -1,12 +1,15 @@
 import axios from "axios";
-
+import {Error} from "/src/components/modals";
 
 const publicVapidKey = "BJAV4oJB0p26ezj0U7-GeTMgMIvCMpvqKflKjUzgSCPQuJ9Wklh36Sfbs5uWHbBaoK06GkVR9Ni1PtIjAiJrxiQ";
 
 //check for service worker
 function Ask() {
     if ("serviceWorker" in navigator) {
-        send().catch(err => console.error(err));
+        send().catch(err => {
+            Error(err);
+            console.error(err);
+        });
     }
 }
 

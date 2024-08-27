@@ -7,7 +7,7 @@ import { BackButton } from "../components/back_button";
 import { ThrowIfNotAxios } from "/src/communication.js";
 import { OverrideWithRepost, HideablePostFocusedMemo, SimplifiedPostList } from "/src/components/posts.jsx";
 import { ListTitle, Loading } from '/src/components/utilities';
-import { ErrorPage } from "/src/pages/error";
+import { ErrorPageFormatted } from "/src/pages/error";
 import { useQuery } from '@tanstack/react-query'
 
 let focused_id = undefined;
@@ -34,13 +34,14 @@ export default () => {
         return result.data;
     });
 
-    const { isPending, data: post, isError } = useQuery({
+    const { isPending, data: post, error } = useQuery({
         queryKey: ['focused_post_' + id],
         queryFn: getPost,
-        retry:false
+        retry: false
     });
 
-    if (isError) return <ErrorPage text={"This post does not exists"} />
+    if (error)
+        return <ErrorPageFormatted error={error} />
     if (isPending) return <Loading />
 
     //if this is a repost, then the comment section of the original post will be displayed

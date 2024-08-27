@@ -17,6 +17,7 @@ import { CommentsOfUser, Followers, Following, LikesOfUser, MediaOfUser, PostsOf
 import { UserData } from "/src/components/user_data";
 import { FadeLink, GetProfileBanner, GetUserName, Loading, ProfilePic, TabSwitcherLinks, TextRow, UserKey, formatNumber, noOverflow } from '/src/components/utilities';
 import { useQuery } from '@tanstack/react-query'
+import { ErrorPageFormatted } from "/src/pages/error";
 
 function Profile() {
     const { id } = useParams();
@@ -28,12 +29,14 @@ function Profile() {
         return res.data;
     });
 
-    const { isPending, data: user } = useQuery({
+    const { isPending, data: user, error } = useQuery({
         queryKey: ['profile_' + id],
         queryFn: getUser,
         retry: false
     });
 
+    if (error)
+        return <ErrorPageFormatted error={error} />
 
     if (!isPending) {
         if (localBlocked !== undefined)

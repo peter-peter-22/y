@@ -11,6 +11,7 @@ import modify from "./logged_in/modify.js";
 import notifications from "./logged_in/notifications.js";
 import search from "./logged_in/search.js";
 import trends from "./logged_in/trends.js";
+import settings from "./logged_in/settings.js";
 
 const router = express.Router();
 
@@ -28,6 +29,7 @@ router.use("/feed", feed);
 router.use("/notifications", notifications);
 router.use("/trends", trends);
 router.use("/search", search);
+router.use("/settings", settings);
 
 async function UpdateUser(newUser, req) {
     return new Promise(resolve => {
@@ -44,8 +46,8 @@ async function ApplySqlToUser(query_result, req) {
     await UpdateUser(user, req);
 }
 
-async function UpdateUserAfterChange( req) {
-    const q =await db.query(named(`select ${user_columns} from users where id=:id`)({id:UserId(req)}));
+async function UpdateUserAfterChange(req) {
+    const q = await db.query(named(`select ${user_columns} from users where id=:id`)({ id: UserId(req) }));
     await ApplySqlToUser(q, req);
 }
 

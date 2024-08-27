@@ -12,7 +12,6 @@ import SharedPages from "/src/components/shared_pages_router";
 import {
   QueryClient,
   QueryClientProvider,
-  useInfiniteQuery,
 } from '@tanstack/react-query';
 import MyTheme from '/src/styles/mui/my_theme.jsx';
 
@@ -26,6 +25,7 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: Infinity,
+      refetchOnWindowFocus: false,
     },
   },
 });
