@@ -5,7 +5,7 @@
 -- Dumped from database version 15.4
 -- Dumped by pg_dump version 15.4
 
--- Started on 2024-08-08 23:24:37
+-- Started on 2024-08-28 01:53:07
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -85,7 +85,7 @@ BEGIN
 	
 	--update count
  	UPDATE posts
-	SET comment_count = count_estimate('select * from posts where posts.replying_to='||posts.id)
+	SET comment_count = (select count(*) from posts where posts.replying_to=replied_post)
 	WHERE posts.id = replied_post;
   	RETURN NULL;
 END
@@ -325,6 +325,11 @@ CREATE FUNCTION public.create_comment_notification_trg() RETURNS trigger
 		IF new.replying_to IS NULL THEN
 			RETURN NULL;
 		END IF;
+		
+		--exit if the user is commenting to itself
+		IF new.replying_to_user=new.publisher THEN
+			RETURN NULL;
+		END IF;
 
 		--insert new notification
  		INSERT INTO notifications (type,user_id,post_id,comment_id)
@@ -423,7 +428,7 @@ $$;
 ALTER FUNCTION public.create_follow_notification_trg() OWNER TO postgres;
 
 --
--- TOC entry 253 (class 1255 OID 91249)
+-- TOC entry 254 (class 1255 OID 91249)
 -- Name: create_like_notification_trg(); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -431,13 +436,25 @@ CREATE FUNCTION public.create_like_notification_trg() RETURNS trigger
     LANGUAGE plpgsql
     AS $$DECLARE
 	liked_post_id integer;
+	liker_user integer;
 	like_count integer;
+	liked_user integer;
 BEGIN
 	--getting the post id either from 'new' or 'old'
 	IF TG_OP IN ('INSERT') THEN
 		liked_post_id:=new.post_id;
+		liker_user:=new.user_id;
 	ELSE
 		liked_post_id:=old.post_id;
+		liker_user:=old.user_id;
+	END IF;
+	
+	--getting the user who will recieve the notification
+	liked_user:=(SELECT posts.publisher from posts where posts.id=liked_post_id);
+	
+	--no notification if the user likes it's own post
+	IF liked_user=liker_user THEN
+		RETURN NULL;
 	END IF;
 	
 	--creating a new notification, or updating an existing unread notification
@@ -446,7 +463,7 @@ BEGIN
 		INSERT INTO notifications (type,user_id,post_id)
 		VALUES(
 			'like',
-			(SELECT posts.publisher from posts where posts.id=liked_post_id),
+			liked_user,
 			liked_post_id
 		)
 		ON CONFLICT (user_id,post_id,type,comment_id) WHERE seen=FALSE
@@ -496,24 +513,36 @@ CREATE FUNCTION public.create_repost_notification_trg() RETURNS trigger
     AS $$DECLARE
 	reposted_post_id integer;
 	repost_count integer;
+	repost_publisher integer;
+	reposter integer;
 BEGIN
 	--getting the post id either from 'new' or 'old'
 	IF TG_OP IN ('INSERT') THEN
 		reposted_post_id:=new.repost;
+		reposter:=new.publisher;
 	ELSE
 		reposted_post_id:=old.repost;
+		reposter:=old.publisher;
 	END IF;
 	
 	--if this is not a repost, ignore
 	IF(reposted_post_id IS NULL) THEN
-		RETURN old;
+		RETURN NULL;
+	END IF;
+	
+	--get the publisher of the reposted post
+	repost_publisher:=(SELECT posts.publisher from posts where posts.id=reposted_post_id);
+	
+	--if the user repost his own post, ignore
+	IF repost_publisher=reposter THEN
+		RETURN NULL;
 	END IF;
 	
 	--creating a new notification, or updating an existing unread notification
 	INSERT INTO notifications (type,user_id,post_id)
 	VALUES(
 		'repost',
-		(SELECT posts.publisher from posts where posts.id=reposted_post_id),
+		repost_publisher,
 		reposted_post_id
 	)
 	ON CONFLICT (user_id,post_id,type,comment_id) WHERE seen=FALSE
@@ -533,7 +562,6 @@ BEGIN
 			type='repost'
 			and notifications.post_id=reposted_post_id;
 		END IF;
-		RETURN old;
 	END IF;
 	
 	RETURN NULL;
@@ -543,7 +571,7 @@ END$$;
 ALTER FUNCTION public.create_repost_notification_trg() OWNER TO postgres;
 
 --
--- TOC entry 254 (class 1255 OID 91273)
+-- TOC entry 253 (class 1255 OID 91273)
 -- Name: repost_cant_be_reposted_trg(); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -614,7 +642,8 @@ ALTER TABLE public.bookmarks OWNER TO postgres;
 CREATE TABLE public.follows (
     follower integer,
     followed integer,
-    "timestamp" timestamp without time zone DEFAULT now() NOT NULL
+    "timestamp" timestamp without time zone DEFAULT now() NOT NULL,
+    CONSTRAINT cannot_follow_itself CHECK ((follower <> followed))
 );
 
 
@@ -660,6 +689,7 @@ CREATE TABLE public.notifications (
     type public.notification NOT NULL,
     comment_id integer,
     seen boolean DEFAULT false NOT NULL,
+    CONSTRAINT comment_id_nn CHECK (((type <> 'comment'::public.notification) OR (comment_id IS NOT NULL))),
     CONSTRAINT post_id_nn CHECK (((type = 'follow'::public.notification) OR (post_id IS NOT NULL)))
 );
 
@@ -701,6 +731,7 @@ CREATE TABLE public.posts (
     repost_count integer DEFAULT 0 NOT NULL,
     bookmark_count integer DEFAULT 0 NOT NULL,
     replying_to_user integer,
+    deleted timestamp without time zone,
     CONSTRAINT replying_to_user_nn CHECK (((replying_to IS NULL) OR (replying_to_user IS NOT NULL)))
 );
 
@@ -724,7 +755,7 @@ CREATE SEQUENCE public.posts_id_seq
 ALTER TABLE public.posts_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3503 (class 0 OID 0)
+-- TOC entry 3504 (class 0 OID 0)
 -- Dependencies: 218
 -- Name: posts_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -777,7 +808,7 @@ CREATE SEQUENCE public.trends_id_seq
 ALTER TABLE public.trends_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3504 (class 0 OID 0)
+-- TOC entry 3505 (class 0 OID 0)
 -- Dependencies: 226
 -- Name: trends_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -808,7 +839,8 @@ CREATE TABLE public.users (
     push_subscribtion jsonb,
     unread_notification_count integer DEFAULT 0 NOT NULL,
     last_email_notifications integer DEFAULT 0 NOT NULL,
-    following_count integer DEFAULT 0 NOT NULL
+    following_count integer DEFAULT 0 NOT NULL,
+    settings jsonb
 );
 
 
@@ -831,7 +863,7 @@ CREATE SEQUENCE public.users_id_seq
 ALTER TABLE public.users_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3505 (class 0 OID 0)
+-- TOC entry 3506 (class 0 OID 0)
 -- Dependencies: 214
 -- Name: users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -877,16 +909,7 @@ ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_
 
 
 --
--- TOC entry 3265 (class 2606 OID 91242)
--- Name: notifications comment_id_nn; Type: CHECK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE public.notifications
-    ADD CONSTRAINT comment_id_nn CHECK (((type <> 'comment'::public.notification) OR (comment_id IS NOT NULL))) NOT VALID;
-
-
---
--- TOC entry 3284 (class 2606 OID 82789)
+-- TOC entry 3285 (class 2606 OID 82789)
 -- Name: follows follow_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -895,7 +918,7 @@ ALTER TABLE ONLY public.follows
 
 
 --
--- TOC entry 3315 (class 2606 OID 91114)
+-- TOC entry 3316 (class 2606 OID 91114)
 -- Name: hashtags hashtag_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -904,7 +927,7 @@ ALTER TABLE ONLY public.hashtags
 
 
 --
--- TOC entry 3292 (class 2606 OID 74595)
+-- TOC entry 3293 (class 2606 OID 74595)
 -- Name: posts posts_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -913,7 +936,7 @@ ALTER TABLE ONLY public.posts
 
 
 --
--- TOC entry 3280 (class 2606 OID 66374)
+-- TOC entry 3281 (class 2606 OID 66374)
 -- Name: session session_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -922,7 +945,7 @@ ALTER TABLE ONLY public.session
 
 
 --
--- TOC entry 3317 (class 2606 OID 91164)
+-- TOC entry 3318 (class 2606 OID 91164)
 -- Name: trends trend_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -931,7 +954,7 @@ ALTER TABLE ONLY public.trends
 
 
 --
--- TOC entry 3319 (class 2606 OID 91160)
+-- TOC entry 3320 (class 2606 OID 91160)
 -- Name: trends trends_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -940,7 +963,7 @@ ALTER TABLE ONLY public.trends
 
 
 --
--- TOC entry 3308 (class 2606 OID 91076)
+-- TOC entry 3309 (class 2606 OID 91076)
 -- Name: blocks unique_blocks; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -949,7 +972,7 @@ ALTER TABLE ONLY public.blocks
 
 
 --
--- TOC entry 3302 (class 2606 OID 82770)
+-- TOC entry 3303 (class 2606 OID 82770)
 -- Name: bookmarks unique_bookmarks; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -958,7 +981,7 @@ ALTER TABLE ONLY public.bookmarks
 
 
 --
--- TOC entry 3298 (class 2606 OID 82755)
+-- TOC entry 3299 (class 2606 OID 82755)
 -- Name: likes unique_likes; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -967,7 +990,7 @@ ALTER TABLE ONLY public.likes
 
 
 --
--- TOC entry 3312 (class 2606 OID 91098)
+-- TOC entry 3313 (class 2606 OID 91098)
 -- Name: password_changes unique_user_id; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -976,7 +999,7 @@ ALTER TABLE ONLY public.password_changes
 
 
 --
--- TOC entry 3304 (class 2606 OID 91071)
+-- TOC entry 3305 (class 2606 OID 91071)
 -- Name: views unique_view; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -985,7 +1008,7 @@ ALTER TABLE ONLY public.views
 
 
 --
--- TOC entry 3272 (class 2606 OID 50023)
+-- TOC entry 3273 (class 2606 OID 50023)
 -- Name: users users_email_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -994,7 +1017,7 @@ ALTER TABLE ONLY public.users
 
 
 --
--- TOC entry 3275 (class 2606 OID 74572)
+-- TOC entry 3276 (class 2606 OID 74572)
 -- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1003,7 +1026,7 @@ ALTER TABLE ONLY public.users
 
 
 --
--- TOC entry 3277 (class 2606 OID 50021)
+-- TOC entry 3278 (class 2606 OID 50021)
 -- Name: users users_username_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1012,7 +1035,7 @@ ALTER TABLE ONLY public.users
 
 
 --
--- TOC entry 3278 (class 1259 OID 66375)
+-- TOC entry 3279 (class 1259 OID 66375)
 -- Name: IDX_session_expire; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1020,7 +1043,7 @@ CREATE INDEX "IDX_session_expire" ON public.session USING btree (expire);
 
 
 --
--- TOC entry 3306 (class 1259 OID 115703)
+-- TOC entry 3307 (class 1259 OID 115703)
 -- Name: blocked_by_user_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1028,7 +1051,7 @@ CREATE INDEX blocked_by_user_idx ON public.blocks USING btree (blocker, blocked)
 
 
 --
--- TOC entry 3299 (class 1259 OID 115708)
+-- TOC entry 3300 (class 1259 OID 115708)
 -- Name: bookmarks_of_post_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1036,7 +1059,7 @@ CREATE INDEX bookmarks_of_post_idx ON public.bookmarks USING btree (post_id, "ti
 
 
 --
--- TOC entry 3300 (class 1259 OID 115705)
+-- TOC entry 3301 (class 1259 OID 115705)
 -- Name: bookmarks_of_user_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1044,7 +1067,7 @@ CREATE INDEX bookmarks_of_user_idx ON public.bookmarks USING btree (user_id, pos
 
 
 --
--- TOC entry 3267 (class 1259 OID 115768)
+-- TOC entry 3268 (class 1259 OID 115768)
 -- Name: celebrities_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1052,7 +1075,7 @@ CREATE INDEX celebrities_idx ON public.users USING btree (follower_count DESC, i
 
 
 --
--- TOC entry 3288 (class 1259 OID 115763)
+-- TOC entry 3289 (class 1259 OID 115763)
 -- Name: contents_of_user_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1060,7 +1083,7 @@ CREATE INDEX contents_of_user_idx ON public.posts USING btree (publisher, ((text
 
 
 --
--- TOC entry 3268 (class 1259 OID 115687)
+-- TOC entry 3269 (class 1259 OID 115687)
 -- Name: email_notifications_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1068,7 +1091,7 @@ CREATE INDEX email_notifications_idx ON public.users USING btree (unread_notific
 
 
 --
--- TOC entry 3281 (class 1259 OID 115779)
+-- TOC entry 3282 (class 1259 OID 115779)
 -- Name: fki_follows_followed_fkey; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1076,7 +1099,7 @@ CREATE INDEX fki_follows_followed_fkey ON public.follows USING btree (followed);
 
 
 --
--- TOC entry 3282 (class 1259 OID 115785)
+-- TOC entry 3283 (class 1259 OID 115785)
 -- Name: fki_follows_follower_fkey; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1084,7 +1107,7 @@ CREATE INDEX fki_follows_follower_fkey ON public.follows USING btree (follower);
 
 
 --
--- TOC entry 3309 (class 1259 OID 115791)
+-- TOC entry 3310 (class 1259 OID 115791)
 -- Name: fki_passwordchanges_id_fkey2; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1092,7 +1115,7 @@ CREATE INDEX fki_passwordchanges_id_fkey2 ON public.password_changes USING btree
 
 
 --
--- TOC entry 3285 (class 1259 OID 115767)
+-- TOC entry 3286 (class 1259 OID 115767)
 -- Name: followed_by_user_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1100,7 +1123,7 @@ CREATE INDEX followed_by_user_idx ON public.follows USING btree (follower, "time
 
 
 --
--- TOC entry 3286 (class 1259 OID 115766)
+-- TOC entry 3287 (class 1259 OID 115766)
 -- Name: followers_of_user_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1108,7 +1131,7 @@ CREATE INDEX followers_of_user_idx ON public.follows USING btree (followed, "tim
 
 
 --
--- TOC entry 3313 (class 1259 OID 115771)
+-- TOC entry 3314 (class 1259 OID 115771)
 -- Name: hashtag_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1116,7 +1139,7 @@ CREATE INDEX hashtag_idx ON public.hashtags USING btree (hashtag);
 
 
 --
--- TOC entry 3310 (class 1259 OID 115707)
+-- TOC entry 3311 (class 1259 OID 115707)
 -- Name: id_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1124,7 +1147,7 @@ CREATE INDEX id_idx ON public.password_changes USING btree (id);
 
 
 --
--- TOC entry 3287 (class 1259 OID 115734)
+-- TOC entry 3288 (class 1259 OID 115734)
 -- Name: is_followed; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1132,7 +1155,7 @@ CREATE INDEX is_followed ON public.follows USING btree (followed, follower);
 
 
 --
--- TOC entry 3295 (class 1259 OID 115700)
+-- TOC entry 3296 (class 1259 OID 115700)
 -- Name: likes_of_post_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1140,7 +1163,7 @@ CREATE INDEX likes_of_post_idx ON public.likes USING btree (post_id, user_id, "t
 
 
 --
--- TOC entry 3296 (class 1259 OID 115698)
+-- TOC entry 3297 (class 1259 OID 115698)
 -- Name: likes_of_user_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1148,7 +1171,7 @@ CREATE INDEX likes_of_user_idx ON public.likes USING btree (user_id, "timestamp"
 
 
 --
--- TOC entry 3321 (class 1259 OID 115773)
+-- TOC entry 3322 (class 1259 OID 115773)
 -- Name: notifs_of_user_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1156,7 +1179,7 @@ CREATE INDEX notifs_of_user_idx ON public.notifications USING btree (user_id, se
 
 
 --
--- TOC entry 3289 (class 1259 OID 107495)
+-- TOC entry 3290 (class 1259 OID 107495)
 -- Name: posts_id_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1164,7 +1187,7 @@ CREATE INDEX posts_id_idx ON public.posts USING btree (id);
 
 
 --
--- TOC entry 3290 (class 1259 OID 115760)
+-- TOC entry 3291 (class 1259 OID 115760)
 -- Name: posts_or_comments_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1172,7 +1195,7 @@ CREATE INDEX posts_or_comments_idx ON public.posts USING btree (replying_to, dat
 
 
 --
--- TOC entry 3293 (class 1259 OID 115761)
+-- TOC entry 3294 (class 1259 OID 115761)
 -- Name: reposter_of_post_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1180,7 +1203,7 @@ CREATE INDEX reposter_of_post_idx ON public.posts USING btree (repost, date DESC
 
 
 --
--- TOC entry 3269 (class 1259 OID 115769)
+-- TOC entry 3270 (class 1259 OID 115769)
 -- Name: search_name_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1188,7 +1211,7 @@ CREATE INDEX search_name_idx ON public.users USING btree (name, follower_count D
 
 
 --
--- TOC entry 3270 (class 1259 OID 115770)
+-- TOC entry 3271 (class 1259 OID 115770)
 -- Name: search_username_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1196,7 +1219,7 @@ CREATE INDEX search_username_idx ON public.users USING btree (username, follower
 
 
 --
--- TOC entry 3320 (class 1259 OID 115772)
+-- TOC entry 3321 (class 1259 OID 115772)
 -- Name: trends_search_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1204,7 +1227,7 @@ CREATE INDEX trends_search_idx ON public.trends USING btree (hashtag, count);
 
 
 --
--- TOC entry 3294 (class 1259 OID 90990)
+-- TOC entry 3295 (class 1259 OID 90990)
 -- Name: unique_repost; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1212,7 +1235,7 @@ CREATE UNIQUE INDEX unique_repost ON public.posts USING btree (publisher, repost
 
 
 --
--- TOC entry 3322 (class 1259 OID 91268)
+-- TOC entry 3323 (class 1259 OID 91268)
 -- Name: unique_unread; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1220,7 +1243,7 @@ CREATE UNIQUE INDEX unique_unread ON public.notifications USING btree (user_id, 
 
 
 --
--- TOC entry 3273 (class 1259 OID 115686)
+-- TOC entry 3274 (class 1259 OID 115686)
 -- Name: users_id_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1228,7 +1251,7 @@ CREATE INDEX users_id_idx ON public.users USING btree (id);
 
 
 --
--- TOC entry 3305 (class 1259 OID 115699)
+-- TOC entry 3306 (class 1259 OID 115699)
 -- Name: views_of_post_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1236,7 +1259,7 @@ CREATE INDEX views_of_post_idx ON public.views USING btree (post_id, user_id);
 
 
 --
--- TOC entry 3352 (class 2620 OID 91184)
+-- TOC entry 3353 (class 2620 OID 91184)
 -- Name: bookmarks cache_bookmark_count; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
@@ -1244,7 +1267,7 @@ CREATE TRIGGER cache_bookmark_count AFTER INSERT OR DELETE ON public.bookmarks F
 
 
 --
--- TOC entry 3344 (class 2620 OID 91176)
+-- TOC entry 3345 (class 2620 OID 91176)
 -- Name: posts cache_comment_count; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
@@ -1252,7 +1275,7 @@ CREATE TRIGGER cache_comment_count AFTER INSERT OR DELETE ON public.posts FOR EA
 
 
 --
--- TOC entry 3342 (class 2620 OID 115712)
+-- TOC entry 3343 (class 2620 OID 115712)
 -- Name: follows cache_follower_counts; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
@@ -1260,7 +1283,7 @@ CREATE TRIGGER cache_follower_counts AFTER INSERT OR DELETE ON public.follows FO
 
 
 --
--- TOC entry 3350 (class 2620 OID 91285)
+-- TOC entry 3351 (class 2620 OID 91285)
 -- Name: likes cache_like_count; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
@@ -1268,7 +1291,7 @@ CREATE TRIGGER cache_like_count AFTER INSERT OR DELETE ON public.likes FOR EACH 
 
 
 --
--- TOC entry 3345 (class 2620 OID 91282)
+-- TOC entry 3346 (class 2620 OID 91282)
 -- Name: posts cache_replied_user; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
@@ -1276,7 +1299,7 @@ CREATE TRIGGER cache_replied_user BEFORE INSERT ON public.posts FOR EACH ROW EXE
 
 
 --
--- TOC entry 3346 (class 2620 OID 91181)
+-- TOC entry 3347 (class 2620 OID 91181)
 -- Name: posts cache_repost_count; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
@@ -1284,7 +1307,7 @@ CREATE TRIGGER cache_repost_count AFTER INSERT OR DELETE ON public.posts FOR EAC
 
 
 --
--- TOC entry 3355 (class 2620 OID 99308)
+-- TOC entry 3356 (class 2620 OID 99308)
 -- Name: notifications cache_unread_notification_count; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
@@ -1292,7 +1315,7 @@ CREATE TRIGGER cache_unread_notification_count AFTER INSERT OR DELETE OR UPDATE 
 
 
 --
--- TOC entry 3353 (class 2620 OID 91179)
+-- TOC entry 3354 (class 2620 OID 91179)
 -- Name: views cache_view_count; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
@@ -1300,7 +1323,7 @@ CREATE TRIGGER cache_view_count AFTER INSERT OR DELETE ON public.views FOR EACH 
 
 
 --
--- TOC entry 3347 (class 2620 OID 91247)
+-- TOC entry 3348 (class 2620 OID 91247)
 -- Name: posts create_comment_notification; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
@@ -1308,7 +1331,7 @@ CREATE TRIGGER create_comment_notification AFTER INSERT OR DELETE ON public.post
 
 
 --
--- TOC entry 3343 (class 2620 OID 91269)
+-- TOC entry 3344 (class 2620 OID 91269)
 -- Name: follows create_follow_notification; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
@@ -1316,7 +1339,7 @@ CREATE TRIGGER create_follow_notification AFTER INSERT OR DELETE ON public.follo
 
 
 --
--- TOC entry 3351 (class 2620 OID 91250)
+-- TOC entry 3352 (class 2620 OID 91250)
 -- Name: likes create_like_notification; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
@@ -1324,7 +1347,7 @@ CREATE TRIGGER create_like_notification AFTER INSERT OR DELETE ON public.likes F
 
 
 --
--- TOC entry 3348 (class 2620 OID 91254)
+-- TOC entry 3349 (class 2620 OID 91254)
 -- Name: posts create_repost_notification; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
@@ -1332,7 +1355,7 @@ CREATE TRIGGER create_repost_notification AFTER INSERT OR DELETE ON public.posts
 
 
 --
--- TOC entry 3349 (class 2620 OID 91274)
+-- TOC entry 3350 (class 2620 OID 91274)
 -- Name: posts repost_cant_be_reposted; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
@@ -1340,7 +1363,7 @@ CREATE TRIGGER repost_cant_be_reposted BEFORE INSERT ON public.posts FOR EACH RO
 
 
 --
--- TOC entry 3354 (class 2620 OID 115792)
+-- TOC entry 3355 (class 2620 OID 115792)
 -- Name: hashtags update_hashtag_count; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
@@ -1348,7 +1371,7 @@ CREATE TRIGGER update_hashtag_count AFTER INSERT ON public.hashtags FOR EACH ROW
 
 
 --
--- TOC entry 3335 (class 2606 OID 91082)
+-- TOC entry 3336 (class 2606 OID 91082)
 -- Name: blocks blocked_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1357,7 +1380,7 @@ ALTER TABLE ONLY public.blocks
 
 
 --
--- TOC entry 3336 (class 2606 OID 91077)
+-- TOC entry 3337 (class 2606 OID 91077)
 -- Name: blocks blocker_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1366,34 +1389,34 @@ ALTER TABLE ONLY public.blocks
 
 
 --
--- TOC entry 3331 (class 2606 OID 91100)
+-- TOC entry 3332 (class 2606 OID 91100)
 -- Name: bookmarks bookmarks_post_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.bookmarks
-    ADD CONSTRAINT bookmarks_post_id_fkey FOREIGN KEY (post_id) REFERENCES public.posts(id) ON DELETE CASCADE NOT VALID;
+    ADD CONSTRAINT bookmarks_post_id_fkey FOREIGN KEY (post_id) REFERENCES public.posts(id) ON DELETE CASCADE;
 
 
 --
--- TOC entry 3332 (class 2606 OID 91105)
+-- TOC entry 3333 (class 2606 OID 91105)
 -- Name: bookmarks bookmarks_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.bookmarks
-    ADD CONSTRAINT bookmarks_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE NOT VALID;
+    ADD CONSTRAINT bookmarks_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
 
 
 --
--- TOC entry 3339 (class 2606 OID 91237)
+-- TOC entry 3340 (class 2606 OID 91237)
 -- Name: notifications comment_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.notifications
-    ADD CONSTRAINT comment_id_fk FOREIGN KEY (comment_id) REFERENCES public.posts(id) ON DELETE CASCADE NOT VALID;
+    ADD CONSTRAINT comment_id_fk FOREIGN KEY (comment_id) REFERENCES public.posts(id) ON DELETE CASCADE;
 
 
 --
--- TOC entry 3323 (class 2606 OID 115774)
+-- TOC entry 3324 (class 2606 OID 115774)
 -- Name: follows follows_followed_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1402,7 +1425,7 @@ ALTER TABLE ONLY public.follows
 
 
 --
--- TOC entry 3324 (class 2606 OID 115780)
+-- TOC entry 3325 (class 2606 OID 115780)
 -- Name: follows follows_follower_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1411,25 +1434,25 @@ ALTER TABLE ONLY public.follows
 
 
 --
--- TOC entry 3329 (class 2606 OID 90975)
+-- TOC entry 3330 (class 2606 OID 90975)
 -- Name: likes likes_liker_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.likes
-    ADD CONSTRAINT likes_liker_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE NOT VALID;
+    ADD CONSTRAINT likes_liker_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
 
 
 --
--- TOC entry 3330 (class 2606 OID 90980)
+-- TOC entry 3331 (class 2606 OID 90980)
 -- Name: likes likes_post_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.likes
-    ADD CONSTRAINT likes_post_fkey FOREIGN KEY (post_id) REFERENCES public.posts(id) ON DELETE CASCADE NOT VALID;
+    ADD CONSTRAINT likes_post_fkey FOREIGN KEY (post_id) REFERENCES public.posts(id) ON DELETE CASCADE;
 
 
 --
--- TOC entry 3337 (class 2606 OID 115786)
+-- TOC entry 3338 (class 2606 OID 115786)
 -- Name: password_changes passwordchanges_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1438,7 +1461,7 @@ ALTER TABLE ONLY public.password_changes
 
 
 --
--- TOC entry 3338 (class 2606 OID 91115)
+-- TOC entry 3339 (class 2606 OID 91115)
 -- Name: hashtags post_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1447,7 +1470,7 @@ ALTER TABLE ONLY public.hashtags
 
 
 --
--- TOC entry 3340 (class 2606 OID 91195)
+-- TOC entry 3341 (class 2606 OID 91195)
 -- Name: notifications post_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1456,7 +1479,7 @@ ALTER TABLE ONLY public.notifications
 
 
 --
--- TOC entry 3333 (class 2606 OID 91065)
+-- TOC entry 3334 (class 2606 OID 91065)
 -- Name: views post_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1465,43 +1488,43 @@ ALTER TABLE ONLY public.views
 
 
 --
--- TOC entry 3325 (class 2606 OID 99310)
+-- TOC entry 3326 (class 2606 OID 99310)
 -- Name: posts posts_publisher_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.posts
-    ADD CONSTRAINT posts_publisher_fkey FOREIGN KEY (publisher) REFERENCES public.users(id) ON DELETE CASCADE NOT VALID;
+    ADD CONSTRAINT posts_publisher_fkey FOREIGN KEY (publisher) REFERENCES public.users(id) ON DELETE CASCADE;
 
 
 --
--- TOC entry 3326 (class 2606 OID 99315)
+-- TOC entry 3327 (class 2606 OID 99315)
 -- Name: posts posts_repost_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.posts
-    ADD CONSTRAINT posts_repost_fkey FOREIGN KEY (repost) REFERENCES public.posts(id) ON DELETE CASCADE NOT VALID;
+    ADD CONSTRAINT posts_repost_fkey FOREIGN KEY (repost) REFERENCES public.posts(id) ON DELETE CASCADE;
 
 
 --
--- TOC entry 3327 (class 2606 OID 99346)
+-- TOC entry 3328 (class 2606 OID 99346)
 -- Name: posts replying_to_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.posts
-    ADD CONSTRAINT replying_to_fkey FOREIGN KEY (replying_to) REFERENCES public.posts(id) ON DELETE CASCADE NOT VALID;
+    ADD CONSTRAINT replying_to_fkey FOREIGN KEY (replying_to) REFERENCES public.posts(id) ON DELETE CASCADE;
 
 
 --
--- TOC entry 3328 (class 2606 OID 99325)
+-- TOC entry 3329 (class 2606 OID 99325)
 -- Name: posts replying_to_user_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.posts
-    ADD CONSTRAINT replying_to_user_fkey FOREIGN KEY (replying_to_user) REFERENCES public.users(id) ON DELETE CASCADE NOT VALID;
+    ADD CONSTRAINT replying_to_user_fkey FOREIGN KEY (replying_to_user) REFERENCES public.users(id) ON DELETE CASCADE;
 
 
 --
--- TOC entry 3341 (class 2606 OID 91190)
+-- TOC entry 3342 (class 2606 OID 91190)
 -- Name: notifications user_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1510,7 +1533,7 @@ ALTER TABLE ONLY public.notifications
 
 
 --
--- TOC entry 3334 (class 2606 OID 91060)
+-- TOC entry 3335 (class 2606 OID 91060)
 -- Name: views user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1518,7 +1541,7 @@ ALTER TABLE ONLY public.views
     ADD CONSTRAINT user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
 
 
--- Completed on 2024-08-08 23:24:37
+-- Completed on 2024-08-28 01:53:07
 
 --
 -- PostgreSQL database dump complete
