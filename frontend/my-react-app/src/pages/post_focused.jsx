@@ -37,6 +37,7 @@ export default () => {
     const { isPending, data: post, isError } = useQuery({
         queryKey: ['focused_post_' + id],
         queryFn: getPost,
+        retry:false
     });
 
     if (isError) return <ErrorPage text={"This post does not exists"} />

@@ -90,6 +90,7 @@ const columns = `
 	POST.REPOST_COUNT,
 	POST.BOOKMARK_COUNT,
     POST.COMMENT_COUNT,
+	POST.DELETED,
 	${liked_by_user} AS LIKED_BY_USER,
 	${reposted_by_user} AS REPOSTED_BY_USER,
 	${bookmarked_by_user} AS BOOKMARKED_BY_USER,

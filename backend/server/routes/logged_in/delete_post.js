@@ -15,10 +15,11 @@ router.post("/post", async (req, res) => {
 
     //delete post from db if it belongs to this user
     const q = await db.query(named(`
-        delete from posts 
+        update posts 
+        set deleted=now()
         where id=:post_id
         and publisher=:user_id
-        returning id,media`
+        returning id`
     )(
         {
             post_id: id,
@@ -32,9 +33,9 @@ router.post("/post", async (req, res) => {
         CheckErr("this post either does not exists or does not belongs to the user");
 
     //delete the files from the cloud
-    const post=q.rows[0];
-    const files_to_delete = post.media;
-    await deletePostFiles(files_to_delete,post.id);
+    //const post=q.rows[0];
+    //const files_to_delete = post.media;
+    //await deletePostFiles(files_to_delete,post.id);
 
     res.sendStatus(200);
 });

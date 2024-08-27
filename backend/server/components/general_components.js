@@ -128,7 +128,9 @@ async function updateViews(posts, user_id) {
     }
 }
 
-async function post_list(req, res, add_validations, where, where_params = {}, posts_query,where_timestamp="where post.date<=to_timestamp(:timestamp)") {
+const timeFilter = "where post.date<=to_timestamp(:timestamp) and (post.deleted is null or post.deleted > to_timestamp(:timestamp))";
+
+async function post_list(req, res, add_validations, where, where_params = {}, posts_query, where_timestamp = timeFilter) {
     //validate inputs
     let validations = { from: "required|integer", timestamp: "required|integer" };
     if (add_validations)

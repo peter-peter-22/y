@@ -43,7 +43,6 @@ const OnlineList = forwardRef(({ exampleSize = 100, EntryMapper, getEntries, ove
     //array of all rows generated from the infinite list data
     const allRows = data ? entryArranger(data) : []
 
-
     //external functions
     useImperativeHandle(ref, () => ({
         AddEntryToTop(newEntry) {
@@ -101,7 +100,8 @@ const OnlineList = forwardRef(({ exampleSize = 100, EntryMapper, getEntries, ove
         if (
             lastItem.index >= allRows.length - 1 &&
             hasNextPage &&
-            !isFetchingNextPage
+            !isFetchingNextPage &&
+            !error
         ) {
             fetchNextPage()
         }
@@ -190,16 +190,10 @@ function DefaultDisplayer({ items, allRows, virtualizer, EntryMapper, hasNextPag
 }
 
 async function fetchServerPage(getEntries, offset = 0, timestamp) {
-    try {
-        const rows = await getEntries(offset, timestamp);
-        if (rows.length === 0)//if fetched 0 posts, this is the end. nextOffset:null means hasNextPage will be false
-            return { rows, nextOffset: null };
-        return { rows, nextOffset: offset + rows.length };
-    }
-    catch (err) {
-        ThrowIfNotAxios(err);
-        return { rows: [], nextOffset: offset }
-    };
+    const rows = await getEntries(offset, timestamp);
+    if (rows.length === 0)//if fetched 0 posts, this is the end. nextOffset:null means hasNextPage will be false
+        return { rows, nextOffset: null };
+    return { rows, nextOffset: offset + rows.length };
 }
 
 function AsyncRender({ element, loading }) {

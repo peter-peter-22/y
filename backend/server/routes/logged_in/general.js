@@ -42,6 +42,8 @@ router.post("/get_post", async (req, res) => {
     const post = posts[0];
     if (post === undefined)
         CheckErr("this post does not exists");
+    if(post.deleted!==null)
+        CheckErr("this post was deleted");
     res.send(post);
 });
 

@@ -113,7 +113,13 @@ function DeleteRow({ post }) {
         }
         else {
             //if not, update the comment section
-            update();
+            commentSections.active.mapRows((row) => {
+                if (row.id === post.id) {
+                    row.deleted = true;
+                    return { ...row };//this will update the post even if it is currently visible
+                }
+                return row;
+            });
         }
     }
 
@@ -159,10 +165,6 @@ function Row(props) {
             </ListItemButton>
         </ListItem>
     );
-}
-
-function update() {
-    commentSections.active.update();
 }
 
 function ManagePost({ original, overriden }) {

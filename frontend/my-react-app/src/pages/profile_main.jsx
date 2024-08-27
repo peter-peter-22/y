@@ -31,6 +31,7 @@ function Profile() {
     const { isPending, data: user } = useQuery({
         queryKey: ['profile_' + id],
         queryFn: getUser,
+        retry: false
     });
 
 
