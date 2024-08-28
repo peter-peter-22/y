@@ -43,7 +43,7 @@ router.post('/register_start', async (req, res) => {
 
     //send verification code in email
     const mailOptions = {
-        from: g.transporter.options.auth.user,
+        from: `Y Verification <${g.transporter.options.auth.user}>`,
         to: req.body.email,
         subject: 'Email verification',
         text: 'Your verification code is "' + code + '"'

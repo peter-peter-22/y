@@ -74,11 +74,11 @@ function ErrorModal(props) {
     );
 }
 
-function SuccessModal(props) {
+function SuccessModal({ title, text }) {
     return (
         <GenericModal
-            title={props.title ? props.title : "Success"}
-            text={props.text}
+            title={title ? title : "Success"}
+            text={text}
             color="success.main"
         />
     );
@@ -178,24 +178,13 @@ function ImagesModal() {
                 alignItems: "center",
                 justifyContent: "center"
             }}>
-                <ResponsiveSelector breakpoint="md"
-                    above={
-                        <Stack direction="row" style={{ height: "80%", width: "80%", alignItems: "center", justifyContent: "center" }}>
-                            <StepButton icon="arrow_left" tall={true} onClick={(e) => { Step(-1, e); }} />
-                            {DisplayedMedia}
-                            <StepButton icon="arrow_right" tall={true} onClick={(e) => { Step(1, e); }} />
-                        </Stack>
-                    }
-                    below={
-                        <Stack direction="column" style={{ height: "80%", width: "95%", alignItems: "center", justifyContent: "center" }}>
-                            {DisplayedMedia}
-                            <Stack direction="row" style={{ width: "100%" }}>
-                                <StepButton icon="arrow_left" onClick={(e) => { Step(-1, e); }} />
-                                <StepButton icon="arrow_right" onClick={(e) => { Step(1, e); }} />
-                            </Stack>
-                        </Stack>
-                    }
-                />
+                <Stack direction="column" style={{ height: "80%", width: "95%", alignItems: "center", justifyContent: "center" }}>
+                    {DisplayedMedia}
+                    <Stack direction="row" style={{ width: "100%" }}>
+                        <StepButton icon="arrow_left" onClick={(e) => { Step(-1, e); }} />
+                        <StepButton icon="arrow_right" onClick={(e) => { Step(1, e); }} />
+                    </Stack>
+                </Stack>
             </div>
         </Modal>
     );

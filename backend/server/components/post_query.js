@@ -30,7 +30,8 @@ const user_columns = `
 id,
 username,
 name,
-picture`;
+picture,
+settings`;
 
 const user_columns_extended = `
 ${user_columns},

@@ -1,11 +1,19 @@
 import { transporter } from "../config.js";
 import { SendMailAsync } from "../routes/register.js";
-import { email_notifications } from "./notifications_query.js";
+
+const email_notifications = `
+update users
+	set last_email_notifications=unread_notification_count
+where unread_notification_count>0
+	and last_email_notifications!=unread_notification_count
+returning
+	name,unread_notification_count,email`;
+
 
 //send emails to the users who have new unread notifications
 async function sendEmailNotifications() {
     try {
-        if(config.log_email_notifications) console.log("sending email notifications...");
+        if (config.log_email_notifications) console.log("sending email notifications...");
 
         //get the users who need email notifications and their necessary data
         //the query also updates the users and excludes them from the next emails as long as the don't get new unread notifications
@@ -16,7 +24,7 @@ async function sendEmailNotifications() {
             await sendEmailNotification(row.email, row.name, row.unread_notification_count);
         }
 
-        if(config.log_email_notifications)  console.log("email notifications sent successfully");
+        if (config.log_email_notifications) console.log(`${q.rowCount} email notifications sent successfully`);
     }
     catch (e) {
         console.error(e);
@@ -34,7 +42,7 @@ Adjust your notification settings here:
 ${config.address_mode.client}/settings`;
 
     const mailOptions = {
-        from: transporter.options.auth.user,
+        from: `Y Community <${transporter.options.auth.user}>`,
         to: email,
         subject: 'Email notifications',
         text: text

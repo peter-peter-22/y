@@ -49,7 +49,7 @@ const config = {
     notifications_per_request: 60,
     uploadLimitMB: 100,
     email_notification_interval:10*50*1000,//10 minutes
-    log_email_notifications:false,
+    log_email_notifications:true,
     ...types
 }
 

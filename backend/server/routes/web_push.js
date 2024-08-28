@@ -3,6 +3,13 @@ import webpush from "web-push";
 
 const router = express.Router();
 
+const notif_types = {
+    like: "push_likes",
+    comment: "push_comments",
+    repost: "push_reposts",
+    follow: "push_follows"
+}
+
 webpush.setVapidDetails(
     "mailto:gfdifgjiugfdjiudfgjjiu@gmail.com",
     process.env.WEB_PUSH_PUBLIC,
@@ -17,13 +24,13 @@ router.post("/subscribe", async (req, res) => {
     const subscription = req.body.subscription;
 
     //store subscription
-    await db.query(named("update users set push_subscribtion=:sub where id=:user_id")({
+    await db.query(named("update users set push_sub=:sub where id=:user_id")({
         user_id: UserId(req),
         sub: subscription
     }));
 
     //send test notification
-    const payload = createPayload("Notifications enabled");
+    const payload = createPayload("The notifications are working");
     await sendNotification(subscription, payload);
 
     //end
@@ -32,24 +39,24 @@ router.post("/subscribe", async (req, res) => {
 
 async function sendNotification(subscription, payload) {
     await webpush.sendNotification(subscription, JSON.stringify(payload)).catch((err) => {
-        console.log("WEBPUSH SENDING ERROR");
+        console.log("\nWEBPUSH SENDING ERROR\n");
         console.error(err);
     });
 }
 
-async function notifyUser(user_id, payload) {
+async function notifyUser(user_id, payload, type) {
     //getting subscription
-    const get_sub = await db.query("select push_subscribtion from users where id=$1", [user_id]);
-    if (get_sub.rowCount === 0)
-        return console.error("attempted to send notification to a user id that does not exists");
-    const subscription = get_sub.rows[0].push_subscribtion;
+    const q = await db.query("select push_sub,settings from users where id=$1", [user_id]);
+    if (q.rowCount === 0)
+        return console.error(`attempted to send notification to a user id that does not exists. user_id:"${user_id}", payload:"${JSON.stringify(payload)}"`);
 
-    //if notifications are not enabled for this user, exit
-    if (subscription === null)
+    const { push_sub, settings } = q.rows[0];
+    //if notifications are not enabled for this user or for this type of notification, exit
+    if (push_sub === null || !settings || !settings.push_enabled || !settings[type])
         return;
 
     //send notification to sub
-    await sendNotification(subscription, payload);
+    await sendNotification(push_sub, payload);
 }
 
 function createPayload(title, body, url, tag) {
@@ -91,10 +98,10 @@ async function likePush(user, post_id) {
         );
 
         //send
-        await notifyUser(notified_user_id, payload);
+        await notifyUser(notified_user_id, payload, notif_types.like);
     }
     catch (err) {
-        console.log("LIKE PUSH ERROR");
+        console.log("\nLIKE PUSH ERROR\n");
         console.error(err);
     }
 }
@@ -118,10 +125,10 @@ async function commentPush(user, comment_id, replying_to) {
         );
 
         //send
-        await notifyUser(notified_user_id, payload);
+        await notifyUser(notified_user_id, payload, notif_types.comment);
     }
     catch (err) {
-        console.log("COMMENT PUSH ERROR");
+        console.log("\nCOMMENT PUSH ERROR\n");
         console.error(err);
     }
 }
@@ -145,10 +152,10 @@ async function repostPush(user, repost_id, reposted_id) {
         );
 
         //send
-        await notifyUser(notified_user_id, payload);
+        await notifyUser(notified_user_id, payload, notif_types.repost);
     }
     catch (err) {
-        console.log("REPOST PUSH ERROR");
+        console.log("\nREPOST PUSH ERROR\n");
         console.error(err);
     }
 }
@@ -169,10 +176,10 @@ async function followPush(user, followed) {
         );
 
         //send
-        await notifyUser(followed, payload);
+        await notifyUser(followed, payload, notif_types.follow);
     }
     catch (err) {
-        console.log("FOLLOW PUSH ERROR");
+        console.log("\nFOLLOW PUSH ERROR\n");
         console.error(err);
     }
 }
@@ -186,4 +193,4 @@ function formatName(name) {
 }
 
 export default router;
-export { commentPush, followPush, likePush, notifyUser, repostPush };
+export { commentPush, followPush, likePush, repostPush };

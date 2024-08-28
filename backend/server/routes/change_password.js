@@ -34,7 +34,7 @@ router.post("/submit_chapta", async (req, res) => {
     //send link with code in email
     const link = config.address_mode.client + "/change_password/" + user_id + "/" + secret;
     const mailOptions = {
-        from: g.transporter.options.auth.user,
+        from: `Y Password change <${g.transporter.options.auth.user}>`,
         to: req.body.email,
         subject: 'Password change',
         text: `
