@@ -1,23 +1,18 @@
-import Fab from '@mui/material/Fab';
-import Stack from '@mui/material/Stack';
-import axios from 'axios';
-import React, { createContext, useCallback, useEffect, useMemo, useRef, memo, useState, Suspense } from "react";
-import Ask from "/src/components/web_push.js";
-import { ListTitle, Loading } from "/src/components/utilities";
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
 import { Typography } from '@mui/material';
 import Checkbox from '@mui/material/Checkbox';
-import FormGroup from '@mui/material/FormGroup';
+import Fab from '@mui/material/Fab';
 import FormControlLabel from '@mui/material/FormControlLabel';
-import FormControl from '@mui/material/FormControl';
-import FormLabel from '@mui/material/FormLabel';
-import { OutlinedFab } from "/src/components/buttons";
-import { useSuspenseQuery, useQuery, useQueryClient } from '@tanstack/react-query'
-import { ErrorPageFormatted } from "/src/pages/error";
-import { useForm, FormProvider, useFormContext, useWatch, Controller } from 'react-hook-form';
+import FormGroup from '@mui/material/FormGroup';
+import Stack from '@mui/material/Stack';
+import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
+import axios from 'axios';
+import React, { Suspense, useCallback } from "react";
+import { Controller, FormProvider, useForm, useFormContext, useWatch } from 'react-hook-form';
 import { ThrowIfNotAxios } from "/src/communication.js";
-import { SuccessModal, Modals } from "/src/components/modals";
+import { Modals, SuccessModal } from "/src/components/modals";
+import { Loading } from "/src/components/utilities";
+import Ask from "/src/components/web_push.js";
+import { ErrorPageFormatted } from "/src/pages/error";
 
 function ControlledCheckbox({ title,name, group, ...props }) {
   const { control } = useFormContext();

@@ -4,7 +4,7 @@ import Fab from '@mui/material/Fab';
 import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
 import axios from 'axios';
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useContext } from "react";
 import ContentEditable from 'react-contenteditable';
 import { ThrowIfNotAxios } from "/src/communication.js";
 import config from "/src/components/config.js";
@@ -13,15 +13,16 @@ import { ErrorText } from "/src/components/modals";
 import { PostMediaEditor } from "/src/components/post_media";
 import { BorderlessPost, QuotedFrame, RowWithPrefix, commentSections } from "/src/components/posts.jsx";
 import { findHashtags, findHtml } from "/src/components/sync.js";
-import { UserData } from "/src/components/user_data";
+import { UserContext } from "/src/components/user_data";
 import { Loading, ProfilePic, ReplyingTo } from '/src/components/utilities';
 import { theme } from "/src/styles/mui/my_theme";
 
 
-function PostCreator({ post, quoted, onPost, editing,noUpdate }) {
+function PostCreator({ post, quoted, onPost, editing, noUpdate }) {
+    const { getData } = useContext(UserContext);
     const [isFocused, setIsFocused] = React.useState(false);
     const [getText, setText] = React.useState(editing ? editing.text : "");
-    const maxLetters = UserData.getData.maxLetters;
+    const maxLetters = getData.maxLetters;
     const isComment = post !== undefined;
     const isQuote = quoted !== undefined;
     const isEditing = editing !== undefined;
@@ -129,8 +130,8 @@ function PostCreator({ post, quoted, onPost, editing,noUpdate }) {
 
             //update post list on client without refreshing the page
             const post = result.data;
-            if(!noUpdate)
-            AddPostToCommentSection(post);
+            if (!noUpdate)
+                AddPostToCommentSection(post);
 
             //call function if defined
             if (onPost)
@@ -157,7 +158,7 @@ function PostCreator({ post, quoted, onPost, editing,noUpdate }) {
             }
             <RowWithPrefix
                 prefix={
-                    <ProfilePic sx={{ my: 1 }} user={UserData.getData.user} />
+                    <ProfilePic sx={{ my: 1 }} user={getData.user} />
                 }
                 contents={
                     <Stack direction="column">

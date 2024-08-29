@@ -5,12 +5,12 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import Stack from '@mui/material/Stack';
 import axios from 'axios';
-import React, { useCallback } from "react";
+import React, { useCallback,useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { Modals } from "/src/components/modals";
 import { PostCreator } from "/src/components/post_creator";
 import { PostModalFrame, commentSections } from "/src/components/posts";
-import { UserData } from "/src/components/user_data";
+import { UserContext} from "/src/components/user_data";
 import { GetUserKey, InheritLink, SimplePopOver, ToggleBlock, ToggleFollow, noOverflow } from '/src/components/utilities';
 import { get_focused_id } from "/src/pages/post_focused.jsx";
 
@@ -168,8 +168,9 @@ function Row(props) {
 }
 
 function ManagePost({ original, overriden }) {
+    const {getData}=useContext(UserContext);
     const user = overriden.publisher;
-    const is_me = original.publisher.id === UserData.getData.user.id;
+    const is_me = original.publisher.id === getData.user.id;
 
     const onChange = useCallback((isBlocked, user) => {
         commentSections.active.mapRows((row) => {

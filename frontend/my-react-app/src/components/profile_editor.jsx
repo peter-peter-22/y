@@ -2,15 +2,16 @@ import { Box, Typography } from '@mui/material';
 import Fab from '@mui/material/Fab';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
+import { useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import Moment from "moment";
-import React, { memo, useEffect, useRef, useState } from "react";
+import React, { memo, useContext, useEffect, useRef, useState } from "react";
 import { ThrowIfNotAxios } from "/src/communication.js";
 import { CornerButton } from "/src/components/buttons.jsx";
 import { BirthDateEditor, ChangeablePicture, NameEditor, ProfilePicEditor, UserNameEditor } from "/src/components/create_account";
 import { Modals } from "/src/components/modals";
 import { PostModalFrame } from "/src/components/posts";
-import { UserData } from "/src/components/user_data";
+import { UserContext } from "/src/components/user_data";
 import { GetProfileBanner, Loading } from '/src/components/utilities';
 import { ProfileBanner } from "/src/pages/profile_main";
 
@@ -18,6 +19,8 @@ function ProfileEditor({user}) {
     const [ok, setOk] = useState(false);
     const valuesRef = useRef({});
     const [uploading, setUploading] = useState(false);
+    const {update}=useContext(UserContext);
+    const queryClient = useQueryClient()
 
     function updateValue(name, value) {
         valuesRef.current[name] = value;
@@ -41,9 +44,9 @@ function ProfileEditor({user}) {
                     }
                 }
             );
-            UserData.update();
+            queryClient.invalidateQueries({ queryKey: ['profile_'+user.id] })
+            update();
             Close();
-            window.location.reload();
         }
         catch (err) {
             ThrowIfNotAxios(err);
@@ -125,3 +128,4 @@ const BannerChangerMemo = memo(({ user, onUploadFile }) => {
     (prev, now) => prev.user === now.user);
 
 export { ProfileEditor };
+

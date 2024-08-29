@@ -11,7 +11,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import axios from 'axios';
 import Moment from "moment";
 import 'moment/locale/de';
-import React, { memo, useEffect, useRef, useState } from 'react';
+import React, { memo, useContext, useEffect, useRef, useState } from 'react';
 import ReCAPTCHA from 'react-google-recaptcha';
 import validator from "validator";
 import { ThrowIfNotAxios } from "/src/communication.js";
@@ -21,7 +21,7 @@ import { PasswordFieldWithToggle, VisuallyHiddenInput } from "/src/components/in
 import { fileToMedia } from '/src/components/media';
 import { Modals } from "/src/components/modals";
 import { BigModal, BottomButtonWithBorder, ByRegistering, ModalMargin ,SmallLink} from "/src/components/no_user";
-import { UserData } from "/src/components/user_data";
+import { UserContext } from "/src/components/user_data";
 import { AvatarImageDisplayer, CenterLogo, GetProfilePicture } from '/src/components/utilities';
 import { UserListExtended } from "/src/pages/follow_people";
 import Ask from "/src/components/web_push.js";
@@ -308,6 +308,7 @@ function Page4(props)//enter password, login
     const [data, handleNext] = GetProps(props);
     const [password, setPassword] = useState('');
     const [passwordOk, setPasswordOk] = useState();
+    const {update}=useContext(UserContext);
 
     async function submitPassword() {
         if (!passwordOk)
@@ -320,7 +321,7 @@ function Page4(props)//enter password, login
                 },
             );
             //code ok, logged in on server, update user on client, this will render the next page
-            await UserData.update();
+            await update();
         }
         catch (err) {
             ThrowIfNotAxios(err);
@@ -649,6 +650,7 @@ function UserNameEditor(props) {
     const changedUserName = props.onChangeUserName;
     const changedOk = props.onChangeOk;
     const timerRef = useRef();
+    const {getData}=useContext(UserContext); 
 
     useEffect(() => {
         if (changedOk)
@@ -681,7 +683,7 @@ function UserNameEditor(props) {
     useEffect(() => {//add the existing username to the textfield on creation
         let starting_username;
         try {
-            starting_username = UserData.getData.user.username;
+            starting_username = getData.user.username;
         } catch {
             starting_username = "";
         }

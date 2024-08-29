@@ -1,9 +1,10 @@
 import { Box, Icon, Typography } from '@mui/material';
 import Fab from '@mui/material/Fab';
 import Stack from '@mui/material/Stack';
+import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import Moment from "moment";
-import React, { memo, useCallback, useEffect, useState } from "react";
+import React, { memo, useCallback, useContext, useState } from "react";
 import { Route, Routes, useParams } from "react-router-dom";
 import { ThrowIfNotAxios } from "/src/communication.js";
 import { BlueCenterButton } from "/src/components/buttons";
@@ -14,9 +15,8 @@ import { Modals } from "/src/components/modals";
 import { ClickableSingleImageContainer } from "/src/components/post_media";
 import { ProfileEditor } from "/src/components/profile_editor";
 import { CommentsOfUser, Followers, Following, LikesOfUser, MediaOfUser, PostsOfUser } from "/src/components/profile_tabs";
-import { UserData } from "/src/components/user_data";
+import { UserContext } from "/src/components/user_data";
 import { FadeLink, GetProfileBanner, GetUserName, Loading, ProfilePic, TabSwitcherLinks, TextRow, UserKey, formatNumber, noOverflow } from '/src/components/utilities';
-import { useQuery } from '@tanstack/react-query'
 import { ErrorPageFormatted } from "/src/pages/error";
 
 function Profile() {
@@ -61,7 +61,8 @@ function ProfileInfo({ user, setLocalBlocked }) {
     const profileSize = "100px";
     const moment = Moment(new Date(user.registration_date));
     const baseUrl = GetBaseUrl(user);
-    const is_me = user.id === UserData.getData.user.id;
+    const { getData } = useContext(UserContext);
+    const is_me = user.id === getData.user.id;
     const following = user.follows;
     const followers = user.followers;
 
@@ -265,3 +266,4 @@ const ProfileBannerMemo = memo(({ user, ...props }) => {
 
 export default Profile;
 export { ProfileBanner, UnblockButton };
+

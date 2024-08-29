@@ -1,22 +1,13 @@
 import axios from "axios";
-import React, { useState } from "react";
+import React, { createContext, useEffect, useState } from "react";
 import { ThrowIfNotAxios } from "/src/communication.js";
 import CreateAccount from "/src/components/create_account.jsx";
 import { Modals } from "/src/components/modals";
 
+const UserContext=createContext();
 
-//globally accessible
-let UserData = {};
-
-function GetUser() {
-    const [getData, setData] = useState();
-    UserData.getData = getData;
-    UserData.setData = setData;
-    UserData.update = Update;
-
-    React.useEffect(() => {
-        Update();//the loading message is visible until it is done
-    }, []);
+function UserProvider({children}) {
+    const [getData, setData] = useState(null);
 
     async function Update() {
         try {
@@ -34,7 +25,7 @@ function GetUser() {
                 async function CloseStartMessage() {
                     try {
                         await axios.get("member/modify/close_starting_message");
-                        UserData.update();
+                        data.update();
                     }
                     catch (err) {
                         ThrowIfNotAxios(err);
@@ -49,7 +40,7 @@ function GetUser() {
                 async function ExitRegistration() {
                     try {
                         await axios.get("exit_registration");
-                        UserData.update();
+                        data.update();
                     }
                     catch (err) {
                         ThrowIfNotAxios(err);
@@ -63,8 +54,14 @@ function GetUser() {
         }
     }
 
-    return getData;
+    useEffect(()=>{Update()},[]);
+
+    return (
+        <UserContext.Provider value={{getData,setData,update:Update}}>
+            {children}
+        </UserContext.Provider>
+    );
 }
 
-export { UserData, GetUser };
+export {  UserProvider,UserContext};
 

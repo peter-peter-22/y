@@ -2,7 +2,7 @@ import { Box, Typography } from '@mui/material';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import axios from 'axios';
-import React, { useRef, useState } from "react";
+import React, { useRef, useState,useContext } from "react";
 import { ThrowIfNotAxios } from "/src/communication.js";
 import { CornerButton, OutlinedButton, WideButton } from "/src/components/buttons.jsx";
 import config from "/src/components/config.js";
@@ -10,7 +10,7 @@ import { EmailInput, RechaptaInput, validateEmail } from "/src/components/create
 import { PasswordFieldWithToggle } from "/src/components/inputs";
 import { ErrorText, Modals, SuccessModal } from "/src/components/modals";
 import { AlternativeLogin, BigModal, BigModalMargin, BottomButtonWithBorder, Or,SmallLink } from "/src/components/no_user";
-import { UserData } from "/src/components/user_data";
+import { UserContext } from "/src/components/user_data";
 import { CenterLogo } from '/src/components/utilities';
 
 function Login(props) {
@@ -45,6 +45,7 @@ function Login(props) {
 function EnterPassword(props) {
     const dataRef = props.dataRef;
     const email = dataRef.current.email;
+    const {update}=useContext(UserContext);
 
     //password
     const [password, setPassword] = useState("");
@@ -60,7 +61,7 @@ function EnterPassword(props) {
                     password: password
                 },
             );
-            await UserData.update();
+            await update();
             Close();
         } catch (err) {
             ThrowIfNotAxios(err);

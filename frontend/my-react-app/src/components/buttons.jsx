@@ -7,14 +7,14 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import Stack from '@mui/material/Stack';
 import axios from "axios";
-import React, { forwardRef } from 'react';
+import React, { forwardRef, useContext } from 'react';
 import { NavLink } from "react-router-dom";
 import { ThrowIfNotAxios } from "/src/communication.js";
 import { BlueTextButton } from "/src/components/containers";
 import { Modals } from "/src/components/modals";
 import { PostCreator } from '/src/components/post_creator';
 import { PostModalFrame } from "/src/components/posts";
-import { UserData } from '/src/components/user_data';
+import { UserContext } from '/src/components/user_data';
 import { GetUserKey, LinelessLink, noOverflow, ProfilePic, ProfileText, ResponsiveSelector, SimplePopOver, ToCorner } from '/src/components/utilities';
 
 const smallerButtons = "leftMenuIcons";
@@ -158,14 +158,15 @@ function PostButton(props) {
 
 function ProfileButton() {
     const size = "60px";
-    const user = UserData.getData.user;
+    const {getData,update} = useContext(UserContext);
+    const user=getData.user;
 
     const { handleOpen, ShowPopover } = SimplePopOver();
 
     async function handleLogout() {
         try {
             await axios.get("logout");
-            UserData.update();
+            await update();
         } catch (err) {
             ThrowIfNotAxios(err);
         }

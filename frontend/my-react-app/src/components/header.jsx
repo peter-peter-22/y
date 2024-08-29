@@ -5,12 +5,12 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import Stack from '@mui/material/Stack';
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { BottomTabButton, ButtonIcon, ButtonSvg, PostButton, ProfileButton, ResponsiveButton, TabButton } from "./buttons.jsx";
 import { Inside } from "./side_menus.jsx";
 import { AboveBreakpoint, logo, SimplePopOver } from './utilities';
 import { DisplayNotificationCount, NotifCountProvider } from "/src/components/notification_listener";
-import { UserData } from "/src/components/user_data";
+import { UserContext } from "/src/components/user_data";
 import { GetProfileLink, InheritLink } from '/src/components/utilities';
 
 function Tab(name, link, active_icon, inactive_icon, element = BasicTab) {
@@ -42,6 +42,8 @@ function NotificationsTab({ tab }) {
 }
 
 function Header() {
+const {getData}=useContext(UserContext);
+
     const tabs = {
         home: new Tab(
             "home",
@@ -94,7 +96,7 @@ function Header() {
         ),
         profile: new Tab(
             "profile",
-            GetProfileLink(UserData.getData.user),
+            GetProfileLink(getData.user),
             <ButtonIcon icon="person" filled={true} />,
             <ButtonIcon icon="person" filled={false} />
         )
