@@ -52,14 +52,15 @@ const transporter = nodemailer.createTransport({
 });
 
 //pg
-
-const pgPool = new pg.Pool({
+const test={
     user: process.env.PG_USER,
     host: process.env.PG_HOST,
     database: process.env.PG_DATABASE,
     password: process.env.PG_PASSWORD,
     port: process.env.PG_PORT,
-});
+};
+console.log(test);
+const pgPool = new pg.Pool(test);
 
 async function initialize() {
     const db = pgPool;
