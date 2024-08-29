@@ -8,6 +8,11 @@ import { CheckErr, CheckV, validate_image } from "../../components/validations.j
 import { ApplySqlToUser, UpdateUserAfterChange } from "../logged_in.js";
 import { selectable_username } from "../user.js";
 
+const bools = (array,value) => array.reduce((m, v) => (m[v] = value, m), {});
+const push_settings = ["push_enabled", "push_emails", "push_reposts", "push_likes", "push_follows"];
+const push_enabled = bools(push_settings,true);
+const push_disabled = bools(push_settings,false);
+
 const router = express.Router();
 
 router.post("/update_profile_picture", async (req, res) => {
@@ -95,14 +100,17 @@ router.post("/change_browser_notifications", async (req, res) => {
         enabled: 'required|boolean',
     });
     await CheckV(v);
+    const {enabled}=req.body;
 
     const result = await db.query(named(`
         UPDATE users 
-        SET browser_notifications=:enabled 
+        SET settings=coalesce(settings,'{}'::jsonb) || :set::jsonb
         WHERE id=:id 
         RETURNING ${user_columns}`
-    )
-        ({ enabled: req.body.enabled, id: UserId(req) }));
+    )({
+        set: enabled?push_enabled: push_disabled,
+        id: UserId(req)
+    }));
     await ApplySqlToUser(result, req);
     res.sendStatus(200);
 });

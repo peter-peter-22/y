@@ -81,13 +81,9 @@ router.post("/submit_password", async (req, res) => {
     if (data.verified === false)
         return (res.status(400).send("this email is not verified"));
 
-    try {
-        const { password } = req.body;
-        const hash = await hashPasswordAsync(password);
-        await finish_registration(req, res, data.name, data.email, hash, data.birthdate, data.checkboxes);
-    } catch (err) {
-        console.log(err);
-    }
+    const { password } = req.body;
+    const hash = await hashPasswordAsync(password);
+    await finish_registration(req, res, data.name, data.email, hash, data.birthdate, data.checkboxes);
 });
 
 function hashPasswordAsync(password) {

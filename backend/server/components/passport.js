@@ -6,7 +6,14 @@ import GithubRoutes from "./passport_strategies/github.js";
 import GoogleRoutes from "./passport_strategies/google.js";
 import LocalRoutes from "./passport_strategies/local.js";
 import { user_columns } from "./post_query.js";
-import { CheckV } from "./validations.js";
+import { CheckV,CheckErr } from "./validations.js";
+import { notif_types } from "../routes/web_push.js";
+
+const emailSettings = {};
+["email_enabled",...Object.values(notif_types)].forEach(el=>{
+    emailSettings[el]=true;
+});
+
 
 const router = express.Router();
 
@@ -72,7 +79,7 @@ async function universal_auth(req, res, err, user, info, noRedirect) {
         }
     }
     catch (err) {
-        res.status(422).send(typeof err =="string"?err: err.message);
+        res.status(422).send(typeof err == "string" ? err : err.message);
     }
 }
 
@@ -82,14 +89,15 @@ router.get("/exit_registration", (req, res) => {
 });
 
 router.post("/finish_registration", async (req, res) => {
-    const { birthdate, checkboxes } = req.body;
     const v = new Validator(req.body, {
         checkboxes: "array",
         birthdate: "required|datepast"
     });
+    await CheckV(v);
+
+    const { birthdate, checkboxes } = req.body;
     if (checkboxes === undefined)
         checkboxes = [];
-    await CheckV(v);
 
     const { name, email } = req.session.pending_data;
     await finish_registration(req, res, name, email, "", birthdate, checkboxes);
@@ -97,19 +105,18 @@ router.post("/finish_registration", async (req, res) => {
 
 async function finish_registration(req, res, name, email, password_hash, birthdate, checkboxes) {
     try {
-
         const uniquefied_name = await unique_username(name);
         const result = await db.query(
             named(`
-            INSERT INTO users (username,name,email,password_hash,birthdate,email_notifications) 
-            VALUES (:username, :name,:email,:password_hash,:birthdate,:email_notifications) 
+            INSERT INTO users (username,name,email,password_hash,birthdate,settings) 
+            VALUES (:username, :name,:email,:password_hash,:birthdate,:settings) 
             RETURNING ${user_columns}`,)({
                 username: uniquefied_name,
                 name: name,
                 email: email.toLowerCase(),
                 password_hash: password_hash,
                 birthdate: birthdate,
-                email_notifications: checkboxes.includes("emails")
+                settings: checkboxes.includes("emails") ? emailSettings:null
             })
         );
 
@@ -123,9 +130,9 @@ async function finish_registration(req, res, name, email, password_hash, birthda
     }
     catch (e) {
         if (e.constraint === "users_email_key")
-            res.status(422).send("this email is already registered");
+            CheckErr("this email is already registered");
         else if (e.constraint === "users_username_key")
-            res.status(422).send("this username is already registered");
+            CheckErr("this username is already registered");
         else {
             throw e;
         }
@@ -151,7 +158,8 @@ async function unique_username(baseName) {//ha rövid nevet ír be akkor sok avo
         if (!avoid.incudes(n))
             return n;
     }
-    throw new Error("unique name cannot be created");
+    //unique name cannot be created, returning base name
+    return basename;
 }
 
 function AddDataToSession(req) {

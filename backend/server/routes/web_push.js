@@ -193,4 +193,4 @@ function formatName(name) {
 }
 
 export default router;
-export { commentPush, followPush, likePush, repostPush };
+export { commentPush, followPush, likePush, repostPush,notif_types };

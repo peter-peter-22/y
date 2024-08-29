@@ -334,7 +334,7 @@ function Page4(props)//enter password, login
                 <Typography variant="small_fade" sx={{ mt: 3 }}>At least 8 characters {data.current.email}</Typography>
                 <PasswordInput onChangePassword={setPassword} onChangeOk={setPasswordOk} />
                 <ByRegistering variant="small_fade" sx={{ mt: "auto" }} />
-                <Typography variant="small_fade">Y can use your contact informations, including your email address and phone number according to the privacy policy. <SmallLink href="#">See more</SmallLink></Typography>
+                <Typography variant="small_fade">Y can use your contact informations, including your email address and phone number according to the privacy policy. <SmallLink to="/privacy_policy">See more</SmallLink></Typography>
                 <WideButton color="black" sx={{ my: 3 }}
                     onClick={submitPassword} disabled={!passwordOk}>Next</WideButton>
             </ModalMargin>
@@ -346,12 +346,14 @@ function Page5(props)//upload profile picture
 {
     const [data, handleNext] = GetProps(props);
     const [file, setFile] = useState();
+    const [uploading,setUploading]=useState(false);
 
     async function submitImage() {
         if (file !== undefined) {
             const formData = new FormData();
             formData.append('image', file);
             try {
+                setUploading(true);
                 await axios.post(
                     '/member/modify/update_profile_picture',
                     formData,
@@ -361,6 +363,7 @@ function Page5(props)//upload profile picture
                         }
                     }
                 );
+                setUploading(false);
                 handleNext();
             }
             catch (err) {
@@ -382,7 +385,7 @@ function Page5(props)//upload profile picture
                 </div>
                 <Box sx={{ my: 3, boxSizing: "border-box" }}>
                     {file ?
-                        <WideButton color="black" onClick={submitImage}>
+                        <WideButton color="black" onClick={submitImage} disabled={uploading}>
                             Submit
                         </WideButton>
                         :
@@ -449,7 +452,7 @@ function Page7(props)//notifications
                 <Typography variant="verybig_bold">Enable notifications?</Typography>
                 <Typography variant="small_fade" sx={{ mt: 1, mb: 3 }}>Bring out the most of Y and stay up-to-date about the events.</Typography>
                 <WideButton color="black" sx={{ mb: 2, boxSizing: "border-box" }} onClick={() => { setNotifications(true) }}>Enable</WideButton>
-                <OutlinedButton onClick={() => { setNotifications(false) }}>Not now</OutlinedButton>
+                <OutlinedButton onClick={handleNext}>Not now</OutlinedButton>
             </ModalMargin>
         </Stack>
     );
