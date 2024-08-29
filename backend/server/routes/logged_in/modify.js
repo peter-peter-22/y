@@ -9,7 +9,7 @@ import { ApplySqlToUser, UpdateUserAfterChange } from "../logged_in.js";
 import { selectable_username } from "../user.js";
 
 const bools = (array,value) => array.reduce((m, v) => (m[v] = value, m), {});
-const push_settings = ["push_enabled", "push_emails", "push_reposts", "push_likes", "push_follows"];
+const push_settings = ["push_enabled", "push_comments", "push_reposts", "push_likes", "push_follows"];
 const push_enabled = bools(push_settings,true);
 const push_disabled = bools(push_settings,false);
 

@@ -24,6 +24,7 @@ import { BigModal, BottomButtonWithBorder, ByRegistering, ModalMargin ,SmallLink
 import { UserData } from "/src/components/user_data";
 import { AvatarImageDisplayer, CenterLogo, GetProfilePicture } from '/src/components/utilities';
 import { UserListExtended } from "/src/pages/follow_people";
+import Ask from "/src/components/web_push.js";
 
 function CreateAccount(props) {
     //only the selected pages are rendered
@@ -437,6 +438,7 @@ function Page7(props)//notifications
     const [data, handleNext] = GetProps(props);
     async function setNotifications(enabled) {
         try {
+            await Ask();
             await axios.post("member/modify/change_browser_notifications", {
                 enabled: enabled
             });

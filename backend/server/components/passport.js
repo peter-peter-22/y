@@ -9,9 +9,9 @@ import { user_columns } from "./post_query.js";
 import { CheckV,CheckErr } from "./validations.js";
 import { notif_types } from "../routes/web_push.js";
 
-const emailSettings = {};
+const emailsEnabled = {};
 ["email_enabled",...Object.values(notif_types)].forEach(el=>{
-    emailSettings[el]=true;
+    emailsEnabled[el]=true;
 });
 
 
@@ -116,7 +116,7 @@ async function finish_registration(req, res, name, email, password_hash, birthda
                 email: email.toLowerCase(),
                 password_hash: password_hash,
                 birthdate: birthdate,
-                settings: checkboxes.includes("emails") ? emailSettings:null
+                settings: checkboxes.includes("emails") ? emailsEnabled:null
             })
         );
 
