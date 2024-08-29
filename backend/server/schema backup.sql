@@ -5,7 +5,7 @@
 -- Dumped from database version 15.4
 -- Dumped by pg_dump version 15.4
 
--- Started on 2024-08-29 01:30:37
+-- Started on 2024-08-29 22:21:40
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -1539,7 +1539,7 @@ ALTER TABLE ONLY public.views
     ADD CONSTRAINT user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
 
 
--- Completed on 2024-08-29 01:30:37
+-- Completed on 2024-08-29 22:21:40
 
 --
 -- PostgreSQL database dump complete
