@@ -6,12 +6,12 @@ import GithubRoutes from "./passport_strategies/github.js";
 import GoogleRoutes from "./passport_strategies/google.js";
 import LocalRoutes from "./passport_strategies/local.js";
 import { user_columns } from "./post_query.js";
-import { CheckV,CheckErr } from "./validations.js";
+import { CheckV, CheckErr } from "./validations.js";
 import { notif_types } from "../routes/web_push.js";
 
 const emailsEnabled = {};
-["email_enabled",...Object.values(notif_types)].forEach(el=>{
-    emailsEnabled[el]=true;
+["email_enabled", ...Object.values(notif_types)].forEach(el => {
+    emailsEnabled[el] = true;
 });
 
 
@@ -62,8 +62,7 @@ async function universal_auth(req, res, err, user, info, noRedirect) {
             if (info.registering) {
                 req.session.pending_data = info.registering
                 req.session.pending_registration = true;
-                console.log(info.registering);
-                console.log(req.session);
+                console.log(`universal auth: \ninfo: ${JSON.stringify(info)} \nsession: ${JSON.stringify(req.session)}`);
                 return res.redirect(config.address_mode.client);
             }
             else
@@ -118,7 +117,7 @@ async function finish_registration(req, res, name, email, password_hash, birthda
                 email: email.toLowerCase(),
                 password_hash: password_hash,
                 birthdate: birthdate,
-                settings: checkboxes.includes("emails") ? emailsEnabled:null
+                settings: checkboxes.includes("emails") ? emailsEnabled : null
             })
         );
 
