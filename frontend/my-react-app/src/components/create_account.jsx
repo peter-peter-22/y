@@ -262,6 +262,7 @@ function Page3(props)//submit verification code
     const [data, handleNext] = GetProps(props);
     const [code, setCode] = useState("");
     const codeOk = code.length > 0;
+    const [loading,setLoading]=useState(false);
 
     function handleCode(e) {
         setCode(e.target.value);
@@ -273,11 +274,13 @@ function Page3(props)//submit verification code
             return;
 
         try {
+            setLoading(true);
             await axios.post('verify_code',
                 {
                     code: code
                 },
             );
+            setLoading(false);
             //code ok, next page
             handleNext();
         }
@@ -297,7 +300,7 @@ function Page3(props)//submit verification code
                     onChange={handleCode}
                     value={code} />
                 <WideButton color="black" sx={{ mb: 3, mt: "auto" }}
-                    onClick={submitCode} disabled={!codeOk}>Submit</WideButton>
+                    onClick={submitCode} disabled={!codeOk || loading}>Submit</WideButton>
             </ModalMargin>
         </Stack>
     );

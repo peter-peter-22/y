@@ -89,7 +89,6 @@ if(!req.session.registered_data)
 async function CheckRechapta(recaptchaToken,req) {
     const user_ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
     const response = await axios.post(`https://www.google.com/recaptcha/api/siteverify?secret=${config.google_rechapta_secret_key}&response=${recaptchaToken}&remoteip=${user_ip}`);
-    console.log(response.data);
     const { success } = response.data;
     if (!success)
         CheckErr('reCAPTCHA validation failed');
