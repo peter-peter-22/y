@@ -36,7 +36,7 @@ function initialize() {
             name: "test123242345",
             cookie: {
                 secure: https, // Set to true if using HTTPS
-                sameSite: https ? "none" : "lax",
+                sameSite: https ? "lax" : "lax",
                 maxAge: false,
                 httpOnly: true
             }
