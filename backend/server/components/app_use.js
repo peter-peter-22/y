@@ -29,7 +29,7 @@ function initialize() {
             resave: false,
             saveUninitialized: false,
             cookie: {
-                secure: false, // Set to true if using HTTPS
+                secure: process.env.HTTPS, // Set to true if using HTTPS
                 maxAge: false,
             }
         })

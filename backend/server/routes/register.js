@@ -67,8 +67,11 @@ async function SendMailAsync(mailOptions)
 }
 
 router.post('/verify_code', async (req, res) => {
+if(!req.session.registered_data)
+   return res.status(400).send("registration data missing from session");
+
     const { code } = req.body;
-    if (code === req.session.registered_data.verification_code && code !== undefined || skip) {
+    if ( code === req.session.registered_data.verification_code && code !== undefined || skip) {
         try {
             req.session.registered_data.verified = true;
             //email verification code is ok
