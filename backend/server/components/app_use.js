@@ -18,7 +18,7 @@ function initialize() {
     app.use(express.static("public"));
     app.use(express.json());//required to get the body of the fetch post
 
-    //pg session
+    //session
     app.use(
         session({
             store: new pgSession({
@@ -34,6 +34,7 @@ function initialize() {
             }
         })
     );
+    app.set('trust proxy', 1); // Trust first proxy
 
     //update session expiration 
     app.use((req, res, next) => {
