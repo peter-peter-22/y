@@ -30,6 +30,7 @@ function initialize() {
             resave: false,
             saveUninitialized: true,
             proxy: true, 
+            name: '754543t8huhutrgeuh8gteruhgfh8g',
             cookie: {
                 secure: process.env.HTTPS=="true", // Set to true if using HTTPS
                 sameSite: "none",
