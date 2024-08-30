@@ -88,6 +88,7 @@ if(!req.session.registered_data)
 
 async function CheckRechapta(recaptchaToken) {
     const response = await axios.post(`https://www.google.com/recaptcha/api/siteverify?secret=${config.google_rechapta_secret_key}&response=${recaptchaToken}`);
+    console.log(response.data);
     const { success } = response.data;
     if (!success)
         CheckErr('reCAPTCHA validation failed');
