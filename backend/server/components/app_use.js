@@ -19,6 +19,7 @@ function initialize() {
     app.use(express.json());//required to get the body of the fetch post
 
     //session
+    app.set("trust proxy", 1); // trust first proxy
     app.use(
         session({
             store: new pgSession({
@@ -28,13 +29,14 @@ function initialize() {
             secret: process.env.SESSION_SECRET,
             resave: false,
             saveUninitialized: true,
+            proxy: true, 
             cookie: {
                 secure: process.env.HTTPS=="true", // Set to true if using HTTPS
+                sameSite: "none",
                 maxAge: false,
             }
         })
     );
-    app.set('trust proxy', 1); // Trust first proxy
 
     //update session expiration 
     app.use((req, res, next) => {

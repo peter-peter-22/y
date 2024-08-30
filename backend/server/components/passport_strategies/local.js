@@ -2,7 +2,6 @@ import express from "express";
 import bcrypt from "bcrypt";
 import passport from "passport";
 import { Strategy } from "passport-local";
-import yesql from 'yesql';
 import { Validator } from "node-input-validator";
 import { universal_auth, finish_registration } from "../passport.js";
 import { CheckV } from "../validations.js";
