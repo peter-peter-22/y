@@ -46,6 +46,7 @@ async function selectable_username(new_username, current_username) {
 }
 
 router.get("/get", async (req, res) => {
+    console.log("get user: "+JSON.stringify(req.user) + " session: " +JSON.stringify(req.session) );
     res.json({
         user: req.user,
         showStartMessage: req.session.showStartMessage,
