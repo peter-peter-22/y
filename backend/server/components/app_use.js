@@ -20,7 +20,7 @@ function initialize() {
 
     //session
     const https=process.env.HTTPS==="true";
-    app.set("trust proxy", 1); // trust first proxy
+    app.enable('trust proxy');
     app.use(
         session({
             store: new pgSession({
@@ -30,13 +30,13 @@ function initialize() {
             secret: process.env.SESSION_SECRET,
             resave: false,
             saveUninitialized: true,
-            //proxy: https?true:undefined, 
+            proxy: https?true:undefined, 
             name:"test123242345",
             cookie: {
                 secure: https, // Set to true if using HTTPS
                 sameSite: https?"none":"lax",
                 maxAge: false,
-                httpOnly:false
+                httpOnly:true
             }
         })
     );
