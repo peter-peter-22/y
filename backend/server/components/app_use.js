@@ -21,7 +21,7 @@ function initialize() {
     app.use(express.json());//required to get the body of the fetch post
 
     //session
-    const https = process.env.HTTPS === "true";
+    //const https = process.env.HTTPS === "true";
     app.set('trust proxy', 1)
     app.use(
         session({
@@ -32,7 +32,7 @@ function initialize() {
             secret: process.env.SESSION_SECRET,
             resave: false,
             saveUninitialized: true,
-            proxy: https ? true : undefined,
+            //proxy: https ? true : undefined,
             name: "y_cookie",
             cookie: {
                 secure: https, // Set to true if using HTTPS
