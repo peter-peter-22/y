@@ -41,7 +41,6 @@ function initialize() {
 
     //update session expiration 
     app.use((req, res, next) => {
-        console.log(req.session);
         req.session.lastVisit = new Date();
         next();
     });

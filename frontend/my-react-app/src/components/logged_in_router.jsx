@@ -18,7 +18,6 @@ import Search from "/src/pages/search";
 import Settings from "/src/pages/settings";
 import Trends from "/src/pages/trendlist";
 import Explore from "/src/pages/explore";
-import PostTest from "/src/pages/post_test";
 
 //the memo is necessary to prevent unwanted re-renders caused by the parent router (shared_pages_router) when the url changes
 export default memo(() => {
@@ -35,7 +34,7 @@ export default memo(() => {
           <Route path="/add_followers" element={<AddFollowers />} />
           <Route path="/profile/:id/*" element={<Profile />} />
           <Route path="/trends" element={<Trends />} />
-          <Route path="/lists" element={<PostTest />} />
+          <Route path="/lists" element={<NotImplemented />} />
           <Route path="/communities" element={<NotImplemented />} />
           <Route path="/explore" element={<Explore />} />
           <Route path="/messages" element={<NotImplemented />} />

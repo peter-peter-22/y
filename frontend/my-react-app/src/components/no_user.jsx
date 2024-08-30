@@ -2,6 +2,7 @@ import { Box, Typography } from '@mui/material';
 import Divider from '@mui/material/Divider';
 import Stack from '@mui/material/Stack';
 import React from "react";
+import { Route, Routes } from "react-router-dom";
 import { OutlinedButton, WideButton } from "/src/components/buttons.jsx";
 import config from "/src/components/config.js";
 import CreateAccount from "/src/components/create_account.jsx";
@@ -9,8 +10,9 @@ import links from "/src/components/footer_links";
 import Login from "/src/components/login.jsx";
 import { Modals } from "/src/components/modals";
 import { StyledLink, TextRow, creation, logo } from '/src/components/utilities';
+import Error from "/src/pages/error";
 
-export default () => {
+function Main() {
     function showCreator()//show local registration inputs
     {
         Modals[0].Show(<CreateAccount pages={[0, 1, 2, 3, 4]} key="local" />);
@@ -61,6 +63,14 @@ export default () => {
     );
 }
 
+export default ()=>{
+return(
+    <Routes>
+    <Route path="/" element={<Main />} />
+    <Route path="*" element={<Error />} />
+  </Routes>
+);
+}
 function AlternativeLogin(props) {
     return (
         <OutlinedButton onClick={props.onClick} size={props.size ? props.size : "medium"}>
@@ -146,4 +156,5 @@ function InheritAndMargin(props) {
 }
 
 
-export { AlternativeLogin, BigModal, BigModalMargin, BottomButtonWithBorder, ByRegistering, GrowingLine, ModalMargin, Or,SmallLink };
+export { AlternativeLogin, BigModal, BigModalMargin, BottomButtonWithBorder, ByRegistering, GrowingLine, ModalMargin, Or, SmallLink };
+

@@ -1,5 +1,6 @@
+import "../config.js";
 //error caused by db constraints and errors with status are not logged unless extra debug is enabled
-const extra_debug = true;//log all errors
+const extra_debug = config.extra_debug;//log all errors
 
 //webpush and email notification related functions are not handled here
 
