@@ -10,16 +10,26 @@ import { start } from "./email_notifications.js";
 const pgSession = ConnectPg(session);
 
 function initialize() {
-    //express
+    //cors
     app.use(cors({
         origin: config.address_mode.client,
         credentials: true
     }));
+
+    //headers
+    app.use(function (req, res, next) {
+        res.header('Access-Control-Allow-Credentials', true);
+        res.header('Access-Control-Allow-Origin', '*');  // add this line  
+        // res.header('Access-Control-Allow-Origin', req.headers.origin);
+        res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+    });
+
+    //express
     app.use(express.static("public"));
     app.use(express.json());//required to get the body of the fetch post
 
     //session
-    const https=process.env.HTTPS==="true";
+    const https = process.env.HTTPS === "true";
     app.enable('trust proxy');
     app.use(
         session({
@@ -30,12 +40,13 @@ function initialize() {
             secret: process.env.SESSION_SECRET,
             resave: false,
             saveUninitialized: true,
-            name:"test123242345",
+            proxy: https ? true : undefined,
+            name: "test123242345",
             cookie: {
                 secure: https, // Set to true if using HTTPS
-                sameSite: https?"none":"lax",
+                sameSite: https ? "none" : "lax",
                 maxAge: false,
-                httpOnly:true
+                httpOnly: true
             }
         })
     );
