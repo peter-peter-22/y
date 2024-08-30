@@ -16,14 +16,6 @@ function initialize() {
         credentials: true
     }));
 
-    //headers
-    app.use(function (req, res, next) {
-        res.header('Access-Control-Allow-Credentials', true);
-        res.header('Access-Control-Allow-Origin', '*');  // add this line  
-        // res.header('Access-Control-Allow-Origin', req.headers.origin);
-        res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-    });
-
     //express
     app.use(express.static("public"));
     app.use(express.json());//required to get the body of the fetch post
