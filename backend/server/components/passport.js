@@ -62,6 +62,7 @@ async function universal_auth(req, res, err, user, info, noRedirect) {
             if (info.registering) {
                 req.session.pending_data = info.registering
                 req.session.pending_registration = true;
+                console.log(info.registering);
                 return res.redirect(config.address_mode.client);
             }
             else
