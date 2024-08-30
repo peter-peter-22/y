@@ -19,7 +19,8 @@ function initialize() {
     app.use(express.json());//required to get the body of the fetch post
 
     //session
-    app.set("trust proxy", 1); // trust first proxy
+    const https=process.env.HTTPS==="true";
+    if(https)app.set("trust proxy", 1); // trust first proxy
     app.use(
         session({
             store: new pgSession({
@@ -29,11 +30,10 @@ function initialize() {
             secret: process.env.SESSION_SECRET,
             resave: false,
             saveUninitialized: true,
-            proxy: true, 
-            name: '754543t8huhutrgeuh8gteruhgfh8g',
+            proxy: https?true:undefined, 
             cookie: {
-                secure: process.env.HTTPS=="true", // Set to true if using HTTPS
-                sameSite: "none",
+                secure: https, // Set to true if using HTTPS
+                sameSite: https?"none":undefined,
                 maxAge: false,
             }
         })

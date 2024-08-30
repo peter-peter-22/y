@@ -7,7 +7,7 @@ import * as g from "../config.js";
 import { exists_email } from "./user.js";
 
 const router = express.Router();
-const skip = true;//skip rechapta and verification
+const skip = config.fast_register;//skip rechapta and verification
 
 router.post('/register_start', async (req, res) => {
     //get inputs
@@ -49,7 +49,7 @@ router.post('/register_start', async (req, res) => {
         text: 'Your verification code is "' + code + '"'
     };
 
-   await SendMailAsync(mailOptions);
+   if(!skip) await SendMailAsync(mailOptions);
 
     res.sendStatus(200);
 });
