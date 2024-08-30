@@ -273,6 +273,7 @@ function ColorLetters({ onChangeRaw, value, isComment, onFocus, max_letters }) {
             style={{
                 outline: "none",
                 width: "100%",
+                whiteSpace:"pre"
             }}
         />
     );
