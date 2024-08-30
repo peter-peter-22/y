@@ -33,7 +33,7 @@ function initialize() {
             proxy: https?true:undefined, 
             cookie: {
                 secure: https, // Set to true if using HTTPS
-                sameSite: false,
+                sameSite: "lax",
                 maxAge: false,
             }
         })
