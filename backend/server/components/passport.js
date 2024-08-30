@@ -62,7 +62,7 @@ async function universal_auth(req, res, err, user, info, noRedirect) {
             if (info.registering) {
                 req.session.pending_data = info.registering
                 req.session.pending_registration = true;
-                console.log(`\n\nuniversal auth: \ninfo: ${JSON.stringify(info)} \nsession: ${JSON.stringify(req.session)}\n\n`);
+                console.log(`\n\nuniversal auth register: \ninfo: ${JSON.stringify(info)} \nsession: ${JSON.stringify(req.session)}\n\n`);
                 return res.redirect(config.address_mode.client);
             }
             else
@@ -72,10 +72,15 @@ async function universal_auth(req, res, err, user, info, noRedirect) {
             req.logIn(user, function (err) {
                 if (err) { throw err; }
                 AddDataToSession(req);
+
+                console.log(`\n\nuniversal auth login: \nuser: ${JSON.stringify(user)} \nsession: ${JSON.stringify(req.session)}\n\n`);
                 if (!noRedirect)
                     res.redirect(config.address_mode.client);
                 else
+                {
+                        
                     res.sendStatus(200);
+                }
             });
         }
     }
