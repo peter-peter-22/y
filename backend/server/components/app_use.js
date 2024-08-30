@@ -27,9 +27,9 @@ function initialize() {
             }),
             secret: process.env.SESSION_SECRET,
             resave: false,
-            saveUninitialized: false,
+            saveUninitialized: true,
             cookie: {
-                secure: process.env.HTTPS, // Set to true if using HTTPS
+                secure: process.env.HTTPS=="true", // Set to true if using HTTPS
                 maxAge: false,
             }
         })
