@@ -25,7 +25,7 @@ router.post("/submit_chapta", async (req, res) => {
     const user_id = user_query.rows[0].id;
 
     //check rechapta solution
-    if (!skip) await CheckRechapta(recaptchaToken);
+    if (!skip) await CheckRechapta(recaptchaToken,req);
 
     //generate secret code
     const code_query = await (db.query(create_secret, [user_id]));
