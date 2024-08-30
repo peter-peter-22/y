@@ -7,7 +7,7 @@ import * as g from "../config.js";
 import { exists_email } from "./user.js";
 
 const router = express.Router();
-const skip = config.fast_register;//skip rechapta and verification
+const skip = config.fast_register==="true";//skip rechapta and verification
 
 router.post('/register_start', async (req, res) => {
     //get inputs
