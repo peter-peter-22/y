@@ -30,7 +30,6 @@ function initialize() {
             secret: process.env.SESSION_SECRET,
             resave: false,
             saveUninitialized: true,
-            proxy: https?true:undefined, 
             name:"test123242345",
             cookie: {
                 secure: https, // Set to true if using HTTPS
