@@ -39,7 +39,6 @@ function initialize() {
                 sameSite: https ? "none" : "lax",
                 maxAge: false,
                 httpOnly: false,
-                cross
             }
         })
     );
