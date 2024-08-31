@@ -33,10 +33,10 @@ function initialize() {
             resave: false,
             saveUninitialized: true,
             //proxy: https ? true : undefined,
-            name: "y_cookie",
+            name: "y_cookie_vercel",
             cookie: {
                 secure: https, // Set to true if using HTTPS
-                sameSite: https ? "none" : "lax",
+                sameSite: https ? "lax" : "lax",
                 maxAge: false,
                 httpOnly: true
             }
