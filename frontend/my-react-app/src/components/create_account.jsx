@@ -548,7 +548,7 @@ function RechaptaInput(props) {
     return (
         <Stack style={{ alignItems: "center", flexGrow: 1 }}>
             <ReCAPTCHA
-                sitekey="6Ld-x7wpAAAAAI72weXOfrlCY4hmIZ_b1F9FWFik"
+                sitekey={config.rechapta_key}
                 {...props}
             />
         </Stack>

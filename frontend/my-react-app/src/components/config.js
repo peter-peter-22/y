@@ -10,6 +10,7 @@ const config = {
         server: env.VITE_SERVER_URL,
         client: env.VITE_CLIENT_URL,
     },
+    rechapta_key:env.VITE_RECHAPTA
 }
 
 export default config;
