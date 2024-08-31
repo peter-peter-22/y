@@ -22,7 +22,7 @@ function initialize() {
 
     //session
     const https = process.env.HTTPS === "true";
-    //app.set('trust proxy', 1)
+    app.set('trust proxy', 1)
     app.use(
         session({
             store: new pgSession({
@@ -32,7 +32,7 @@ function initialize() {
             secret: process.env.SESSION_SECRET,
             resave: false,
             saveUninitialized: true,
-            //proxy: https ? true : undefined,
+            proxy: https ? true : undefined,
             name: "y_cookie_vercel",
             cookie: {
                 secure: https, // Set to true if using HTTPS
