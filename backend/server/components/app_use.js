@@ -36,7 +36,7 @@ function initialize() {
             name: "y_cookie_vercel",
             cookie: {
                 secure: https, // Set to true if using HTTPS
-                sameSite: https ? "lax" : "lax",
+                sameSite: https ? "none" : "lax",
                 maxAge: false,
                 httpOnly: false
             }
