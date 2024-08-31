@@ -37,7 +37,7 @@ function initialize() {
             cookie: {
                 secure: https, // Set to true if using HTTPS
                 sameSite: https ? "none" : "lax",
-                maxAge: false,
+                maxAge: 9999999999999,
                 httpOnly: false,
             }
         })
