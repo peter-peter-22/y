@@ -31,7 +31,7 @@ function initialize() {
             }),
             secret: process.env.SESSION_SECRET,
             resave: false,
-            saveUninitialized: true,
+            saveUninitialized: false,
             proxy: https ? true : undefined,
             name: "y_cookie_vercel",
             cookie: {
@@ -46,7 +46,7 @@ function initialize() {
 
     //update session expiration 
     app.use((req, res, next) => {
-        req.session.lastVisit = new Date();
+        //req.session.lastVisit = new Date();
         next();
     });
 
