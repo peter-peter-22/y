@@ -38,7 +38,8 @@ function initialize() {
                 secure: https, // Set to true if using HTTPS
                 sameSite: https ? "none" : "lax",
                 maxAge: false,
-                httpOnly: false
+                httpOnly: false,
+                cross
             }
         })
     );
