@@ -21,7 +21,11 @@ function UserProvider({ children }) {
         }
     }
 
-    useEffect(() => { Update() }, []);
+    useEffect(() => {
+        setTimeout(() => {
+            Update();
+        }, 2000);
+    }, []);
 
     useEffect(() => {
         //process the messages
