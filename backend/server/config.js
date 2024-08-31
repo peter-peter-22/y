@@ -54,7 +54,8 @@ const transporter = nodemailer.createTransport({
 });
 
 //pg
-const poolConfig=process.env.PUSTGRES_URL?{connectionString: process.env.POSTGRES_URL}:
+//use url if available, then object
+const poolConfig=process.env.POSTGRES_URL?{connectionString: process.env.POSTGRES_URL}:
 {
     user: process.env.POSTGRES_USER,
     host: process.env.POSTGRES_HOST,
@@ -67,7 +68,14 @@ const pgPool = new pg.Pool(poolConfig);
 
 async function initialize() {
     const db = pgPool;
-    await db.connect();
+    await db.connect((err)=>{
+        if(err)
+        {
+            console.log("\n\nFailed to connect to DB\n\n");
+            throw(err);
+        }
+        console.log("DB connected successfully");
+    });
     global.db = db;
 }
 
