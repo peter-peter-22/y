@@ -22,7 +22,6 @@ function initialize() {
 
     //session
     const https = process.env.HTTPS === "true";
-    app.set('trust proxy', 1)
     app.use(
         session({
             store: new pgSession({
