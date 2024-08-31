@@ -75,7 +75,7 @@ async function universal_auth(req, res, err, user, info, noRedirect) {
 
                 console.log(`\n\nuniversal auth login: \nuser: ${JSON.stringify(user)} \nsession: ${JSON.stringify(req.session)}\n\n`);
                 if (!noRedirect) {
-                    res.cookie("test", "testvalue", { sameSite: 'none', secure: true });
+                    res.cookie("test", "testvalue", { sameSite: 'none', secure: true,domain:config.address_mode.server });
                     res.redirect(config.address_mode.client);
                 }
                 else {
