@@ -63,7 +63,6 @@ async function universal_auth(req, res, err, user, info, noRedirect) {
                 req.session.pending_data = info.registering
                 req.session.pending_registration = true;
                 req.session.cookie.priority="high";
-                req.session.cookie.domain=config.address_mode.server;
                 
                 console.log(`\n\nuniversal auth register: \ninfo: ${JSON.stringify(info)} \nsession: ${JSON.stringify(req.session)}\n\n`);
                 return res.redirect(config.address_mode.client);

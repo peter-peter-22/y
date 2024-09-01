@@ -33,13 +33,13 @@ function initialize() {
             saveUninitialized: false,
             proxy: https ? true : undefined,
             name: "y_cookie_vercel",
+            domain:"y-eight-theta-69.vercel.app",
             cookie: {
                 secure: https, // Set to true if using HTTPS
                 sameSite: https ? "none" : "lax",
                 maxAge: false,
                 httpOnly: false,
                 priority:"low",
-                domain:config.address_mode.server
             }
         })
     );
