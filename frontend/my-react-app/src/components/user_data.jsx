@@ -11,7 +11,6 @@ function UserProvider({ children }) {
 
     async function Update() {
         try {
-            debugger
             //get user from server
             const response = await axios.get("user/get");
             console.log(response.data);

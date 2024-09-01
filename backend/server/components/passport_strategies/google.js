@@ -34,9 +34,8 @@ const google_login_redirect=  process.env.GOOGLE_CALLBACK;
                 clientSecret: process.env.GOOGLE_CLIENT_SECRET,
                 callbackURL: config.address_mode.server + google_login_redirect,
                 proxy: true,
-                passReqToCallback: true
             },
-            async (req,accessToken, refreshToken, profile, cb) => {
+            async (accessToken, refreshToken, profile, cb) => {
                 try {
                     const query_result = await db.query(`SELECT ${user_columns} FROM users WHERE email=$1`, [profile.email])
                     if (query_result.rowCount === 0) {

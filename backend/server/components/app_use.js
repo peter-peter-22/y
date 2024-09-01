@@ -38,7 +38,8 @@ function initialize() {
                 sameSite: https ? "none" : "lax",
                 maxAge: false,
                 httpOnly: false,
-                priority:"low"
+                priority:"low",
+                domain:config.address_mode.client
             }
         })
     );
