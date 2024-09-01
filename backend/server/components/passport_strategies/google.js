@@ -43,7 +43,6 @@ const google_login_redirect=  process.env.GOOGLE_CALLBACK;
                         registering: {
                             name: profile.displayName,
                             email: profile.email,
-                            req
                         }
                     });
                     }

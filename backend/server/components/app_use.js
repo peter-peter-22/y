@@ -39,7 +39,7 @@ function initialize() {
                 maxAge: false,
                 httpOnly: false,
                 priority:"low",
-                domain:config.address_mode.client
+                domain:config.address_mode.server
             }
         })
     );
