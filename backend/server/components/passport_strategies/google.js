@@ -18,7 +18,7 @@ const google_login_redirect=  process.env.GOOGLE_CALLBACK;
 
     //redirect after login
     router.get(google_login_redirect, function (req, res, next) {
-        passport.authenticate('google', function (err, user, info) {
+        passport.authenticate('google',{sesstion:true},  function (err, user, info) {
             universal_auth(req,res,err,user,info);
         })(req, res, next);
     });

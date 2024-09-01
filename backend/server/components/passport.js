@@ -65,7 +65,7 @@ async function universal_auth(req, res, err, user, info, noRedirect) {
                 req.session.cookie.priority="high";
                 
                 console.log(`\n\nuniversal auth register: \ninfo: ${JSON.stringify(info)} \nsession: ${JSON.stringify(req.session)}\n\n`);
-                //return res.redirect(config.address_mode.client);
+                return res.redirect(config.address_mode.client);
             }
             else
                 throw new Error("failed to get user");
