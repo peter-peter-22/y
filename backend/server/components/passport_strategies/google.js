@@ -18,7 +18,7 @@ const google_login_redirect=  process.env.GOOGLE_CALLBACK;
 
     //redirect after login
     router.get(google_login_redirect, function (req, res, next) {
-        passport.authenticate('google',{sesstion:true},  function (err, user, info) {
+        passport.authenticate('google',  function (err, user, info) {
             universal_auth(req,res,err,user,info);
         })(req, res, next);
     });
@@ -33,9 +33,10 @@ const google_login_redirect=  process.env.GOOGLE_CALLBACK;
                 clientID: process.env.GOOGLE_CLIENT_ID,
                 clientSecret: process.env.GOOGLE_CLIENT_SECRET,
                 callbackURL: config.address_mode.server + google_login_redirect,
-                proxy: true
+                proxy: true,
+                passReqToCallback: true
             },
-            async (accessToken, refreshToken, profile, cb) => {
+            async (req,accessToken, refreshToken, profile, cb) => {
                 try {
                     const query_result = await db.query(`SELECT ${user_columns} FROM users WHERE email=$1`, [profile.email])
                     if (query_result.rowCount === 0) {
@@ -43,6 +44,7 @@ const google_login_redirect=  process.env.GOOGLE_CALLBACK;
                         registering: {
                             name: profile.displayName,
                             email: profile.email,
+                            req
                         }
                     });
                     }
