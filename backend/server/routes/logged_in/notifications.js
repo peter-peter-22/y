@@ -32,17 +32,22 @@ router.post("/get", async (req, res) => {
 
 router.get("/events", (req, res) => {
 	//start stream
-	res.setHeader('Content-Type','text/event-stream');
-	res.setHeader('Connection','keep-alive');
-	res.setHeader('Cache-Control','no-cache');
+	res.setHeader('Content-Type', 'text/event-stream');
+	res.setHeader('Connection', 'keep-alive');
+	res.setHeader('Cache-Control', 'no-cache');
 
 	const user_id = UserId(req);
+	let count = 0;
+
+	//get notif count from db
+	async function calculateCount() {
+		//get unread notification count
+		count = await countUnread(user_id);
+	}
+
 
 	//send count to client
 	async function sendCount() {
-		//get unread notification count
-		const count = await countUnread(user_id);
-
 		//write to stream
 		res.write(count);
 	}
@@ -51,10 +56,12 @@ router.get("/events", (req, res) => {
 	sendCount();
 
 	//continuusly send the count of the unread notifications 
-	const interval = setInterval(sendCount, 5000);
+	const interval = setInterval(sendCount, 1000);
+	const interval2 = setInterval(calculateCount, 5000);
 
 	res.on("close", () => {
 		clearInterval(interval);
+		clearInterval(interval2);
 		res.end();
 	});
 });
