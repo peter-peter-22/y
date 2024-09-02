@@ -32,12 +32,10 @@ router.post("/get", async (req, res) => {
 
 router.get("/events", (req, res) => {
 	//start stream
-	const headers = {
-		'Content-Type': 'text/event-stream',
-		'Connection': 'keep-alive',
-		'Cache-Control': 'no-cache',
-	};
-	res.writeHead(200, headers);
+	res.setHeader('Content-Type','text/event-stream');
+	res.setHeader('Connection','keep-alive');
+	res.setHeader('Cache-Control','no-cache');
+
 	const user_id = UserId(req);
 
 	//send count to client
