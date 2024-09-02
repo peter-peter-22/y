@@ -32,6 +32,12 @@ router.post("/get", async (req, res) => {
 
 router.get("/events", (req, res) => {
 	//start stream
+	const headers = {
+		'Content-Type': 'text/event-stream',
+		'Connection': 'keep-alive',
+		'Cache-Control': 'no-cache',
+	};
+	res.writeHead(200, headers);
 	const user_id = UserId(req);
 
 	//send count to client
@@ -40,8 +46,7 @@ router.get("/events", (req, res) => {
 		const count = await countUnread(user_id);
 
 		//write to stream
-		const chunk = JSON.stringify({ chunk: count });
-		res.write(`data: ${chunk}\n\n`);
+		res.write(count);
 	}
 
 	//send on connect
