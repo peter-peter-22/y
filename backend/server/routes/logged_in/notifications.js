@@ -36,9 +36,14 @@ router.get("/events", (req, res) => {
 		'Content-Type': 'text/event-stream',
 		'Connection': 'keep-alive',
 		'Cache-Control': 'no-cache',
+		...enableCors()
 	};
-	res.writeHead(200,headers);
-	res.flushHeaders();
+
+	//this must be used instead of flushHeaders because it doesn't works on vercel
+	Object.entries(headers).forEach(header => {
+		const [key,value] = header;
+		res.setHeader(key,value);
+	});
 
 	const user_id = UserId(req);
 	let count = 0;
@@ -53,7 +58,7 @@ router.get("/events", (req, res) => {
 	//send count to client
 	async function sendCount() {
 		//write to stream
-		res.write(count);
+		res.write(count.toString());
 	}
 
 	//send on connect
