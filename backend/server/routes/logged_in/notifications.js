@@ -32,9 +32,13 @@ router.post("/get", async (req, res) => {
 
 router.get("/events", (req, res) => {
 	//start stream
-	res.setHeader('Content-Type', 'text/event-stream');
-	res.setHeader('Connection', 'keep-alive');
-	res.setHeader('Cache-Control', 'no-cache');
+	const headers = {
+		'Content-Type': 'text/event-stream',
+		'Connection': 'keep-alive',
+		'Cache-Control': 'no-cache',
+		...enableCors()
+	};
+	res.writeHead(200,headers);
 
 	const user_id = UserId(req);
 	let count = 0;
@@ -73,3 +77,17 @@ async function countUnread(user_id) {
 
 export default router;
 export { countUnread };
+
+function enableCors(res) {
+	return {
+		// Website you wish to allow to connect
+		'Access-Control-Allow-Origin': config.address_mode.client,
+		// Request methods you wish to allow
+		'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE',
+		// Request headers you wish to allow
+		'Access-Control-Allow-Headers': 'X-Requested-With,content-type',
+		// to the API (e.g. in case you use sessions)
+		'Access-Control-Allow-Credentials': true
+	}
+}
+
