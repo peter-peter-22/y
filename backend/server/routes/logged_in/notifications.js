@@ -30,49 +30,56 @@ router.post("/get", async (req, res) => {
 	res.json(notifs.rows);
 });
 
-router.get("/events", (req, res) => {
-	//start stream
-	const headers = {
-		'Content-Type': 'text/event-stream',
-		'Connection': 'keep-alive',
-		'Cache-Control': 'no-cache',
-		...enableCors()
-	};
+//router.get("/events", (req, res) => {
+//	//start stream
+//	const headers = {
+//		'Content-Type': 'text/event-stream',
+//		'Connection': 'keep-alive',
+//		'Cache-Control': 'no-cache',
+//		'Content-Encoding': 'none',
+//		...enableCors()
+//	};
+//
+//	//this must be used instead of flushHeaders because it doesn't works on vercel
+//	Object.entries(headers).forEach(header => {
+//		const [key,value] = header;
+//		res.setHeader(key,value);
+//	});
+//
+//	const user_id = UserId(req);
+//	let count = 0;
+//
+//	//get notif count from db
+//	async function calculateCount() {
+//		//get unread notification count
+//		count = await countUnread(user_id);
+//	}
+//
+//
+//	//send count to client
+//	async function sendCount() {
+//		//write to stream
+//		res.write(count.toString());
+//	}
+//
+//	//send on connect
+//	sendCount();
+//
+//	//continuusly send the count of the unread notifications 
+//	const interval = setInterval(sendCount, 1000);
+//	const interval2 = setInterval(calculateCount, 5000);
+//
+//	res.on("close", () => {
+//		clearInterval(interval);
+//		clearInterval(interval2);
+//		res.end();
+//	});
+//});
 
-	//this must be used instead of flushHeaders because it doesn't works on vercel
-	Object.entries(headers).forEach(header => {
-		const [key,value] = header;
-		res.setHeader(key,value);
-	});
-
+router.get("/get_count", async (req, res) => {
 	const user_id = UserId(req);
-	let count = 0;
-
-	//get notif count from db
-	async function calculateCount() {
-		//get unread notification count
-		count = await countUnread(user_id);
-	}
-
-
-	//send count to client
-	async function sendCount() {
-		//write to stream
-		res.write(count.toString());
-	}
-
-	//send on connect
-	sendCount();
-
-	//continuusly send the count of the unread notifications 
-	const interval = setInterval(sendCount, 1000);
-	const interval2 = setInterval(calculateCount, 5000);
-
-	res.on("close", () => {
-		clearInterval(interval);
-		clearInterval(interval2);
-		res.end();
-	});
+	const count = await countUnread(user_id);
+	res.json(count);
 });
 
 async function countUnread(user_id) {
@@ -82,17 +89,3 @@ async function countUnread(user_id) {
 
 export default router;
 export { countUnread };
-
-function enableCors(res) {
-	return {
-		// Website you wish to allow to connect
-		'Access-Control-Allow-Origin': config.address_mode.client,
-		// Request methods you wish to allow
-		'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE',
-		// Request headers you wish to allow
-		'Access-Control-Allow-Headers': 'X-Requested-With,content-type',
-		// to the API (e.g. in case you use sessions)
-		'Access-Control-Allow-Credentials': true
-	}
-}
-

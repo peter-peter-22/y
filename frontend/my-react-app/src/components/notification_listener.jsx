@@ -6,7 +6,7 @@ import { ListenToStream } from "/src/components/event_stream";
 
 function GetNotificationCount() {
     const [count, setCount] = useState(0);
-    ListenToStream(config.address_mode.server + "/member/notifications/events", (data) => {
+    ListenToStream(config.address_mode.server + "/member/notifications/get_count", (data) => {
         setCount(data);
     });
     return [count, setCount];

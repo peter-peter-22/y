@@ -237,11 +237,8 @@ function ColorLetters({ onChangeRaw, value, isComment, onFocus, max_letters }) {
     });
 
     function updateRaw(e) {
-        let text = e.target.value;
-        //remove html 
+        let text = e.currentTarget.innerText;
         text = text.replace(findHtml, '');
-        //fix nbsp
-        text = text.replace(/&nbsp;/g, ' ');
 
         if (onChangeRaw)
             onChangeRaw(text);

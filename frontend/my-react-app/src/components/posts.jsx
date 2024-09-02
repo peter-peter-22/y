@@ -452,7 +452,7 @@ function PostBottomIcon(props) {
 
 function PostText(props) {
     return (
-        <Typography variant="small" style={{ wordWrap: "break-word" }} dangerouslySetInnerHTML={{ __html: findAndColorHashtags(props.post.text) }} />
+        <Typography variant="small" style={{ wordWrap: "break-word",whiteSpace:"pre" }} dangerouslySetInnerHTML={{ __html: findAndColorHashtags(props.post.text) }} />
     );
 }
 
