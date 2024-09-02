@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 
-function ListenToStream( url, onData ) {
+function ListenToStream(url, onData) {
     const first = useRef(true);
     useEffect(() => {
         //prevent double request
@@ -14,7 +14,8 @@ function ListenToStream( url, onData ) {
                 headers: {
                     "Accept": "text/event-stream",
                 },
-                credentials: 'include'
+                credentials: 'include',
+                mode: "cors"
             });
 
             if (!response.ok) {
