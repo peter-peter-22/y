@@ -36,7 +36,6 @@ router.get("/events", (req, res) => {
 		'Content-Type': 'text/event-stream',
 		'Connection': 'keep-alive',
 		'Cache-Control': 'no-cache',
-		...corsHeaders()
 	};
 	res.writeHead(200, headers);
 	const user_id = UserId(req);

@@ -12,7 +12,9 @@ function ListenToStream(url, onData) {
         async function createEvents() {
             const response = await fetch(url, {
                 headers: {
-                    "Accept": "text/event-stream",
+                    'Content-Type': 'text/event-stream',
+                    'Connection': 'keep-alive',
+                    'Cache-Control': 'no-cache',
                 },
                 credentials: 'include',
                 mode: "cors"
