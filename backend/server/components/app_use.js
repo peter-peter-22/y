@@ -32,14 +32,12 @@ function initialize() {
             resave: false,
             saveUninitialized: false,
             proxy: https ? true : undefined,
-            name: "y_cookie_vercel",
-            domain:"y-eight-theta-69.vercel.app",
+            name: https?"y_cookie_vercel":"local_cookie",
             cookie: {
                 secure: https, // Set to true if using HTTPS
                 sameSite: https ? "none" : "lax",
                 maxAge: false,
                 httpOnly: false,
-                priority:"low",
             }
         })
     );

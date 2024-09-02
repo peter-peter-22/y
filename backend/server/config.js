@@ -21,7 +21,7 @@ types.accepted_media_types = [...types.accepted_image_types, ...types.accepted_v
 //config
 
 const config = {
-    port: 3000,
+    port: 3001,
     saltRounds: 10,
     __dirname: dirname(fileURLToPath(import.meta.url)),
     google_rechapta_secret_key: process.env.GOOGLE_RECHAPTA_SECRET,

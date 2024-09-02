@@ -44,8 +44,7 @@ function remember_session(req, time) {
     req.session.cookie.maxAge = time;
 }
 
-function auth(req, res)
-{
+function auth(req, res) {
     if (req.isAuthenticated()) {
         return true;
     }
@@ -55,17 +54,14 @@ function auth(req, res)
     }
 }
 
-async function universal_auth(req, res, err, user, info, noRedirect) {
+async function universal_auth(req, res, err, user, info) {
     try {
         if (err) { throw err; }
         if (!user) {
             if (info.registering) {
                 req.session.pending_data = info.registering
                 req.session.pending_registration = true;
-                req.session.cookie.priority="high";
-                
-                console.log(`\n\nuniversal auth register: \ninfo: ${JSON.stringify(info)} \nsession: ${JSON.stringify(req.session)}\n\n`);
-                return res.redirect(config.address_mode.client);
+                res.sendStatus(200);
             }
             else
                 throw new Error("failed to get user");
@@ -74,14 +70,7 @@ async function universal_auth(req, res, err, user, info, noRedirect) {
             req.logIn(user, function (err) {
                 if (err) { throw err; }
                 AddDataToSession(req);
-
-                console.log(`\n\nuniversal auth login: \nuser: ${JSON.stringify(user)} \nsession: ${JSON.stringify(req.session)}\n\n`);
-                if (!noRedirect) {
-                    res.redirect(config.address_mode.client);
-                }
-                else {
-                    res.sendStatus(200);
-                }
+                res.sendStatus(200);
             });
         }
     }

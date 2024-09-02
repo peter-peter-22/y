@@ -9,10 +9,13 @@ import CreateAccount from "/src/components/create_account.jsx";
 import links from "/src/components/footer_links";
 import Login from "/src/components/login.jsx";
 import { Modals } from "/src/components/modals";
-import { StyledLink, TextRow, creation, logo } from '/src/components/utilities';
+import { StyledLink, TextRow, creation, logo,AboveBreakpoint } from '/src/components/utilities';
 import Error from "/src/pages/error";
+import { LoginLink } from '/src/components/login_redirects/google';
 
 function Main() {
+const wide = AboveBreakpoint("md");
+
     function showCreator()//show local registration inputs
     {
         Modals[0].Show(<CreateAccount pages={[0, 1, 2, 3, 4]} key="local" />);
@@ -23,53 +26,50 @@ function Main() {
     }
 
     return (
-        <div style={{ height: "100vh" }}>
-
-            <Stack direction="column" style={{ height: "100%" }}>
-                <Stack direction="row" style={{ justifyContent: "space-evenly", alignItems: "center", flexGrow: 1 }}>
-                    <img src={logo} style={{ height: "350px" }} />
-                    <Stack direction="column">
-                        <Typography variant="h2" fontWeight="bold" sx={{ my: 5 }}>
-                            Happening now
-                        </Typography>
-                        <Typography variant="h4" fontWeight="bold" sx={{ mb: 3 }}>
-                            Join today.
-                        </Typography>
-                        <Stack direction="column" spacing={1} style={{ width: "300px" }}>
-                            <a href={config.address_mode.server+"/auth/google"}><AlternativeLogin src="/svg/google.svg" text="Sign-up with Google" /></a>
-                            {/*<a href={config.address_mode.server+"/auth/github"}><AlternativeLogin src="/svg/github.svg" text="Sign-up with Github" /></a>*/}
-                            <Stack direction="row" sx={{ my: 0.5, alignItems: "center" }}>
-                                <Or />
-                            </Stack>
-                            <WideButton size="medium" color="primary" onClick={showCreator}>
-                                Create account
-                            </WideButton>
-                            <ByRegistering variant="verysmall_fade" />
-                            <Typography variant="medium_bold" sx={{ pt: 5 }}>Do you already have an account?</Typography>
-                            <OutlinedButton size="medium" onClick={showLogin}>
-                                <Typography variant="medium_bold" color="primary" >Sign-in</Typography>
-                            </OutlinedButton>
+        <Stack direction="column" style={{ height: "100vh" }}>
+            <Stack direction={wide?"row":"column"} style={{ justifyContent: "space-evenly", alignItems: "center", flexGrow: 1 }}>
+                <img src={logo} style={{ height: wide?"350px":"70px" }} />
+                <Stack direction="column">
+                    <Typography variant={wide?"h2":"h4"} fontWeight="bold" sx={{ my: wide?5:2.5 }}>
+                        Happening now
+                    </Typography>
+                    <Typography variant={wide?"h4":"h6"} fontWeight="bold" sx={{ mb: wide?3:1.5 }}>
+                        Join today.
+                    </Typography>
+                    <Stack direction="column" spacing={1} style={{ width: "300px" }}>
+                        <LoginLink><AlternativeLogin src="/svg/google.svg" text="Sign-up with Google" /></LoginLink>
+                        {/*<a href={config.address_mode.server+"/auth/github"}><AlternativeLogin src="/svg/github.svg" text="Sign-up with Github" /></a>*/}
+                        <Stack direction="row" sx={{ my: 0.5, alignItems: "center" }}>
+                            <Or />
                         </Stack>
+                        <WideButton size="medium" color="primary" onClick={showCreator}>
+                            Create account
+                        </WideButton>
+                        <ByRegistering variant="verysmall_fade" />
+                        <Typography variant="medium_bold" sx={{ pt: wide?5:2.5 }}>Do you already have an account?</Typography>
+                        <OutlinedButton size="medium" onClick={showLogin}>
+                            <Typography variant="medium_bold" color="primary" >Sign-in</Typography>
+                        </OutlinedButton>
                     </Stack>
                 </Stack>
-                <Stack direction="row" spacing={1} sx={{ my: 2, mx: 5, justifyContent: "center" }}>
-                    {links.map((link, i) => <link.GetElement key={i} />)}
-                    <div>
-                        <Typography variant="small_fade">{creation}</Typography>
-                    </div>
-                </Stack>
             </Stack>
-        </div>
+            <Stack direction="row" spacing={1} sx={{ my: 2, mx: 5, justifyContent: "center",flexWrap:"wrap" }}>
+                {links.map((link, i) => <link.GetElement key={i} />)}
+                <div>
+                    <Typography variant="small_fade">{creation}</Typography>
+                </div>
+            </Stack>
+        </Stack>
     );
 }
 
-export default ()=>{
-return(
-    <Routes>
-    <Route path="/" element={<Main />} />
-    <Route path="*" element={<Error />} />
-  </Routes>
-);
+export default () => {
+    return (
+        <Routes>
+            <Route path="/" element={<Main />} />
+            <Route path="*" element={<Error />} />
+        </Routes>
+    );
 }
 function AlternativeLogin(props) {
     return (
@@ -107,10 +107,9 @@ function BigModal(props) {
     );
 }
 
-function SmallLink(props)
-{
-    return(
-        <StyledLink typography="very_small" color ="primary" {...props}>{props.children}</StyledLink>
+function SmallLink(props) {
+    return (
+        <StyledLink typography="very_small" color="primary" {...props}>{props.children}</StyledLink>
     );
 }
 

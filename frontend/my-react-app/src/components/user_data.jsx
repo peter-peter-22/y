@@ -13,7 +13,6 @@ function UserProvider({ children }) {
         try {
             //get user from server
             const response = await axios.get("user/get");
-            console.log(response.data);
             setData(response.data);
         }
         catch (err) {

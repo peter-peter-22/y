@@ -114,4 +114,4 @@ function GetSearchUrl(text) {
     return "/search?q=" + text;
 }
 
-export { GetSearchText, GetSearchUrl };
+export { GetSearchText, GetSearchUrl,useQuery };

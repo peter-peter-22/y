@@ -18,7 +18,7 @@ const github_login_redirect = process.env.GITHUB_CALLBACK;
 
     //redirect after login
     router.get(github_login_redirect, async function (req, res, next) {
-        passport.authenticate('github', async function (err, user, info, status) {
+        passport.authenticate('github', async function (err, user, info) {
         await universal_auth(req,res,err,user,info);
         })(req, res, next);
     });

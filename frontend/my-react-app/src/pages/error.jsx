@@ -5,9 +5,15 @@ import { FormatAxiosError } from "/src/communication.js";
 
 function ErrorPage({ text }) {
   return (
+    <InfoPage icon="block" text={text} />
+  );
+}
+
+function InfoPage({ text, icon }) {
+  return (
     <Stack direction="column" style={{ height: "100vh", margin: "auto", alignItems: "center", justifyContent: "center" }}>
       <Icon color="secondary" style={{ fontSize: "50px" }}>
-        block
+        {icon}
       </Icon>
       <Typography color="secondary" variant="medium">{text}</Typography>
     </Stack>
@@ -19,6 +25,11 @@ function ErrorPageFormatted({ error }) {
     <ErrorPage text={FormatAxiosError(error)} />
   );
 }
+function Successpage({ text }) {
+  return (
+    <InfoPage icon="done" text={text} />
+  );
+}
 
 export default () => {
   return (
@@ -26,4 +37,4 @@ export default () => {
   );
 }
 
-export { ErrorPage,ErrorPageFormatted };
+export { ErrorPage, ErrorPageFormatted,Successpage };
