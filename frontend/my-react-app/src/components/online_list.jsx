@@ -5,7 +5,6 @@ import {
 } from '@tanstack/react-query';
 import { useWindowVirtualizer } from '@tanstack/react-virtual';
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
-import { ThrowIfNotAxios } from "/src/communication.js";
 import { Loading } from "/src/components/utilities";
 
 const lastIndexes = {};
@@ -116,15 +115,19 @@ const OnlineList = forwardRef(({ exampleSize = 100, EntryMapper, getEntries, ove
     //load the last rendered location
     useEffect(() => {
         const loaded = lastIndexes[id];
-        //console.log("loaded " + loaded);
-        if (loaded && scrollRestoration)
-            virtualizer.scrollToIndex(loaded, { align: "middle" });
+        setTimeout(() => {
+            //console.log("loaded " + loaded);
+            if (scrollRestoration)
+                virtualizer.scrollToIndex(loaded?loaded:0, { align: "middle" });
+        },200);
     }, [id, virtualizer, scrollRestoration]);
 
     //save the last rendered location
     useEffect(() => {
         if (items.length !== 0) {
             const row = items[Math.floor((items.length - 1) / 2)].index;
+            if (row < 20)
+                return;
             //console.log("saved " + row);
             lastIndexes[id] = row;
         }

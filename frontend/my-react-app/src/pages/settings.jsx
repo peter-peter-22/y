@@ -16,6 +16,7 @@ import { ErrorPageFormatted } from "/src/pages/error";
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import Icon from '@mui/material/Icon';
+import { ScrollToTop } from "/src/components/scroll_to_top";
 
 function ControlledCheckbox({ title, name, group, ...props }) {
   const { control } = useFormContext();
@@ -165,6 +166,7 @@ function Form() {
 }
 
 export default () => {
+  ScrollToTop();
   return (
     <Suspense fallback={<Loading />}>
       <Form />

@@ -8,6 +8,7 @@ import { LinkButton } from "/src/components/buttons";
 import { SimplifiedPostList } from "/src/components/posts";
 import { ListTitle, Loading } from "/src/components/utilities";
 import { FollowDialogExtended, UserListExtended } from "/src/pages/follow_people";
+import { ScrollToTop } from "/src/components/scroll_to_top";
 
 // A custom hook that builds on useLocation to parse
 // the query string for you.
@@ -24,6 +25,7 @@ function GetSearchText() {
 }
 
 export default () => {
+    ScrollToTop();
     const text = GetSearchText();
 
     return (
@@ -114,4 +116,4 @@ function GetSearchUrl(text) {
     return "/search?q=" + text;
 }
 
-export { GetSearchText, GetSearchUrl,useQuery };
+export { GetSearchText, GetSearchUrl, useQuery };

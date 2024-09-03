@@ -1,7 +1,9 @@
 //naming this file "privacy_policy.jsx" will cause an error in brave
 import { Box } from '@mui/material';
+import { ScrollToTop } from "/src/components/scroll_to_top";
 
 function Main() {
+    ScrollToTop();
     return (
         <Box sx={{ m: 2 }}>
             <h1>Privacy Policy</h1>
