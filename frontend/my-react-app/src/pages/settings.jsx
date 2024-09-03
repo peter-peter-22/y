@@ -13,8 +13,11 @@ import { Modals, SuccessModal } from "/src/components/modals";
 import { Loading } from "/src/components/utilities";
 import Ask from "/src/components/web_push.js";
 import { ErrorPageFormatted } from "/src/pages/error";
+import IconButton from '@mui/material/IconButton';
+import Tooltip from '@mui/material/Tooltip';
+import Icon from '@mui/material/Icon';
 
-function ControlledCheckbox({ title,name, group, ...props }) {
+function ControlledCheckbox({ title, name, group, ...props }) {
   const { control } = useFormContext();
   const full_name = group + "_" + name;
 
@@ -102,11 +105,38 @@ function Form() {
 
               <FormGroup aria-label="Push Notifications">
 
-                <div>
+                <Stack direction="row" spacing={1}>
                   <Fab color="black" variant="extended" size="small" onClick={Ask} sx={{ mt: 1 }}>
                     Setup
                   </Fab>
-                </div>
+
+                  <Tooltip title={
+                    <>
+                      <h3 >Create a service worker</h3>
+                      <p>
+                        This must be pressed at least once to make the push notifications work.
+                      </p>
+                      <p>
+                        After pressing, a notification must appear.
+                      </p>
+                      <p>
+                        If not then your browser is not compatible with webpush.
+                      </p>
+                      <p>
+                        Incompatibility examples: brave, edge.
+                      </p>
+                      <p>
+                        Compatibility examples: chrome.
+                      </p>
+                    </>
+                  }>
+                    <IconButton size="small">
+                      <Icon>
+                        question_mark
+                      </Icon>
+                    </IconButton>
+                  </Tooltip>
+                </Stack>
 
                 <ControlledCheckbox title="Enabled" name="enabled" group="push" />
                 <Types group="push" dependsOn="push_enabled" />
@@ -114,6 +144,7 @@ function Form() {
             </div>
 
             <div>
+              <Typography color="warning.main">Email notifications are not working now!</Typography>
               <Typography variant="medium_bold">Email Notifications</Typography>
 
               <FormGroup aria-label="Email Notifications">
