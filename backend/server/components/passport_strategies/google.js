@@ -67,7 +67,7 @@ async function Authenticate(accessToken, refreshToken, profile, cb) {
         if (query_result.rowCount === 0) {
             cb(null, null, {
                 registering: {
-                    name: profile.displayName,
+                    name: profile.given_name,
                     email: profile.email,
                 }
             });

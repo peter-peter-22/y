@@ -59,6 +59,7 @@ async function universal_auth(req, res, err, user, info) {
         if (err) { throw err; }
         if (!user) {
             if (info.registering) {
+                remember_session(req, config.cookie_remember);
                 req.session.pending_data = info.registering
                 req.session.pending_registration = true;
                 res.sendStatus(200);
@@ -69,7 +70,7 @@ async function universal_auth(req, res, err, user, info) {
         else {
             req.logIn(user, function (err) {
                 if (err) { throw err; }
-                AddDataToSession(req);
+                remember_session(req, config.cookie_remember);
                 res.sendStatus(200);
             });
         }
@@ -119,7 +120,7 @@ async function finish_registration(req, res, name, email, password_hash, birthda
         const user = result.rows[0];
         req.logIn(user, function (err) {
             if (err) { throw err; }
-            AddDataToSession(req);
+            remember_session(req, config.cookie_remember);
             req.session.showStartMessage = true;
             res.sendStatus(200);
         });
@@ -156,10 +157,6 @@ async function unique_username(baseName) {//ha rövid nevet ír be akkor sok avo
     }
     //unique name cannot be created, returning base name
     return basename;
-}
-
-function AddDataToSession(req) {
-    remember_session(req, config.cookie_remember);
 }
 
 export { auth, finish_registration, remember_session, router, universal_auth };

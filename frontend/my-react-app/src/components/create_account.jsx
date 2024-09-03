@@ -33,6 +33,12 @@ function CreateAccount(props) {
     //the values of the pages that is not sent to the server directly on submit (like email,birthdate)
     const dataRef = useRef({});
 
+    useEffect(() => {
+        setInterval(() => {
+            console.log(dataRef.current);
+        }, 1000);
+    },[])
+
     //step handler
     const [stepIndex, setStep] = useState(0);//the stepindex must be cleared via key when another createaccount is rendered 
     const allowBack = stepIndex > 0;
