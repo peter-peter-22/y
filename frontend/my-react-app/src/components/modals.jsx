@@ -4,7 +4,6 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Modal from '@mui/material/Modal';
-import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
 import 'moment/locale/de';
 import React, { useRef, useState } from "react";
@@ -188,16 +187,6 @@ function ImagesModal() {
             </div>
         </Modal>
     );
-}
-
-function SimpleDialog({ open, onClose, children }) {
-    return (
-        <Backdrop open={open} onClick={onClose} style={{ zIndex: 1 }}>
-            <Paper style={{ borderRadius: 15 }} onClick={(e) => e.stopPropagation()}>
-                {children}
-            </Paper>
-        </Backdrop>
-    )
 }
 
 function StepButton(props) {

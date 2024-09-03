@@ -9,12 +9,12 @@ import CreateAccount from "/src/components/create_account.jsx";
 import links from "/src/components/footer_links";
 import Login from "/src/components/login.jsx";
 import { Modals } from "/src/components/modals";
-import { StyledLink, TextRow, creation, logo,AboveBreakpoint } from '/src/components/utilities';
+import { StyledLink, TextRow, creation, logo, AboveBreakpoint } from '/src/components/utilities';
 import Error from "/src/pages/error";
 import { LoginLink } from '/src/components/login_redirects/google';
 
 function Main() {
-const wide = AboveBreakpoint("md");
+    const wide = AboveBreakpoint("md");
 
     function showCreator()//show local registration inputs
     {
@@ -27,13 +27,13 @@ const wide = AboveBreakpoint("md");
 
     return (
         <Stack direction="column" style={{ height: "100vh" }}>
-            <Stack direction={wide?"row":"column"} style={{ justifyContent: "space-evenly", alignItems: "center", flexGrow: 1 }}>
-                <img src={logo} style={{ height: wide?"350px":"70px" }} />
+            <Stack direction={wide ? "row" : "column"} style={{ justifyContent: "space-evenly", alignItems: "center", flexGrow: 1 }}>
+                <img src={logo} style={{ height: wide ? "350px" : "70px" }} />
                 <Stack direction="column">
-                    <Typography variant={wide?"h2":"h4"} fontWeight="bold" sx={{ my: wide?5:2.5 }}>
+                    <Typography variant={wide ? "h2" : "h4"} fontWeight="bold" sx={{ my: wide ? 5 : 2.5 }}>
                         Happening now
                     </Typography>
-                    <Typography variant={wide?"h4":"h6"} fontWeight="bold" sx={{ mb: wide?3:1.5 }}>
+                    <Typography variant={wide ? "h4" : "h6"} fontWeight="bold" sx={{ mb: wide ? 3 : 1.5 }}>
                         Join today.
                     </Typography>
                     <Stack direction="column" spacing={1} style={{ width: "300px" }}>
@@ -46,14 +46,14 @@ const wide = AboveBreakpoint("md");
                             Create account
                         </WideButton>
                         <ByRegistering variant="verysmall_fade" />
-                        <Typography variant="medium_bold" sx={{ pt: wide?5:2.5 }}>Do you already have an account?</Typography>
+                        <Typography variant="medium_bold" sx={{ pt: wide ? 5 : 2.5 }}>Do you already have an account?</Typography>
                         <OutlinedButton size="medium" onClick={showLogin}>
                             <Typography variant="medium_bold" color="primary" >Sign-in</Typography>
                         </OutlinedButton>
                     </Stack>
                 </Stack>
             </Stack>
-            <Stack direction="row" spacing={1} sx={{ my: 2, mx: 5, justifyContent: "center",flexWrap:"wrap" }}>
+            <Stack direction="row" spacing={1} sx={{ my: 2, mx: 5, justifyContent: "center", flexWrap: "wrap" }}>
                 {links.map((link, i) => <link.GetElement key={i} />)}
                 <div>
                     <Typography variant="small_fade">{creation}</Typography>
@@ -101,7 +101,7 @@ function Or() {
 
 function BigModal(props) {
     return (
-        <Box style={{ width: 600, height: 650 }}>
+        <Box style={{ width: 600, maxWidth: "100%", height: 650 }}>
             {props.children}
         </Box>
     );
@@ -132,24 +132,24 @@ function BottomButtonWithBorder(props) {
 
 function ModalMargin(props) {
     return (
-        <InheritAndMargin mx={10}>
+        <ModalInner style={{ width: 350 }}>
             {props.children}
-        </InheritAndMargin>
+        </ModalInner>
     );
 }
 
 function BigModalMargin(props) {
     return (
-        <InheritAndMargin mx={15}>
+        <ModalInner style={{ width: 350, margin: "0 auto" }}>
             {props.children}
-        </InheritAndMargin>
+        </ModalInner>
     );
 }
 
-function InheritAndMargin(props) {
+function ModalInner({ style, children }) {
     return (
-        <Box sx={{ px: props.mx, boxSizing: "border-box", display: "inherit", flexDirection: "inherit", height: "inherit", justifyContent: "inherit", alignItems: "inherit", gap: "inherit" }}>
-            {props.children}
+        <Box sx={{ px: 1 }} style={{ boxSizing: "border-box", display: "inherit", flexDirection: "inherit", height: "inherit", justifyContent: "inherit", alignItems: "inherit", gap: "inherit", maxWidth: "100%", margin: "0 auto", ...style }}>
+            {children}
         </Box>
     );
 }

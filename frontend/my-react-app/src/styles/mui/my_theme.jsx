@@ -162,6 +162,7 @@ const theme = createTheme({
             styleOverrides: {
                 paper: {
                     borderRadius: 15, // Adjust the value as needed
+                    margin:10
                 },
             }
         },
