@@ -13,9 +13,10 @@ import { ExamplePost } from "/src/components/exampleData.js";
 import { ManagePost, engagementsLink } from "/src/components/manage_content_button.jsx";
 import { Modals, SuccessModal } from "/src/components/modals";
 import { OnlineList } from '/src/components/online_list';
-import { PostCreator, findAndColorHashtags } from "/src/components/post_creator.jsx";
+import { PostCreator } from "/src/components/post_creator.jsx";
 import { PostMedia } from "/src/components/post_media";
 import { DateLink, FadeLink, GetPostMedia, GetUserName, ProfilePic, ProfileText, ReplyingFrom, SimplePopOver, TextRow, UserKey, UserLink, formatNumber, noOverflow } from '/src/components/utilities';
+import { TextDisplayer } from "/src/components/post_text";
 
 const commentSections = {};
 
@@ -65,7 +66,7 @@ function BorderlessPost({ post, hideButtons }) {
                         <ManagePost original={original} overriden={overriden} />
                     </Stack>
                     <ReplyingToPost post={overriden} />
-                    <PostText post={overriden} />
+                    <TextDisplayer text={overriden.text} />
                     <PostMedia medias={overriden.mediaObjects} />
                 </Stack>
             } />
@@ -156,7 +157,7 @@ function PostFocused(props) {
                 } />
 
             <Stack direction="column" sx={{ overflow: "hidden", mt: 1 }}>
-                <PostText post={overriden} />
+                <TextDisplayer text={overriden.text} />
                 <PostMedia medias={overriden.mediaObjects} />
                 <Stack direction="row" spacing={0.5} sx={{ alignItems: "baseline", my: 1 }}>
                     <DateLink passed isoString={overriden.date} />
@@ -391,7 +392,7 @@ const HideablePostFocusedMemo = memo((props) => {
 
 function HideablePostAny({ entry, Renderer }) {
     const [show, setShow] = useState(false);
-    
+
     if (entry.deleted)
         return;
 
@@ -448,12 +449,6 @@ function PostBottomIcon(props) {
             </Icon>
             <Typography variant="small" color="secondary" style={{ position: "absolute", left: "90%" }}>{props.text}</Typography>
         </IconButton>);
-}
-
-function PostText(props) {
-    return (
-        <Typography variant="small" style={{ wordWrap: "break-word",whiteSpace:"pre" }} dangerouslySetInnerHTML={{ __html: findAndColorHashtags(props.post.text) }} />
-    );
 }
 
 function RepostedOrQuoted(props) {

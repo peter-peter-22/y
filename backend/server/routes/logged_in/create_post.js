@@ -2,7 +2,7 @@ import express from "express";
 import { Validator } from "node-input-validator";
 import { uploadPostFiles } from "../../components/cloudinary_handler.js";
 import { GetPosts } from "../../components/general_components.js";
-import { findHashtags, findHtml } from "../../components/sync.js";
+import { findHashtags } from "../../components/sync.js";
 import { CheckErr, CheckV, validate_media } from "../../components/validations.js";
 import { GetMaxLetters } from "../user.js";
 import { commentPush, repostPush } from "../web_push.js";
@@ -114,9 +114,6 @@ async function postAny(req, saveToDatabase) {
     //upload to database
     let { text } = req.body;
 
-    //remove html from text 
-    text = CleanText(text);
-
     //the values those are sent to all kinds of posts
     const user_id = UserId(req);
     const baseCols = "PUBLISHER, TEXT";
@@ -179,11 +176,6 @@ async function UploadHashtags(post_id, hashtags) {
         post_id: post_id,
         hashtags: hashtags
     }));
-}
-
-function CleanText(text) {
-    //remove html from text to prevent abusing the html displayer of the posts
-    return text.replace(findHtml, '');
 }
 
 function FindHashtags(text) {

@@ -12,11 +12,10 @@ import { fileToMedia } from "/src/components/media.jsx";
 import { ErrorText } from "/src/components/modals";
 import { PostMediaEditor } from "/src/components/post_media";
 import { BorderlessPost, QuotedFrame, RowWithPrefix, commentSections } from "/src/components/posts.jsx";
-import { findHashtags, findHtml } from "/src/components/sync.js";
 import { UserContext } from "/src/components/user_data";
 import { Loading, ProfilePic, ReplyingTo } from '/src/components/utilities';
 import { theme } from "/src/styles/mui/my_theme";
-
+import { TextEditor } from "/src/components/post_text";
 
 function PostCreator({ post, quoted, onPost, editing, noUpdate }) {
     const { getData } = useContext(UserContext);
@@ -164,11 +163,10 @@ function PostCreator({ post, quoted, onPost, editing, noUpdate }) {
                     <Stack direction="column">
                         <Stack direction={isFocused ? "column" : "row"}>
                             <Box sx={{ pb: 1, pt: 2, display: "inline-flex", flexGrow: 1, position: "relative", overflow: "hidden" }}>
-                                <ColorLetters
+                                <PostTextEditor
                                     isComment={isComment}
                                     onFocus={handleFocus}
                                     onChangeRaw={handleChange}
-                                    value={getText}
                                     max_letters={maxLetters}
                                 />
                             </Box>
@@ -213,67 +211,13 @@ function get_publish_message(isComment, isEditing) {
     return "Post";
 }
 
-function ColorHashtag(hashtagString) {
-    return '<span style="color:blue">' + hashtagString + '</span>';
-}
-
-function findAndColorHashtags(postText) {
-    return postText.replace(findHashtags, (found) => {
-        return ColorHashtag(found);
-    });
-}
-
-function ColorLetters({ onChangeRaw, value, isComment, onFocus, max_letters }) {
-    let keep = value.substring(0, max_letters);
-    let overflow = value.substring(max_letters);
-    const [focused, setFocused] = useState(false);
-
-    //color overflow
-    overflow = `<mark style="background: #FF000044">${overflow}</mark>`
-
-    //color hashtags
-    keep = keep.replace(findHashtags, (found) => {
-        return ColorHashtag(found);
-    });
-
-    function updateRaw(e) {
-        let text = e.currentTarget.innerText;
-        text = text.replace(findHtml, '');
-
-        if (onChangeRaw)
-            onChangeRaw(text);
-    }
-
-    function focus() {
-        setFocused(true);
-        if (onFocus)
-            onFocus();
-    }
-
-    function focusOut() {
-        setFocused(false);
-    }
-
-    function GetText() {
-        if (focused || keep.length > 0)
-            return keep + overflow;
-        else
-            return `<span style="opacity:0.5">${isComment ? "Post your reply" : "Write something"}</span>`;
-    }
-
-    return (
-        <ContentEditable
-            html={GetText()}
-            onChange={updateRaw} // handle innerHTML change
-            onFocus={focus}
-            onBlur={focusOut}
-            style={{
-                outline: "none",
-                width: "100%",
-                whiteSpace:"pre"
-            }}
-        />
-    );
+function PostTextEditor({ onChangeRaw, isComment, onFocus, max_letters }) {
+    return <TextEditor
+        onChange={onChangeRaw}
+        onFocus={onFocus}
+        placeholder={isComment ? "Post your reply" : "Write something"}
+        maxLetters={max_letters}
+    />;
 }
 
 function CommentButton(props) {
@@ -360,4 +304,4 @@ function AddPostToCommentSection(post) {
 }
 
 
-export { PostCreator, findAndColorHashtags };
+export { PostCreator };

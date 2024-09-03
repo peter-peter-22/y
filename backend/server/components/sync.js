@@ -1,5 +1,5 @@
 //these must be the same on client and server
 const findHashtags = /(\#\w+)/g;
-const findHtml = /<[^>]*>?/gm;
+const findMentions = /(\@\w+)/g;
 
-export { findHashtags, findHtml };
+export { findHashtags, findMentions };
