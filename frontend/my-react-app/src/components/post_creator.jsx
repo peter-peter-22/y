@@ -164,6 +164,7 @@ function PostCreator({ post, quoted, onPost, editing, noUpdate }) {
                         <Stack direction={isFocused ? "column" : "row"}>
                             <Box sx={{ pb: 1, pt: 2, display: "inline-flex", flexGrow: 1, position: "relative", overflow: "hidden" }}>
                                 <PostTextEditor
+                                    startText={getText}
                                     isComment={isComment}
                                     onFocus={handleFocus}
                                     onChangeRaw={handleChange}
@@ -211,12 +212,13 @@ function get_publish_message(isComment, isEditing) {
     return "Post";
 }
 
-function PostTextEditor({ onChangeRaw, isComment, onFocus, max_letters }) {
+function PostTextEditor({ onChangeRaw, isComment, onFocus, max_letters,startText }) {
     return <TextEditor
         onChange={onChangeRaw}
         onFocus={onFocus}
         placeholder={isComment ? "Post your reply" : "Write something"}
         maxLetters={max_letters}
+        startText={startText}
     />;
 }
 

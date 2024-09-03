@@ -41,11 +41,13 @@ function TextContainer({ children }) {
 }
 
 //the updating part of the text editor is separated to prevent unnecessary rerenders
-const TextEditorInner = ({ onChange, decorators, ...props }) => {
-    const composite = new CompositeDecorator(decorators);
-
+const TextEditorInner = ({ startText, onChange, decorators, ...props }) => {
     const [editorState, setEditorState] = useState(
-        () => EditorState.createEmpty(composite),
+        () => {
+            //initialize starting value
+            const contentState = ContentState.createFromText(startText ? startText : "");
+            return EditorState.createWithContent(contentState, new CompositeDecorator(decorators));
+        }
     );
 
     useEffect(() => {
@@ -68,7 +70,7 @@ const TextEditorInner = ({ onChange, decorators, ...props }) => {
     );
 }
 
-const TextEditor = memo(({ maxLetters, ...props }) => {
+const TextEditor = memo(({ maxLetters, startText, ...props }) => {
     //hashtag
     const HashtagSpan = ({ children }) => {
         const theme = useTheme();
@@ -121,7 +123,7 @@ const TextEditor = memo(({ maxLetters, ...props }) => {
     //join the decorators in the right order
     const decorators = [markOverFlow, markHashtags, markMentions];
 
-    return <TextEditorInner decorators={decorators} {...props} />
+    return <TextEditorInner startText={startText} decorators={decorators} {...props} />
 }, () => true);
 
 const TextDisplayer = (({ text }) => {
