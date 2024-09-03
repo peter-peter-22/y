@@ -17,7 +17,7 @@ import { Loading, ProfilePic, ReplyingTo } from '/src/components/utilities';
 import { theme } from "/src/styles/mui/my_theme";
 import { TextEditor } from "/src/components/post_text";
 
-function PostCreator({ post, quoted, onPost, editing, noUpdate }) {
+function PostCreator({ post, quoted, onPost, editing }) {
     const { getData } = useContext(UserContext);
     const [isFocused, setIsFocused] = React.useState(false);
     const [getText, setText] = React.useState(editing ? editing.text : "");
@@ -129,8 +129,15 @@ function PostCreator({ post, quoted, onPost, editing, noUpdate }) {
 
             //update post list on client without refreshing the page
             const post = result.data;
-            if (!noUpdate)
+            if (!editing)
                 AddPostToCommentSection(post);
+            else
+                commentSections.active.mapRows((row) => {
+                    if (row.id === editing.id) {
+                        return { ...row };//this will update the post even if it is currently visible
+                    }
+                    return row;
+                });
 
             //call function if defined
             if (onPost)
@@ -212,7 +219,7 @@ function get_publish_message(isComment, isEditing) {
     return "Post";
 }
 
-function PostTextEditor({ onChangeRaw, isComment, onFocus, max_letters,startText }) {
+function PostTextEditor({ onChangeRaw, isComment, onFocus, max_letters, startText }) {
     return <TextEditor
         onChange={onChangeRaw}
         onFocus={onFocus}
