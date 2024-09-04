@@ -6,7 +6,7 @@ import fileUpload from "express-fileupload";
 import session from "express-session";
 import passport from "passport";
 import * as g from "../config.js";
-import { start } from "./email_notifications.js";
+import { start } from "./email_notifications.js";//
 const pgSession = ConnectPg(session);
 
 function initialize() {
