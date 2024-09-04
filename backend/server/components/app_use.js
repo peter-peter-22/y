@@ -37,7 +37,7 @@ function initialize() {
                 secure: https, // Set to true if using HTTPS
                 sameSite: https ? "none" : "lax",
                 maxAge: false,
-                httpOnly: false,
+                httpOnly: true,
             }
         })
     );
@@ -45,7 +45,7 @@ function initialize() {
     //update session expiration 
     app.use((req, res, next) => {
         req.session.lastVisit = new Date();
-        console.log(req.session.cookie.maxAge);
+        console.log(`maxAge: ${req.session.cookie.maxAge} expires: ${req.session.cookie.expires}`);
         next();
     });
 
