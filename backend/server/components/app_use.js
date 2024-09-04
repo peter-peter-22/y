@@ -6,7 +6,7 @@ import fileUpload from "express-fileupload";
 import session from "express-session";
 import passport from "passport";
 import * as g from "../config.js";
-import { start } from "./email_notifications.js";//
+import { start } from "./email_notifications.js";
 const pgSession = ConnectPg(session);
 
 function initialize() {
@@ -15,7 +15,6 @@ function initialize() {
         origin: config.address_mode.client,
         credentials: true
     }));
-    const dsdsgdg=true;
 
     //express
     app.use(express.static("public"));
