@@ -31,12 +31,12 @@ function initialize() {
             secret: process.env.SESSION_SECRET,
             resave: false,
             saveUninitialized: false,
-            proxy: https ? true : true,
+            proxy: https ? true : undefined,
             cookie: {
                 secure: https, // Set to true if using HTTPS
                 sameSite: https ? "none" : "lax",
                 maxAge: config.cookie_remember,//false
-                httpOnly: false,
+                httpOnly: true,
             }
         })
     );
