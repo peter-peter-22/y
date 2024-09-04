@@ -1,8 +1,8 @@
 {
     "rewrites": [
         {
-            "source": "/app/:path*",
-            "destination": "https://yapi-peters-projects-dc325e60.vercel.app/:path*"
+            "source": "/api/:path*",
+            "destination": "https://yapi-peters-projects-dc325e60.vercel.api/:path*"
         },
         {
             "source": "/(.*)",
