@@ -15,6 +15,7 @@ function initialize() {
         origin: config.address_mode.client,
         credentials: true
     }));
+    const dsdsgdg=true;
 
     //express
     app.use(express.static("public"));
