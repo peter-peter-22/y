@@ -36,7 +36,7 @@ function initialize() {
             cookie: {
                 secure: https, // Set to true if using HTTPS
                 sameSite: https ? "none" : "lax",
-                maxAge: config.false,
+                maxAge: false,
                 httpOnly: false,
             }
         })
@@ -45,6 +45,7 @@ function initialize() {
     //update session expiration 
     app.use((req, res, next) => {
         req.session.lastVisit = new Date();
+        console.log(req.session.cookie.maxAge);
         next();
     });
 
