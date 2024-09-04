@@ -10,68 +10,57 @@ import { user_columns } from "../post_query.js";
 const router = express.Router();
 
 //routes
-{
-    router.post(
-        "/login",
-        (req, res, next) => {
-            passport.authenticate('local', function (err, user, info, status) {
-                universal_auth(req, res, err, user, info, true);
-            })(req, res, next);
-        }
-    );
-}
+router.post(
+    "/login",
+    (req, res, next) => {
+        passport.authenticate('local', function (err, user, info) {
+            universal_auth(req, res, err, user, info, true);
+        })(req, res, next);
+    }
+);
 
 //use
-{
-    passport.use(
-        "local",
-        new Strategy(
-            {
-                usernameField: 'email',    // define the parameter in req.body that passport can use as username and password
-                passwordField: 'password'
-            },
-            async function verify(email, password, cb) {
-                try {
-                    const result = await db.query(`SELECT ${user_columns},password_hash FROM users WHERE email = $1 and password_hash!=''`, [
-                        email.toLowerCase()
-                    ]);
-                    if (result.rows.length > 0) {
-                        const user = result.rows[0];
-                        if (user.password_hash === null)
-                            return cb(new Error("This email belongs to a third party login"));
-                        const storedHashedPassword = user.password_hash;
-                        bcrypt.compare(password, storedHashedPassword, (err, valid) => {
-                            if (err) {
-                                //Error with password check
-                                console.error("Error comparing passwords:", err);
-                                return cb(err);
-                            } else {
-                                if (valid) {
-                                    //Passed password check
-                                    return cb(null, user);
-                                } else {
-                                    //Did not pass password check
-                                    return cb("Wrong password", false);
-                                }
-                            }
-                        });
-                    } else {
-                        //user not found
-                        return cb("Wrong email", false);
+passport.use(
+    "local",
+    new Strategy(
+        {
+            usernameField: 'email',    // define the parameter in req.body that passport can use as username and password
+            passwordField: 'password'
+        },
+        async function verify(email, password, cb) {
+            try {
+                const result = await db.query(`SELECT ${user_columns},password_hash FROM users WHERE email = $1 and password_hash!=''`, [
+                    email.toLowerCase()
+                ]);
+                if (result.rows.length > 0) {
+                    const user = result.rows[0];
+                    if (user.password_hash === null)
+                        return cb(new Error("This email belongs to a third party login"));
+                    const storedHashedPassword = user.password_hash;
+
+                    try {
+                        await comparePasswordAsync(password, storedHashedPassword);
+                        return cb(null,user)
                     }
-                } catch (err) {
-                    console.error(err);
+                    catch (err) {
+                        return cb(err, null);
+                    }
+
+                } else {
+                    //user not found
+                    return cb("Wrong email", false);
                 }
-            })
-    );
-}
+            } catch (err) {
+                console.error(err);
+            }
+        })
+);
 
 router.post("/submit_password", async (req, res) => {
     const v = new Validator(req.body, {
         password: 'required|password',
     });
     await CheckV(v);
-
 
     if (req.session.registered_data === undefined)
         return (res.status(400).send("no registered data"));
@@ -97,6 +86,25 @@ function hashPasswordAsync(password) {
     });
 }
 
+function comparePasswordAsync(password, compareWith) {
+    return new Promise((resolve, reject) => {
+        bcrypt.compare(password, compareWith, (err, valid) => {
+            if (err) {
+                //Error with password check
+                throw (err);
+            } else {
+                if (valid) {
+                    //Passed password check
+                    resolve();
+                } else {
+                    //Did not pass password check
+                    reject("Wrong password");
+                }
+            }
+        });
+    });
+}
+
 export default router;
-export { hashPasswordAsync };
+export { hashPasswordAsync ,comparePasswordAsync};
 

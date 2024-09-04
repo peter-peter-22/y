@@ -50,7 +50,7 @@ const router = express.Router();
             const userProfile = profileResponse.data;
 
             //authenticate the user with the obtained profile then redirect
-            Authenticate(access_token, id_token, userProfile, async (err, user, info) => {
+           await Authenticate(access_token, id_token, userProfile, async (err, user, info) => {
                 await universal_auth(req, res, err, user, info);
             });
         } catch (error) {

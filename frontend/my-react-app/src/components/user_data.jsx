@@ -21,7 +21,7 @@ function UserProvider({ children }) {
     }
 
     useEffect(() => {
-            Update();
+        Update();
     }, []);
 
     useEffect(() => {
@@ -44,7 +44,7 @@ function UserProvider({ children }) {
 
         //pending third party registration
         if (getData?.pending_registration) {
-            Modals[0].Show(<CreateAccount pages={[1, 9]} finish key="external" />, ExitRegistration);
+            Modals[0].Show(<CreateAccount pages={[1, 9]} finish={finish_google_registration} key="external" />, ExitRegistration);
 
             async function ExitRegistration() {
                 try {
@@ -64,6 +64,20 @@ function UserProvider({ children }) {
             {children}
         </UserContext.Provider>
     );
+}
+
+async function finish_google_registration(data,close) {
+    try {
+        await axios.post("finish_registration",
+            {
+                birthdate: data.birthdate.toISOString(),
+                checkboxes: data.checkboxes
+            });
+        close();
+    }
+    catch (err) {
+        ThrowIfNotAxios(err);
+    }
 }
 
 export { UserProvider, UserContext };

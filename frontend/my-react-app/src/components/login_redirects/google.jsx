@@ -57,8 +57,6 @@ function LoginLink({ children }) {
     const { data } = useQuery({
         queryKey: ['google_login_link'],
         queryFn: getLink,
-        retry: false,
-        staleTime: 0
     });
 
     return <a href={data ? data : "#"}>{children}</a>

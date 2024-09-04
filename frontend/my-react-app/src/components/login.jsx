@@ -1,15 +1,16 @@
 import { Box, Typography } from '@mui/material';
+import Icon from "@mui/material/Icon";
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import axios from 'axios';
-import React, { useRef, useState,useContext } from "react";
+import React, { useCallback, useContext, useRef, useState } from "react";
 import { ThrowIfNotAxios } from "/src/communication.js";
 import { CornerButton, OutlinedButton, WideButton } from "/src/components/buttons.jsx";
-import config from "/src/components/config.js";
 import { EmailInput, RechaptaInput, validateEmail } from "/src/components/create_account";
 import { PasswordFieldWithToggle } from "/src/components/inputs";
+import { LoginLink } from '/src/components/login_redirects/google';
 import { ErrorText, Modals, SuccessModal } from "/src/components/modals";
-import { AlternativeLogin, BigModal, BigModalMargin, BottomButtonWithBorder, Or,SmallLink } from "/src/components/no_user";
+import { AlternativeLogin, BigModal, BigModalMargin, BottomButtonWithBorder, Or, SmallLink } from "/src/components/no_user";
 import { UserContext } from "/src/components/user_data";
 import { CenterLogo } from '/src/components/utilities';
 
@@ -21,7 +22,8 @@ function Login(props) {
     const pages = {
         main: ChooseMethod,
         password: EnterPassword,
-        forgot: ForgotPassword
+        forgot: ForgotPassword,
+        emailless: EmaillessLogin
     }
     const [page, setPage] = useState("main");
 
@@ -45,7 +47,7 @@ function Login(props) {
 function EnterPassword(props) {
     const dataRef = props.dataRef;
     const email = dataRef.current.email;
-    const {update}=useContext(UserContext);
+    const { update } = useContext(UserContext);
 
     //password
     const [password, setPassword] = useState("");
@@ -124,7 +126,8 @@ function ChooseMethod(props) {
                 <Typography variant="verybig_bold" sx={{ my: 4 }}>Sign-in to Y!</Typography>
 
                 <Stack direction="column" spacing={2}>
-                    <a href={config.address_mode.server + "/auth/google"}><AlternativeLogin src="/svg/google.svg" text="Sign-in with Google" /></a>
+                    <LoginLink><AlternativeLogin icon={<img src="/svg/google.svg" style={{ height: "1.5em" }} />} text="Sign-in with Google" /></LoginLink>
+                    <AlternativeLogin icon={<Icon>visibility_off</Icon>} text="Sign-in without email" onClick={() => { props.setPage("emailless"); }} />
                     {/*<a href={config.address_mode.server + "/auth/github"}><AlternativeLogin src="/svg/github.svg" text="Sign-in with Github" /></a>*/}
                     <Stack direction="row" sx={{ my: 0.5, alignItems: "center" }}>
                         <Or />
@@ -203,6 +206,47 @@ function NoAccount() {
     return (
         <Typography variant="small_fade">You have no account? <SmallLink style={{ cursor: "pointer" }} onClick={Close}>Register</SmallLink></Typography>
     );
+}
+
+function EmaillessLogin() {
+    const { update } = useContext(UserContext);
+
+    const [password, setPassword] = useState("");
+    const [username, setUsername] = useState("");
+
+    const handleUsername=useCallback(e=>{setUsername(e.target.value)});
+    const handlePassword=useCallback(e=>{setPassword(e.target.value)});
+
+    async function submit() {
+        await axios.post("/username/login", {
+            username,
+            password
+        });
+        update();
+        Close();
+    }
+
+    return (
+        <Stack direction="column" sx={{ height: "100%" }}>
+            <BigModalMargin>
+                <CenterLogo />
+                <Typography variant="verybig_bold" sx={{ my: 4 }}>Sign-in</Typography>
+                <Stack direction="column" spacing={2} style={{ flexGrow: 1 }}>
+                    <Typography variant="small_fade">Enter the @username and password of your account</Typography>
+                    <TextField autoComplete="username" variant="outlined" type="text" label="Username" onChange={handleUsername} value={username} />
+                    <PasswordFieldWithToggle variant="outlined" label="Password" sx={{ my: 3 }}
+                        onChange={handlePassword}
+                        value={password} />
+                    <WideButton onClick={submit} size="small" color="black" style={{ marginTop: "auto" }}>Login</WideButton>
+                    <Box sx={{ mt: 3 }}>
+                        <NoAccount />
+                    </Box>
+                </Stack>
+
+            </BigModalMargin>
+        </Stack>
+    );
+
 }
 
 export default Login;

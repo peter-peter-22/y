@@ -259,10 +259,10 @@ function DateLink(props) {
     );
 }
 
-function TextRow(props) {
+function TextRow({ children, ...props }) {
     return (
-        <Stack direction="row" spacing={0.5} sx={{ overflow: "hidden", alignItems: "baseline", m: 0, "& img,& icon": { alignSelf: "center" } }}>
-            {props.children}
+        <Stack direction="row" spacing={0.5} sx={{ overflow: "hidden", alignItems: "baseline", m: 0 }} {...props}>
+            {children}
         </Stack>
     );
 }
@@ -387,7 +387,7 @@ function ToggleOnlineBool(user, url, startingValue, onChange) {
             const newValue = !prev;
             update(newValue);
             if (onChange)
-                onChange(newValue,user);
+                onChange(newValue, user);
 
             return newValue;
         });

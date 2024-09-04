@@ -1,17 +1,19 @@
 import { Box, Typography } from '@mui/material';
 import Divider from '@mui/material/Divider';
+import Icon from "@mui/material/Icon";
 import Stack from '@mui/material/Stack';
+import axios from "axios";
 import React from "react";
 import { Route, Routes } from "react-router-dom";
+import { ThrowIfNotAxios } from "/src/communication.js";
 import { OutlinedButton, WideButton } from "/src/components/buttons.jsx";
-import config from "/src/components/config.js";
 import CreateAccount from "/src/components/create_account.jsx";
 import links from "/src/components/footer_links";
 import Login from "/src/components/login.jsx";
-import { Modals } from "/src/components/modals";
-import { StyledLink, TextRow, creation, logo, AboveBreakpoint } from '/src/components/utilities';
-import Error from "/src/pages/error";
 import { LoginLink } from '/src/components/login_redirects/google';
+import { Modals } from "/src/components/modals";
+import { AboveBreakpoint, StyledLink, creation, logo } from '/src/components/utilities';
+import Error from "/src/pages/error";
 
 function Main() {
     const wide = AboveBreakpoint("md");
@@ -19,6 +21,11 @@ function Main() {
     function showCreator()//show local registration inputs
     {
         Modals[0].Show(<CreateAccount pages={[0, 1, 2, 3, 4]} key="local" />);
+    }
+
+    function showUsernameCreator()//show username registration inputs
+    {
+        Modals[0].Show(<CreateAccount pages={[10, 11]} key="username" finish={finishUsernameRegistration} />);
     }
 
     function showLogin() {
@@ -37,7 +44,8 @@ function Main() {
                         Join today.
                     </Typography>
                     <Stack direction="column" spacing={1} style={{ width: "300px" }}>
-                        <LoginLink><AlternativeLogin src="/svg/google.svg" text="Sign-up with Google" /></LoginLink>
+                        <LoginLink><AlternativeLogin icon={<img src="/svg/google.svg" style={{ height: "1.5em" }} />} text="Sign-up with Google" /></LoginLink>
+                        <AlternativeLogin icon={<Icon>visibility_off</Icon>} text="Register without email" onClick={showUsernameCreator} />
                         {/*<a href={config.address_mode.server+"/auth/github"}><AlternativeLogin src="/svg/github.svg" text="Sign-up with Github" /></a>*/}
                         <Stack direction="row" sx={{ my: 0.5, alignItems: "center" }}>
                             <Or />
@@ -63,6 +71,21 @@ function Main() {
     );
 }
 
+async function finishUsernameRegistration(data, close,update) {
+    try {
+        await axios.post("/username/register",
+            {
+                name: data.name,
+                password: data.password
+            }
+        );
+        update();
+    }
+    catch (err) {
+        ThrowIfNotAxios(err);
+    }
+}
+
 export default () => {
     return (
         <Routes>
@@ -71,13 +94,13 @@ export default () => {
         </Routes>
     );
 }
-function AlternativeLogin(props) {
+function AlternativeLogin({ icon, size, ...props }) {
     return (
-        <OutlinedButton onClick={props.onClick} size={props.size ? props.size : "medium"}>
-            <TextRow>
-                <img src={props.src} style={{ height: "1.5em" }} />
+        <OutlinedButton {...props} size={size ? size : "medium"}>
+            <Stack direction="row" spacing={0.5} style={{ height: "100%", alignItems: "center" }}>
+                {icon}
                 <span>{props.text}</span>
-            </TextRow>
+            </Stack>
         </OutlinedButton >
     );
 }

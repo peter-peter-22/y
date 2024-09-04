@@ -5,9 +5,11 @@ import { basename } from "path";
 import GithubRoutes from "./passport_strategies/github.js";
 import GoogleRoutes from "./passport_strategies/google.js";
 import LocalRoutes from "./passport_strategies/local.js";
+import UsernameRoutes from "./passport_strategies/username.js";
 import { user_columns } from "./post_query.js";
 import { CheckV, CheckErr } from "./validations.js";
 import { notif_types } from "../routes/web_push.js";
+import requestIp from "request-ip";
 
 const emailsEnabled = {};
 ["email_enabled", ...Object.values(notif_types)].forEach(el => {
@@ -22,6 +24,7 @@ const router = express.Router();
     router.use(LocalRoutes);
     router.use(GoogleRoutes);
     router.use(GithubRoutes);
+    router.use("/username/",UsernameRoutes);
 }
 
 router.get("/logout", (req, res) => {
@@ -102,18 +105,20 @@ router.post("/finish_registration", async (req, res) => {
 
 async function finish_registration(req, res, name, email, password_hash, birthdate, checkboxes) {
     try {
+        const clientIp = requestIp.getClientIp(req);
         const uniquefied_name = await unique_username(name);
         const result = await db.query(
             named(`
-            INSERT INTO users (username,name,email,password_hash,birthdate,settings) 
-            VALUES (:username, :name,:email,:password_hash,:birthdate,:settings) 
+            INSERT INTO users (username,name,email,password_hash,birthdate,settings,ip) 
+            VALUES (:username, :name,:email,:password_hash,:birthdate,:settings,:ip) 
             RETURNING ${user_columns}`,)({
                 username: uniquefied_name,
                 name: name,
-                email: email.toLowerCase(),
+                email: email?email.toLowerCase():null,
                 password_hash: password_hash,
                 birthdate: birthdate,
-                settings: checkboxes.includes("emails") ? emailsEnabled : null
+                settings: checkboxes.includes("emails") ? emailsEnabled : null,
+                ip:clientIp
             })
         );
 
@@ -147,12 +152,12 @@ async function unique_username(baseName) {//ha rövid nevet ír be akkor sok avo
     //try add a number to the base name until reaching an unique name
     for (let n = 0; n <= maxNumber; n++) {
         const attempt = baseName + n;
-        if (!avoid.incudes(attempt))
+        if (!avoid.includes(attempt))
             return attempt;
     }
     //if the base name is too long and all numbered versions are taken, return only a number
     for (let n = 0; n <= Number.MAX_SAFE_INTEGER; n++) {
-        if (!avoid.incudes(n))
+        if (!avoid.includes(n))
             return n;
     }
     //unique name cannot be created, returning base name

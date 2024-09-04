@@ -20,15 +20,16 @@ import config from "/src/components/config.js";
 import { PasswordFieldWithToggle, VisuallyHiddenInput } from "/src/components/inputs";
 import { fileToMedia } from '/src/components/media';
 import { Modals } from "/src/components/modals";
-import { BigModal, BottomButtonWithBorder, ByRegistering, ModalMargin ,SmallLink} from "/src/components/no_user";
+import { BigModal, BottomButtonWithBorder, ByRegistering, ModalMargin, SmallLink } from "/src/components/no_user";
 import { UserContext } from "/src/components/user_data";
 import { AvatarImageDisplayer, CenterLogo, GetProfilePicture } from '/src/components/utilities';
 import { UserListExtended } from "/src/pages/follow_people";
 import Ask from "/src/components/web_push.js";
 
-function CreateAccount(props) {
+function CreateAccount({ pages = [0], finish, close }) {
     //only the selected pages are rendered
-    const pages = props.pages ? props.pages : [0];
+
+    const { update } = useContext(UserContext);
 
     //the values of the pages that is not sent to the server directly on submit (like email,birthdate)
     const dataRef = useRef({});
@@ -39,8 +40,8 @@ function CreateAccount(props) {
 
     function handleNext() {
         if (stepIndex >= pages.length - 1) {
-            if (props.finish)
-                send_finish();
+            if (finish)
+                finish(dataRef.current, close,update);
             else
                 close();
         }
@@ -57,21 +58,6 @@ function CreateAccount(props) {
     function close() {
         Modals[0].Close();
     }
-    async function send_finish() {
-        try {
-            const data=dataRef.current;
-            await axios.post("finish_registration",
-                {
-                    birthdate: data.birthdate.toISOString(),
-                    checkboxes: data.checkboxes
-                });
-            close();
-        }
-        catch (err) {
-            ThrowIfNotAxios(err);
-        }
-    }
-
 
     //step renderer
     const pageIndex = pages[stepIndex];
@@ -85,13 +71,15 @@ function CreateAccount(props) {
         Page6,
         Page7,
         Page8,
-        Page9
+        Page9,
+        Page10,
+        Page11
     ];
     const RenderPage = pageRenderers[pageIndex];
 
     //render the chosen page
     return (
-        <BigModal close={props.close} open={true}>
+        <BigModal close={close} open={true}>
             <CornerButton onClick={handleBack}>{allowBack ? "arrow_back" : "close"}</CornerButton>
             <RenderPage dataRef={dataRef} handleNext={handleNext} />
         </BigModal>
@@ -262,7 +250,7 @@ function Page3(props)//submit verification code
     const [data, handleNext] = GetProps(props);
     const [code, setCode] = useState("");
     const codeOk = code.length > 0;
-    const [loading,setLoading]=useState(false);
+    const [loading, setLoading] = useState(false);
 
     function handleCode(e) {
         setCode(e.target.value);
@@ -306,17 +294,10 @@ function Page3(props)//submit verification code
     );
 }
 
-function Page4(props)//enter password, login
-{
-    const [data, handleNext] = GetProps(props);
-    const [password, setPassword] = useState('');
-    const [passwordOk, setPasswordOk] = useState();
-    const {update}=useContext(UserContext);
+function Page4(props) {
+    const { update } = useContext(UserContext);
 
-    async function submitPassword() {
-        if (!passwordOk)
-            return;
-
+    async function onSubmit(password, data, handleNext) {
         try {
             await axios.post('submit_password',
                 {
@@ -329,6 +310,31 @@ function Page4(props)//enter password, login
         catch (err) {
             ThrowIfNotAxios(err);
         }
+    }
+
+    return <Page4Any onSubmit={onSubmit} {...props} />
+}
+
+function Page11(props) {
+    async function onSubmit(password, data, handleNext) {
+        data.current.password = password;
+        handleNext();
+    }
+
+    return <Page4Any onSubmit={onSubmit} {...props} />
+}
+
+function Page4Any(props)//enter password, and decide what to do after it
+{
+    const [data, handleNext] = GetProps(props);
+    const [password, setPassword] = useState('');
+    const [passwordOk, setPasswordOk] = useState();
+
+    async function submitPassword() {
+        if (!passwordOk)
+            return;
+
+        props.onSubmit(password, data, handleNext);
     }
 
     return (
@@ -351,7 +357,7 @@ function Page5(props)//upload profile picture
 {
     const [data, handleNext] = GetProps(props);
     const [file, setFile] = useState();
-    const [uploading,setUploading]=useState(false);
+    const [uploading, setUploading] = useState(false);
 
     async function submitImage() {
         if (file !== undefined) {
@@ -430,7 +436,7 @@ function Page6(props)//enter username
                 <Typography variant="verybig_bold" sx={{ mt: 4 }}>How should we call you?</Typography>
                 <Typography variant="small_fade" sx={{ mt: 3 }}>The @username is unique. You can modify it anytime.</Typography>
                 <UserNameEditor onChangeUserName={setUserName} onChangeOk={setUserNameOk} />
-                <WideButton color="black" sx={{ my: 3 }}
+                <WideButton color="black" sx={{ mb: 3,mt:"auto" }}
                     onClick={submitUsername} disabled={!usernameOk}>Next</WideButton>
             </ModalMargin>
         </Stack>
@@ -447,9 +453,9 @@ function Page7(props)//notifications
                 enabled: enabled
             });
             handleNext();
-        }  catch (err) {
-                ThrowIfNotAxios(err);
-            }
+        } catch (err) {
+            ThrowIfNotAxios(err);
+        }
     }
 
     return (
@@ -499,6 +505,34 @@ function Page9(props)//only date of birth
                 <CenterLogo />
                 <EnterBirthDate onChangeDate={setDate} onChangeOk={setDateOk} />
                 <WideButton color="black" disabled={!dateOk} sx={{ mt: "auto", mb: 3 }}
+                    onClick={Submit}>Next</WideButton>
+            </ModalMargin>
+        </Stack>
+    );
+}
+
+function Page10(props)//only name
+{
+    const [data, handleNext] = GetProps(props);
+    const [name, setName] = useState("");
+    const [nameOk, setNameOk] = useState(false);
+
+    function Submit() {
+        if (nameOk) {
+            data.current.name = name;
+            handleNext();
+        }
+    }
+
+    return (
+        <Stack direction="column" sx={{ height: "100%" }}>
+            <ModalMargin>
+                <CenterLogo />
+                <Typography variant="verybig_bold" sx={{ my: 4 }}>Sign-up to Y!</Typography>
+                <Typography variant="small_fade" sx={{ mb: 3 }}>Only a username and a password is needed. Email address is not necessary for the sake of privacy.</Typography>
+                <NameEditor onChangeName={setName} onChangeOk={setNameOk} />
+                <ByRegistering variant="small_fade" sx={{ mt: "auto" }} />
+                <WideButton color="black" disabled={!nameOk} sx={{ mt: 3, mb: 3 }}
                     onClick={Submit}>Next</WideButton>
             </ModalMargin>
         </Stack>
@@ -578,16 +612,16 @@ function GetProps(props) {
     return [data, handleNext];
 }
 
-function WaitAfterChange(cb, timerRef,wait=300) {
+function WaitAfterChange(cb, timerRef, wait = 300) {
     clearTimeout(timerRef.current);
     timerRef.current = setTimeout(() => {
         cb();
     }, wait);
 }
 
-const ProfilePicEditor = memo(({user,size : overwriteSize,onUploadFile})=> {
+const ProfilePicEditor = memo(({ user, size: overwriteSize, onUploadFile }) => {
     const size = overwriteSize ? overwriteSize : "100px";
-    const current=user?GetProfilePicture(user):undefined;
+    const current = user ? GetProfilePicture(user) : undefined;
 
     function ProfileDisplayer({ media, button }) {
         return (
@@ -602,7 +636,7 @@ const ProfilePicEditor = memo(({user,size : overwriteSize,onUploadFile})=> {
         <ChangeablePicture displayer={ProfileDisplayer} current={current} onUploadFile={onUploadFile} />
     );
 },
-(prev,now)=>prev.user===now.user);
+    (prev, now) => prev.user === now.user);
 
 function ChangeablePicture(props) {
     const [file, setFile] = useState();
@@ -632,7 +666,7 @@ function ChangeablePicture(props) {
     function ChangeButton() {
         return (
             <Fab size="small" color="transparentBlack" sx={{ border: 1, borderColor: "divider", position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}>
-                <VisuallyHiddenInput type="file" accept={config.accepted_image_types} onChange={handleFile} onClick={(e)=>e.stopPropagation()}/>
+                <VisuallyHiddenInput type="file" accept={config.accepted_image_types} onChange={handleFile} onClick={(e) => e.stopPropagation()} />
                 <Icon baseClassName="material-icons-outlined">
                     add_a_photo
                 </Icon>
@@ -653,7 +687,7 @@ function UserNameEditor(props) {
     const changedUserName = props.onChangeUserName;
     const changedOk = props.onChangeOk;
     const timerRef = useRef();
-    const {getData}=useContext(UserContext); 
+    const { getData } = useContext(UserContext);
 
     useEffect(() => {
         if (changedOk)
@@ -677,9 +711,9 @@ function UserNameEditor(props) {
                     });
                     setUserNameOk(res.data);
                 }
-                 catch (err) {
-                ThrowIfNotAxios(err);
-            }
+                catch (err) {
+                    ThrowIfNotAxios(err);
+                }
             }
         }, timerRef);
     }

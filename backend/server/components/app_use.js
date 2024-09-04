@@ -9,6 +9,7 @@ import * as g from "../config.js";
 import { start } from "./email_notifications.js";
 const pgSession = ConnectPg(session);
 
+
 function initialize() {
     //cors
     app.use(cors({
@@ -31,12 +32,12 @@ function initialize() {
             secret: process.env.SESSION_SECRET,
             resave: false,
             saveUninitialized: false,
-            proxy: process.env.PROXY==="true",
+            proxy: process.env.PROXY === "true",
             cookie: {
                 secure: https, // Set to true if using HTTPS
                 sameSite: "lax",
-                maxAge: config.cookie_remember,//false
-                httpOnly: true,
+                maxAge: false,
+                httpOnly: true
             }
         })
     );
@@ -44,7 +45,6 @@ function initialize() {
     //update session expiration 
     app.use((req, res, next) => {
         req.session.lastVisit = new Date();
-        //console.log(`maxAge: ${req.session.cookie.maxAge} expires: ${req.session.cookie.expires}`);
         next();
     });
 
