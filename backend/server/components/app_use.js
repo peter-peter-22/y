@@ -34,7 +34,7 @@ function initialize() {
             proxy: process.env.PROXY==="true",
             cookie: {
                 secure: https, // Set to true if using HTTPS
-                sameSite: "lax",
+                sameSite: https ? "lax" : "lax",
                 maxAge: config.cookie_remember,//false
                 httpOnly: true,
             }
