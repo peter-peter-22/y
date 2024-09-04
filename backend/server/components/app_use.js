@@ -32,12 +32,12 @@ function initialize() {
             resave: false,
             saveUninitialized: false,
             proxy: https ? true : undefined,
-            name: https?"y_cookie_vercel":"local_cookie",
+            name: https ? "y_cookie" : "local_cookie",
             cookie: {
                 secure: https, // Set to true if using HTTPS
                 sameSite: https ? "none" : "lax",
                 maxAge: false,
-                httpOnly: true,
+                httpOnly: false,
             }
         })
     );
@@ -45,7 +45,7 @@ function initialize() {
     //update session expiration 
     app.use((req, res, next) => {
         req.session.lastVisit = new Date();
-        console.log(`maxAge: ${req.session.cookie.maxAge} expires: ${req.session.cookie.expires}`);
+        //console.log(`maxAge: ${req.session.cookie.maxAge} expires: ${req.session.cookie.expires}`);
         next();
     });
 
