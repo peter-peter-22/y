@@ -31,8 +31,7 @@ function initialize() {
             secret: process.env.SESSION_SECRET,
             resave: false,
             saveUninitialized: false,
-            proxy: https ? true : undefined,
-            name: https ? "y_cookie" : "local_cookie",
+            proxy: https ? true : true,
             cookie: {
                 secure: https, // Set to true if using HTTPS
                 sameSite: https ? "none" : "lax",
