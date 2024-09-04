@@ -42,7 +42,7 @@ function NotificationsTab({ tab }) {
 }
 
 function Header() {
-const {getData}=useContext(UserContext);
+    const { getData } = useContext(UserContext);
 
     const tabs = {
         home: new Tab(
@@ -242,9 +242,11 @@ const {getData}=useContext(UserContext);
         ];
         const myTabs = selectedTabs.map(tab => tabs[tab]);
         return (
-            <Stack direction={"column"} style={{ position: "fixed", bottom: 0, left: 0, width: "100%", zIndex: 2, }}>
-                <PostButton sx={{ alignSelf: "end", m: 2 }} />
-                <Box sx={{ py: 1, backgroundColor: "background.default", zIndex: 2, borderTop: 1, borderColor: "divider" }}>
+            <Stack direction={"column"} style={{ position: "fixed", bottom: 0, left: 0, width: "100%", zIndex: 2, pointerEvents: "none" }}>
+                <Box sx={{ alignSelf: "end", m: 2 }} style={{ pointerEvents: "all" }}>
+                    <PostButton />
+                </Box>
+                <Box sx={{ py: 1, backgroundColor: "background.default", zIndex: 2, borderTop: 1, borderColor: "divider" }} style={{ pointerEvents: "all" }}>
                     <Stack direction={"row"} style={{ width: "100%", justifyContent: "space-around" }}>
                         {myTabs.map((tab, index) =>
                             <BottomTabButton

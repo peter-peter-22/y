@@ -5,7 +5,8 @@ import {
 } from '@tanstack/react-query';
 import { useWindowVirtualizer } from '@tanstack/react-virtual';
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
-import { Loading } from "/src/components/utilities";
+import { Loading, AboveBreakpoint } from "/src/components/utilities";
+
 
 const lastIndexes = {};
 
@@ -20,6 +21,7 @@ const OnlineList = forwardRef(({ exampleSize = 100, EntryMapper, getEntries, ove
     const listRef = useRef(null);
     const queryClient = useQueryClient();
     const [version, setVersion] = useState(0);
+    const addMargin = !AboveBreakpoint("bottomTabs");
 
     //update the virtualized rows
     const update = useCallback(() => setVersion(prev => prev + 1));
@@ -118,8 +120,8 @@ const OnlineList = forwardRef(({ exampleSize = 100, EntryMapper, getEntries, ove
         setTimeout(() => {
             //console.log("loaded " + loaded);
             if (scrollRestoration)
-                virtualizer.scrollToIndex(loaded?loaded:0, { align: "middle" });
-        },200);
+                virtualizer.scrollToIndex(loaded ? loaded : 0, { align: "middle" });
+        }, 200);
     }, [id, virtualizer, scrollRestoration]);
 
     //save the last rendered location
@@ -146,6 +148,7 @@ const OnlineList = forwardRef(({ exampleSize = 100, EntryMapper, getEntries, ove
                         height: `${virtualizer.getTotalSize()}px`,
                         width: '100%',
                         position: 'relative',
+                        marginBottom: addMargin ? 70 : 0
                     }}
                 >
                     <div
