@@ -8,11 +8,11 @@ import { ThrowIfNotAxios } from "/src/communication.js";
 import { CornerButton, OutlinedButton, WideButton } from "/src/components/buttons.jsx";
 import { EmailInput, RechaptaInput, validateEmail } from "/src/components/create_account";
 import { PasswordFieldWithToggle } from "/src/components/inputs";
-import { LoginLink } from '/src/components/login_redirects/google';
 import { ErrorText, Modals, SuccessModal } from "/src/components/modals";
 import { AlternativeLogin, BigModal, BigModalMargin, BottomButtonWithBorder, Or, SmallLink } from "/src/components/no_user";
 import { UserContext } from "/src/components/user_data";
 import { CenterLogo } from '/src/components/utilities';
+import { LoginLink } from '/src/components/login_redirects/google';
 
 function Login(props) {
     //shared data

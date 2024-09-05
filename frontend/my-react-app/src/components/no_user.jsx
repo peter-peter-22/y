@@ -10,10 +10,10 @@ import { OutlinedButton, WideButton } from "/src/components/buttons.jsx";
 import CreateAccount from "/src/components/create_account.jsx";
 import links from "/src/components/footer_links";
 import Login from "/src/components/login.jsx";
-import { LoginLink } from '/src/components/login_redirects/google';
 import { Modals } from "/src/components/modals";
 import { AboveBreakpoint, StyledLink, creation, logo } from '/src/components/utilities';
 import Error from "/src/pages/error";
+import { LoginLink } from '/src/components/login_redirects/google';
 
 function Main() {
     const wide = AboveBreakpoint("md");

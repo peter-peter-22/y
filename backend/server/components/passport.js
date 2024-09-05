@@ -22,9 +22,9 @@ const router = express.Router();
 //strategies
 {
     router.use(LocalRoutes);
-    router.use(GoogleRoutes);
+    router.use("/google",GoogleRoutes);
     router.use(GithubRoutes);
-    router.use("/username/",UsernameRoutes);
+    router.use("/username/", UsernameRoutes);
 }
 
 router.get("/logout", (req, res) => {
@@ -57,7 +57,7 @@ function auth(req, res) {
     }
 }
 
-async function universal_auth(req, res, err, user, info) {
+async function universal_auth(req, res, err, user, info, redirect) {
     try {
         if (err) { throw err; }
         if (!user) {
@@ -65,7 +65,11 @@ async function universal_auth(req, res, err, user, info) {
                 remember_session(req, config.cookie_remember);
                 req.session.pending_data = info.registering
                 req.session.pending_registration = true;
-                res.sendStatus(200);
+
+                if (redirect)
+                    res.redirect(config.address_mode.client);
+                else
+                    res.sendStatus(200);
             }
             else
                 throw new Error("failed to get user");
@@ -74,7 +78,11 @@ async function universal_auth(req, res, err, user, info) {
             req.logIn(user, function (err) {
                 if (err) { throw err; }
                 remember_session(req, config.cookie_remember);
-                res.sendStatus(200);
+
+                if (redirect)
+                    res.redirect(config.address_mode.client);
+                else
+                    res.sendStatus(200);
             });
         }
     }
@@ -114,11 +122,11 @@ async function finish_registration(req, res, name, email, password_hash, birthda
             RETURNING ${user_columns}`,)({
                 username: uniquefied_name,
                 name: name,
-                email: email?email.toLowerCase():null,
+                email: email ? email.toLowerCase() : null,
                 password_hash: password_hash,
                 birthdate: birthdate,
                 settings: checkboxes.includes("emails") ? emailsEnabled : null,
-                ip:clientIp
+                ip: clientIp
             })
         );
 
