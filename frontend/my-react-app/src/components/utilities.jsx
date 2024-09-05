@@ -18,6 +18,17 @@ import { Media, MediaDisplayer, MediaFromFileData, mediaTypes } from "/src/compo
 import { ClickableSingleImageContainer } from "/src/components/post_media";
 import { OpenOnClick } from "/src/components/posts";
 import { theme } from '/src/styles/mui/my_theme.jsx';
+import Drawer from '@mui/material/Drawer';
+import Button from '@mui/material/Button';
+import Divider from '@mui/material/Divider';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import InboxIcon from '@mui/icons-material/MoveToInbox';
+import MailIcon from '@mui/icons-material/Mail';
+import { UserContext } from "/src/components/user_data";
+import { useContext } from 'react';
+import { BottomTabButton, ButtonIcon, ButtonSvg, PostButton, ProfileButton, ResponsiveButton, TabButton } from "./buttons.jsx";
+import { LeftTabsMobile } from "/src/components/header";
 
 const noOverflow = {
     whiteSpace: 'nowrap',
@@ -69,22 +80,13 @@ function AboveValue(value) {
 
 function TopMenu(props) {
     return (
-        <NavMenu style={{
+        <div style={{
             position: "sticky",
             top: 0,
             zIndex: 1051
         }}>
-            <div style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                width: "100%",
-                height: "100%",
-                backgroundColor: alpha(theme.palette.background.default, 0.8),
-                backdropFilter: "blur(5px)"
-            }} />
             {props.children}
-        </NavMenu>
+        </div>
     );
 }
 
@@ -169,30 +171,68 @@ function BoldLink(props) {
 
 function TabSwitcher(props) {
     const [getTab, setTab] = React.useState(0);
+    const { getData } = useContext(UserContext);
+    const [showTabs, setShowTags] = useState(false);
+
+    const hideTabs = AboveBreakpoint("bottomTabs");
+    const selectedTab = props.tabs[getTab];
 
     function SelectTab(tabIndex) {
         setTab(tabIndex);
     }
 
-    const selectedTab = props.tabs[getTab];
+    const setDrawer = (open) => () => {
+        setShowTags(open);
+    }
 
     return (
         <>
             <TopMenu>
-                <Box sx={{ borderBottom: 1, borderColor: 'divider', height: "100%", width: "100%", display: "flex", alignItems: "center", flexDirection: "row", position: "relative" }}>
-                    {props.tabs.map((tab, index) => {
-                        return (
-                            <TopMenuButton
-                                selected={getTab === index}
-                                onClick={() => {
-                                    SelectTab(index);
-                                }}
-                                key={index}>
-                                {tab.text}
-                            </TopMenuButton>);
-                    })}
-                    {props.children}
-                </Box>
+
+                <div style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    height: "100%",
+                    backgroundColor: alpha(theme.palette.background.default, 0.8),
+                    backdropFilter: "blur(5px)"
+                }} />
+
+                {!hideTabs &&
+                    <NavMenu style={{ position: "relative", display: "flex" }}>
+                        <div style={{ height: "100%", width: "100%", position: "absolute", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                            <img src={logo} style={{ height: "80%" }} />
+                        </div>
+                        <ProfilePic user={getData.user} style={{ alignSelf: "center", marginLeft: 5 }} disabled onClick={setDrawer(true)} />
+                    </NavMenu>
+                }
+
+                <NavMenu>
+                    <Box sx={{ borderBottom: 1, borderColor: 'divider', height: "100%", width: "100%", display: "flex", alignItems: "center", flexDirection: "row", position: "relative" }}>
+                        {props.tabs.map((tab, index) => {
+                            return (
+                                <TopMenuButton
+                                    selected={getTab === index}
+                                    onClick={() => {
+                                        SelectTab(index);
+                                    }}
+                                    key={index}>
+                                    {tab.text}
+                                </TopMenuButton>);
+                        })}
+                        {props.children}
+                    </Box>
+                </NavMenu>
+
+                <Drawer
+                    anchor={"left"}
+                    open={showTabs}
+                    onClose={setDrawer(false)}
+                >
+                    <LeftTabsMobile />
+                </Drawer>
+
             </TopMenu>
             <div style={{ position: "relative" }}>
                 {selectedTab.contents}

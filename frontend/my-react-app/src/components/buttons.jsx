@@ -140,26 +140,26 @@ function PostButton(props) {
         Modals[0].Close();
     }
     return (
-            <ResponsiveSelector breakpoint={smallerButtons}
-                above={
-                    <WideButton color="primary" style={{ flexShrink: 0 }} {...props} onClick={handlePost}>
-                        <Typography variant="big_bold" color="primary.contrastText">Post</Typography>
-                    </WideButton>
-                }
-                below={
-                    <Fab size="medium" color="primary" style={{ flexShrink: 0 }} {...props} onClick={handlePost}>
-                        <ButtonIcon icon="create" filled="true" />
-                    </Fab>
-                }
-            />
+        <ResponsiveSelector breakpoint={smallerButtons}
+            above={
+                <WideButton color="primary" style={{ flexShrink: 0 }} {...props} onClick={handlePost}>
+                    <Typography variant="big_bold" color="primary.contrastText">Post</Typography>
+                </WideButton>
+            }
+            below={
+                <Fab size="medium" color="primary" style={{ flexShrink: 0 }} {...props} onClick={handlePost}>
+                    <ButtonIcon icon="create" filled="true" />
+                </Fab>
+            }
+        />
     );
 }
 
 
 function ProfileButton() {
     const size = "60px";
-    const {getData,update} = useContext(UserContext);
-    const user=getData.user;
+    const { getData, update } = useContext(UserContext);
+    const user = getData.user;
 
     const { handleOpen, ShowPopover } = SimplePopOver();
 
