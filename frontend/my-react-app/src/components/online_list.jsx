@@ -116,10 +116,15 @@ const OnlineList = forwardRef(({ exampleSize = 100, EntryMapper, getEntries, ove
 
     //load the last rendered location
     useEffect(() => {
+        if (!scrollRestoration)
+            return;
+
         const loaded = lastIndexes[id];
         setTimeout(() => {
             //console.log("loaded " + loaded);
-            if (scrollRestoration)
+            if (allRows.length === 0)
+                window.scrollTo(0, 0);
+            else
                 virtualizer.scrollToIndex(loaded ? loaded : 0, { align: "middle" });
         }, 200);
     }, [id, virtualizer, scrollRestoration]);
