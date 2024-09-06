@@ -127,10 +127,11 @@ const OnlineList = forwardRef(({ exampleSize = 100, EntryMapper, getEntries, ove
             else
                 virtualizer.scrollToIndex(loaded ? loaded : 0, { align: "middle" });
         }, 100);
-    }, [id, virtualizer, scrollRestoration]);
+    }, []);
 
     //save the last rendered location
     useEffect(() => {
+        console.log(`items: ${items.length}`)
         if (items.length !== 0) {
             const row = items[Math.floor((items.length - 1) / 2)].index;
             if (row < 20)
@@ -138,7 +139,7 @@ const OnlineList = forwardRef(({ exampleSize = 100, EntryMapper, getEntries, ove
             console.log("saved " + row);
             lastIndexes[id] = row;
         }
-    }, [items, id, overscan]);
+    }, [items]);
 
 
     return (
