@@ -9,7 +9,7 @@ import {
   QueryClientProvider,
 } from '@tanstack/react-query';
 import 'material-icons/iconfont/material-icons.css';
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import { BrowserRouter } from "react-router-dom";
 import { CreateModals } from "/src/components/modals";
 import SharedPages from "/src/components/shared_pages_router";

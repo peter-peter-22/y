@@ -1,6 +1,7 @@
 import { alpha, Box, Typography } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import CircularProgress from '@mui/material/CircularProgress';
+import Drawer from '@mui/material/Drawer';
 import Fab from '@mui/material/Fab';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
@@ -10,25 +11,16 @@ import Stack from '@mui/material/Stack';
 import Tooltip from '@mui/material/Tooltip';
 import axios from 'axios';
 import Moment from "moment";
-import React, { forwardRef, memo, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import React, { forwardRef, memo, useContext, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { Link, NavLink } from "react-router-dom";
 import { ThrowIfNotAxios } from "/src/communication.js";
 import { TopMenuButton } from "/src/components/buttons.jsx";
+import { LeftTabsMobile } from "/src/components/header";
 import { Media, MediaDisplayer, MediaFromFileData, mediaTypes } from "/src/components/media.jsx";
 import { ClickableSingleImageContainer } from "/src/components/post_media";
 import { OpenOnClick } from "/src/components/posts";
-import { theme } from '/src/styles/mui/my_theme.jsx';
-import Drawer from '@mui/material/Drawer';
-import Button from '@mui/material/Button';
-import Divider from '@mui/material/Divider';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import InboxIcon from '@mui/icons-material/MoveToInbox';
-import MailIcon from '@mui/icons-material/Mail';
 import { UserContext } from "/src/components/user_data";
-import { useContext } from 'react';
-import { BottomTabButton, ButtonIcon, ButtonSvg, PostButton, ProfileButton, ResponsiveButton, TabButton } from "./buttons.jsx";
-import { LeftTabsMobile } from "/src/components/header";
+import { theme } from '/src/styles/mui/my_theme.jsx';
 
 const noOverflow = {
     whiteSpace: 'nowrap',
