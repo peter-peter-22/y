@@ -121,7 +121,7 @@ const OnlineList = forwardRef(({ exampleSize = 100, EntryMapper, getEntries, ove
 
         const loaded = lastIndexes[id];
         setTimeout(() => {
-            console.log("loaded " + loaded + " rows: " + allRows.length);
+            //console.log("loaded " + loaded + " rows: " + allRows.length);
             if (allRows.length === 0)
                 window.scrollTo(0, 0);
             else
@@ -131,12 +131,9 @@ const OnlineList = forwardRef(({ exampleSize = 100, EntryMapper, getEntries, ove
 
     //save the last rendered location
     useEffect(() => {
-        console.log(`items: ${items.length}`)
         if (items.length !== 0) {
             const row = items[Math.floor((items.length - 1) / 2)].index;
-            if (row < 20)
-                return;
-            console.log("saved " + row);
+            //console.log("saved " + row);
             lastIndexes[id] = row;
         }
     }, [items]);
