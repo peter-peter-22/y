@@ -22,26 +22,30 @@ async function send() {
     });
     console.log("service worker registered");
 
-    setTimeout(async () => {
+    await asyncTimeout(200);
 
-        //register push
-        console.log("registering push");
-        const subscription = await register.pushManager.subscribe({
-            userVisibleOnly: true,
-            applicationServerKey: publicVapidKey
-        });
-        console.log("push registered");
+    //register push
+    console.log("registering push");
+    const subscription = await register.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: publicVapidKey
+    });
+    console.log("push registered");
 
-        //send push notification
-        console.log("sending subscription to server");
-        await axios.post("subscribe",
-            { subscription: subscription }
-        );
-        console.log("subscription sent");
+    //send push notification
+    console.log("sending subscription to server");
+    await axios.post("subscribe",
+        { subscription: subscription }
+    );
+    console.log("subscription sent");
+}
 
-    }, (200));
-
-
+function asyncTimeout(time) {
+    return new Promise(res => {
+        setTimeout(() => {
+            res();
+        }, time);
+    })
 }
 
 export default Ask;
