@@ -150,7 +150,7 @@ async function finish_registration(req, res, name, email, password_hash, birthda
 }
 
 async function unique_username(baseName) {//ha rövid nevet ír be akkor sok avoid lesz és ez hibát okozhat
-    const result = await db.query(named("SELECT username FROM users WHERE name LIKE :baseName || '%'")({ baseName: baseName }));
+    const result = await db.query(named("SELECT username FROM users WHERE username LIKE :baseName || '%'")({ baseName: baseName }));
     if (result.rowCount === 0)
         return baseName;
     const avoid = result.rows.map(row => row.username);

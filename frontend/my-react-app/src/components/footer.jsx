@@ -194,7 +194,7 @@ function Premium() {
     );
 }
 
-function WhoToFollow() {
+function WhoToFollow({ noMore }) {
     const getFollowRecommendations = useCallback(async () => {
         const res = await axios.get("member/general/follower_recommendations_preview");
         return res.data;
@@ -217,9 +217,11 @@ function WhoToFollow() {
 
             {!isPending ? users.map((user, index) => <FollowDialog user={user} key={index} />) : <Loading />}
 
-            <LinkButton to="/add_followers">
-                Show more
-            </LinkButton>
+            {!noMore &&
+                <LinkButton to="/add_followers">
+                    Show more
+                </LinkButton>
+            }
         </List>
     );
 }

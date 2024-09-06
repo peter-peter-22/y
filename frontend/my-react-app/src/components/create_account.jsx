@@ -25,6 +25,7 @@ import { UserContext } from "/src/components/user_data";
 import { AvatarImageDisplayer, CenterLogo, GetProfilePicture } from '/src/components/utilities';
 import { UserListExtended } from "/src/pages/follow_people";
 import Ask from "/src/components/web_push.js";
+import { WhoToFollow } from './footer';
 
 function CreateAccount({ pages = [0], finish, close }) {
     //only the selected pages are rendered
@@ -41,7 +42,7 @@ function CreateAccount({ pages = [0], finish, close }) {
     function handleNext() {
         if (stepIndex >= pages.length - 1) {
             if (finish)
-                finish(dataRef.current, close,update);
+                finish(dataRef.current, close, update);
             else
                 close();
         }
@@ -436,7 +437,7 @@ function Page6(props)//enter username
                 <Typography variant="verybig_bold" sx={{ mt: 4 }}>How should we call you?</Typography>
                 <Typography variant="small_fade" sx={{ mt: 3 }}>The @username is unique. You can modify it anytime.</Typography>
                 <UserNameEditor onChangeUserName={setUserName} onChangeOk={setUserNameOk} />
-                <WideButton color="black" sx={{ mb: 3,mt:"auto" }}
+                <WideButton color="black" sx={{ mb: 3, mt: "auto" }}
                     onClick={submitUsername} disabled={!usernameOk}>Next</WideButton>
             </ModalMargin>
         </Stack>
@@ -475,7 +476,7 @@ function Page8(props)//follow
     const [data, handleNext] = GetProps(props);
     return (
         <Stack direction="column" sx={{ height: "100%" }}>
-            <Stack direction="column" sx={{ flexGrow: 1 }}>
+            <Stack direction="column" sx={{ flexGrow: 1,overflow:"hidden" }}>
                 <CenterLogo />
                 <div style={{ flexGrow: 1, maxHeight: "100%", overflowY: "scroll" }}>
                     <RecommendCelebrities />
@@ -590,9 +591,8 @@ function RechaptaInput(props) {
 }
 
 function RecommendCelebrities() {
-    const url = "/member/general/celebrities";
     return (
-        <UserListExtended url={url} />
+        <WhoToFollow noMore />
     );
 }
 

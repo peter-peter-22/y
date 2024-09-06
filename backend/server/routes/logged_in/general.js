@@ -270,7 +270,7 @@ router.get("/follower_recommendations_preview", async (req, res) => {
         NOT ${is_followed()}
         AND id!=:user_id 
     ORDER BY follower_count DESC, USERS.ID ASC
-    LIMIT 3`;
+    LIMIT 10`;
     const users = await db.query(named(text)({ user_id: UserId(req) }));
     res.send(users.rows);
 });
