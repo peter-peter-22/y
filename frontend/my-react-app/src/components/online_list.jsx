@@ -126,7 +126,7 @@ const OnlineList = forwardRef(({ exampleSize = 100, EntryMapper, getEntries, ove
                 window.scrollTo(0, 0);
             else
                 virtualizer.scrollToIndex(loaded ? loaded : 0, { align: "middle" });
-        }, 200);
+        }, 100);
     }, [id, virtualizer, scrollRestoration]);
 
     //save the last rendered location
@@ -173,10 +173,6 @@ const OnlineList = forwardRef(({ exampleSize = 100, EntryMapper, getEntries, ove
     )
 });
 
-function StaticLoading() {
-    return <Typography variant="small_fade" style={{ textAlign: "center", display: "block", margin: 20 }}>Loading...</Typography>;
-}
-
 function DefaultDisplayer({ items, allRows, virtualizer, EntryMapper, hasNextPage }) {
     return items.map((virtualRow) => {
         const isLoaderRow = virtualRow.index > allRows.length - 1
@@ -207,19 +203,5 @@ async function fetchServerPage(getEntries, offset = 0, timestamp) {
     return { rows, nextOffset: offset + rows.length };
 }
 
-function AsyncRender({ element, loading }) {
-    const [ready, setReady] = useState(false);
-
-    useEffect(() => {
-        setReady(true);
-    }, [])
-
-    return ready ? element : loading;
-}
-
-const AsyncOnlineList = forwardRef((props, ref) => {
-    return <AsyncRender element={<OnlineList {...props} ref={ref} />} loading={<StaticLoading />} />
-})
-
-export { AsyncOnlineList as OnlineList };
+export { OnlineList };
 
