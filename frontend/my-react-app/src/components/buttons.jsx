@@ -8,7 +8,7 @@ import ListItemButton from '@mui/material/ListItemButton';
 import Stack from '@mui/material/Stack';
 import axios from "axios";
 import React, { forwardRef, useContext } from 'react';
-import { matchPath, NavLink, useMatch } from "react-router-dom";
+import { matchPath, NavLink, useMatch, useNavigate } from "react-router-dom";
 import { ThrowIfNotAxios } from "/src/communication.js";
 import { BlueTextButton } from "/src/components/containers";
 import { Modals } from "/src/components/modals";
@@ -166,6 +166,7 @@ function ProfileButton() {
     const size = "60px";
     const { getData, update } = useContext(UserContext);
     const user = getData.user;
+    const navigate=useNavigate();
 
     const { handleOpen, ShowPopover } = SimplePopOver();
 
@@ -173,6 +174,7 @@ function ProfileButton() {
         try {
             await axios.get("logout");
             await update();
+            navigate("/");
         } catch (err) {
             ThrowIfNotAxios(err);
         }

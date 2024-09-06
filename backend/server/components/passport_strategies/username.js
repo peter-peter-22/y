@@ -16,7 +16,7 @@ router.post("/login", async (req, res, next) => {
     const { username, password } = req.body;
 
     await verify(username, password, function (err, user, info) {
-        universal_auth(req, res, err, user, info, true);
+        universal_auth(req, res, err, user, info);
     });
 }
 );
