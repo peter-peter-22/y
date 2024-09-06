@@ -122,10 +122,10 @@ const OnlineList = forwardRef(({ exampleSize = 100, EntryMapper, getEntries, ove
         const loaded = lastIndexes[id];
         setTimeout(() => {
             //console.log("loaded " + loaded + " rows: " + allRows.length);
-            if (allRows.length === 0)
+            if (allRows.length === 0 || !loaded)
                 window.scrollTo(0, 0);
             else
-                virtualizer.scrollToIndex(loaded ? loaded : 0, { align: "middle" });
+                virtualizer.scrollToIndex(loaded, { align: "middle" });
         }, 100);
     }, []);
 
