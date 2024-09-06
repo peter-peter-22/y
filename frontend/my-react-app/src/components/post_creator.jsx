@@ -17,12 +17,12 @@ import { Loading, ProfilePic, ReplyingTo } from '/src/components/utilities';
 import { theme } from "/src/styles/mui/my_theme";
 
 function PostCreator({ post, quoted, onPost, editing }) {
-    const postList=UsePostList();
+    const postList = UsePostList();
     const { getData } = useContext(UserContext);
     const [isFocused, setIsFocused] = React.useState(false);
     const [getText, setText] = React.useState(editing ? editing.text : "");
     const maxLetters = getData.maxLetters;
-    const isComment = post !== undefined;
+    const isComment = Boolean(post);
     const isQuote = quoted !== undefined;
     const isEditing = editing !== undefined;
     const [files, setFiles] = useState([]);
@@ -130,7 +130,7 @@ function PostCreator({ post, quoted, onPost, editing }) {
             //update post list on client without refreshing the page
             const post = result.data;
             if (!editing)
-                AddPostToCommentSection(post,postList);
+                AddPostToCommentSection(post, postList);
             else
                 postList.mapRows((row) => {
                     if (row.id === editing.id) {
@@ -300,13 +300,11 @@ function LetterCounter(props) {
     );
 }
 
-function AddPostToCommentSection(post,postList) {
+function AddPostToCommentSection(post, postList) {
     if (!postList)
         return;
 
-    const myCommentSection = post.replying_to === postList.replied_post.id;
-    if (!myCommentSection)
-        return;
+    const myCommentSection = post.replying_to === postList.replied_post?.id;
 
     postList.addPost(post);
 }
