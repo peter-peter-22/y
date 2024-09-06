@@ -8,14 +8,16 @@ import ListItemButton from '@mui/material/ListItemButton';
 import Stack from '@mui/material/Stack';
 import axios from "axios";
 import React, { forwardRef, useContext } from 'react';
-import { NavLink } from "react-router-dom";
+import { matchPath, NavLink, useMatch } from "react-router-dom";
 import { ThrowIfNotAxios } from "/src/communication.js";
 import { BlueTextButton } from "/src/components/containers";
 import { Modals } from "/src/components/modals";
 import { PostCreator } from '/src/components/post_creator';
 import { PostModalFrame } from "/src/components/posts";
+import { UsePostList } from "/src/components/posts.jsx";
 import { UserContext } from '/src/components/user_data';
 import { GetUserKey, LinelessLink, noOverflow, ProfilePic, ProfileText, ResponsiveSelector, SimplePopOver, ToCorner } from '/src/components/utilities';
+import { useLocation } from 'react-router-dom';
 
 const smallerButtons = "leftMenuIcons";
 const iconSize = "35px";
@@ -129,10 +131,14 @@ function ButtonSvg(props) {
 
 
 function PostButton(props) {
+    const postList = UsePostList();
+    const match = useMatch("/posts/*");
+    const comment = match && postList && Boolean(postList.replied_post);
+
     function handlePost() {
         Modals[0].Show(
             <PostModalFrame>
-                <PostCreator onPost={posted} />
+                <PostCreator onPost={posted} post={comment?postList.replied_post:null}/>
             </PostModalFrame>
         );
     }
@@ -143,12 +149,12 @@ function PostButton(props) {
         <ResponsiveSelector breakpoint={smallerButtons}
             above={
                 <WideButton color="primary" style={{ flexShrink: 0 }} {...props} onClick={handlePost}>
-                    <Typography variant="big_bold" color="primary.contrastText">Post</Typography>
+                    <Typography variant="big_bold" color="primary.contrastText">{comment ? "Comment" : "Post"}</Typography>
                 </WideButton>
             }
             below={
                 <Fab size="medium" color="primary" style={{ flexShrink: 0 }} {...props} onClick={handlePost}>
-                    <ButtonIcon icon="create" filled="true" />
+                    <ButtonIcon icon={comment ? "add_comment" : "create"} filled="true" />
                 </Fab>
             }
         />

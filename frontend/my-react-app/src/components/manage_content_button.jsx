@@ -9,7 +9,7 @@ import React, { useCallback, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { Modals } from "/src/components/modals";
 import { PostCreator } from "/src/components/post_creator";
-import { PostModalFrame, commentSections } from "/src/components/posts";
+import { PostModalFrame,UsePostList } from "/src/components/posts";
 import { UserContext } from "/src/components/user_data";
 import { GetUserKey, InheritLink, SimplePopOver, ToggleBlock, ToggleFollow, noOverflow } from '/src/components/utilities';
 import { get_focused_id } from "/src/pages/post_focused.jsx";
@@ -97,6 +97,7 @@ function BlockRow({ user, onChange }) {
 
 function DeleteRow({ post }) {
     const navigate = useNavigate();
+    const postList=UsePostList();
     async function handle_delete() {
         close();
 
@@ -113,7 +114,7 @@ function DeleteRow({ post }) {
         }
         else {
             //if not, update the comment section
-            commentSections.active.mapRows((row) => {
+            postList.mapRows((row) => {
                 if (row.id === post.id) {
                     row.deleted = true;
                     return { ...row };//this will update the post even if it is currently visible
@@ -132,6 +133,7 @@ function DeleteRow({ post }) {
 }
 
 function EditRow({ post }) {
+    const postList=UsePostList();
     async function handle_edit() {
         close();
         Modals[0].Show(
@@ -143,7 +145,7 @@ function EditRow({ post }) {
 
     function onSubmit(edited) {
         Modals[0].Close();
-        commentSections.active.mapRows((row) => {
+        postList.mapRows((row) => {
             if (row.id === edited.id) {
                 return edited;//this will update the post even if it is currently visible
             }
@@ -173,12 +175,13 @@ function Row(props) {
 }
 
 function ManagePost({ original, overriden }) {
+    const postList=UsePostList();
     const { getData } = useContext(UserContext);
     const user = overriden.publisher;
     const is_me = original.publisher.id === getData.user.id;
 
     const onChange = useCallback((isBlocked, user) => {
-        commentSections.active.mapRows((row) => {
+        postList.mapRows((row) => {
             if (row.publisher.id === user.id) {
                 row.publisher.is_blocked = isBlocked;
                 return { ...row };//this will update the post even if it is currently visible

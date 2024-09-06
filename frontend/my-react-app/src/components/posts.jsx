@@ -5,7 +5,7 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import Stack from '@mui/material/Stack';
 import axios from 'axios';
-import React, { memo, useEffect, useRef, useState } from "react";
+import React, { createContext, memo, useContext, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { BlueCenterButton } from "/src/components/buttons";
 import config from '/src/components/config';
@@ -18,7 +18,19 @@ import { PostMedia } from "/src/components/post_media";
 import { DateLink, FadeLink, GetPostMedia, GetUserName, ProfilePic, ProfileText, ReplyingFrom, SimplePopOver, TextRow, UserKey, UserLink, formatNumber, noOverflow } from '/src/components/utilities';
 import { TextDisplayer } from "/src/components/post_text";
 
-const commentSections = {};
+const postListContext = createContext();
+let setPostList;
+function SetPostList(value) {
+    setPostList(value);
+}
+function PostListProvider({ children }) {
+    const [get, set] = useState();
+    setPostList = set;
+    return <postListContext.Provider value={get}>{children}</postListContext.Provider>
+}
+function UsePostList() {
+    return useContext(postListContext);
+}
 
 function Prefix(props) {
     return (
@@ -420,11 +432,11 @@ function SimplifiedPostList({ params: additional_params, post, endpoint, id, scr
         const addPost = (newPost) => { onlineListRef.current.AddEntryToTop(newPost) };
         const update = () => { onlineListRef.current.update };
         const mapRows = (fn) => { onlineListRef.current.mapRows(fn) };
-        const replied_post = post ? post.id : null;//what post belongs to this comment section? null if this is the main feed
+        const replied_post = post;
 
         const thisCommentSection = { addPost, update, mapRows, replied_post };
 
-        commentSections.active = thisCommentSection;
+        SetPostList(thisCommentSection);
     }, [post]);
 
     return (
@@ -516,5 +528,5 @@ function OverrideWithRepost(post) {
 }
 
 
-export { BorderlessPost, HideablePostFocusedMemo, HideablePostMemo, ListBlock, ListBlockButton, OpenOnClick, OpenPostOnClick, OverrideWithRepost, Post, PostButtonRow, PostModalFrame, QuotedFrame, RowWithPrefix, SimplifiedPostList, WritePost, commentSections };
+export { BorderlessPost, HideablePostFocusedMemo, HideablePostMemo, ListBlock, ListBlockButton, OpenOnClick, OpenPostOnClick, OverrideWithRepost, Post, PostButtonRow, PostModalFrame, QuotedFrame, RowWithPrefix, SimplifiedPostList, WritePost, PostListProvider, SetPostList, UsePostList };
 

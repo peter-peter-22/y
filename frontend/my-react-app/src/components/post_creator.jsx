@@ -4,20 +4,20 @@ import Fab from '@mui/material/Fab';
 import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
 import axios from 'axios';
-import React, { useRef, useState, useContext } from "react";
-import ContentEditable from 'react-contenteditable';
+import React, { useContext, useRef, useState } from "react";
 import { ThrowIfNotAxios } from "/src/communication.js";
 import config from "/src/components/config.js";
 import { fileToMedia } from "/src/components/media.jsx";
 import { ErrorText } from "/src/components/modals";
 import { PostMediaEditor } from "/src/components/post_media";
-import { BorderlessPost, QuotedFrame, RowWithPrefix, commentSections } from "/src/components/posts.jsx";
+import { TextEditor } from "/src/components/post_text";
+import { BorderlessPost, QuotedFrame, RowWithPrefix, UsePostList } from "/src/components/posts.jsx";
 import { UserContext } from "/src/components/user_data";
 import { Loading, ProfilePic, ReplyingTo } from '/src/components/utilities';
 import { theme } from "/src/styles/mui/my_theme";
-import { TextEditor } from "/src/components/post_text";
 
 function PostCreator({ post, quoted, onPost, editing }) {
+    const postList=UsePostList();
     const { getData } = useContext(UserContext);
     const [isFocused, setIsFocused] = React.useState(false);
     const [getText, setText] = React.useState(editing ? editing.text : "");
@@ -130,9 +130,9 @@ function PostCreator({ post, quoted, onPost, editing }) {
             //update post list on client without refreshing the page
             const post = result.data;
             if (!editing)
-                AddPostToCommentSection(post);
+                AddPostToCommentSection(post,postList);
             else
-                commentSections.active.mapRows((row) => {
+                postList.mapRows((row) => {
                     if (row.id === editing.id) {
                         return { ...row };//this will update the post even if it is currently visible
                     }
@@ -300,17 +300,17 @@ function LetterCounter(props) {
     );
 }
 
-function AddPostToCommentSection(post) {
-    const section = commentSections.active;
-    if (!section)
+function AddPostToCommentSection(post,postList) {
+    if (!postList)
         return;
 
-    const myCommentSection = post.replying_to === section.replied_post;
+    const myCommentSection = post.replying_to === postList.replied_post.id;
     if (!myCommentSection)
         return;
 
-    section.addPost(post);
+    postList.addPost(post);
 }
 
 
 export { PostCreator };
+

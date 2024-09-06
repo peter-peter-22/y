@@ -20,6 +20,7 @@ import Loading from "./components/loading.jsx";
 import Main from "./components/logged_in_router.jsx";
 import NoUser from "./components/no_user.jsx";
 import { UserContext, UserProvider } from "/src/components/user_data";
+import { PostListProvider } from "/src/components/posts";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -36,12 +37,14 @@ function App() {
       <MyTheme>
         <BrowserRouter>
           <UserProvider>
-            <CreateModals />
-            <div style={{ position: "relative", zIndex: 0 }}>
-              <SharedPages>
-                <Page />
-              </SharedPages>
-            </div>
+            <PostListProvider>
+              <CreateModals />
+              <div style={{ position: "relative", zIndex: 0 }}>
+                <SharedPages>
+                  <Page />
+                </SharedPages>
+              </div>
+            </PostListProvider>
           </UserProvider>
         </BrowserRouter>
       </MyTheme >
