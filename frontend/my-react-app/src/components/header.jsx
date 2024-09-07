@@ -293,9 +293,9 @@ function LeftTabs({ lastTab, bottom, tabs }) {
     }
     return (
         <div style={{ width: width, height: "100vh", flexShrink: 0 }}>
-            <div style={{ position: "fixed", width: width, height: "100vh" }}>
+            <div style={{ position: "fixed", width: width, height: "100vh",overflow:"hidden" }}>
                 <Inside>
-                    <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", alignItems: wideButtons ? "stretch" : "center", height: "100%",overflowY:"hidden" }}>
+                    <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", alignItems: wideButtons ? "stretch" : "center", height: "100%",overflow:"hidden" }}>
                         {/*this div show the maximum available space for the tabs*/}
                         <div style={{ flexGrow: 1, overflow: "hidden" }} ref={spaceRef}>
                             <Stack direction="column" gap={2} ref={parentRef} sx={{ mr: wideButtons ? 4 : 0 }}>
