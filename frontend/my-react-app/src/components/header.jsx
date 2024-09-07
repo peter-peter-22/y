@@ -292,7 +292,7 @@ function LeftTabs({ lastTab, bottom, tabs }) {
         console.log(alwaysHiddenTabs);
     }
     return (
-        <div style={{ width: width, height: "100vh", flexShrink: 0 }}>
+        <div style={{ width: width, height: "100%", flexShrink: 0,overflow:"hidden" }}>
             <div style={{ position: "fixed", width: width, height: "100vh",overflow:"hidden" }}>
                 <Inside>
                     <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", alignItems: wideButtons ? "stretch" : "center", height: "100%",overflow:"hidden" }}>
