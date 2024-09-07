@@ -171,25 +171,25 @@ function Header() {
     );
 }
 
-function BottomTabs() {
-    const tabs = Tabs();
+const bottomTabs = [
+    "home",
+    "explore",
+    "notif",
+    "messages",
+    "profile"
+];
 
-    const selectedTabs = [
-        "home",
-        "explore",
-        "notif",
-        "messages",
-        "profile"
-    ];
-    const myTabs = selectedTabs.map(tab => tabs[tab]);
+function BottomTabs() {
+    let tabs = Tabs();
+    tabs = bottomTabs.map(tab => tabs[tab]);
     return (
-        <Stack direction={"column"} style={{ position: "fixed", bottom: 0, left: 0, width: "100%", zIndex: 2, pointerEvents: "none" }}>
+        <Stack direction={"column"} style={{ position: "fixed", bottom: 0, left: 0, width: "100%", zIndex: 2, pointerEvents: "none", zIndex: 1051 }}>
             <Box sx={{ alignSelf: "end", m: 2 }} style={{ pointerEvents: "all" }}>
                 <PostButton />
             </Box>
             <Box sx={{ py: 1, backgroundColor: "background.default", zIndex: 2, borderTop: 1, borderColor: "divider" }} style={{ pointerEvents: "all" }}>
                 <Stack direction={"row"} style={{ width: "100%", justifyContent: "space-around" }}>
-                    {myTabs.map((tab, index) =>
+                    {tabs.map((tab, index) =>
                         <BottomTabButton
                             to={tab.link}
                             active_icon={tab.active_icon}
@@ -204,26 +204,40 @@ function BottomTabs() {
 }
 
 function LeftTabsNormal() {
+    const tabs = Tabs();
+
     return (
         <LeftTabs
             lastTab={<PostButton style={{ marginTop: 10 }} />}
             bottom={<ProfileButton />}
+            tabs={tabs}
         />
     );
 }
 
 function LeftTabsMobile() {
+    let tabs = Tabs();
+
+    tabs = Object.fromEntries(
+        Object.entries(tabs).filter(entry => {
+            const [key, value] = entry;
+            return !bottomTabs.includes(key);
+        })
+    )
+
     return (
-        <LeftTabs />
+        <LeftTabs
+            tabs={tabs}
+            bottom={<ProfileButton />}
+        />
     );
 }
 
-function LeftTabs({ lastTab, bottom }) {
+function LeftTabs({ lastTab, bottom, tabs }) {
     const wideButtons = AboveBreakpoint("leftMenuIcons");
     const bigMargins = AboveBreakpoint("smallIconMargins");
     const width = wideButtons ? "270px" : bigMargins ? "70px" : "60px";
 
-    const tabs = Tabs();
     const alwaysHiddenTabs = HiddenTabs();
 
     const spaceRef = useRef();
@@ -281,7 +295,7 @@ function LeftTabs({ lastTab, bottom }) {
         <div style={{ width: width, height: "100vh", flexShrink: 0 }}>
             <div style={{ position: "fixed", width: width, height: "100vh" }}>
                 <Inside>
-                    <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", alignItems: wideButtons ? "stretch" : "center", height: "100%" }}>
+                    <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", alignItems: wideButtons ? "stretch" : "center", height: "100%",overflowY:"hidden" }}>
                         {/*this div show the maximum available space for the tabs*/}
                         <div style={{ flexGrow: 1, overflow: "hidden" }} ref={spaceRef}>
                             <Stack direction="column" gap={2} ref={parentRef} sx={{ mr: wideButtons ? 4 : 0 }}>
