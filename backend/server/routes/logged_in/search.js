@@ -20,8 +20,8 @@ WHERE
     NAME ${isOk}
 )`;
 
-const searchUserPreview = `${searchUser} LIMIT 3`;
-const searchUserList = `${searchUser} AND registration_date < to_timestamp(:timestamp) OFFSET :from LIMIT :limit`;
+const searchUserPreview = `${searchUser} ORDER BY follower_count DESC LIMIT 3`;
+const searchUserList = `${searchUser} AND registration_date < to_timestamp(:timestamp) ORDER BY follower_count DESC OFFSET :from LIMIT :limit`;
 
 const autoFillPerTopic = 5;
 const searchAutofill = `
