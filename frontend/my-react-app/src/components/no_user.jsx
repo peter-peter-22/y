@@ -86,14 +86,6 @@ async function finishUsernameRegistration(data, close,update) {
     }
 }
 
-export default () => {
-    return (
-        <Routes>
-            <Route path="/" element={<Main />} />
-            <Route path="*" element={<Error />} />
-        </Routes>
-    );
-}
 function AlternativeLogin({ icon, size, ...props }) {
     return (
         <OutlinedButton {...props} size={size ? size : "medium"}>
@@ -179,4 +171,5 @@ function ModalInner({ style, children }) {
 
 
 export { AlternativeLogin, BigModal, BigModalMargin, BottomButtonWithBorder, ByRegistering, GrowingLine, ModalMargin, Or, SmallLink };
+export default Main;
 

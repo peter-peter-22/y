@@ -12,12 +12,11 @@ import 'material-icons/iconfont/material-icons.css';
 import React, { useContext, useEffect } from "react";
 import { BrowserRouter } from "react-router-dom";
 import { CreateModals } from "/src/components/modals";
-import SharedPages from "/src/components/shared_pages_router";
+import Pages from "/src/components/router";
 import MyTheme from '/src/styles/mui/my_theme.jsx';
 
 //components
 import Loading from "./components/loading.jsx";
-import Main from "./components/logged_in_router.jsx";
 import NoUser from "./components/no_user.jsx";
 import { UserContext, UserProvider } from "/src/components/user_data";
 import { PostListProvider } from "/src/components/posts";
@@ -40,9 +39,7 @@ function App() {
             <PostListProvider>
               <CreateModals />
               <div style={{ position: "relative", zIndex: 0 }}>
-                <SharedPages>
-                  <Page />
-                </SharedPages>
+                <Pages/>
               </div>
             </PostListProvider>
           </UserProvider>
@@ -50,16 +47,6 @@ function App() {
       </MyTheme >
     </QueryClientProvider>
   );
-}
-
-function Page() {
-  //get user data
-  const { getData } = useContext(UserContext);
-
-  //choose page
-  return !getData ? <Loading />
-    : getData.user ? <Main />
-      : <NoUser />
 }
 
 export default App

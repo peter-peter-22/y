@@ -209,7 +209,6 @@ function LeftTabsNormal() {
     return (
         <LeftTabs
             lastTab={<PostButton style={{ marginTop: 10 }} />}
-            bottom={<ProfileButton />}
             tabs={tabs}
         />
     );
@@ -228,7 +227,6 @@ function LeftTabsMobile() {
     return (
         <LeftTabs
             tabs={tabs}
-            bottom={<ProfileButton />}
         />
     );
 }
@@ -293,9 +291,9 @@ function LeftTabs({ lastTab, bottom, tabs }) {
     }
     return (
         <div style={{ width: width, height: "100%", flexShrink: 0 }}>
-            <div style={{ position: "fixed", width: width, height: "100%",overflow:"hidden" }}>
+            <div style={{ position: "fixed", width: width, height: "100%", overflow: "hidden" }}>
                 <Inside>
-                    <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", alignItems: wideButtons ? "stretch" : "center", height: "100%",overflow:"hidden" }}>
+                    <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", alignItems: wideButtons ? "stretch" : "center", height: "100%", overflow: "visible" }}>
                         {/*this div show the maximum available space for the tabs*/}
                         <div style={{ flexGrow: 1, overflow: "hidden" }} ref={spaceRef}>
                             <Stack direction="column" gap={2} ref={parentRef} sx={{ mr: wideButtons ? 4 : 0 }}>
@@ -315,7 +313,7 @@ function LeftTabs({ lastTab, bottom, tabs }) {
                             </Stack>
                         </div>
 
-                        {bottom}
+                        <ProfileButton />
                     </div>
                 </Inside>
             </div>

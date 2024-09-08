@@ -2,6 +2,7 @@ import { Icon, Typography } from '@mui/material';
 import Stack from '@mui/material/Stack';
 import React from "react";
 import { FormatAxiosError } from "/src/communication.js";
+import { StyledLink } from "/src/components/utilities";
 
 function ErrorPage({ text }) {
   return (
@@ -31,10 +32,22 @@ function Successpage({ text }) {
   );
 }
 
+function Unauthorized() {
+  return (
+    <ErrorPage text={
+      <div style={{textAlign:"center"}}>
+        <div>Unauthorized!</div>
+        <Typography color="secondary" variant="small">You must sign-in to visit this page</Typography>
+        <StyledLink to="/" color="primary">Sign-in</StyledLink>
+      </div>
+    } />
+  );
+}
+
 export default () => {
   return (
     <ErrorPage text={"404 Not found"} />
   );
 }
 
-export { ErrorPage, ErrorPageFormatted,Successpage };
+export { ErrorPage, ErrorPageFormatted, Successpage,Unauthorized };

@@ -14,7 +14,7 @@ function GetNotificationCount() {
 
 const NotifCountContext = createContext();
 
-function NotifCountProvider({ children }) {
+const NotifCountProvider = memo(({ children }) => {
     const [count, setCount] = GetNotificationCount();
 
     function clear() {
@@ -28,15 +28,15 @@ function NotifCountProvider({ children }) {
             </Mem>
         </NotifCountContext.Provider>
     );
-}
+});
 
 const Mem = memo(({ children }) => {
     return children;
-}, ()=>true);
+}, () => true);
 
 
 function DisplayNotificationCount({ children }) {
-const {count,clear}=useContext(NotifCountContext);
+    const { count, clear } = useContext(NotifCountContext);
 
     return (
         <StyledBadge color="primary" badgeContent={count} max={99} invisible={count == 0} onClick={clear}>
@@ -54,4 +54,4 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
     },
 }));
 
-export { DisplayNotificationCount,NotifCountProvider };
+export { DisplayNotificationCount, NotifCountProvider };

@@ -7,7 +7,7 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import Stack from '@mui/material/Stack';
 import axios from "axios";
-import React, { forwardRef, useContext } from 'react';
+import React, { forwardRef, useContext, memo } from 'react';
 import { matchPath, NavLink, useMatch, useNavigate } from "react-router-dom";
 import { ThrowIfNotAxios } from "/src/communication.js";
 import { BlueTextButton } from "/src/components/containers";
@@ -96,7 +96,7 @@ function SelectableIcon({ size = "medium", active_icon, inactive_icon, selected,
     );
 }
 
-function ResponsiveButton({ children, ...props }) {
+const ResponsiveButton = memo(({ children, ...props }) => {
     const full = <SelectableButton {...props}>{children}</SelectableButton>;
     const iconOnly = <SelectableIcon  {...props}>{children}</SelectableIcon>;
 
@@ -108,7 +108,7 @@ function ResponsiveButton({ children, ...props }) {
             />);
     else
         return iconOnly;
-}
+});
 
 function ButtonIcon(props) {
     return (
@@ -138,7 +138,7 @@ function PostButton(props) {
     function handlePost() {
         Modals[0].Show(
             <PostModalFrame>
-                <PostCreator onPost={posted} post={comment?postList.replied_post:null}/>
+                <PostCreator onPost={posted} post={comment ? postList.replied_post : null} />
             </PostModalFrame>
         );
     }
@@ -162,11 +162,11 @@ function PostButton(props) {
 }
 
 
-function ProfileButton() {
+const ProfileButton=memo(()=> {
     const size = "60px";
     const { getData, update } = useContext(UserContext);
     const user = getData.user;
-    const navigate=useNavigate();
+    const navigate = useNavigate();
 
     const { handleOpen, ShowPopover } = SimplePopOver();
 
@@ -214,7 +214,7 @@ function ProfileButton() {
             </ShowPopover>
         </>
     );
-}
+},()=>true);
 
 function CornerButton(props) {
     return (
