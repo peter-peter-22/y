@@ -19,11 +19,10 @@ function initialize() {
 
     //throttle limit
     // Define rate limit rules
-    //60 request per min
     const limiter = rateLimit({
-        windowMs: 60 * 1000, // 1 minutes
-        max: 60, // Limit each IP to 60 requests per windowMs
-        message: "Too many requests from this IP, please try again later."
+        windowMs: 5 * 60 * 1000, // 5 minutes
+        max: 5*60, // Limit each IP to 60 requests per windowMs
+        message: "Too many requests from this IP, please try again later. You are banned for 5 minutes."
     });
 
     // Apply the rate limiting middleware to all requests

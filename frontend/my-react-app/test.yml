@@ -1,0 +1,9 @@
+config:
+  target: "https://y-community.vercel.app"
+  phases:
+    - duration: 60
+      arrivalRate: 10  # Requests per second (adjust this rate)
+scenarios:
+  - flow:
+      - get:
+          url: "/api/user/get"
