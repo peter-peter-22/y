@@ -3,26 +3,13 @@ import List from '@mui/material/List';
 import Stack from '@mui/material/Stack';
 import axios from 'axios';
 import React, { useEffect, useState } from "react";
-import { Route, Routes, useLocation } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import { LinkButton } from "/src/components/buttons";
+import { FollowDialogExtended, UserListExtended } from "/src/components/follow_dialogs";
 import { SimplifiedPostList } from "/src/components/posts";
-import { ListTitle, Loading } from "/src/components/utilities";
-import { FollowDialogExtended, UserListExtended } from "/src/pages/follow_people";
 import { ScrollToTop } from "/src/components/scroll_to_top";
-
-// A custom hook that builds on useLocation to parse
-// the query string for you.
-function useQuery() {
-    const { search } = useLocation();
-
-    return React.useMemo(() => new URLSearchParams(search), [search]);
-}
-
-function GetSearchText() {
-    const query = useQuery();
-    const text = query.get("q");
-    return text;
-}
+import { GetSearchText } from "/src/components/search_components";
+import { ListTitle, Loading } from "/src/components/utilities";
 
 export default () => {
     ScrollToTop();
@@ -111,9 +98,3 @@ function Main({ text }) {
         </>
     );
 }
-
-function GetSearchUrl(text) {
-    return "/search?q=" + text;
-}
-
-export { GetSearchText, GetSearchUrl, useQuery };

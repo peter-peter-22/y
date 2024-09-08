@@ -1,28 +1,23 @@
 import List from '@mui/material/List';
 import Stack from '@mui/material/Stack';
+import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { BackButton } from "../components/back_button";
-import { ThrowIfNotAxios } from "/src/communication.js";
-import { OverrideWithRepost, HideablePostFocusedMemo, SimplifiedPostList } from "/src/components/posts.jsx";
+import { set_focused_id } from "/src/components/post_focused_components";
+import { HideablePostFocusedMemo, OverrideWithRepost, SimplifiedPostList } from "/src/components/posts.jsx";
 import { ListTitle, Loading } from '/src/components/utilities';
 import { ErrorPageFormatted } from "/src/pages/error";
-import { useQuery } from '@tanstack/react-query'
-
-let focused_id = undefined;
-function get_focused_id() {
-    return focused_id;
-}
 
 export default () => {
     const { id } = useParams();
 
     //update focused_id
     useEffect(() => {
-        focused_id = id;
+        set_focused_id(id);
         return () => {
-            focused_id = undefined;
+            set_focused_id(undefined);
         }
     }, [id]);
 
@@ -62,5 +57,3 @@ function CommentList({ post }) {
     const id = post.id;
     return <SimplifiedPostList endpoint="member/general/get_comments" params={{ id: id }} id={"comments_of_" + id} post={post} />;
 }
-
-export { get_focused_id };

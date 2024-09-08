@@ -9,7 +9,7 @@ import { OnlineList } from '/src/components/online_list';
 import { ClickableImage, MediaContext } from "/src/components/post_media";
 import { SimplifiedPostList } from "/src/components/posts";
 import { GetUserName, ListTitle } from '/src/components/utilities';
-import { UserListExtended } from "/src/pages/follow_people.jsx";
+import { UserListExtended } from "/src/components/follow_dialogs";
 
 function ImageGrid({ items, allRows, virtualizer }) {
     return (

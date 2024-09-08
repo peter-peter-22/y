@@ -1,31 +1,30 @@
-import { Box, Typography } from '@mui/material';
-import Divider from '@mui/material/Divider';
+import { Typography } from '@mui/material';
 import Icon from "@mui/material/Icon";
 import Stack from '@mui/material/Stack';
 import axios from "axios";
-import React from "react";
-import { Route, Routes } from "react-router-dom";
+import React,{lazy} from "react";
 import { ThrowIfNotAxios } from "/src/communication.js";
 import { OutlinedButton, WideButton } from "/src/components/buttons.jsx";
-import CreateAccount from "/src/components/create_account.jsx";
+const CreateAccount = lazy(() => import("/src/components/create_account"));
 import links from "/src/components/footer_links";
 import Login from "/src/components/login.jsx";
-import { Modals } from "/src/components/modals";
-import { AboveBreakpoint, StyledLink, creation, logo } from '/src/components/utilities';
-import Error from "/src/pages/error";
 import { LoginLink } from '/src/components/login_redirects/google';
+import { Modals } from "/src/components/modals";
+import { AlternativeLogin, ByRegistering, Or } from "/src/components/no_user_components";
+import { AboveBreakpoint, creation, logo } from '/src/components/utilities';
+import { Sus } from "/src/components/lazified";
 
 function Main() {
     const wide = AboveBreakpoint("md");
 
     function showCreator()//show local registration inputs
     {
-        Modals[0].Show(<CreateAccount pages={[0, 1, 2, 3, 4]} key="local" />);
+        Modals[0].Show(<Sus><CreateAccount pages={[0, 1, 2, 3, 4]} key="local" /></Sus>);
     }
 
     function showUsernameCreator()//show username registration inputs
     {
-        Modals[0].Show(<CreateAccount pages={[10, 11]} key="username" finish={finishUsernameRegistration} />);
+        Modals[0].Show(<Sus><CreateAccount pages={[10, 11]} key="username" finish={finishUsernameRegistration} /></Sus>);
     }
 
     function showLogin() {
@@ -71,7 +70,7 @@ function Main() {
     );
 }
 
-async function finishUsernameRegistration(data, close,update) {
+async function finishUsernameRegistration(data, close, update) {
     try {
         await axios.post("/username/register",
             {
@@ -86,90 +85,5 @@ async function finishUsernameRegistration(data, close,update) {
     }
 }
 
-function AlternativeLogin({ icon, size, ...props }) {
-    return (
-        <OutlinedButton {...props} size={size ? size : "medium"}>
-            <Stack direction="row" spacing={0.5} style={{ height: "100%", alignItems: "center" }}>
-                {icon}
-                <span>{props.text}</span>
-            </Stack>
-        </OutlinedButton >
-    );
-}
-
-function GrowingLine() {
-    return (
-        <Divider style={{ flexGrow: 1 }} />
-    );
-}
-
-function Or() {
-    return (
-        <>
-            <GrowingLine />
-            <Typography variant="small_fade" sx={{ mx: 1 }}>or</Typography>
-            <GrowingLine />
-        </>
-    );
-}
-
-
-function BigModal(props) {
-    return (
-        <Box style={{ width: 600, maxWidth: "100%", height: 650 }}>
-            {props.children}
-        </Box>
-    );
-}
-
-function SmallLink(props) {
-    return (
-        <StyledLink typography="very_small" color="primary" {...props}>{props.children}</StyledLink>
-    );
-}
-
-function ByRegistering(props) {
-    return (
-        <Typography {...props}>By registering you accept our <SmallLink to="/privacy_policy">End-user agreement</SmallLink> and <SmallLink to="/privacy_policy">Cookie policy</SmallLink> including <SmallLink to="/privacy_policy">Privacy policy</SmallLink></Typography>
-    );
-}
-
-function BottomButtonWithBorder(props) {
-    return (
-        <Box borderTop={1} borderColor="divider">
-            <ModalMargin>
-                <WideButton color="black" sx={{ my: 3, boxSizing: "border-box" }}
-                    onClick={props.onClick}>{props.text}</WideButton>
-            </ModalMargin>
-        </Box>
-    );
-}
-
-function ModalMargin(props) {
-    return (
-        <ModalInner style={{ width: 350 }}>
-            {props.children}
-        </ModalInner>
-    );
-}
-
-function BigModalMargin(props) {
-    return (
-        <ModalInner style={{ width: 350, margin: "0 auto" }}>
-            {props.children}
-        </ModalInner>
-    );
-}
-
-function ModalInner({ style, children }) {
-    return (
-        <Box sx={{ px: 1 }} style={{ boxSizing: "border-box", display: "inherit", flexDirection: "inherit", height: "inherit", justifyContent: "inherit", alignItems: "inherit", gap: "inherit", maxWidth: "100%", margin: "0 auto", ...style }}>
-            {children}
-        </Box>
-    );
-}
-
-
-export { AlternativeLogin, BigModal, BigModalMargin, BottomButtonWithBorder, ByRegistering, GrowingLine, ModalMargin, Or, SmallLink };
 export default Main;
 

@@ -1,11 +1,11 @@
-import { useQuery as useUrlQuery } from "/src/pages/search";
-import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
-import { Suspense, useCallback, useContext, useEffect } from "react";
-import { Loading } from "/src/components/utilities";
+import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import axios from "axios";
-import { Successpage, ErrorPageFormatted } from "/src/pages/error";
+import { Suspense, useCallback, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQuery as useUrlQuery } from "/src/components/search_components";
 import { UserContext } from "/src/components/user_data";
+import { Loading } from "/src/components/utilities";
+import { ErrorPageFormatted, Successpage } from "/src/pages/error";
 
 export default () => {
     return (

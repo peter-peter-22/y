@@ -5,14 +5,14 @@ import TextField from '@mui/material/TextField';
 import axios from 'axios';
 import React, { useCallback, useContext, useRef, useState } from "react";
 import { ThrowIfNotAxios } from "/src/communication.js";
+import { EmailInput, RechaptaInput, validateEmail } from "/src/components/account_components";
 import { CornerButton, OutlinedButton, WideButton } from "/src/components/buttons.jsx";
-import { EmailInput, RechaptaInput, validateEmail } from "/src/components/create_account";
 import { PasswordFieldWithToggle } from "/src/components/inputs";
+import { LoginLink } from '/src/components/login_redirects/google';
 import { ErrorText, Modals, SuccessModal } from "/src/components/modals";
-import { AlternativeLogin, BigModal, BigModalMargin, BottomButtonWithBorder, Or, SmallLink } from "/src/components/no_user";
+import { AlternativeLogin, BigModal, BigModalMargin, BottomButtonWithBorder, ByRegistering, GrowingLine, ModalMargin, Or, SmallLink } from "/src/components/no_user_components";
 import { UserContext } from "/src/components/user_data";
 import { CenterLogo } from '/src/components/utilities';
-import { LoginLink } from '/src/components/login_redirects/google';
 
 function Login(props) {
     //shared data

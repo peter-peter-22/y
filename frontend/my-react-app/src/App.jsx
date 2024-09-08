@@ -9,17 +9,15 @@ import {
   QueryClientProvider,
 } from '@tanstack/react-query';
 import 'material-icons/iconfont/material-icons.css';
-import React, { useContext, useEffect } from "react";
+import React from "react";
 import { BrowserRouter } from "react-router-dom";
 import { CreateModals } from "/src/components/modals";
 import Pages from "/src/components/router";
 import MyTheme from '/src/styles/mui/my_theme.jsx';
 
 //components
-import Loading from "./components/loading.jsx";
-import NoUser from "./components/no_user.jsx";
-import { UserContext, UserProvider } from "/src/components/user_data";
 import { PostListProvider } from "/src/components/posts";
+import { UserProvider } from "/src/components/user_data";
 
 const queryClient = new QueryClient({
   defaultOptions: {

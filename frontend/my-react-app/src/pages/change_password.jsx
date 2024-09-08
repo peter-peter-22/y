@@ -8,9 +8,9 @@ import 'moment/locale/de';
 import React, { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { ThrowIfNotAxios } from "/src/communication.js";
+import { PasswordInput } from "/src/components/account_components";
 import { OutlinedFab } from "/src/components/buttons.jsx";
 import { BoxList } from '/src/components/containers';
-import { PasswordInput } from "/src/components/create_account";
 import { Modals, SuccessModal } from "/src/components/modals";
 
 export default () => {

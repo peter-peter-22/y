@@ -1,9 +1,10 @@
+import { useQuery } from '@tanstack/react-query';
 import axios from "axios";
-import React, { createContext, useCallback, useEffect, useState } from "react";
+import React, { createContext, useCallback, useEffect, lazy } from "react";
 import { ThrowIfNotAxios } from "/src/communication.js";
-import CreateAccount from "/src/components/create_account.jsx";
+import { Sus } from "/src/components/lazified";
 import { Modals } from "/src/components/modals";
-import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
+const CreateAccount = lazy(() => import("/src/components/create_account"));
 
 const UserContext = createContext();
 
@@ -23,7 +24,7 @@ function UserProvider({ children }) {
 
         //after any register 
         if (data?.showStartMessage) {
-            Modals[0].Show(<CreateAccount pages={[5, 6, 7, 8]} key="after" />, CloseStartMessage);
+            Modals[0].Show(<Sus><CreateAccount pages={[5, 6, 7, 8]} key="after" /></Sus>, CloseStartMessage);
 
             async function CloseStartMessage() {
                 try {
@@ -38,7 +39,7 @@ function UserProvider({ children }) {
 
         //pending third party registration
         if (data?.pending_registration) {
-            Modals[0].Show(<CreateAccount pages={[1, 9]} finish={finish_google_registration} key="external" />, ExitRegistration);
+            Modals[0].Show(<Sus><CreateAccount pages={[1, 9]} finish={finish_google_registration} key="external" /></Sus>, ExitRegistration);
 
             async function ExitRegistration() {
                 try {
@@ -74,5 +75,5 @@ async function finish_google_registration(data, close) {
     }
 }
 
-export { UserProvider, UserContext };
+export { UserContext, UserProvider };
 

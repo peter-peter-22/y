@@ -7,7 +7,7 @@ import axios from 'axios';
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ThrowIfNotAxios } from "/src/communication.js";
-import { GetSearchText, GetSearchUrl } from "/src/pages/search";
+import { GetSearchText, GetSearchUrl } from "/src/components/search_components";
 
 const topicOrder = {
     Topics: 0,
@@ -184,3 +184,4 @@ const VisuallyHiddenInput = styled('input')({
 });
 
 export { PasswordFieldWithToggle, PlainTextField, SearchField, VisuallyHiddenInput };
+

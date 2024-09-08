@@ -9,10 +9,10 @@ import React, { useCallback, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { Modals } from "/src/components/modals";
 import { PostCreator } from "/src/components/post_creator";
-import { PostModalFrame,UsePostList } from "/src/components/posts";
+import { get_focused_id } from "/src/components/post_focused_components";
+import { PostModalFrame, UsePostList } from "/src/components/posts";
 import { UserContext } from "/src/components/user_data";
 import { GetUserKey, InheritLink, SimplePopOver, ToggleBlock, ToggleFollow, noOverflow } from '/src/components/utilities';
-import { get_focused_id } from "/src/pages/post_focused.jsx";
 
 let closeCurrent = undefined;
 function close() {

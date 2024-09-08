@@ -3,15 +3,15 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import Stack from '@mui/material/Stack';
+import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
-import React, { memo, useCallback, useEffect, useState } from "react";
+import React, { memo, useCallback } from "react";
 import { ThrowIfNotAxios } from "/src/communication.js";
 import { CornerButton, LinkButton } from "/src/components/buttons.jsx";
 import { BoxList } from '/src/components/containers';
-import { formatNumber, InheritLink, ListTitle, Loading } from '/src/components/utilities';
-import { GetSearchUrl } from "/src/pages/search.jsx";
 import { OnlineList } from "/src/components/online_list";
-import { useQuery } from '@tanstack/react-query'
+import { GetSearchUrl } from "/src/components/search_components";
+import { formatNumber, InheritLink, ListTitle, Loading } from '/src/components/utilities';
 
 function TrendsPreview() {
     const Download = useCallback(async () => {
@@ -106,3 +106,4 @@ function TrendList() {
 
 export default TrendsPreview;
 export { TrendList };
+
