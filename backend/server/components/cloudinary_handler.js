@@ -4,8 +4,8 @@ import { CheckErr } from './validations.js';
 // Configuration
 cloudinary.config({
     cloud_name: "dhfm5s5x8",
-    api_key: "614619697686557",
-    api_secret: "LK1MPl5HzmJB4ACHlS38BFIZsVo" // Click 'View Credentials' below to copy your API secret
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET // Click 'View Credentials' below to copy your API secret
 });
 
 async function uploadMedia(file, public_id, folder) {
