@@ -7,8 +7,8 @@ import session from "express-session";
 import passport from "passport";
 import * as g from "../config.js";
 import { start } from "./email_notifications.js";
+import rateLimit from "express-rate-limit";
 const pgSession = ConnectPg(session);
-
 
 function initialize() {
     //cors
@@ -16,6 +16,18 @@ function initialize() {
         origin: config.address_mode.client,
         credentials: true
     }));
+
+    //throttle limit
+    // Define rate limit rules
+    //60 request per min
+    const limiter = rateLimit({
+        windowMs: 60 * 1000, // 1 minutes
+        max: 60, // Limit each IP to 60 requests per windowMs
+        message: "Too many requests from this IP, please try again later."
+    });
+
+    // Apply the rate limiting middleware to all requests
+    app.use(limiter);
 
     //express
     app.use(express.static("public"));

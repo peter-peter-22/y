@@ -183,7 +183,7 @@ function BottomTabs() {
     let tabs = Tabs();
     tabs = bottomTabs.map(tab => tabs[tab]);
     return (
-        <Stack direction={"column"} style={{ position: "fixed", bottom: 0, left: 0, width: "100%", zIndex: 2, pointerEvents: "none", zIndex: 1051 }}>
+        <Stack direction={"column"} style={{ position: "fixed", bottom: 0, left: 0, width: "100%", pointerEvents: "none", zIndex: 1051 }}>
             <Box sx={{ alignSelf: "end", m: 2 }} style={{ pointerEvents: "all" }}>
                 <PostButton />
             </Box>
