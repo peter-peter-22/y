@@ -1,9 +1,6 @@
 //functions and resources
-import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
-import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
-import '@fontsource/roboto/900.css';
 import {
   QueryClient,
   QueryClientProvider,
@@ -37,7 +34,7 @@ function App() {
             <PostListProvider>
               <CreateModals />
               <div style={{ position: "relative", zIndex: 0 }}>
-                <Pages/>
+                <Pages />
               </div>
             </PostListProvider>
           </UserProvider>
