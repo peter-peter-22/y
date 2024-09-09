@@ -13,6 +13,24 @@ import { DisplayNotificationCount } from "/src/components/notification_listener"
 import { UserContext } from "/src/components/user_data";
 import { GetProfileLink, InheritLink } from '/src/components/utilities';
 
+import BookmarkIcon from "@mui/icons-material/Bookmark";
+import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
+import HomeIcon from "@mui/icons-material/Home";
+import HomeIconOutlined from "@mui/icons-material/HomeOutlined";
+import ListAltIcon from "@mui/icons-material/ListAlt";
+import MailIcon from "@mui/icons-material/Mail";
+import MailIconOutlined from "@mui/icons-material/MailOutlined";
+import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
+import NotificationsIcon from "@mui/icons-material/Notifications";
+import NotificationsIconOutlined from "@mui/icons-material/NotificationsOutlined";
+import PeopleIcon from "@mui/icons-material/People";
+import PeopleIconOutlined from "@mui/icons-material/PeopleOutlined";
+import PersonIcon from "@mui/icons-material/Person";
+import PersonIconOutlined from "@mui/icons-material/PersonOutlined";
+import SearchIcon from "@mui/icons-material/Search";
+import SettingsIcon from "@mui/icons-material/Settings";
+import SettingsIconOutlined from "@mui/icons-material/SettingsOutlined";
+
 function Tab(name, link, active_icon, inactive_icon, element = BasicTab) {
     this.active_icon = active_icon;
     this.inactive_icon = inactive_icon;
@@ -48,57 +66,57 @@ function Tabs() {
         home: new Tab(
             "home",
             "/",
-            <ButtonIcon icon="home" filled={true} />,
-            <ButtonIcon icon="home" filled={false} />
+            <ButtonIcon icon={<HomeIcon />} />,
+            <ButtonIcon icon={<HomeIconOutlined />} />,
         ),
         explore: new Tab(
             "explore",
             "/explore",
-            <ButtonIcon icon="search" useWeight={true} />,
-            <ButtonIcon icon="search" />
+            <ButtonIcon icon={<SearchIcon />} useWeight={true} />,
+            <ButtonIcon icon={<SearchIcon />} />,
         ),
         notif: new Tab(
             "notifications",
             "/notifications",
-            <ButtonIcon icon="notifications" filled={true} />,
-            <ButtonIcon icon="notifications" filled={false} />,
+            <ButtonIcon icon={<NotificationsIcon />} />,
+            <ButtonIcon icon={<NotificationsIconOutlined />} />,
             NotificationsTab
         ),
         messages: new Tab(
             "messages",
             "/messages",
-            <ButtonIcon icon="mail" filled={true} />,
-            <ButtonIcon icon="mail" filled={false} />
+            <ButtonIcon icon={<MailIcon />} />,
+            <ButtonIcon icon={<MailIconOutlined />} />,
         ),
         lists: new Tab(
             "lists",
             "/lists",
-            <ButtonIcon icon="list_alt" useWeight={true} />,
-            <ButtonIcon icon="list_alt" />
+            <ButtonIcon icon={<ListAltIcon />} useWeight={true} />,
+            <ButtonIcon icon={<ListAltIcon />} />,
         ),
         bookmarks: new Tab(
             "bookmarks",
             "/bookmarks",
-            <ButtonIcon icon="bookmark" />,
-            <ButtonIcon icon="bookmark_border" />
+            <ButtonIcon icon={<BookmarkIcon />} />,
+            <ButtonIcon icon={<BookmarkBorderIcon />} />,
         ),
         comm: new Tab(
             "communities",
             "/communities",
-            <ButtonIcon icon="people" filled={true} />,
-            <ButtonIcon icon="people" filled={false} />
+            <ButtonIcon icon={<PeopleIcon />} />,
+            <ButtonIcon icon={<PeopleIconOutlined />} />,
         ),
         premium: new Tab(
             "premium",
             "/premium",
             <ButtonSvg src={logo} useWeight={true} />,
-            <ButtonSvg src={logo} />
+            <ButtonSvg src={logo} />,
         ),
         profile: new Tab(
             "profile",
             GetProfileLink(getData.user),
-            <ButtonIcon icon="person" filled={true} />,
-            <ButtonIcon icon="person" filled={false} />
+            <ButtonIcon icon={<PersonIcon />} />,
+            <ButtonIcon icon={<PersonIconOutlined />} />,
         )
     });
 
@@ -112,8 +130,8 @@ function HiddenTabs() {
         new Tab(
             "settings",
             "/settings",
-            <ButtonIcon icon="settings" filled={true} />,
-            <ButtonIcon icon="settings" filled={false} />
+            <ButtonIcon icon={<SettingsIcon />} />,
+            <ButtonIcon icon={<SettingsIconOutlined />} />,
         )
     ];
 
@@ -125,8 +143,8 @@ function MoreButton({ invisibleTabs }) {
     return (
         <div>
             <ResponsiveButton
-                active_icon={<ButtonIcon icon="more_horiz" />}
-                inactive_icon={<ButtonIcon icon="more_horiz" />}
+                active_icon={<ButtonIcon icon={<MoreHorizIcon />} />}
+                inactive_icon={<ButtonIcon icon={<MoreHorizIcon />} />}
                 onClick={handleOpen}
                 style={{ flexShrink: 0 }}
             >

@@ -5,7 +5,6 @@ import {
   QueryClient,
   QueryClientProvider,
 } from '@tanstack/react-query';
-import 'material-icons/iconfont/material-icons.css';
 import React from "react";
 import { BrowserRouter } from "react-router-dom";
 import { CreateModals } from "/src/components/modals";

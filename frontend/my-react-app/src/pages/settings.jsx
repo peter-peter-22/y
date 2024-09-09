@@ -6,7 +6,7 @@ import FormGroup from '@mui/material/FormGroup';
 import Stack from '@mui/material/Stack';
 import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import axios from 'axios';
-import React, { Suspense, useCallback } from "react";
+import React, { Suspense, useCallback ,lazy} from "react";
 import { Controller, FormProvider, useForm, useFormContext, useWatch } from 'react-hook-form';
 import { ThrowIfNotAxios } from "/src/communication.js";
 import { Modals, SuccessModal } from "/src/components/modals";
@@ -15,8 +15,8 @@ import Ask from "/src/components/web_push.js";
 import { ErrorPageFormatted } from "/src/pages/error";
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
-import Icon from '@mui/material/Icon';
 import { ScrollToTop } from "/src/components/scroll_to_top";
+const QuestionMarkIcon = lazy(() => import('@mui/icons-material/QuestionMark'));
 
 function ControlledCheckbox({ title, name, group, ...props }) {
   const { control } = useFormContext();
@@ -132,9 +132,7 @@ function Form() {
                     </>
                   }>
                     <IconButton size="small">
-                      <Icon>
-                        question_mark
-                      </Icon>
+                      <QuestionMarkIcon />
                     </IconButton>
                   </Tooltip>
                 </Stack>

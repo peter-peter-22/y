@@ -5,7 +5,7 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import Stack from '@mui/material/Stack';
 import axios from 'axios';
-import React, { useCallback, useContext } from "react";
+import React, { useCallback, useContext, lazy } from "react";
 import { useNavigate } from "react-router-dom";
 import { Modals } from "/src/components/modals";
 import { PostCreator } from "/src/components/post_creator";
@@ -13,6 +13,16 @@ import { get_focused_id } from "/src/components/post_focused_components";
 import { PostModalFrame, UsePostList } from "/src/components/posts";
 import { UserContext } from "/src/components/user_data";
 import { GetUserKey, InheritLink, SimplePopOver, ToggleBlock, ToggleFollow, noOverflow } from '/src/components/utilities';
+import { Sus } from "/src/components/lazified";
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
+
+const AlignVerticalBottomIcon = lazy(() => import('@mui/icons-material/AlignVerticalBottom'));
+const PersonRemoveIcon = lazy(() => import('@mui/icons-material/PersonRemove'));
+const PersonAddAlt1Icon = lazy(() => import('@mui/icons-material/PersonAddAlt1'));
+const DoDisturbOnIcon = lazy(() => import('@mui/icons-material/DoDisturbOn'));
+const DoDisturbIcon = lazy(() => import('@mui/icons-material/DoDisturb'));
+const CloseIcon = lazy(() => import('@mui/icons-material/Close'));
+const EditIcon = lazy(() => import('@mui/icons-material/Edit'));
 
 let closeCurrent = undefined;
 function close() {
@@ -26,11 +36,13 @@ function ManageContent(props) {
     function PostOptions() {
         return (
             <ShowPopover>
-                <List sx={{ p: 0 }}>
-                    <Typography variant="medium_bold" sx={{ maxWidth: "70vw" }} style={noOverflow}>
-                        {props.children}
-                    </Typography>
-                </List>
+                <Sus>
+                    <List sx={{ p: 0 }}>
+                        <Typography variant="medium_bold" sx={{ maxWidth: "70vw" }} style={noOverflow}>
+                            {props.children}
+                        </Typography>
+                    </List>
+                </Sus>
             </ShowPopover>
         );
     }
@@ -44,7 +56,7 @@ function ManageContent(props) {
     return (
         <>
             <IconButton size="small" style={{ marginLeft: "auto" }} onClick={Clicked}>
-                <Icon fontSize="small">more_horiz</Icon>
+                <MoreHorizIcon fontSize="small" />
             </IconButton>
             <PostOptions />
         </>
@@ -56,7 +68,7 @@ function EngagementsRow(props) {
     return (
         <InheritLink to={engagementsLink(post)}>
             <Row>
-                <Icon>align_vertical_bottom</Icon>
+                <AlignVerticalBottomIcon />
                 <span>View post engagements</span>
             </Row>
         </InheritLink>
@@ -73,7 +85,7 @@ function FollowRow(props) {
 
     return (
         <Row onClick={toggleFollow}>
-            <Icon>{follow ? "person_remove" : "person_add_alt_1"}</Icon>
+            {follow ? <PersonRemoveIcon /> : <PersonAddAlt1Icon />}
             <span>{follow ? "Unfollow" : "Follow"} < GetUserKey user={user} /></span>
         </Row>
     );
@@ -89,7 +101,7 @@ function BlockRow({ user, onChange }) {
 
     return (
         <Row onClick={handleBlock}>
-            <Icon>{blocked ? "do_disturb_on" : "do_disturb"}</Icon>
+            {blocked ? <DoDisturbOnIcon /> : <DoDisturbIcon />}
             <span>{blocked ? "Unblock" : "Block"} < GetUserKey user={user} /></span>
         </Row>
     );
@@ -97,7 +109,7 @@ function BlockRow({ user, onChange }) {
 
 function DeleteRow({ post }) {
     const navigate = useNavigate();
-    const postList=UsePostList();
+    const postList = UsePostList();
     async function handle_delete() {
         close();
 
@@ -126,14 +138,14 @@ function DeleteRow({ post }) {
 
     return (
         <Row onClick={handle_delete}>
-            <Icon>close</Icon>
+            <CloseIcon />
             <span>Delete</span>
         </Row>
     );
 }
 
 function EditRow({ post }) {
-    const postList=UsePostList();
+    const postList = UsePostList();
     async function handle_edit() {
         close();
         Modals[0].Show(
@@ -155,7 +167,7 @@ function EditRow({ post }) {
 
     return (
         <Row onClick={handle_edit}>
-            <Icon>edit</Icon>
+            <EditIcon />
             <span>Edit</span>
         </Row>
     );
@@ -175,7 +187,7 @@ function Row(props) {
 }
 
 function ManagePost({ original, overriden }) {
-    const postList=UsePostList();
+    const postList = UsePostList();
     const { getData } = useContext(UserContext);
     const user = overriden.publisher;
     const is_me = original.publisher.id === getData.user.id;
@@ -219,6 +231,5 @@ function ManageProfile(props) {
     );
 }
 
-export default ManageContent;
 export { ManagePost, ManageProfile, engagementsLink };
 

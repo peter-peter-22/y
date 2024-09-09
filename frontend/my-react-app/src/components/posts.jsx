@@ -1,4 +1,4 @@
-import { Box, Icon, Typography } from '@mui/material';
+import { Box, Icon, SvgIcon, Typography } from '@mui/material';
 import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
 import ListItem from '@mui/material/ListItem';
@@ -15,8 +15,17 @@ import { Modals, SuccessModal } from "/src/components/modals";
 import { OnlineList } from '/src/components/online_list';
 import { PostCreator } from "/src/components/post_creator.jsx";
 import { PostMedia } from "/src/components/post_media";
-import { DateLink, FadeLink, GetPostMedia, GetUserName, ProfilePic, ProfileText, ReplyingFrom, SimplePopOver, TextRow, UserKey, UserLink, formatNumber, noOverflow } from '/src/components/utilities';
 import { TextDisplayer } from "/src/components/post_text";
+import { DateLink, FadeLink, GetPostMedia, GetUserName, ProfilePic, ProfileText, ReplyingFrom, SimplePopOver, TextRow, UserKey, UserLink, formatNumber, noOverflow } from '/src/components/utilities';
+
+import AlignVerticalBottomIcon from '@mui/icons-material/AlignVerticalBottom';
+import BookmarkIcon from '@mui/icons-material/Bookmark';
+import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
+import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
+import FavoriteIcon from "@mui/icons-material/Favorite";
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import LoopIcon from "@mui/icons-material/Loop";
+import UploadIcon from "@mui/icons-material/Upload";
 
 const postListContext = createContext();
 let setPostList;
@@ -260,44 +269,42 @@ function PostButtonRow(props) {
         <Stack direction="row" justifyContent="space-between" style={{ flexGrow: 1 }}>
 
             <PostBottomIcon text={formatNumber(comment_count)}
-                active_icon="chat_bubble_outline"
-                inactive_icon="chat_bubble_outline"
+                active_icon={<ChatBubbleOutlineIcon />}
+                inactive_icon={<ChatBubbleOutlineIcon />}
                 active_color="primary.main"
                 onClick={handleComment} />
 
             <PostBottomIcon text={formatNumber(repost_count)}
-                active_icon="loop"
-                inactive_icon="loop"
+                active_icon={<LoopIcon />}
+                inactive_icon={<LoopIcon />}
                 active_color="colors.share"
                 active={reposted}
                 onClick={showRepostDialog} />
 
             <PostBottomIcon text={formatNumber(like_count)}
-                active_icon="favorite"
-                inactive_icon="favorite_border"
+                active_icon={<FavoriteIcon />}
+                inactive_icon={<FavoriteBorderIcon />}
                 active_color="colors.like"
                 active={liked}
                 onClick={handleLike} />
 
             <PostBottomIcon text={formatNumber(post.view_count)}
-                active_icon="align_vertical_bottom"
-                inactive_icon="align_vertical_bottom"
+                active_icon={<AlignVerticalBottomIcon />}
+                inactive_icon={<AlignVerticalBottomIcon />}
                 active_color="primary.main"
                 onClick={handleViewClick}
             />
 
             <PostBottomIcon
                 text={formatNumber(bookmark_count)}
-                active_icon="bookmark"
-                inactive_icon="bookmark_border"
+                active_icon={<BookmarkIcon />}
+                inactive_icon={<BookmarkBorderIcon />}
                 active_color="primary.main"
                 active={bookmarked}
                 onClick={handleBookmark} />
 
             <IconButton size="small" onClick={showShareDialog}>
-                <Icon fontSize="small">
-                    upload
-                </Icon>
+                <UploadIcon fontSize="small" />
             </IconButton>
 
             <RepostPopover>
@@ -456,9 +463,9 @@ function SimplifiedPostList({ params: additional_params, post, endpoint, id, scr
 function PostBottomIcon(props) {
     return (
         <IconButton size="small" onClick={(e) => { e.stopPropagation(); if (props.onClick) props.onClick(e); }}>
-            <Icon sx={{ color: props.active ? props.active_color : "" }} fontSize="small" baseClassName={props.active ? "material-icons" : "material-icons-outlined"}>
+            <SvgIcon sx={{ color: props.active ? props.active_color : "" }} fontSize="small">
                 {props.active ? props.active_icon : props.inactive_icon}
-            </Icon>
+            </SvgIcon>
             <Typography variant="small" color="secondary" style={{ position: "absolute", left: "90%" }}>{props.text}</Typography>
         </IconButton>);
 }
@@ -468,7 +475,7 @@ function RepostedOrQuoted(props) {
     if (post.repost || post.quote) {
         return (
             <RowWithPrefix
-                prefix={<Icon color="secondary" style={{ fontSize: "15px", alignSelf: "center" }}>loop</Icon>}
+                prefix={<LoopIcon color="secondary" style={{ fontSize: "15px", alignSelf: "center" }}/>}
                 contents={
                     <FadeLink to={"/posts/" + post.reposted_post.id} style={{ fontWeight: "bold", overflow: "hidden" }}>
                         <TextRow>
@@ -528,5 +535,5 @@ function OverrideWithRepost(post) {
 }
 
 
-export { BorderlessPost, HideablePostFocusedMemo, HideablePostMemo, ListBlock, ListBlockButton, OpenOnClick, OpenPostOnClick, OverrideWithRepost, Post, PostButtonRow, PostModalFrame, QuotedFrame, RowWithPrefix, SimplifiedPostList, WritePost, PostListProvider, SetPostList, UsePostList };
+export { BorderlessPost, HideablePostFocusedMemo, HideablePostMemo, ListBlock, ListBlockButton, OpenOnClick, OpenPostOnClick, OverrideWithRepost, Post, PostButtonRow, PostListProvider, PostModalFrame, QuotedFrame, RowWithPrefix, SetPostList, SimplifiedPostList, UsePostList, WritePost };
 

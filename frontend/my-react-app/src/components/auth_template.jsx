@@ -2,13 +2,13 @@ import { Box } from '@mui/material';
 import React, { memo, useContext, lazy, Suspense } from "react";
 import { Outlet, useMatch } from "react-router-dom";
 import Footer from "/src/components/footer";
-import Header from "/src/components/header";
 import LoadingPage from "/src/components/loading.jsx";
 import { NotifCountProvider } from "/src/components/notification_listener";
 import { UserContext } from "/src/components/user_data";
 import { Unauthorized } from "/src/pages/error";
 import { Loading } from "/src/components/utilities";
 const LoggedOut = lazy(() => import("/src/components/no_user.jsx"));
+const Header = lazy(() => import("/src/components/header"));
 
 const AuthTemplate = memo(() => {
     //get user data

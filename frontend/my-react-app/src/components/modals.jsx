@@ -1,4 +1,4 @@
-import { Backdrop, Box, Icon } from '@mui/material';
+import { Box } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
@@ -9,7 +9,6 @@ import 'moment/locale/de';
 import React, { useRef, useState } from "react";
 import { FormatAxiosError } from "/src/communication.js";
 import { MediaDisplayer } from "/src/components/media.jsx";
-import { ResponsiveSelector } from '/src/components/utilities';
 
 //creating modal data
 let Modals = [];
@@ -189,16 +188,14 @@ function ImagesModal() {
     );
 }
 
-function StepButton(props) {
+function StepButton({myIcon,tall,onClick}) {
     return (
         <Box sx={{
-            display: "flex", width: props.tall ? "50px" : "100%", height: props.tall ? "100%" : "50px", justifyContent: "center", alignItems: "center",
+            display: "flex", width: tall ? "50px" : "100%", height: tall ? "100%" : "50px", justifyContent: "center", alignItems: "center",
             fontSize: "50px", "&:hover": { fontSize: "75px" }
         }}
-            onClick={props.onClick}>
-            <Icon sx={{ color: "primary.contrastText", fontSize: "inherit" }}>
-                {props.icon}
-            </Icon>
+            onClick={onClick}>
+            <myIcon sx={{ color: "primary.contrastText", fontSize: "inherit" }} />
         </Box >
     );
 }
@@ -212,3 +209,4 @@ function ShowSingleImage(media) {
 }
 
 export { CreateModals, Error, ErrorModal, ErrorText, ImagesDisplay, Modals, ShowImage, ShowSingleImage, SuccessModal };
+

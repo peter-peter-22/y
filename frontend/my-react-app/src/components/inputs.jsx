@@ -4,10 +4,13 @@ import InputAdornment from '@mui/material/InputAdornment';
 import { styled } from '@mui/material/styles';
 import TextField from '@mui/material/TextField';
 import axios from 'axios';
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState,lazy } from "react";
 import { useNavigate } from "react-router-dom";
 import { ThrowIfNotAxios } from "/src/communication.js";
 import { GetSearchText, GetSearchUrl } from "/src/components/search_components";
+const VisibilityIcon = lazy(() => import('@mui/icons-material/Visibility'));
+const VisibilityOffIcon = lazy(() => import('@mui/icons-material/VisibilityOff'));
+const SearchIcon = lazy(() => import('@mui/icons-material/Search'));
 
 const topicOrder = {
     Topics: 0,
@@ -117,9 +120,7 @@ function SearchField() {
                         sx: { borderRadius: '999px', height: "100%" },
                         startAdornment: (
                             <InputAdornment position="start">
-                                <Icon color={isFocused ? "primary" : ""}>
-                                    search
-                                </Icon>
+                                <SearchIcon color={isFocused ? "primary" : ""}/>
                             </InputAdornment>
                         )
                     }}
@@ -163,7 +164,7 @@ function PasswordFieldWithToggle(props) {
                 endAdornment: (
                     <InputAdornment position="end">
                         <IconButton onClick={handleTogglePasswordVisibility}>
-                            {showPassword ? <Icon>visibility_off</Icon> : <Icon>visibility</Icon>}
+                            {showPassword ? <VisibilityOffIcon/> : <VisibilityIcon/>}
                         </IconButton>
                     </InputAdornment>
                 ),

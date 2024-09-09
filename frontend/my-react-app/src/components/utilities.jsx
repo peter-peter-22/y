@@ -11,16 +11,20 @@ import Stack from '@mui/material/Stack';
 import Tooltip from '@mui/material/Tooltip';
 import axios from 'axios';
 import Moment from "moment";
-import React, { forwardRef, memo, useContext, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import React, { forwardRef, memo, useContext, useEffect, useImperativeHandle, useRef, useState, lazy } from 'react';
 import { Link, NavLink } from "react-router-dom";
 import { ThrowIfNotAxios } from "/src/communication.js";
 import { TopMenuButton } from "/src/components/buttons.jsx";
-import { LeftTabsMobile } from "/src/components/header";
 import { Media, MediaDisplayer, MediaFromFileData, mediaTypes } from "/src/components/media.jsx";
 import { ClickableSingleImageContainer } from "/src/components/post_media";
 import { OpenOnClick } from "/src/components/posts";
 import { UserContext } from "/src/components/user_data";
 import { theme } from '/src/styles/mui/my_theme.jsx';
+
+const LeftTabsMobile = lazy(async () => ({
+    default: (await import('/src/components/header')).LeftTabsMobile,
+}));
+
 
 const noOverflow = {
     whiteSpace: 'nowrap',

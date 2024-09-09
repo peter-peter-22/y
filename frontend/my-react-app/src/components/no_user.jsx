@@ -1,18 +1,18 @@
 import { Typography } from '@mui/material';
-import Icon from "@mui/material/Icon";
 import Stack from '@mui/material/Stack';
 import axios from "axios";
-import React,{lazy} from "react";
+import React, { lazy } from "react";
 import { ThrowIfNotAxios } from "/src/communication.js";
 import { OutlinedButton, WideButton } from "/src/components/buttons.jsx";
 const CreateAccount = lazy(() => import("/src/components/create_account"));
 import links from "/src/components/footer_links";
-import Login from "/src/components/login.jsx";
 import { LoginLink } from '/src/components/login_redirects/google';
 import { Modals } from "/src/components/modals";
 import { AlternativeLogin, ByRegistering, Or } from "/src/components/no_user_components";
 import { AboveBreakpoint, creation, logo } from '/src/components/utilities';
 import { Sus } from "/src/components/lazified";
+const VisibilityOffIcon = lazy(() => import('@mui/icons-material/VisibilityOff'));
+const Login = lazy(() => import('/src/components/login.jsx'));
 
 function Main() {
     const wide = AboveBreakpoint("md");
@@ -28,7 +28,7 @@ function Main() {
     }
 
     function showLogin() {
-        Modals[0].Show(<Login />)
+        Modals[0].Show(<Sus><Login /></Sus>)
     }
 
     return (
@@ -44,7 +44,7 @@ function Main() {
                     </Typography>
                     <Stack direction="column" spacing={1} style={{ width: "300px" }}>
                         <LoginLink><AlternativeLogin icon={<img src="/svg/google.svg" style={{ height: "1.5em" }} />} text="Sign-up with Google" /></LoginLink>
-                        <AlternativeLogin icon={<Icon>visibility_off</Icon>} text="Register without email" onClick={showUsernameCreator} />
+                        <AlternativeLogin icon={<VisibilityOffIcon />} text="Register without email" onClick={showUsernameCreator} />
                         {/*<a href={config.address_mode.server+"/auth/github"}><AlternativeLogin src="/svg/github.svg" text="Sign-up with Github" /></a>*/}
                         <Stack direction="row" sx={{ my: 0.5, alignItems: "center" }}>
                             <Or />

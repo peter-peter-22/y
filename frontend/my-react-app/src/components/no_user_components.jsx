@@ -5,12 +5,12 @@ import React from "react";
 import { OutlinedButton, WideButton } from "/src/components/buttons.jsx";
 import { StyledLink } from '/src/components/utilities';
 
-function AlternativeLogin({ icon, size, ...props }) {
+function AlternativeLogin({ icon, size, text, ...props }) {
     return (
         <OutlinedButton {...props} size={size ? size : "medium"}>
             <Stack direction="row" spacing={0.5} style={{ height: "100%", alignItems: "center" }}>
                 {icon}
-                <span>{props.text}</span>
+                <span>{text}</span>
             </Stack>
         </OutlinedButton >
     );

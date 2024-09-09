@@ -7,8 +7,8 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import Stack from '@mui/material/Stack';
 import axios from "axios";
-import React, { forwardRef, useContext, memo } from 'react';
-import { matchPath, NavLink, useMatch, useNavigate } from "react-router-dom";
+import React, { forwardRef, memo, useContext } from 'react';
+import { NavLink, useMatch, useNavigate } from "react-router-dom";
 import { ThrowIfNotAxios } from "/src/communication.js";
 import { BlueTextButton } from "/src/components/containers";
 import { Modals } from "/src/components/modals";
@@ -17,7 +17,11 @@ import { PostModalFrame } from "/src/components/posts";
 import { UsePostList } from "/src/components/posts.jsx";
 import { UserContext } from '/src/components/user_data';
 import { GetUserKey, LinelessLink, noOverflow, ProfilePic, ProfileText, ResponsiveSelector, SimplePopOver, ToCorner } from '/src/components/utilities';
-import { useLocation } from 'react-router-dom';
+import SvgIcon from '@mui/material/SvgIcon';
+
+import AddCommentIcon from "@mui/icons-material/AddComment";
+import CreateIcon from "@mui/icons-material/Create";
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 
 const smallerButtons = "leftMenuIcons";
 const iconSize = "35px";
@@ -110,20 +114,21 @@ const ResponsiveButton = memo(({ children, ...props }) => {
         return iconOnly;
 });
 
-function ButtonIcon(props) {
+function ButtonIcon({ icon, useWeight }) {
+    let style = { width: iconSize, height: iconSize };
+    if (useWeight)
+        style = { stroke: "black", strokeWidth: 1.3, ...style };
+
+    const SizedIcon = React.cloneElement(icon, { style })
+
     return (
-        <Icon
-            baseClassName={props.filled ? "material-icons" : "material-icons-outlined"}
-            sx={{ fontSize: iconSize, fontWeight: props.useWeight ? "bold" : "initial" }}
-        >
-            {props.icon}
-        </Icon>
+        SizedIcon
     );
 }
 
 function ButtonSvg(props) {
     return (
-        <Icon sx={{ fontSize: iconSize }}>
+        <Icon sx={{ fontSize: iconSize, display: "flex" }}>
             <img src={props.src} style={{ height: "100%" }} />
         </Icon>
     );
@@ -154,7 +159,7 @@ function PostButton(props) {
             }
             below={
                 <Fab size="medium" color="primary" style={{ flexShrink: 0 }} {...props} onClick={handlePost}>
-                    <ButtonIcon icon={comment ? "add_comment" : "create"} filled="true" />
+                    <ButtonIcon icon={comment ? <AddCommentIcon /> : <CreateIcon />} />
                 </Fab>
             }
         />
@@ -162,7 +167,7 @@ function PostButton(props) {
 }
 
 
-const ProfileButton=memo(()=> {
+const ProfileButton = memo(() => {
     const size = "60px";
     const { getData, update } = useContext(UserContext);
     const user = getData.user;
@@ -188,9 +193,7 @@ const ProfileButton=memo(()=> {
                         <Stack direction="row" spacing={1} sx={{ width: "100%", height: "100%", alignItems: "center" }}>
                             <ProfilePic user={user} disabled />
                             <ProfileText user={user} />
-                            <Icon fontSize="small">
-                                more_horiz
-                            </Icon>
+                            <MoreHorizIcon fontSize="small" />
                         </Stack>
                     </Fab>
                 }
@@ -214,13 +217,13 @@ const ProfileButton=memo(()=> {
             </ShowPopover>
         </>
     );
-},()=>true);
+}, () => true);
 
 function CornerButton(props) {
     return (
         <ToCorner {...props}>
             <IconButton size="small" onClick={props.onClick}>
-                <Icon fontSize="small">{props.children}</Icon>
+                <SvgIcon fontSize="small">{props.children}</SvgIcon>
             </IconButton>
         </ToCorner>);
 }

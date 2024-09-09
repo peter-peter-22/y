@@ -15,6 +15,12 @@ import { BorderlessPost, QuotedFrame, RowWithPrefix, UsePostList } from "/src/co
 import { UserContext } from "/src/components/user_data";
 import { Loading, ProfilePic, ReplyingTo } from '/src/components/utilities';
 import { theme } from "/src/styles/mui/my_theme";
+import SvgIcon from '@mui/material/SvgIcon';
+
+import InsertPhotoIcon from "@mui/icons-material/InsertPhotoOutlined";
+import GifBoxIcon from "@mui/icons-material/GifBoxOutlined";
+import SentimentSatisfiedAltIcon from "@mui/icons-material/SentimentSatisfiedAltOutlined";
+import LocationOnIcon from "@mui/icons-material/LocationOnOutlined";
 
 function PostCreator({ post, quoted, onPost, editing }) {
     const postList = UsePostList();
@@ -184,10 +190,10 @@ function PostCreator({ post, quoted, onPost, editing }) {
                                     <Stack direction="row" alignItems="center" justifyContent={"space-between"} style={{ flexGrow: 1 }}>
                                         <Stack direction="row" spacing={0.5}>
                                             <input ref={inputRef} type="file" accept={config.accepted_media_types} onChange={handleFile} multiple style={{ display: "none" }} />
-                                            <CommentButton onClick={insertPhoto}>insert_photo</CommentButton>
-                                            <CommentButton onClick={notImplemented}>gif_box</CommentButton>
-                                            <CommentButton onClick={notImplemented}>sentiment_satisfied_alt</CommentButton>
-                                            <CommentButton onClick={notImplemented}>location_on</CommentButton>
+                                            <CommentButton onClick={insertPhoto}><InsertPhotoIcon /></CommentButton>
+                                            <CommentButton onClick={notImplemented}><GifBoxIcon /></CommentButton>
+                                            <CommentButton onClick={notImplemented}><SentimentSatisfiedAltIcon /></CommentButton>
+                                            <CommentButton onClick={notImplemented}><LocationOnIcon /></CommentButton>
                                         </Stack>
 
                                         <LetterCounter maxvalue={maxLetters} letters={getText.length} />
@@ -232,9 +238,9 @@ function PostTextEditor({ onChangeRaw, isComment, onFocus, max_letters, startTex
 function CommentButton(props) {
     return (
         <IconButton color="primary" size="small" onClick={props.onClick}>
-            <Icon fontSize="small" baseClassName="material-icons-outlined">
+            <SvgIcon fontSize="small">
                 {props.children}
-            </Icon>
+            </SvgIcon>
         </IconButton>
     );
 }
@@ -303,8 +309,6 @@ function LetterCounter(props) {
 function AddPostToCommentSection(post, postList) {
     if (!postList)
         return;
-
-    const myCommentSection = post.replying_to === postList.replied_post?.id;
 
     postList.addPost(post);
 }

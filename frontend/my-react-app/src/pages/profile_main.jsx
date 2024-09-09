@@ -18,6 +18,7 @@ import { CommentsOfUser, Followers, Following, LikesOfUser, MediaOfUser, PostsOf
 import { UserContext } from "/src/components/user_data";
 import { FadeLink, GetProfileBanner, GetUserName, Loading, ProfilePic, TabSwitcherLinks, TextRow, UserKey, formatNumber, noOverflow } from '/src/components/utilities';
 import { ErrorPageFormatted } from "/src/pages/error";
+import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 
 function Profile() {
     const { id } = useParams();
@@ -114,7 +115,7 @@ function ProfileInfo({ user, setLocalBlocked }) {
                     </Stack>
                     <Typography variant="small_fade" >
                         <Stack direction="row" spacing={0.5}>
-                            <Icon style={{ fontSize: "1.5em" }}>calendar_month</Icon>
+                            <CalendarMonthIcon style={{ fontSize: "1.5em" }} />
                             <span>Joined {moment.format('MMMM YYYY')}</span>
                         </Stack>
                     </Typography>

@@ -1,21 +1,26 @@
-import { Icon, Typography } from '@mui/material';
+import BlockIcon from "@mui/icons-material/Block";
+import DoneIcon from "@mui/icons-material/Done";
+import { SvgIcon, Typography } from '@mui/material';
 import Stack from '@mui/material/Stack';
 import React from "react";
 import { FormatAxiosError } from "/src/communication.js";
+import { ScrollToTop } from "/src/components/scroll_to_top";
 import { StyledLink } from "/src/components/utilities";
 
 function ErrorPage({ text }) {
   return (
-    <InfoPage icon="block" text={text} />
+    <InfoPage icon={<BlockIcon/>} text={text} />
   );
 }
 
 function InfoPage({ text, icon }) {
+  ScrollToTop();
+
   return (
     <Stack direction="column" style={{ height: "100vh", margin: "auto", alignItems: "center", justifyContent: "center" }}>
-      <Icon color="secondary" style={{ fontSize: "50px" }}>
+      <SvgIcon color="secondary" style={{ fontSize: "50px" }}>
         {icon}
-      </Icon>
+      </SvgIcon>
       <Typography color="secondary" variant="medium">{text}</Typography>
     </Stack>
   );
@@ -28,7 +33,7 @@ function ErrorPageFormatted({ error }) {
 }
 function Successpage({ text }) {
   return (
-    <InfoPage icon="done" text={text} />
+    <InfoPage icon={<DoneIcon/>} text={text} />
   );
 }
 
@@ -50,4 +55,5 @@ export default () => {
   );
 }
 
-export { ErrorPage, ErrorPageFormatted, Successpage,Unauthorized };
+export { ErrorPage, ErrorPageFormatted, Successpage, Unauthorized };
+

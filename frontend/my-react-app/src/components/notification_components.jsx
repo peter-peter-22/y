@@ -4,9 +4,14 @@ import Stack from '@mui/material/Stack';
 import axios from 'axios';
 import React, { memo } from "react";
 import { BorderlessPost, ListBlockButton, OpenOnClick, OpenPostOnClick, RowWithPrefix } from "/src/components/posts";
-import {  ProfilePic, TextRow, UserLink, noOverflow } from '/src/components/utilities';
+import { ProfilePic, TextRow, UserLink, noOverflow } from '/src/components/utilities';
 import { theme } from "/src/styles/mui/my_theme";
-import {OnlineList} from "/src/components/online_list";
+import { OnlineList } from "/src/components/online_list";
+import SvgIcon from '@mui/material/SvgIcon';
+
+import FavoriteIcon from "@mui/icons-material/Favorite";
+import PersonIcon from "@mui/icons-material/Person";
+import LoopIcon from "@mui/icons-material/Loop";
 
 const spacing = 1.5;
 
@@ -24,7 +29,7 @@ function Like({ data }) {
             <OpenPostOnClick id={data.post_id}>
                 <Stack direction="column" spacing={spacing}>
                     <RowWithPrefix
-                        prefix={<SmallIcon color={theme.palette.colors.like} icon="favorite" />}
+                        prefix={<SmallIcon color={theme.palette.colors.like} icon={<FavoriteIcon />} />}
                         contents={
                             <UserBalls users={data.users} />
                         }
@@ -59,7 +64,7 @@ function Follow({ data }) {
             <OpenOnClick link={link}>
                 <Stack direction="column" spacing={spacing}>
                     <RowWithPrefix
-                        prefix={<SmallIcon color={theme.palette.primary.main} icon="person" />}
+                        prefix={<SmallIcon color={theme.palette.primary.main} icon={<PersonIcon />} />}
                         contents={
                             <UserBalls users={data.users} />
                         }
@@ -102,7 +107,7 @@ function Repost({ data }) {
             <OpenPostOnClick id={data.post_id}>
                 <Stack direction="column" spacing={spacing}>
                     <RowWithPrefix
-                        prefix={<SmallIcon color={theme.palette.colors.share} icon="loop" />}
+                        prefix={<SmallIcon color={theme.palette.colors.share} icon={<LoopIcon />} />}
                         contents={
                             <UserBalls users={data.users} />
                         }
@@ -125,7 +130,7 @@ function Repost({ data }) {
 
 function SmallIcon(props) {
     return (
-        <Icon style={{ color: props.color, fontSize: "25px", alignSelf: "center" }}>{props.icon}</Icon>
+        <SvgIcon style={{ color: props.color, fontSize: "25px", alignSelf: "center" }}>{props.icon}</SvgIcon>
     );
 }
 

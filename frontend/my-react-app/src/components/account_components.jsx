@@ -1,4 +1,3 @@
-import { Icon } from '@mui/material';
 import Fab from '@mui/material/Fab';
 import InputAdornment from '@mui/material/InputAdornment';
 import Stack from '@mui/material/Stack';
@@ -18,6 +17,10 @@ import { PasswordFieldWithToggle, VisuallyHiddenInput } from "/src/components/in
 import { fileToMedia } from '/src/components/media';
 import { UserContext } from "/src/components/user_data";
 import { AvatarImageDisplayer, GetProfilePicture } from '/src/components/utilities';
+
+import AddAPhotoOutlinedIcon from '@mui/icons-material/AddAPhotoOutlined';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CancelIcon from '@mui/icons-material/Cancel';
 
 function BirthDateEditor(props) {
     const startingValue = props.current ? new Moment(props.current) : new Moment();
@@ -77,9 +80,7 @@ function ChangeablePicture(props) {
         return (
             <Fab size="small" color="transparentBlack" sx={{ border: 1, borderColor: "divider", position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}>
                 <VisuallyHiddenInput type="file" accept={config.accepted_image_types} onChange={handleFile} onClick={(e) => e.stopPropagation()} />
-                <Icon baseClassName="material-icons-outlined">
-                    add_a_photo
-                </Icon>
+                <AddAPhotoOutlinedIcon/>
             </Fab>
         );
     }
@@ -146,7 +147,7 @@ function UserNameEditor(props) {
                 maxLength: "50",
                 endAdornment: (
                     <InputAdornment position="end">
-                        {usernameOk ? <Icon color="success">check_circle</Icon> : <Icon color="error">cancel</Icon>}
+                        {usernameOk ? <CheckCircleIcon color="success"/> : <CancelIcon color="error"/>}
                     </InputAdornment>
                 ),
                 startAdornment: (

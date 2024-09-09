@@ -1,18 +1,18 @@
 import { Box, Typography } from '@mui/material';
-import Icon from "@mui/material/Icon";
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import axios from 'axios';
-import React, { useCallback, useContext, useRef, useState } from "react";
+import React, { lazy, useCallback, useContext, useRef, useState } from "react";
 import { ThrowIfNotAxios } from "/src/communication.js";
 import { EmailInput, RechaptaInput, validateEmail } from "/src/components/account_components";
 import { CornerButton, OutlinedButton, WideButton } from "/src/components/buttons.jsx";
 import { PasswordFieldWithToggle } from "/src/components/inputs";
 import { LoginLink } from '/src/components/login_redirects/google';
 import { ErrorText, Modals, SuccessModal } from "/src/components/modals";
-import { AlternativeLogin, BigModal, BigModalMargin, BottomButtonWithBorder, ByRegistering, GrowingLine, ModalMargin, Or, SmallLink } from "/src/components/no_user_components";
+import { AlternativeLogin, BigModal, BigModalMargin, BottomButtonWithBorder, Or, SmallLink } from "/src/components/no_user_components";
 import { UserContext } from "/src/components/user_data";
 import { CenterLogo } from '/src/components/utilities';
+const VisibilityOffIcon = lazy(() => import('@mui/icons-material/VisibilityOff'));
 
 function Login(props) {
     //shared data
@@ -35,7 +35,7 @@ function Login(props) {
     }
 
     const CurrentPage = pages[page];
-
+    
     return (
         <BigModal close={props.close} open={true}>
             <CornerButton onClick={handleBack}>{page === "main" ? "close" : "arrow_back"}</CornerButton>
@@ -126,8 +126,8 @@ function ChooseMethod(props) {
                 <Typography variant="verybig_bold" sx={{ my: 4 }}>Sign-in to Y!</Typography>
 
                 <Stack direction="column" spacing={2}>
-                    <LoginLink><AlternativeLogin icon={<img src="/svg/google.svg" style={{ height: "1.5em" }} />} text="Sign-in with Google" /></LoginLink>
-                    <AlternativeLogin icon={<Icon>visibility_off</Icon>} text="Sign-in without email" onClick={() => { props.setPage("emailless"); }} />
+                <LoginLink><AlternativeLogin icon={<img src="/svg/google.svg" style={{ height: "1.5em" }} />} text="Sign-in with Google" /></LoginLink>
+                    <AlternativeLogin icon={<VisibilityOffIcon />} text="Sign-in without email" onClick={() => { props.setPage("emailless"); }} />
                     {/*<a href={config.address_mode.server + "/auth/github"}><AlternativeLogin src="/svg/github.svg" text="Sign-in with Github" /></a>*/}
                     <Stack direction="row" sx={{ my: 0.5, alignItems: "center" }}>
                         <Or />

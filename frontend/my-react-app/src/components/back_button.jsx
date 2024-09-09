@@ -1,6 +1,8 @@
 import Icon from '@mui/material/Icon';
 import IconButton from '@mui/material/IconButton';
 import { useNavigate } from 'react-router-dom';
+import { lazy } from "react";
+const ArrowBackIcon = lazy(() => import('@mui/icons-material/ArrowBack'));
 
 function BackButton() {
     const navigate = useNavigate();
@@ -11,9 +13,7 @@ function BackButton() {
 
     return (
         <IconButton aria-label="delete" onClick={handleBack}>
-            <Icon>
-                arrow_back
-            </Icon>
+            <ArrowBackIcon />
         </IconButton>
     );
 }
