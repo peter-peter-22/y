@@ -29,7 +29,7 @@ function UserProvider({ children }) {
             async function CloseStartMessage() {
                 try {
                     await axios.get("member/modify/close_starting_message");
-                    await Update();
+                    await refetch();
                 }
                 catch (err) {
                     ThrowIfNotAxios(err);
@@ -44,7 +44,7 @@ function UserProvider({ children }) {
             async function ExitRegistration() {
                 try {
                     await axios.get("exit_registration");
-                    await Update();
+                    await refetch();
                 }
                 catch (err) {
                     ThrowIfNotAxios(err);

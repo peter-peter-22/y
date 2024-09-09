@@ -4,7 +4,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 import { styled } from '@mui/material/styles';
 import TextField from '@mui/material/TextField';
 import axios from 'axios';
-import React, { useEffect, useRef, useState,lazy } from "react";
+import React, { useEffect, useRef, useState, lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { ThrowIfNotAxios } from "/src/communication.js";
 import { GetSearchText, GetSearchUrl } from "/src/components/search_components";
@@ -120,7 +120,7 @@ function SearchField() {
                         sx: { borderRadius: '999px', height: "100%" },
                         startAdornment: (
                             <InputAdornment position="start">
-                                <SearchIcon color={isFocused ? "primary" : ""}/>
+                                <SearchIcon color={isFocused ? "primary" : ""} />
                             </InputAdornment>
                         )
                     }}
@@ -164,7 +164,9 @@ function PasswordFieldWithToggle(props) {
                 endAdornment: (
                     <InputAdornment position="end">
                         <IconButton onClick={handleTogglePasswordVisibility}>
-                            {showPassword ? <VisibilityOffIcon/> : <VisibilityIcon/>}
+                            <Suspense>
+                                {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                            </Suspense >
                         </IconButton>
                     </InputAdornment>
                 ),

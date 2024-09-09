@@ -160,6 +160,13 @@ function UserNameEditor(props) {
     );
 }
 
+function WaitAfterChange(cb, timerRef, wait = 300) {
+    clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+        cb();
+    }, wait);
+}
+
 function NameEditor(props) {
     const [name, setName] = useState(props.current !== undefined ? props.current : "");
     const [nameError, setNameError] = useState('');
@@ -265,5 +272,5 @@ function RechaptaInput(props) {
     );
 }
 
-export { BirthDateEditor, ChangeablePicture, EmailInput, NameEditor, PasswordInput, ProfilePicEditor, RechaptaInput, UserNameEditor, validateEmail };
+export { BirthDateEditor, ChangeablePicture, EmailInput, NameEditor, PasswordInput, ProfilePicEditor, RechaptaInput, UserNameEditor, validateEmail,WaitAfterChange };
 

@@ -8,7 +8,7 @@ import 'moment/locale/de';
 import React, { useContext, useRef, useState } from 'react';
 import { WhoToFollow } from './footer';
 import { ThrowIfNotAxios } from "/src/communication.js";
-import { BirthDateEditor, EmailInput, NameEditor, PasswordInput, ProfilePicEditor, RechaptaInput, UserNameEditor, validateEmail } from "/src/components/account_components";
+import { BirthDateEditor, EmailInput, NameEditor, PasswordInput, ProfilePicEditor, RechaptaInput, UserNameEditor, validateEmail,WaitAfterChange } from "/src/components/account_components";
 import { CornerButton, OutlinedButton, WideButton } from "/src/components/buttons.jsx";
 import { Modals } from "/src/components/modals";
 import { BigModal, BottomButtonWithBorder, ByRegistering, ModalMargin, SmallLink } from "/src/components/no_user_components";
@@ -551,13 +551,6 @@ function GetProps(props) {
     const data = props.dataRef;
     const handleNext = props.handleNext;
     return [data, handleNext];
-}
-
-function WaitAfterChange(cb, timerRef, wait = 300) {
-    clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => {
-        cb();
-    }, wait);
 }
 
 export default CreateAccount;

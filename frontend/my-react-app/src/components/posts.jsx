@@ -18,16 +18,16 @@ import { OpenOnClick, PostModalFrame, SetPostList } from "/src/components/post_c
 import { PostMedia } from "/src/components/post_media";
 import { TextDisplayer } from "/src/components/post_text";
 import { DateLink, FadeLink, GetPostMedia, GetUserName, ProfilePic, ProfileText, ReplyingFrom, SimplePopOver, TextRow, UserKey, UserLink, formatNumber, noOverflow } from '/src/components/utilities';
-const PostCreator = lazy(()=>import('/src/components/post_creator'));
+const PostCreator = lazy(() => import('/src/components/post_creator'));
 
-const AlignVerticalBottomIcon  = lazy(()=>import('@mui/icons-material/AlignVerticalBottom'));
-const BookmarkIcon  = lazy(()=>import('@mui/icons-material/Bookmark'));
-const BookmarkBorderIcon  = lazy(()=>import('@mui/icons-material/BookmarkBorder'));
-const ChatBubbleOutlineIcon  = lazy(()=>import("@mui/icons-material/ChatBubbleOutline"));
-const FavoriteIcon  = lazy(()=>import("@mui/icons-material/Favorite"));
-const FavoriteBorderIcon  = lazy(()=>import('@mui/icons-material/FavoriteBorder'));
-const LoopIcon  = lazy(()=>import("@mui/icons-material/Loop"));
-const UploadIcon  = lazy(()=>import("@mui/icons-material/Upload"));
+import AlignVerticalBottomIcon from '@mui/icons-material/AlignVerticalBottom';
+import BookmarkIcon from '@mui/icons-material/Bookmark';
+import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
+import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
+import FavoriteIcon from "@mui/icons-material/Favorite";
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import LoopIcon from "@mui/icons-material/Loop";
+import UploadIcon from "@mui/icons-material/Upload";
 
 function Prefix(props) {
     return (
@@ -441,7 +441,7 @@ function RepostedOrQuoted(props) {
     if (post.repost || post.quote) {
         return (
             <RowWithPrefix
-                prefix={<LoopIcon color="secondary" style={{ fontSize: "15px", alignSelf: "center" }}/>}
+                prefix={<LoopIcon color="secondary" style={{ fontSize: "15px", alignSelf: "center" }} />}
                 contents={
                     <FadeLink to={"/posts/" + post.reposted_post.id} style={{ fontWeight: "bold", overflow: "hidden" }}>
                         <TextRow>
