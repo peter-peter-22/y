@@ -1,11 +1,7 @@
-import { Typography } from '@mui/material';
 import Stack from '@mui/material/Stack';
-import axios from "axios";
-import React, { memo } from "react";
-import { ThrowIfNotAxios } from "/src/communication.js";
-import { FollowDialog, ListTitle } from '/src/components/utilities';
-import { OnlineList } from "/src/components/online_list";
-import {FollowDialogExtended, UserListExtended, UserListNormal} from "/src/components/follow_dialogs";
+import React from "react";
+import { UserListNormal } from "/src/components/follow_dialogs";
+import { ListTitle } from '/src/components/utilities';
 
 function FollowableList() {
     return (
