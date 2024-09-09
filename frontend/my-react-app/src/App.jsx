@@ -12,7 +12,7 @@ import Pages from "/src/components/router";
 import MyTheme from '/src/styles/mui/my_theme.jsx';
 
 //components
-import { PostListProvider } from "/src/components/posts";
+import { PostListProvider } from "/src/components/post_components";
 import { UserProvider } from "/src/components/user_data";
 
 const queryClient = new QueryClient({

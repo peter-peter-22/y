@@ -1,20 +1,20 @@
-import { Icon, Typography } from '@mui/material';
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
+import { Typography } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import Stack from '@mui/material/Stack';
 import axios from 'axios';
-import React, { useCallback, useContext, lazy } from "react";
+import React, { lazy, useCallback, useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import { Sus } from "/src/components/lazified";
 import { Modals } from "/src/components/modals";
-import { PostCreator } from "/src/components/post_creator";
+import { PostModalFrame, UsePostList } from "/src/components/post_components";
 import { get_focused_id } from "/src/components/post_focused_components";
-import { PostModalFrame, UsePostList } from "/src/components/posts";
 import { UserContext } from "/src/components/user_data";
 import { GetUserKey, InheritLink, SimplePopOver, ToggleBlock, ToggleFollow, noOverflow } from '/src/components/utilities';
-import { Sus } from "/src/components/lazified";
-import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
+const PostCreator = lazy(()=>import('/src/components/post_creator'));
 
 const AlignVerticalBottomIcon = lazy(() => import('@mui/icons-material/AlignVerticalBottom'));
 const PersonRemoveIcon = lazy(() => import('@mui/icons-material/PersonRemove'));
@@ -150,7 +150,7 @@ function EditRow({ post }) {
         close();
         Modals[0].Show(
             <PostModalFrame>
-                <PostCreator onPost={onSubmit} editing={post} quoted={post.reposted_post} />
+                <Sus><PostCreator onPost={onSubmit} editing={post} quoted={post.reposted_post} /></Sus>
             </PostModalFrame>
         );
     }

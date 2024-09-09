@@ -36,4 +36,4 @@ function NoUser() {
     return home ? <LoggedOut /> : <Unauthorized />
 }
 
-export { AuthTemplate };
+export default AuthTemplate ;

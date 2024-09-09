@@ -1,8 +1,8 @@
 import React, { lazy, Suspense } from "react";
 import { Route, Routes } from "react-router-dom";
-import { AuthTemplate } from "/src/components/auth_template";
 import { Loading } from "/src/components/utilities";
 import Error from "/src/pages/error";
+const AuthTemplate = lazy(() => import("/src/components/auth_template"));
 
 const Bookmarks = lazy(() => import("/src/pages/bookmarks"));
 const ChangePassword = lazy(() => import("/src/pages/change_password"));

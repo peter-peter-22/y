@@ -6,18 +6,18 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import Stack from '@mui/material/Stack';
+import SvgIcon from '@mui/material/SvgIcon';
 import axios from "axios";
-import React, { forwardRef, memo, useContext } from 'react';
+import React, { forwardRef, lazy, memo, useContext } from 'react';
 import { NavLink, useMatch, useNavigate } from "react-router-dom";
 import { ThrowIfNotAxios } from "/src/communication.js";
 import { BlueTextButton } from "/src/components/containers";
+import { Sus } from "/src/components/lazified";
 import { Modals } from "/src/components/modals";
-import { PostCreator } from '/src/components/post_creator';
-import { PostModalFrame } from "/src/components/posts";
-import { UsePostList } from "/src/components/posts.jsx";
+import { PostModalFrame, UsePostList } from "/src/components/post_components";
 import { UserContext } from '/src/components/user_data';
 import { GetUserKey, LinelessLink, noOverflow, ProfilePic, ProfileText, ResponsiveSelector, SimplePopOver, ToCorner } from '/src/components/utilities';
-import SvgIcon from '@mui/material/SvgIcon';
+const PostCreator = lazy(()=>import('/src/components/post_creator'));
 
 import AddCommentIcon from "@mui/icons-material/AddComment";
 import CreateIcon from "@mui/icons-material/Create";
@@ -143,7 +143,7 @@ function PostButton(props) {
     function handlePost() {
         Modals[0].Show(
             <PostModalFrame>
-                <PostCreator onPost={posted} post={comment ? postList.replied_post : null} />
+                <Sus><PostCreator onPost={posted} post={comment ? postList.replied_post : null} /></Sus>
             </PostModalFrame>
         );
     }
@@ -271,3 +271,4 @@ function BlueCenterButton(props) {
 }
 
 export { BlueCenterButton, BottomTabButton, ButtonIcon, ButtonSvg, CornerButton, LinkButton, OutlinedButton, OutlinedFab, PostButton, ProfileButton, ResponsiveButton, SelectableButton, SelectableIcon, TabButton, TopMenuButton, WideButton };
+

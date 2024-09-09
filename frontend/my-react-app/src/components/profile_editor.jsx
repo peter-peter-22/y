@@ -10,7 +10,7 @@ import { ThrowIfNotAxios } from "/src/communication.js";
 import { BirthDateEditor, ChangeablePicture, NameEditor, ProfilePicEditor, UserNameEditor } from "/src/components/account_components";
 import { CornerButton } from "/src/components/buttons.jsx";
 import { Modals } from "/src/components/modals";
-import { PostModalFrame } from "/src/components/posts";
+import { PostModalFrame } from "/src/components/post_components";
 import { UserContext } from "/src/components/user_data";
 import { GetProfileBanner, Loading } from '/src/components/utilities';
 import { ProfileBanner } from "/src/pages/profile_main";

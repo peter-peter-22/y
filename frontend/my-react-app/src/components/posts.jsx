@@ -1,45 +1,33 @@
-import { Box, Icon, SvgIcon, Typography } from '@mui/material';
+import { Box, SvgIcon, Typography } from '@mui/material';
 import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import Stack from '@mui/material/Stack';
 import axios from 'axios';
-import React, { createContext, memo, useContext, useEffect, useRef, useState } from "react";
+import React, { lazy, memo, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { BlueCenterButton } from "/src/components/buttons";
 import config from '/src/components/config';
 import { ExamplePost } from "/src/components/exampleData.js";
+import { Sus } from "/src/components/lazified";
 import { ManagePost, engagementsLink } from "/src/components/manage_content_button.jsx";
 import { Modals, SuccessModal } from "/src/components/modals";
 import { OnlineList } from '/src/components/online_list';
-import { PostCreator } from "/src/components/post_creator.jsx";
+import { OpenOnClick, PostModalFrame, SetPostList } from "/src/components/post_components";
 import { PostMedia } from "/src/components/post_media";
 import { TextDisplayer } from "/src/components/post_text";
 import { DateLink, FadeLink, GetPostMedia, GetUserName, ProfilePic, ProfileText, ReplyingFrom, SimplePopOver, TextRow, UserKey, UserLink, formatNumber, noOverflow } from '/src/components/utilities';
+const PostCreator = lazy(()=>import('/src/components/post_creator'));
 
-import AlignVerticalBottomIcon from '@mui/icons-material/AlignVerticalBottom';
-import BookmarkIcon from '@mui/icons-material/Bookmark';
-import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
-import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
-import FavoriteIcon from "@mui/icons-material/Favorite";
-import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
-import LoopIcon from "@mui/icons-material/Loop";
-import UploadIcon from "@mui/icons-material/Upload";
-
-const postListContext = createContext();
-let setPostList;
-function SetPostList(value) {
-    setPostList(value);
-}
-function PostListProvider({ children }) {
-    const [get, set] = useState();
-    setPostList = set;
-    return <postListContext.Provider value={get}>{children}</postListContext.Provider>
-}
-function UsePostList() {
-    return useContext(postListContext);
-}
+const AlignVerticalBottomIcon  = lazy(()=>import('@mui/icons-material/AlignVerticalBottom'));
+const BookmarkIcon  = lazy(()=>import('@mui/icons-material/Bookmark'));
+const BookmarkBorderIcon  = lazy(()=>import('@mui/icons-material/BookmarkBorder'));
+const ChatBubbleOutlineIcon  = lazy(()=>import("@mui/icons-material/ChatBubbleOutline"));
+const FavoriteIcon  = lazy(()=>import("@mui/icons-material/Favorite"));
+const FavoriteBorderIcon  = lazy(()=>import('@mui/icons-material/FavoriteBorder'));
+const LoopIcon  = lazy(()=>import("@mui/icons-material/Loop"));
+const UploadIcon  = lazy(()=>import("@mui/icons-material/Upload"));
 
 function Prefix(props) {
     return (
@@ -138,20 +126,6 @@ function OpenPostOnClick({ id, children }) {
     )
 }
 
-function OpenOnClick(props) {
-    const navigate = useNavigate();
-    function Clicked(e) {
-        e.stopPropagation();
-        navigate(props.link);
-    }
-    return (
-        <div onClick={Clicked} {...props}>
-            {props.children}
-        </div>
-    );
-}
-
-
 function ReplyingToPost({ post }) {
     if (post.replied_user) {
         return (<ReplyingFrom post={post} />);
@@ -231,7 +205,7 @@ function PostButtonRow(props) {
     function handleComment() {
         Modals[0].Show(
             <PostModalFrame>
-                <PostCreator post={post} onPost={commented} />
+                <Sus><PostCreator post={post} onPost={commented} /></Sus>
             </PostModalFrame>
         );
     }
@@ -244,7 +218,7 @@ function PostButtonRow(props) {
     function handleQuote() {
         Modals[0].Show(
             <PostModalFrame>
-                <PostCreator quoted={post} onPost={closeModal} />
+                <Sus><PostCreator quoted={post} onPost={closeModal} /></Sus>
             </PostModalFrame>
         );
     }
@@ -342,14 +316,6 @@ function QuotedFrame(props) {
         <Box sx={{ borderRadius: "10px", border: 1, borderColor: "divider", overflow: "hidden", p: 1, w: "100%", transition: "background-color 0.2s", "&:hover": { backgroundColor: "rgba(0, 0, 0, 0.04)" } }}>
             {props.children}
         </Box>
-    );
-}
-
-function PostModalFrame(props) {
-    return (
-        <div style={{ width: "500px", padding: "20px", maxWidth: "100%", boxSizing: "border-box" }}>
-            {props.children}
-        </div>
     );
 }
 
@@ -535,5 +501,5 @@ function OverrideWithRepost(post) {
 }
 
 
-export { BorderlessPost, HideablePostFocusedMemo, HideablePostMemo, ListBlock, ListBlockButton, OpenOnClick, OpenPostOnClick, OverrideWithRepost, Post, PostButtonRow, PostListProvider, PostModalFrame, QuotedFrame, RowWithPrefix, SetPostList, SimplifiedPostList, UsePostList, WritePost };
+export { BorderlessPost, HideablePostFocusedMemo, HideablePostMemo, ListBlock, ListBlockButton, OpenPostOnClick, OverrideWithRepost, Post, QuotedFrame, RowWithPrefix, SimplifiedPostList, WritePost };
 
