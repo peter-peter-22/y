@@ -4,7 +4,6 @@ import Fab from '@mui/material/Fab';
 import ListItem from '@mui/material/ListItem';
 import Stack from '@mui/material/Stack';
 import axios from 'axios';
-import 'moment/locale/de';
 import React, { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { ThrowIfNotAxios } from "/src/communication.js";

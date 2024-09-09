@@ -1,18 +1,22 @@
-import { Icon, Typography } from '@mui/material';
+import { Typography } from '@mui/material';
 import ListItem from '@mui/material/ListItem';
 import Stack from '@mui/material/Stack';
 import axios from 'axios';
-import React, { memo } from "react";
-import { BorderlessPost, ListBlockButton, OpenPostOnClick, RowWithPrefix } from "/src/components/posts";
+import React, { memo,lazy } from "react";
 import { OpenOnClick } from "/src/components/post_components";
-import { ProfilePic, TextRow, UserLink, noOverflow } from '/src/components/utilities';
-import { theme } from "/src/styles/mui/my_theme";
-import { OnlineList } from "/src/components/online_list";
+import { BorderlessPost, ListBlockButton, OpenPostOnClick, RowWithPrefix } from "/src/components/posts";
+import { TextRow, UserLink, noOverflow } from '/src/components/utilities';
+import {
+    ProfilePic
+} from "/src/components/utilities_auth";
+
 import SvgIcon from '@mui/material/SvgIcon';
+const OnlineList = lazy(()=>import("/src/components/online_list"));
+import { theme } from "/src/styles/mui/my_theme";
 
 import FavoriteIcon from "@mui/icons-material/Favorite";
-import PersonIcon from "@mui/icons-material/Person";
 import LoopIcon from "@mui/icons-material/Loop";
+import PersonIcon from "@mui/icons-material/Person";
 
 const spacing = 1.5;
 
@@ -202,4 +206,5 @@ function NotificationList() {
     );
 }
 
-export { NotificationList };
+export default NotificationList ;
+

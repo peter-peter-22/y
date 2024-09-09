@@ -6,14 +6,17 @@ import ListItemText from '@mui/material/ListItemText';
 import Stack from '@mui/material/Stack';
 import axios from 'axios';
 import React, { memo, useCallback, useEffect, useRef, useState } from "react";
-import { ThrowIfNotAxios } from "/src/communication.js";
 import { LinkButton } from "/src/components/buttons.jsx";
 import { BoxList } from '/src/components/containers';
 import links from "/src/components/footer_links";
 import { SearchField } from "/src/components/inputs.jsx";
 import Trends from "/src/components/trends";
-import { AboveBreakpoint, creation, FadeLink, FollowDialog, InheritLink, Loading, NavMenu, SimplePopOver } from '/src/components/utilities';
-import { useQuery } from '@tanstack/react-query'
+import { AboveBreakpoint, creation, FadeLink, InheritLink, Loading, NavMenu, SimplePopOver } from '/src/components/utilities';
+import {
+    FollowDialog
+} from "/src/components/utilities_auth";
+
+import { useQuery } from '@tanstack/react-query';
 
 function Footer() {
     const visible = AboveBreakpoint("hideRightMenu");
@@ -228,3 +231,4 @@ function WhoToFollow({ noMore }) {
 
 export default Footer;
 export { WhoToFollow };
+

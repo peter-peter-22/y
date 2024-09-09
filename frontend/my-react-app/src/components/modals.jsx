@@ -5,10 +5,10 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Modal from '@mui/material/Modal';
 import Stack from '@mui/material/Stack';
-import 'moment/locale/de';
 import React, { useRef, useState } from "react";
 import { FormatAxiosError } from "/src/communication.js";
-import { MediaDisplayer } from "/src/components/media.jsx";
+import { lazily } from 'react-lazily';
+const { MediaDisplayer } = lazily(() => import('/src/components/media.jsx'));
 
 //creating modal data
 let Modals = [];

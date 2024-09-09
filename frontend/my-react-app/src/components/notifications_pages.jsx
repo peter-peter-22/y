@@ -1,10 +1,9 @@
-import React from "react";
-import { NotificationList } from "/src/components/notification_components";
+import React,{lazy} from "react";
+const NotificationList = lazy(() => import('/src/components/notification_components'));
 
-function All()
-{
-    return(
-        <NotificationList/>
+function All() {
+    return (
+        <NotificationList />
     );
 }
 

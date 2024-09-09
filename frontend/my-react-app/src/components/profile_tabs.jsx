@@ -1,15 +1,15 @@
 import { Grid } from '@mui/material';
 import Stack from '@mui/material/Stack';
 import axios from 'axios';
-import React, { memo, useCallback } from "react";
+import React, { lazy, memo, useCallback } from "react";
 import { Loading } from './utilities';
 import { ThrowIfNotAxios } from "/src/communication.js";
-import { MediaFromFileData } from "/src/components/media";
-import { OnlineList } from '/src/components/online_list';
+import { UserListExtended } from "/src/components/follow_dialogs";
+import { MediaFromFileData } from "/src/components/media_components";
 import { ClickableImage, MediaContext } from "/src/components/post_media";
 import { SimplifiedPostList } from "/src/components/posts";
 import { GetUserName, ListTitle } from '/src/components/utilities';
-import { UserListExtended } from "/src/components/follow_dialogs";
+import OnlineList from "/src/components/online_list";
 
 function ImageGrid({ items, allRows, virtualizer }) {
     return (

@@ -1,24 +1,33 @@
-import { Box, Icon, Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import Fab from '@mui/material/Fab';
 import Stack from '@mui/material/Stack';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import Moment from "moment";
-import React, { memo, useCallback, useContext, useState } from "react";
+import { Sus } from "/src/components/lazified";
+
+import React, { memo, useCallback, useContext, useState, lazy } from "react";
+import { lazily } from 'react-lazily';
 import { Route, Routes, useParams } from "react-router-dom";
 import { ThrowIfNotAxios } from "/src/communication.js";
 import { BlueCenterButton } from "/src/components/buttons";
 import { WhoToFollow } from "/src/components/footer";
 import { ManageProfile } from "/src/components/manage_content_button.jsx";
-import { MediaDisplayer } from "/src/components/media";
 import { Modals } from "/src/components/modals";
 import { ClickableSingleImageContainer } from "/src/components/post_media";
-import { ProfileEditor } from "/src/components/profile_editor";
 import { CommentsOfUser, Followers, Following, LikesOfUser, MediaOfUser, PostsOfUser } from "/src/components/profile_tabs";
 import { UserContext } from "/src/components/user_data";
-import { FadeLink, GetProfileBanner, GetUserName, Loading, ProfilePic, TabSwitcherLinks, TextRow, UserKey, formatNumber, noOverflow } from '/src/components/utilities';
-import { ErrorPageFormatted } from "/src/pages/error";
+import { FadeLink, GetUserName, Loading, TabSwitcherLinks, TextRow, UserKey, formatNumber, noOverflow } from '/src/components/utilities';
+import {
+    GetProfileBanner,
+    ProfilePic
+} from "/src/components/utilities_auth";
+const ProfileEditor = lazy(() => import("/src/components/profile_editor"));
+const { MediaDisplayer } = lazily(() => import('/src/components/media'));
+
+
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
+import { ErrorPageFormatted } from "/src/pages/error";
 
 function Profile() {
     const { id } = useParams();
@@ -69,7 +78,7 @@ function ProfileInfo({ user, setLocalBlocked }) {
 
     function EditProfile() {
         Modals[0].Show(
-            <ProfileEditor user={user} />
+            <Sus><ProfileEditor user={user} /></Sus>
         );
     }
 
@@ -266,5 +275,5 @@ const ProfileBannerMemo = memo(({ user, ...props }) => {
 });
 
 export default Profile;
-export { ProfileBanner, UnblockButton };
+export { ProfileBanner };
 

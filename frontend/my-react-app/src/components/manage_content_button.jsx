@@ -13,16 +13,21 @@ import { Modals } from "/src/components/modals";
 import { PostModalFrame, UsePostList } from "/src/components/post_components";
 import { get_focused_id } from "/src/components/post_focused_components";
 import { UserContext } from "/src/components/user_data";
-import { GetUserKey, InheritLink, SimplePopOver, ToggleBlock, ToggleFollow, noOverflow } from '/src/components/utilities';
+import { GetUserKey, InheritLink, SimplePopOver, noOverflow } from '/src/components/utilities';
+import {
+    ToggleBlock,
+    ToggleFollow
+} from "/src/components/utilities_auth";
+
 const PostCreator = lazy(()=>import('/src/components/post_creator'));
 
-const AlignVerticalBottomIcon = lazy(() => import('@mui/icons-material/AlignVerticalBottom'));
-const PersonRemoveIcon = lazy(() => import('@mui/icons-material/PersonRemove'));
-const PersonAddAlt1Icon = lazy(() => import('@mui/icons-material/PersonAddAlt1'));
-const DoDisturbOnIcon = lazy(() => import('@mui/icons-material/DoDisturbOn'));
-const DoDisturbIcon = lazy(() => import('@mui/icons-material/DoDisturb'));
-const CloseIcon = lazy(() => import('@mui/icons-material/Close'));
-const EditIcon = lazy(() => import('@mui/icons-material/Edit'));
+import AlignVerticalBottomIcon from '@mui/icons-material/AlignVerticalBottom';
+import PersonRemoveIcon from '@mui/icons-material/PersonRemove';
+import PersonAddAlt1Icon from '@mui/icons-material/PersonAddAlt1';
+import DoDisturbOnIcon from '@mui/icons-material/DoDisturbOn';
+import DoDisturbIcon from '@mui/icons-material/DoDisturb';
+import CloseIcon from '@mui/icons-material/Close';
+import EditIcon from '@mui/icons-material/Edit';
 
 let closeCurrent = undefined;
 function close() {

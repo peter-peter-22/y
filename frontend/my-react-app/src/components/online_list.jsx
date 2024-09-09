@@ -1,11 +1,10 @@
-import { Typography } from '@mui/material';
 import {
     useInfiniteQuery,
     useQueryClient
 } from '@tanstack/react-query';
 import { useWindowVirtualizer } from '@tanstack/react-virtual';
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
-import { Loading, AboveBreakpoint } from "/src/components/utilities";
+import { AboveBreakpoint, Loading } from "/src/components/utilities";
 
 
 const lastIndexes = {};
@@ -201,5 +200,5 @@ async function fetchServerPage(getEntries, offset = 0, timestamp) {
     return { rows, nextOffset: offset + rows.length };
 }
 
-export { OnlineList };
+export default OnlineList;
 

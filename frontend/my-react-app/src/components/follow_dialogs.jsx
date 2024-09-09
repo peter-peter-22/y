@@ -1,9 +1,11 @@
 import { Typography } from '@mui/material';
 import axios from "axios";
-import React, { memo } from "react";
+import React, { memo, lazy } from "react";
 import { ThrowIfNotAxios } from "/src/communication.js";
-import { OnlineList } from "/src/components/online_list";
-import { FollowDialog } from '/src/components/utilities';
+const OnlineList = lazy(() => import("/src/components/online_list"));
+import {
+    FollowDialog
+} from "/src/components/utilities_auth";
 
 function UserListNormal({ url, params }) {
     return (

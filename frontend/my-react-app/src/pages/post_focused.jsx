@@ -6,7 +6,7 @@ import React, { useCallback, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { BackButton } from "../components/back_button";
 import { set_focused_id } from "/src/components/post_focused_components";
-import { HideablePostFocusedMemo, OverrideWithRepost, SimplifiedPostList } from "/src/components/posts.jsx";
+import { HideablePostFocusedMemo, OverrideWithRepost, SimplifiedPostList } from "/src/components/posts";
 import { ListTitle, Loading } from '/src/components/utilities';
 import { ErrorPageFormatted } from "/src/pages/error";
 

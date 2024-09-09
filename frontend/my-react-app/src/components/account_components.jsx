@@ -6,21 +6,24 @@ import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import axios from 'axios';
+
 import Moment from "moment";
-import 'moment/locale/de';
 import { memo, useContext, useEffect, useRef, useState } from 'react';
 import ReCAPTCHA from 'react-google-recaptcha';
 import validator from "validator";
 import { ThrowIfNotAxios } from "/src/communication.js";
 import config from "/src/components/config.js";
 import { PasswordFieldWithToggle, VisuallyHiddenInput } from "/src/components/inputs";
-import { fileToMedia } from '/src/components/media';
+import { fileToMedia } from "/src/components/media_components";
 import { UserContext } from "/src/components/user_data";
-import { AvatarImageDisplayer, GetProfilePicture } from '/src/components/utilities';
+import {
+    AvatarImageDisplayer,
+    GetProfilePicture
+} from "/src/components/utilities_auth";
 
 import AddAPhotoOutlinedIcon from '@mui/icons-material/AddAPhotoOutlined';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 function BirthDateEditor(props) {
     const startingValue = props.current ? new Moment(props.current) : new Moment();
@@ -80,7 +83,7 @@ function ChangeablePicture(props) {
         return (
             <Fab size="small" color="transparentBlack" sx={{ border: 1, borderColor: "divider", position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}>
                 <VisuallyHiddenInput type="file" accept={config.accepted_image_types} onChange={handleFile} onClick={(e) => e.stopPropagation()} />
-                <AddAPhotoOutlinedIcon/>
+                <AddAPhotoOutlinedIcon />
             </Fab>
         );
     }
@@ -147,7 +150,7 @@ function UserNameEditor(props) {
                 maxLength: "50",
                 endAdornment: (
                     <InputAdornment position="end">
-                        {usernameOk ? <CheckCircleIcon color="success"/> : <CancelIcon color="error"/>}
+                        {usernameOk ? <CheckCircleIcon color="success" /> : <CancelIcon color="error" />}
                     </InputAdornment>
                 ),
                 startAdornment: (
@@ -272,5 +275,5 @@ function RechaptaInput(props) {
     );
 }
 
-export { BirthDateEditor, ChangeablePicture, EmailInput, NameEditor, PasswordInput, ProfilePicEditor, RechaptaInput, UserNameEditor, validateEmail,WaitAfterChange };
+export { BirthDateEditor, ChangeablePicture, EmailInput, NameEditor, PasswordInput, ProfilePicEditor, RechaptaInput, UserNameEditor, validateEmail, WaitAfterChange };
 

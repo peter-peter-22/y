@@ -39,7 +39,7 @@ router.post('/register_start', async (req, res) => {
         verification_code: code,
         checkboxes: checkboxes
     }
-    pp.remember_session(req, config.config.cookie_registering);
+    pp.remember_session(req, config.cookie_registering);
 
     //send verification code in email
     const mailOptions = {

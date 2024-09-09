@@ -16,7 +16,11 @@ import { Sus } from "/src/components/lazified";
 import { Modals } from "/src/components/modals";
 import { PostModalFrame, UsePostList } from "/src/components/post_components";
 import { UserContext } from '/src/components/user_data';
-import { GetUserKey, LinelessLink, noOverflow, ProfilePic, ProfileText, ResponsiveSelector, SimplePopOver, ToCorner } from '/src/components/utilities';
+import { GetUserKey, LinelessLink, noOverflow, ProfileText, ResponsiveSelector, SimplePopOver, ToCorner } from '/src/components/utilities';
+import {
+    ProfilePic
+} from "/src/components/utilities_auth";
+
 const PostCreator = lazy(()=>import('/src/components/post_creator'));
 
 import AddCommentIcon from "@mui/icons-material/AddComment";

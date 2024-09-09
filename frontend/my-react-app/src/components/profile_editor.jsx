@@ -12,14 +12,18 @@ import { CornerButton } from "/src/components/buttons.jsx";
 import { Modals } from "/src/components/modals";
 import { PostModalFrame } from "/src/components/post_components";
 import { UserContext } from "/src/components/user_data";
-import { GetProfileBanner, Loading } from '/src/components/utilities';
+import { Loading } from '/src/components/utilities';
+import {
+    GetProfileBanner
+} from "/src/components/utilities_auth";
+
 import { ProfileBanner } from "/src/pages/profile_main";
 
-function ProfileEditor({user}) {
+function ProfileEditor({ user }) {
     const [ok, setOk] = useState(false);
     const valuesRef = useRef({});
     const [uploading, setUploading] = useState(false);
-    const {update}=useContext(UserContext);
+    const { update } = useContext(UserContext);
     const queryClient = useQueryClient()
 
     function updateValue(name, value) {
@@ -44,7 +48,7 @@ function ProfileEditor({user}) {
                     }
                 }
             );
-            queryClient.invalidateQueries({ queryKey: ['profile_'+user.id] })
+            queryClient.invalidateQueries({ queryKey: ['profile_' + user.id] })
             update();
             Close();
         }
@@ -127,5 +131,5 @@ const BannerChangerMemo = memo(({ user, onUploadFile }) => {
 },
     (prev, now) => prev.user === now.user);
 
-export { ProfileEditor };
+export default ProfileEditor ;
 

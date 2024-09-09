@@ -5,11 +5,11 @@ import ListItemText from '@mui/material/ListItemText';
 import Stack from '@mui/material/Stack';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
-import React, { memo, useCallback } from "react";
+import React, { memo, useCallback,lazy } from "react";
 import { ThrowIfNotAxios } from "/src/communication.js";
 import { CornerButton, LinkButton } from "/src/components/buttons.jsx";
 import { BoxList } from '/src/components/containers';
-import { OnlineList } from "/src/components/online_list";
+const OnlineList = lazy(()=>import("/src/components/online_list"));
 import { GetSearchUrl } from "/src/components/search_components";
 import { formatNumber, InheritLink, ListTitle, Loading } from '/src/components/utilities';
 

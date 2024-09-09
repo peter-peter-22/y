@@ -1,9 +1,10 @@
 import { Box, Grid, Typography } from '@mui/material';
 import Stack from '@mui/material/Stack';
 import React, { createContext, useContext } from "react";
+import { lazily } from 'react-lazily';
 import { CornerButton } from "/src/components/buttons.jsx";
-import { BlockMedia } from "/src/components/media.jsx";
 import { ShowImage, ShowSingleImage } from "/src/components/modals";
+const { BlockMedia } = lazily(() => import('/src/components/media'));
 
 
 function ClickableImage({ index, children }) {

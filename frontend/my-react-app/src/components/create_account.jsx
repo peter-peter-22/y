@@ -4,7 +4,6 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import axios from 'axios';
-import 'moment/locale/de';
 import React, { useContext, useRef, useState } from 'react';
 import { WhoToFollow } from './footer';
 import { ThrowIfNotAxios } from "/src/communication.js";

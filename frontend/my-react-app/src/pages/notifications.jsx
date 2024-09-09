@@ -1,6 +1,8 @@
 import React from "react";
 import { All } from "/src/components/notifications_pages";
-import { TabSwitcher } from '/src/components/utilities';
+import {
+    TabSwitcher
+} from "/src/components/utilities_auth";
 import NotImplemented from "/src/pages/not_implemented";
 
 function Page() {

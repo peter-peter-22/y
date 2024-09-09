@@ -6,16 +6,21 @@ import Stack from '@mui/material/Stack';
 import SvgIcon from '@mui/material/SvgIcon';
 import axios from 'axios';
 import React, { useContext, useRef, useState } from "react";
+import { lazily } from 'react-lazily';
 import { ThrowIfNotAxios } from "/src/communication.js";
 import config from "/src/components/config.js";
-import { fileToMedia } from "/src/components/media.jsx";
+import { fileToMedia } from "/src/components/media_components";
 import { ErrorText } from "/src/components/modals";
 import { UsePostList } from "/src/components/post_components";
 import { PostMediaEditor } from "/src/components/post_media";
-import { TextEditor } from "/src/components/post_text";
-import { BorderlessPost, QuotedFrame, RowWithPrefix } from "/src/components/posts.jsx";
+import { BorderlessPost, QuotedFrame, RowWithPrefix } from "/src/components/posts";
 import { UserContext } from "/src/components/user_data";
-import { Loading, ProfilePic, ReplyingTo } from '/src/components/utilities';
+import { Loading, ReplyingTo } from '/src/components/utilities';
+import {
+    ProfilePic
+} from "/src/components/utilities_auth";
+const { TextEditor } = lazily(() => import('/src/components/post_text'));
+
 import { theme } from "/src/styles/mui/my_theme";
 
 import GifBoxIcon from "@mui/icons-material/GifBoxOutlined";

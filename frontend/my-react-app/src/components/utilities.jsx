@@ -1,30 +1,11 @@
-import { alpha, Box, Typography } from '@mui/material';
-import Avatar from '@mui/material/Avatar';
+import { Box, Typography } from '@mui/material';
 import CircularProgress from '@mui/material/CircularProgress';
-import Drawer from '@mui/material/Drawer';
-import Fab from '@mui/material/Fab';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
 import Popover from '@mui/material/Popover';
 import Stack from '@mui/material/Stack';
-import Tooltip from '@mui/material/Tooltip';
-import axios from 'axios';
-import Moment from "moment";
-import React, { forwardRef, lazy, memo, useContext, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, NavLink } from "react-router-dom";
-import { ThrowIfNotAxios } from "/src/communication.js";
 import { TopMenuButton } from "/src/components/buttons.jsx";
-import { Media, MediaDisplayer, MediaFromFileData, mediaTypes } from "/src/components/media.jsx";
-import { OpenOnClick } from "/src/components/post_components";
-import { ClickableSingleImageContainer } from "/src/components/post_media";
-import { UserContext } from "/src/components/user_data";
 import { theme } from '/src/styles/mui/my_theme.jsx';
-
-const LeftTabsMobile = lazy(async () => ({
-    default: (await import('/src/components/header')).LeftTabsMobile,
-}));
-
 
 const noOverflow = {
     whiteSpace: 'nowrap',
@@ -165,78 +146,6 @@ function BoldLink(props) {
     );
 }
 
-function TabSwitcher(props) {
-    const [getTab, setTab] = React.useState(0);
-    const { getData } = useContext(UserContext);
-    const [showTabs, setShowTags] = useState(false);
-
-    const hideTabs = AboveBreakpoint("bottomTabs");
-    const selectedTab = props.tabs[getTab];
-
-    function SelectTab(tabIndex) {
-        setTab(tabIndex);
-    }
-
-    const setDrawer = (open) => () => {
-        setShowTags(open);
-    }
-
-    return (
-        <>
-            <TopMenu>
-
-                <div style={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    width: "100%",
-                    height: "100%",
-                    backgroundColor: alpha(theme.palette.background.default, 0.8),
-                    backdropFilter: "blur(5px)"
-                }} />
-
-                {!hideTabs &&
-                    <NavMenu style={{ position: "relative", display: "flex" }}>
-                        <div style={{ height: "100%", width: "100%", position: "absolute", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                            <img src={logo} style={{ height: "80%" }} />
-                        </div>
-                        <ProfilePic user={getData.user} style={{ alignSelf: "center", marginLeft: 5 }} disabled onClick={setDrawer(true)} />
-                    </NavMenu>
-                }
-
-                <NavMenu>
-                    <Box sx={{ borderBottom: 1, borderColor: 'divider', height: "100%", width: "100%", display: "flex", alignItems: "center", flexDirection: "row", position: "relative" }}>
-                        {props.tabs.map((tab, index) => {
-                            return (
-                                <TopMenuButton
-                                    selected={getTab === index}
-                                    onClick={() => {
-                                        SelectTab(index);
-                                    }}
-                                    key={index}>
-                                    {tab.text}
-                                </TopMenuButton>);
-                        })}
-                        {props.children}
-                    </Box>
-                </NavMenu>
-
-                <Drawer
-                    anchor={"left"}
-                    open={showTabs}
-                    onClose={setDrawer(false)}
-                >
-                    <LeftTabsMobile />
-                </Drawer>
-
-            </TopMenu>
-            <div style={{ position: "relative" }}>
-                {selectedTab.contents}
-            </div>
-        </>
-    );
-}
-
 function TabSwitcherLinks(props) {
     return (
         <NavMenu>
@@ -262,36 +171,6 @@ function NavMenuButtonContainer(props) {
         <Box sx={{ borderBottom: 1, borderColor: 'divider', height: "100%", width: "100%", display: "flex", alignItems: "center", flexDirection: "row" }}>
             {props.children}
         </Box>
-    );
-}
-
-function DateLink(props) {
-    const moment = Moment(new Date(props.isoString));
-    const hover = moment.format('h:mm a [·] MM DD YYYY');
-    let display;
-    if (props.passed) {
-        const passed = Moment.duration(Moment().diff(moment));
-        if (passed.asSeconds() < 60)
-            display = Math.round(passed.asSeconds()) + "s";
-        else if (passed.asMinutes() < 60)
-            display = Math.round(passed.asMinutes()) + "m";
-        else if (passed.asHours() < 24)
-            display = Math.round(passed.asHours()) + "h";
-        else if (passed.asDays() < 7)
-            display = Math.round(passed.asDays()) + "d";
-        else display = moment.format('MMM DD');
-    }
-    else
-        display = hover;
-
-    return (
-        <Tooltip title={hover}>
-            <div>
-                <FadeLink style={{ flexShrink: 0, ...noOverflow }}>
-                    {display}
-                </FadeLink>
-            </div>
-        </Tooltip>
     );
 }
 
@@ -373,143 +252,6 @@ function CenterLogo() {
 }
 
 
-function FollowDialog({ user, children }) {
-    return (
-        <ListItem disablePadding>
-            <OpenOnClick link={GetProfileLink(user)} style={{ width: "100%" }}>
-                <ListItemButton>
-                    <Stack direction="row" spacing={1} sx={{ alignItems: "center", width: "100%" }}>
-                        <div>
-                            <ProfilePic user={user} />
-                        </div>
-                        <div style={{ flexGrow: 1, overflow: "hidden" }}>
-                            <Stack direction="column" >
-                                <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-                                    <ProfileText user={user} />
-                                    <FollowButton user={user} />
-                                </Stack>
-                                {children}
-                            </Stack>
-                        </div>
-                    </Stack>
-                </ListItemButton>
-            </OpenOnClick>
-        </ListItem>
-    );
-}
-
-function FollowButton(props) {
-    const [following, setFollowing, toggleFollow] = ToggleFollow(props.user);
-
-    return (
-        <Fab onClick={(e) => { e.stopPropagation(); toggleFollow(); }} variant="extended" size="small" color="black" sx={{ flexShrink: 0 }}>{following ? "Following" : "Follow"}</Fab>
-    );
-}
-
-function ToggleFollow(user) {
-    return ToggleOnlineBool(user, "/member/general/follow_user", user.is_followed);
-}
-function ToggleBlock(user, onChange) {
-    return ToggleOnlineBool(user, "/member/general/block_user", user.is_blocked, onChange);
-}
-
-function ToggleOnlineBool(user, url, startingValue, onChange) {
-    const start = Boolean(startingValue);
-    const [get, set] = useState(start);
-    const lastValueRef = useRef(start);
-
-    function toggle() {
-        set((prev) => {
-            const newValue = !prev;
-            update(newValue);
-            if (onChange)
-                onChange(newValue, user);
-
-            return newValue;
-        });
-    }
-
-    async function update(newValue) {
-        //prevent duplicated requiests
-        if (newValue === lastValueRef.current)
-            return;
-        else
-            lastValueRef.current = newValue;
-
-        try {
-            await axios.post(url,
-                {
-                    key: user.id,
-                    value: newValue
-                }
-            )
-        }
-        catch (err) {
-            ThrowIfNotAxios(err);
-        }
-    }
-
-    return [get, set, toggle];
-}
-
-
-function GetProfilePicture(user) {
-    return new MediaFromFileData(user.picture);
-}
-function GetProfileBanner(user) {
-    return new MediaFromFileData(user.banner);
-}
-
-const ProfilePic = memo(({ user, ...props }) => {
-    return (
-        <AvatarImageDisplayer media={GetProfilePicture(user)} {...props} />
-    );
-}, (prevProps, nextProps) => prevProps.user === nextProps.user);
-
-function AvatarImageDisplayer({ media, ...props }) {
-    const defa = "/images/default_image.jpg";
-    return (
-        <Avatar {...props}>
-            <ClickableSingleImageContainer
-                disabled={props.disabled}
-                media={media}
-                style={{
-                    width: "100%",
-                    height: "100%",
-                }}>
-                <MediaDisplayer
-                    media={media}
-                    style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover"
-                    }}
-                    onError={({ currentTarget }) => {
-                        currentTarget.onerror = null;
-                        currentTarget.src = defa;
-                    }}
-                    onEmpty={new Media(mediaTypes.image, defa)}
-                />
-            </ClickableSingleImageContainer>
-        </Avatar>
-    );
-}
-
-
-//get media jsons from post and convert them to client media object
-function GetPostMedia(post) {
-    if (!post.media)//media can be null in sql
-        return;
-
-    const medias = [];
-
-    for (let n = 0; n < post.media.length; n++) {
-        const filedata = post.media[n];
-        medias.push(new MediaFromFileData(filedata));
-    }
-
-    return medias;
-}
 
 function LinelessLink({ to, children }) {
     return (
@@ -518,102 +260,6 @@ function LinelessLink({ to, children }) {
         </Link>
     );
 }
-
-function defaultEntryMapController({ entries, EntryMapper, getKey = defaultGetKey }) {
-    return (
-        <List style={{ padding: 0 }}>
-            {entries.map((entry, index) => <EntryMapper entry={entry} key={getKey(entry, index)} />)}
-        </List>
-    );
-}
-
-function defaultGetKey(entry, index) {
-    return index;
-}
-
-const OnlineList = forwardRef(({ EntryMapper, getEntries, entryMapController: overrideEntryMapController, getKey }, ref) => {
-    const [entries, setEntries] = useState([]);
-    const listRef = useRef(null);
-    const savedScrollRef = useRef(0);
-    const [end, setEnd] = useState(false);
-    const [downloading, setDownloading] = useState(false);
-    const startTimeRef = useRef(Math.floor(Date.now() / 1000));//the unix timestamp when this list was created. it is used to filter out the contents those were created after the feed
-    const updateRef = useRef({ end, downloading, entries });
-    useEffect(() => {
-        updateRef.current = { end, downloading, entries }
-    }, [end, downloading, entries]);
-
-    //the minimum distance between the bottom of the screen and the bottom of the list in px.
-    const minUnseenHeight = 2000;
-
-    //add an entry from outside
-    useImperativeHandle(ref, () => ({
-        AddEntryToTop(newEntry) {
-            setEntries((prev) => [newEntry, ...prev]);
-        }
-    }));
-
-    //check the new height after render, adjust the scrolling
-    useEffect(() => {
-        if (savedScrollRef.current !== undefined) {
-            window.scrollTo(0, savedScrollRef.current);
-            savedScrollRef.current = undefined;
-        }
-        Scrolling();
-    }, [entries])
-
-    async function FillEntries() {
-        const from = entries.length;
-        let results = await getEntries(from, startTimeRef.current);
-        //if no results recieved, then this is the end of the list, do not ask for more entries
-        if (results.length === 0) {
-            setEnd(true);
-            return;
-        }
-        else {
-            setEntries((prev) => {
-                return prev.concat(results)
-            });
-            //the scolling would stuck at the bottom when the page is expanded by the new posts,
-            //so the last scroll value before rendering must be saved and loaded after rendering
-            savedScrollRef.current = window.scrollY;
-        }
-        setDownloading(false);
-    }
-
-    //download new entries when needed
-    useEffect(() => {
-        if (downloading)
-            FillEntries();
-    }, [downloading])
-
-
-    function Scrolling() {
-        if (!updateRef.current.end && !updateRef.current.downloading) {
-            const unseenHeight = listRef.current.getBoundingClientRect().bottom - window.innerHeight;
-            if (unseenHeight < minUnseenHeight) {
-                setDownloading(true);
-            }
-        }
-    }
-
-    useEffect(() => {
-        window.addEventListener("scroll", Scrolling);
-        Scrolling();
-        return () => {
-            window.removeEventListener("scroll", Scrolling)
-        };
-    }, [])
-
-    const EntryMapController = overrideEntryMapController ? overrideEntryMapController : defaultEntryMapController;
-
-    return (
-        <div ref={listRef}>
-            <EntryMapController entries={entries} EntryMapper={EntryMapper} getKey={getKey} />
-            {!end && <Loading />}
-        </div>
-    );
-});
 
 function Loading() {
     return (
@@ -691,5 +337,5 @@ function ListTitle(props) {
     );
 }
 
-export { AboveBreakpoint, AvatarImageDisplayer, BoldLink, CenterLogo, creation, DateLink, FadeLink, FollowButton, FollowDialog, formatNumber, GetPostMedia, GetProfileBanner, GetProfileLink, GetProfilePicture, GetUserKey, GetUserName, InheritLink, LinelessLink, ListTitle, Loading, logo, NavMenu, noOverflow, OnlineList, ProfilePic, ProfileText, ReplyingFromPost as ReplyingFrom, ReplyingToUser as ReplyingTo, ResponsiveSelector, SimplePopOver, StyledLink, TabSwitcher, TabSwitcherLinks, TextRow, ToCorner, ToggleBlock, ToggleFollow, TopMenu, UserKey, UserKeyLink, UserLink, UserName };
+export { AboveBreakpoint, BoldLink, CenterLogo, creation, FadeLink, formatNumber, GetProfileLink, GetUserKey, GetUserName, InheritLink, LinelessLink, ListTitle, Loading, logo, NavMenu, noOverflow, ProfileText, ReplyingFromPost as ReplyingFrom, ReplyingToUser as ReplyingTo, ResponsiveSelector, SimplePopOver, StyledLink, TabSwitcherLinks, TextRow, ToCorner, TopMenu, UserKey, UserKeyLink, UserLink, UserName };
 

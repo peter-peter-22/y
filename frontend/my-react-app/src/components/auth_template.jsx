@@ -17,7 +17,7 @@ const AuthTemplate = memo(() => {
     return (
         !getData ? <LoadingPage /> :
             !getData.user ? <NoUser /> :
-                <div style={{ display: "flex", flexDirection: "row", padding: 0, justifyContent: "center" }}>
+                <div style={{ display: "flex", flexDirection: "row", padding: 0, justifyContent: "center",minHeight:"110vh"}}>
                     <NotifCountProvider>
                         <Header />
                         <Box sx={{ maxWidth: "600px", flexGrow: 1, width: "100%", borderLeft: 1, borderRight: 1, borderColor: "divider", boxSizing: "border-box", minHeight: "100vh" }}>

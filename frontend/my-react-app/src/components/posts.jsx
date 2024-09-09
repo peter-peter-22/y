@@ -13,11 +13,18 @@ import { ExamplePost } from "/src/components/exampleData.js";
 import { Sus } from "/src/components/lazified";
 import { ManagePost, engagementsLink } from "/src/components/manage_content_button.jsx";
 import { Modals, SuccessModal } from "/src/components/modals";
-import { OnlineList } from '/src/components/online_list';
+const OnlineList = lazy(() => import("/src/components/online_list"));
 import { OpenOnClick, PostModalFrame, SetPostList } from "/src/components/post_components";
-import { PostMedia } from "/src/components/post_media";
-import { TextDisplayer } from "/src/components/post_text";
-import { DateLink, FadeLink, GetPostMedia, GetUserName, ProfilePic, ProfileText, ReplyingFrom, SimplePopOver, TextRow, UserKey, UserLink, formatNumber, noOverflow } from '/src/components/utilities';
+import { lazily } from 'react-lazily';
+const { PostMedia } = lazily(() => import('/src/components/post_media'));
+const { TextDisplayer } = lazily(() => import('/src/components/post_text'));
+import { FadeLink, GetUserName, ProfileText, ReplyingFrom, SimplePopOver, TextRow, UserKey, UserLink, formatNumber, noOverflow } from '/src/components/utilities';
+import {
+    GetPostMedia,
+    ProfilePic,
+    DateLink
+} from "/src/components/utilities_auth";
+
 const PostCreator = lazy(() => import('/src/components/post_creator'));
 
 import AlignVerticalBottomIcon from '@mui/icons-material/AlignVerticalBottom';

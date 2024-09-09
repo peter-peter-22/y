@@ -1,6 +1,8 @@
 import React from "react";
-import { TabSwitcher } from '/src/components/utilities';
-import { SimplifiedPostList, WritePost } from "/src/components/posts.jsx";
+import { SimplifiedPostList, WritePost } from "/src/components/posts";
+import {
+  TabSwitcher
+} from "/src/components/utilities_auth";
 
 function Page() {
   return (

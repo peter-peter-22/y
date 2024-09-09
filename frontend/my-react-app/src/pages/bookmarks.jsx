@@ -1,6 +1,6 @@
 import Stack from '@mui/material/Stack';
 import React from "react";
-import { SimplifiedPostList } from "/src/components/posts.jsx";
+import { SimplifiedPostList } from "/src/components/posts";
 import { ListTitle } from '/src/components/utilities';
 
 function BookmarkList() {
