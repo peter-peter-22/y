@@ -21,8 +21,6 @@ import {
     ProfilePic
 } from "/src/components/utilities_auth";
 
-const PostCreator = lazy(()=>import('/src/components/post_creator'));
-
 import AddCommentIcon from "@mui/icons-material/AddComment";
 import CreateIcon from "@mui/icons-material/Create";
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
@@ -138,39 +136,6 @@ function ButtonSvg(props) {
     );
 }
 
-
-function PostButton(props) {
-    const postList = UsePostList();
-    const match = useMatch("/posts/*");
-    const comment = match && postList && Boolean(postList.replied_post);
-
-    function handlePost() {
-        Modals[0].Show(
-            <PostModalFrame>
-                <Sus><PostCreator onPost={posted} post={comment ? postList.replied_post : null} /></Sus>
-            </PostModalFrame>
-        );
-    }
-    function posted() {
-        Modals[0].Close();
-    }
-    return (
-        <ResponsiveSelector breakpoint={smallerButtons}
-            above={
-                <WideButton color="primary" style={{ flexShrink: 0 }} {...props} onClick={handlePost}>
-                    <Typography variant="big_bold" color="primary.contrastText">{comment ? "Comment" : "Post"}</Typography>
-                </WideButton>
-            }
-            below={
-                <Fab size="medium" color="primary" style={{ flexShrink: 0 }} {...props} onClick={handlePost}>
-                    <ButtonIcon icon={comment ? <AddCommentIcon /> : <CreateIcon />} />
-                </Fab>
-            }
-        />
-    );
-}
-
-
 const ProfileButton = memo(() => {
     const size = "60px";
     const { getData, update } = useContext(UserContext);
@@ -274,5 +239,5 @@ function BlueCenterButton(props) {
     );
 }
 
-export { BlueCenterButton, BottomTabButton, ButtonIcon, ButtonSvg, CornerButton, LinkButton, OutlinedButton, OutlinedFab, PostButton, ProfileButton, ResponsiveButton, SelectableButton, SelectableIcon, TabButton, TopMenuButton, WideButton };
+export { BlueCenterButton, BottomTabButton, ButtonIcon, ButtonSvg, CornerButton, LinkButton, OutlinedButton, OutlinedFab, ProfileButton, ResponsiveButton, SelectableButton, SelectableIcon, TabButton, TopMenuButton, WideButton };
 

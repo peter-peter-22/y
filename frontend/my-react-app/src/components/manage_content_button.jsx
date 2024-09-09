@@ -19,7 +19,7 @@ import {
     ToggleFollow
 } from "/src/components/utilities_auth";
 
-const PostCreator = lazy(()=>import('/src/components/post_creator'));
+import PostCreator from '/src/components/post_creator';
 
 import AlignVerticalBottomIcon from '@mui/icons-material/AlignVerticalBottom';
 import PersonRemoveIcon from '@mui/icons-material/PersonRemove';

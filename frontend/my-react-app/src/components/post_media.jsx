@@ -4,6 +4,7 @@ import React, { createContext, useContext } from "react";
 import { lazily } from 'react-lazily';
 import { CornerButton } from "/src/components/buttons.jsx";
 import { ShowImage, ShowSingleImage } from "/src/components/modals";
+import { Sus } from "/src/components/lazified";
 const { BlockMedia } = lazily(() => import('/src/components/media'));
 
 
@@ -16,9 +17,11 @@ function ClickableImage({ index, children }) {
         ShowImage(medias, index);
     }
     return (
-        <BlockMedia media={media} onClick={(e) => { Clicked(index, e); }}>
-            {children}
-        </BlockMedia>
+        <Sus>
+            <BlockMedia media={media} onClick={(e) => { Clicked(index, e); }}>
+                {children}
+            </BlockMedia>
+        </Sus>
     );
 }
 

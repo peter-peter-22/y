@@ -5,7 +5,7 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import Stack from '@mui/material/Stack';
 import axios from 'axios';
-import React, { lazy, memo, useEffect, useRef, useState } from "react";
+import React, { memo, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { BlueCenterButton } from "/src/components/buttons";
 import config from '/src/components/config';
@@ -13,19 +13,18 @@ import { ExamplePost } from "/src/components/exampleData.js";
 import { Sus } from "/src/components/lazified";
 import { ManagePost, engagementsLink } from "/src/components/manage_content_button.jsx";
 import { Modals, SuccessModal } from "/src/components/modals";
-const OnlineList = lazy(() => import("/src/components/online_list"));
+import OnlineList from "/src/components/online_list";
 import { OpenOnClick, PostModalFrame, SetPostList } from "/src/components/post_components";
-import { lazily } from 'react-lazily';
-const { PostMedia } = lazily(() => import('/src/components/post_media'));
-const { TextDisplayer } = lazily(() => import('/src/components/post_text'));
+import { PostMedia } from "/src/components/post_media";
+import { TextDisplayer } from '/src/components/post_text';
 import { FadeLink, GetUserName, ProfileText, ReplyingFrom, SimplePopOver, TextRow, UserKey, UserLink, formatNumber, noOverflow } from '/src/components/utilities';
 import {
+    DateLink,
     GetPostMedia,
-    ProfilePic,
-    DateLink
+    ProfilePic
 } from "/src/components/utilities_auth";
 
-const PostCreator = lazy(() => import('/src/components/post_creator'));
+import PostCreator from '/src/components/post_creator';
 
 import AlignVerticalBottomIcon from '@mui/icons-material/AlignVerticalBottom';
 import BookmarkIcon from '@mui/icons-material/Bookmark';

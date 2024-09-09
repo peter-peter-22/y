@@ -6,23 +6,26 @@ import Stack from '@mui/material/Stack';
 import SvgIcon from '@mui/material/SvgIcon';
 import axios from 'axios';
 import React, { useContext, useRef, useState } from "react";
-import { lazily } from 'react-lazily';
+import { useMatch } from "react-router-dom";
 import { ThrowIfNotAxios } from "/src/communication.js";
+import { ButtonIcon, WideButton } from "/src/components/buttons";
 import config from "/src/components/config.js";
+import { Sus } from "/src/components/lazified";
 import { fileToMedia } from "/src/components/media_components";
-import { ErrorText } from "/src/components/modals";
-import { UsePostList } from "/src/components/post_components";
+import { ErrorText, Modals } from "/src/components/modals";
+import { PostModalFrame, UsePostList } from "/src/components/post_components";
 import { PostMediaEditor } from "/src/components/post_media";
+import { TextEditor } from '/src/components/post_text';
 import { BorderlessPost, QuotedFrame, RowWithPrefix } from "/src/components/posts";
 import { UserContext } from "/src/components/user_data";
-import { Loading, ReplyingTo } from '/src/components/utilities';
+import { Loading, ReplyingTo, ResponsiveSelector } from '/src/components/utilities';
 import {
     ProfilePic
 } from "/src/components/utilities_auth";
-const { TextEditor } = lazily(() => import('/src/components/post_text'));
-
 import { theme } from "/src/styles/mui/my_theme";
 
+import AddCommentIcon from "@mui/icons-material/AddComment";
+import CreateIcon from "@mui/icons-material/Create";
 import GifBoxIcon from "@mui/icons-material/GifBoxOutlined";
 import InsertPhotoIcon from "@mui/icons-material/InsertPhotoOutlined";
 import LocationOnIcon from "@mui/icons-material/LocationOnOutlined";
@@ -319,6 +322,38 @@ function AddPostToCommentSection(post, postList) {
     postList.addPost(post);
 }
 
+function PostButton(props) {
+    const postList = UsePostList();
+    const match = useMatch("/posts/*");
+    const comment = match && postList && Boolean(postList.replied_post);
+
+    function handlePost() {
+        Modals[0].Show(
+            <PostModalFrame>
+                <Sus><PostCreator onPost={posted} post={comment ? postList.replied_post : null} /></Sus>
+            </PostModalFrame>
+        );
+    }
+    function posted() {
+        Modals[0].Close();
+    }
+    return (
+        <ResponsiveSelector breakpoint={"leftMenuIcons"}
+            above={
+                <WideButton color="primary" style={{ flexShrink: 0 }} {...props} onClick={handlePost}>
+                    <Typography variant="big_bold" color="primary.contrastText">{comment ? "Comment" : "Post"}</Typography>
+                </WideButton>
+            }
+            below={
+                <Fab size="medium" color="primary" style={{ flexShrink: 0 }} {...props} onClick={handlePost}>
+                    <ButtonIcon icon={comment ? <AddCommentIcon /> : <CreateIcon />} />
+                </Fab>
+            }
+        />
+    );
+}
+
 
 export default PostCreator;
+export { PostButton };
 
