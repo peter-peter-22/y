@@ -36,8 +36,6 @@ const config = {
     trends_per_request: 60,
     notifications_per_request: 60,
     uploadLimitMB: 100,
-    email_notification_interval: 10 * 50 * 1000,//10 minutes
-    log_email_notifications: process.env.LOG_EMAIL_NOTIFICATIONS,
     extra_debug:process.env.EXTRA_DEBUG,
     fast_register:process.env.FAST_REGISTER,
     ...types
