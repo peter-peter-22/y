@@ -192,7 +192,7 @@ function Visible({ user }) {
     const baseUrl = GetBaseUrl(user);
     return (
         <>
-            <WhoToFollow />
+            <WhoToFollow/>
 
             <Stack direction="column" sx={{ mt: 1.5 }}>
                 <TabSwitcherLinks tabs={[

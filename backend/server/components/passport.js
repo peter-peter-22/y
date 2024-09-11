@@ -22,7 +22,7 @@ const router = express.Router();
 //strategies
 {
     router.use(LocalRoutes);
-    router.use("/google",GoogleRoutes);
+    router.use("/google", GoogleRoutes);
     router.use(GithubRoutes);
     router.use("/username/", UsernameRoutes);
 }
@@ -102,6 +102,9 @@ router.post("/finish_registration", async (req, res) => {
         birthdate: "required|datepast"
     });
     await CheckV(v);
+
+    if (!req.session.pending_data)
+        CheckErr("the pending registration data is missing from the session");
 
     const { birthdate, checkboxes } = req.body;
     if (checkboxes === undefined)

@@ -532,7 +532,7 @@ function Page10(props)//only name
 
 function RecommendCelebrities() {
     return (
-        <WhoToFollow noMore />
+        <WhoToFollow noMore url="member/general/celebrities_preview"/>
     );
 }
 

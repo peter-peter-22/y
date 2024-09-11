@@ -42,7 +42,7 @@ router.post("/get_post", async (req, res) => {
     const post = posts[0];
     if (post === undefined)
         CheckErr("this post does not exists");
-    if(post.deleted!==null)
+    if (post.deleted !== null)
         CheckErr("this post was deleted");
     res.send(post);
 });
@@ -131,7 +131,7 @@ router.post("/follower_recommendations", async (req, res) => {
     });
     await CheckV(v);
 
-    const { from,timestamp } = req.body;
+    const { from, timestamp } = req.body;
     const text = `
     SELECT ${user_columns}, FALSE as is_followed 
         from USERS
@@ -157,7 +157,7 @@ router.post("/followed_by_user", async (req, res) => {
     });
     await CheckV(v);
 
-    const { from, id,timestamp } = req.body;
+    const { from, id, timestamp } = req.body;
     const text = `
     SELECT 
         ${user_columns},
@@ -185,7 +185,7 @@ router.post("/followers_of_user", async (req, res) => {
     });
     await CheckV(v);
 
-    const { from, id,timestamp } = req.body;
+    const { from, id, timestamp } = req.body;
     const text = `
     SELECT 
         ${user_columns},
@@ -213,7 +213,7 @@ router.post("/likers_of_post", async (req, res) => {
         timestamp: "required|integer"
     });
     await CheckV(v);
-    const { from, post_id,timestamp } = req.body;
+    const { from, post_id, timestamp } = req.body;
 
     const text = `
     SELECT 
@@ -263,6 +263,16 @@ router.post("/celebrities", async (req, res) => {
 });
 
 router.get("/follower_recommendations_preview", async (req, res) => {
+    const users = await fixedCelebrityList(req, 3);
+    res.send(users);
+});
+
+router.get("/celebrities_preview", async (req, res) => {
+    const users = await fixedCelebrityList(req, 20);
+    res.send(users);
+});
+
+async function fixedCelebrityList(req, count) {
     const text = `
     SELECT ${user_columns}, FALSE AS IS_FOLLOWED 
         from USERS 
@@ -270,10 +280,10 @@ router.get("/follower_recommendations_preview", async (req, res) => {
         NOT ${is_followed()}
         AND id!=:user_id 
     ORDER BY follower_count DESC, USERS.ID ASC
-    LIMIT 10`;
+    LIMIT ${count}`;
     const users = await db.query(named(text)({ user_id: UserId(req) }));
-    res.send(users.rows);
-});
+    return users.rows;
+}
 
 router.post("/repost", async (req, res) => {
 

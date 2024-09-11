@@ -49,7 +49,7 @@ router.get("/get", async (req, res) => {
     //console.log(`\n\nget user: \nuser: ${JSON.stringify(req.user)} \nsession: ${JSON.stringify(req.session)}\n\n` );
     res.json({
         user: req.user,
-        showStartMessage: req.session.showStartMessage,
+        showStartMessage: req.session.showStartMessage||true,
         pending_registration: req.session.pending_registration,
         maxLetters:GetMaxLetters(req.user)
     });

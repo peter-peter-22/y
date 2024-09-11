@@ -197,17 +197,19 @@ function Premium() {
     );
 }
 
-function WhoToFollow({ noMore }) {
+function WhoToFollow({ noMore, url = "member/general/follower_recommendations_preview" }) {
     const getFollowRecommendations = useCallback(async () => {
-        const res = await axios.get("member/general/follower_recommendations_preview");
+        const res = await axios.get(url);
         return res.data;
     });
 
-    const { isPending, data: users } = useQuery({
-        queryKey: ['follows_preview'],
+    const { isPending, data: users, isError } = useQuery({
+        queryKey: [url],
         queryFn: getFollowRecommendations,
     });
 
+    if (isError)
+        return;
     return (
         <List sx={{ p: 0 }}>
             <ListItem>
