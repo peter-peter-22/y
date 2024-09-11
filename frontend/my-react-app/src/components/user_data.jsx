@@ -24,7 +24,7 @@ function UserProvider({ children }) {
 
         //after any register 
         if (data?.showStartMessage) {
-            Modals[0].Show(<Sus><CreateAccount pages={[5, 6, 7, 8]} key="after" /></Sus>, CloseStartMessage);
+            Modals[0].Show(<CreateAccount pages={[5, 6, 7, 8]} key="after" />, CloseStartMessage);
 
             async function CloseStartMessage() {
                 try {
@@ -39,7 +39,7 @@ function UserProvider({ children }) {
 
         //pending third party registration
         if (data?.pending_registration) {
-            Modals[0].Show(<Sus><CreateAccount pages={[1, 9]} finish={finish_google_registration} key="external" /></Sus>, ExitRegistration);
+            Modals[0].Show(<CreateAccount pages={[1, 9]} finish={finish_google_registration} key="external" />, ExitRegistration);
 
             async function ExitRegistration() {
                 try {

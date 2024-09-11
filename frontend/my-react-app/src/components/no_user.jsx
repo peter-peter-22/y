@@ -10,7 +10,6 @@ import { LoginLink } from '/src/components/login_redirects/google';
 import { Modals } from "/src/components/modals";
 import { AlternativeLogin, ByRegistering, Or } from "/src/components/no_user_components";
 import { AboveBreakpoint, creation, logo } from '/src/components/utilities';
-import { Sus } from "/src/components/lazified";
 const VisibilityOffIcon = lazy(() => import('@mui/icons-material/VisibilityOff'));
 const Login = lazy(() => import('/src/components/login.jsx'));
 
@@ -19,16 +18,16 @@ function Main() {
 
     function showCreator()//show local registration inputs
     {
-        Modals[0].Show(<Sus><CreateAccount pages={[0, 1, 2, 3, 4]} key="local" /></Sus>);
+        Modals[0].Show(<CreateAccount pages={[0, 1, 2, 3, 4]} key="local" />);
     }
 
     function showUsernameCreator()//show username registration inputs
     {
-        Modals[0].Show(<Sus><CreateAccount pages={[10, 11]} key="username" finish={finishUsernameRegistration} /></Sus>);
+        Modals[0].Show(<CreateAccount pages={[10, 11]} key="username" finish={finishUsernameRegistration} />);
     }
 
     function showLogin() {
-        Modals[0].Show(<Sus><Login /></Sus>)
+        Modals[0].Show(<Login />)
     }
 
     return (

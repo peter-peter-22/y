@@ -41,13 +41,11 @@ function ManageContent(props) {
     function PostOptions() {
         return (
             <ShowPopover>
-                <Sus>
                     <List sx={{ p: 0 }}>
                         <Typography variant="medium_bold" sx={{ maxWidth: "70vw" }} style={noOverflow}>
                             {props.children}
                         </Typography>
                     </List>
-                </Sus>
             </ShowPopover>
         );
     }
@@ -155,7 +153,7 @@ function EditRow({ post }) {
         close();
         Modals[0].Show(
             <PostModalFrame>
-                <Sus><PostCreator onPost={onSubmit} editing={post} quoted={post.reposted_post} /></Sus>
+               <PostCreator onPost={onSubmit} editing={post} quoted={post.reposted_post} />
             </PostModalFrame>
         );
     }

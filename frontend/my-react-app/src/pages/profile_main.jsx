@@ -78,7 +78,7 @@ function ProfileInfo({ user, setLocalBlocked }) {
 
     function EditProfile() {
         Modals[0].Show(
-            <Sus><ProfileEditor user={user} /></Sus>
+            <ProfileEditor user={user} />
         );
     }
 
@@ -192,7 +192,7 @@ function Visible({ user }) {
     const baseUrl = GetBaseUrl(user);
     return (
         <>
-            <WhoToFollow/>
+            <WhoToFollow />
 
             <Stack direction="column" sx={{ mt: 1.5 }}>
                 <TabSwitcherLinks tabs={[

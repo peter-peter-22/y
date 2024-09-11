@@ -211,7 +211,7 @@ function PostButtonRow(props) {
     function handleComment() {
         Modals[0].Show(
             <PostModalFrame>
-                <Sus><PostCreator post={post} onPost={commented} /></Sus>
+                <PostCreator post={post} onPost={commented} />
             </PostModalFrame>
         );
     }
@@ -224,7 +224,7 @@ function PostButtonRow(props) {
     function handleQuote() {
         Modals[0].Show(
             <PostModalFrame>
-                <Sus><PostCreator quoted={post} onPost={closeModal} /></Sus>
+                <PostCreator quoted={post} onPost={closeModal} />
             </PostModalFrame>
         );
     }

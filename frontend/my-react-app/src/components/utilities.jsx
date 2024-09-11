@@ -2,7 +2,7 @@ import { Box, Typography } from '@mui/material';
 import CircularProgress from '@mui/material/CircularProgress';
 import Popover from '@mui/material/Popover';
 import Stack from '@mui/material/Stack';
-import React, { useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { Link, NavLink } from "react-router-dom";
 import { TopMenuButton } from "/src/components/buttons.jsx";
 import { theme } from '/src/styles/mui/my_theme.jsx';
@@ -285,22 +285,24 @@ function SimplePopOver() {
 
     function ShowPopover(props) {
         return (
-            <Popover
-                open={Boolean(anchorEl)}
-                anchorEl={anchorEl}
-                onClose={handleClose}
-                onClick={(e) => e.stopPropagation()}
-                anchorOrigin={{
-                    vertical: 'top',
-                    horizontal: 'left',
-                }}
-                transformOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left',
-                }}
-            >
-                {props.children}
-            </Popover>
+            <Suspense>
+                <Popover
+                    open={Boolean(anchorEl)}
+                    anchorEl={anchorEl}
+                    onClose={handleClose}
+                    onClick={(e) => e.stopPropagation()}
+                    anchorOrigin={{
+                        vertical: 'top',
+                        horizontal: 'left',
+                    }}
+                    transformOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left',
+                    }}
+                >
+                    {props.children}
+                </Popover>
+            </Suspense>
         );
     };
 

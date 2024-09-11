@@ -330,7 +330,7 @@ function PostButton(props) {
     function handlePost() {
         Modals[0].Show(
             <PostModalFrame>
-                <Sus><PostCreator onPost={posted} post={comment ? postList.replied_post : null} /></Sus>
+               <PostCreator onPost={posted} post={comment ? postList.replied_post : null} />
             </PostModalFrame>
         );
     }

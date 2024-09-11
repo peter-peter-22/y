@@ -5,7 +5,7 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Modal from '@mui/material/Modal';
 import Stack from '@mui/material/Stack';
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, Suspense } from "react";
 import { FormatAxiosError } from "/src/communication.js";
 import { lazily } from 'react-lazily';
 const { MediaDisplayer } = lazily(() => import('/src/components/media.jsx'));
@@ -43,11 +43,11 @@ function CreateModal(props) {
 //creating modal elements
 function CreateModals(props) {
     return (
-        <>
+        <Suspense>
             <ImagesModal />
             <CreateModal id={0} />
             <CreateModal id={1} />
-        </>
+        </Suspense>
     );
 }
 
@@ -188,7 +188,7 @@ function ImagesModal() {
     );
 }
 
-function StepButton({myIcon,tall,onClick}) {
+function StepButton({ myIcon, tall, onClick }) {
     return (
         <Box sx={{
             display: "flex", width: tall ? "50px" : "100%", height: tall ? "100%" : "50px", justifyContent: "center", alignItems: "center",
