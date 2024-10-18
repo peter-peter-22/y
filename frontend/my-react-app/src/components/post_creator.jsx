@@ -198,7 +198,7 @@ function PostCreator({ post, quoted, onPost, editing }) {
                                 {isFocused &&
                                     <Stack direction="row" alignItems="center" justifyContent={"space-between"} style={{ flexGrow: 1 }}>
                                         <Stack direction="row" spacing={0.5}>
-                                            <input ref={inputRef} type="file" accept={config.accepted_media_types} onChange={handleFile} multiple style={{ display: "none" }} />
+                                            <input ref={inputRef} type="file" onChange={handleFile} multiple style={{ display: "none" }} />
                                             <CommentButton onClick={insertPhoto}><InsertPhotoIcon /></CommentButton>
                                             <CommentButton onClick={notImplemented}><GifBoxIcon /></CommentButton>
                                             <CommentButton onClick={notImplemented}><SentimentSatisfiedAltIcon /></CommentButton>
