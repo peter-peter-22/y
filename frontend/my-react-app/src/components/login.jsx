@@ -35,7 +35,7 @@ function Login(props) {
     }
 
     const CurrentPage = pages[page];
-    
+
     return (
         <BigModal close={props.close} open={true}>
             <CornerButton onClick={handleBack}>{page === "main" ? "close" : "arrow_back"}</CornerButton>
@@ -126,7 +126,7 @@ function ChooseMethod(props) {
                 <Typography variant="verybig_bold" sx={{ my: 4 }}>Sign-in to Y!</Typography>
 
                 <Stack direction="column" spacing={2}>
-                <LoginLink><AlternativeLogin icon={<img src="/svg/google.svg" style={{ height: "1.5em" }} />} text="Sign-in with Google" /></LoginLink>
+                    <LoginLink><AlternativeLogin icon={<img src="/svg/google.svg" style={{ height: "1.5em" }} />} text="Sign-in with Google" /></LoginLink>
                     <AlternativeLogin icon={<VisibilityOffIcon />} text="Sign-in without email" onClick={() => { props.setPage("emailless"); }} />
                     {/*<a href={config.address_mode.server + "/auth/github"}><AlternativeLogin src="/svg/github.svg" text="Sign-in with Github" /></a>*/}
                     <Stack direction="row" sx={{ my: 0.5, alignItems: "center" }}>
@@ -177,7 +177,7 @@ function ForgotPassword(props) {
             );
             //rechapta ok, email sent, show modal
             Modals[0].Show(
-                <SuccessModal title={"We sent you an email."} />
+                <SuccessModal title={"We sent you an email."} text="It is probably inside the spam folder." />
             )
         }
         catch (err) {
@@ -214,8 +214,8 @@ function EmaillessLogin() {
     const [password, setPassword] = useState("");
     const [username, setUsername] = useState("");
 
-    const handleUsername=useCallback(e=>{setUsername(e.target.value)});
-    const handlePassword=useCallback(e=>{setPassword(e.target.value)});
+    const handleUsername = useCallback(e => { setUsername(e.target.value) });
+    const handlePassword = useCallback(e => { setPassword(e.target.value) });
 
     async function submit() {
         await axios.post("/username/login", {

@@ -25,6 +25,12 @@ export default (props) => {
             <Routes>
                 <Route path="/change_password/:user_id/:secret" element={<ChangePassword />} />
                 <Route path="/privacy_policy" element={<PP />} />
+                <Route path="/tos" element={<NotImplemented />} />
+                <Route path="/cookie_policy" element={<NotImplemented />} />
+                <Route path="/accessibility" element={<NotImplemented />} />
+                <Route path="/ads_info" element={<NotImplemented />} />
+                <Route path="/business" element={<NotImplemented />} />
+                <Route path="/blog" element={<NotImplemented />} />
                 {/*<Route path="/login/google" element={<GoogleLogin/>}/>*/}
                 <Route path="" element={<AuthTemplate />}>
                     <Route path="/" element={<Home />} />

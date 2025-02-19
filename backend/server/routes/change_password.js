@@ -24,7 +24,7 @@ router.post("/submit_chapta", async (req, res) => {
         CheckErr("No Y user belongs to this email");
     const user = user_query.rows[0];
     const user_id = user.id;
-    if (user.password_hash)
+    if (!user.password_hash)
         CheckErr("This email was registered with Google authentication. It has no password.");
 
     //check rechapta solution

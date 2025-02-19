@@ -11,15 +11,14 @@ router.post('/exists/email', async (req, res) => {
     const v = new Validator(req.body, {
         email: 'required|email',
     });
-        await CheckV(v);
+    await CheckV(v);
 
     const { email } = req.body;
     const exists = await exists_email(email);
     res.send(exists);
 });
 
-async function exists_email(email)
-{
+async function exists_email(email) {
     const result = await db.query(named("SELECT count(*) FROM users WHERE email=:email")({ email: email.toLowerCase() }));
     const exists = result.rows[0].count > 0;
     return exists;
@@ -51,12 +50,11 @@ router.get("/get", async (req, res) => {
         user: req.user,
         showStartMessage: req.session.showStartMessage,
         pending_registration: req.session.pending_registration,
-        maxLetters:GetMaxLetters(req.user)
+        maxLetters: GetMaxLetters(req.user)
     });
 });
 
-function GetMaxLetters(user)
-{
+function GetMaxLetters(user) {
     return 280;
 }
 
